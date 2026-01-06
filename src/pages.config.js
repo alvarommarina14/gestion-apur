@@ -5,6 +5,7 @@ import Pagos from './pages/Pagos';
 import Recuperos from './pages/Recuperos';
 import Reportes from './pages/Reportes';
 import Configuracion from './pages/Configuracion';
+import Recordatorios from './pages/Recordatorios';
 import __Layout from './Layout.jsx';
 
 
@@ -16,6 +17,7 @@ export const PAGES = {
     "Recuperos": Recuperos,
     "Reportes": Reportes,
     "Configuracion": Configuracion,
+    "Recordatorios": Recordatorios,
 }
 
 export const pagesConfig = {

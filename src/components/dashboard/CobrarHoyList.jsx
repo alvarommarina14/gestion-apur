@@ -98,17 +98,7 @@ function AlumnoCobroItem({ alumno, isMoroso, onRegistrarPago, onEnviarRecordator
         </div>
         
         <div className="flex items-center gap-1.5">
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-8 w-8 p-0 text-slate-500 hover:text-slate-700"
-            onClick={() => {
-              const msg = `Hola ${alumno.nombre.split(' ')[0]}, te recordamos el pago de tu cuota mensual de tenis.`;
-              window.open(`https://wa.me/${alumno.whatsapp?.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`);
-            }}
-          >
-            <Phone className="w-4 h-4" />
-          </Button>
+          <EnviarRecordatorioBtn alumno={alumno} variant="ghost" size="sm" className="h-8 w-8 p-0" />
           <Button
             size="sm"
             onClick={() => onRegistrarPago?.(alumno)}
