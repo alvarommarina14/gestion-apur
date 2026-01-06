@@ -1,7 +1,8 @@
 import React from 'react';
-import { DollarSign, Phone, Clock, AlertTriangle } from 'lucide-react';
+import { DollarSign, Phone, Clock, AlertTriangle, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import StatusBadge from '@/components/ui/StatusBadge';
+import EnviarRecordatorioBtn from '@/components/recordatorios/EnviarRecordatorioBtn';
 import { cn } from '@/lib/utils';
 
 export default function CobrarHoyList({ alumnos = [], onRegistrarPago, onEnviarRecordatorio }) {

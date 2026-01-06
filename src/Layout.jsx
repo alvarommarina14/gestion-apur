@@ -10,7 +10,8 @@ import {
   FileText,
   Menu,
   X,
-  ChevronRight
+  ChevronRight,
+  Settings
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,7 @@ const navigation = [
   { name: 'Pagos', href: 'Pagos', icon: DollarSign },
   { name: 'Recuperos', href: 'Recuperos', icon: RefreshCw },
   { name: 'Reportes', href: 'Reportes', icon: FileText },
+  { name: 'Configuración', href: 'Configuracion', icon: Settings },
 ];
 
 export default function Layout({ children, currentPageName }) {

@@ -45,6 +45,7 @@ import StatusBadge from '@/components/ui/StatusBadge';
 import NuevoAlumnoModal from '@/components/modals/NuevoAlumnoModal';
 import RegistrarPagoModal from '@/components/modals/RegistrarPagoModal';
 import DetalleAlumnoModal from '@/components/modals/DetalleAlumnoModal';
+import EnviarRecordatorioBtn from '@/components/recordatorios/EnviarRecordatorioBtn';
 import { cn } from '@/lib/utils';
 
 export default function Alumnos() {
@@ -252,6 +253,11 @@ export default function Alumnos() {
                             }}>
                               <DollarSign className="w-4 h-4 mr-2" />
                               Registrar pago
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                              <div onClick={(e) => e.stopPropagation()}>
+                                <EnviarRecordatorioBtn alumno={alumno} variant="ghost" size="sm" className="w-full justify-start p-0 h-auto font-normal" />
+                              </div>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={(e) => {
                               e.stopPropagation();

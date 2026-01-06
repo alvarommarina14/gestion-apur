@@ -27,6 +27,7 @@ import RegistrarPagoModal from '@/components/modals/RegistrarPagoModal';
 import RegistrarAsistenciaModal from '@/components/modals/RegistrarAsistenciaModal';
 import NuevaClaseModal from '@/components/modals/NuevaClaseModal';
 import CancelarClaseModal from '@/components/modals/CancelarClaseModal';
+import RecordatoriosPendientes from '@/components/recordatorios/RecordatoriosPendientes';
 import { createPageUrl } from '@/utils';
 import { Link } from 'react-router-dom';
 
@@ -364,6 +365,9 @@ export default function Dashboard() {
             </Card>
           </div>
         </div>
+        
+        {/* Recordatorios Pendientes */}
+        <RecordatoriosPendientes compact={false} />
       </div>
       
       {/* Modals */}
