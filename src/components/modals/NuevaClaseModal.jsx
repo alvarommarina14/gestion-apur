@@ -1,0 +1,320 @@
+import React, { useState, useEffect } from 'react';
+import { format, addDays } from 'date-fns';
+import { es } from 'date-fns/locale';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { CalendarIcon, Plus, CheckCircle } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { cn } from '@/lib/utils';
+
+export default function NuevaClaseModal({ open, onOpenChange, recupero = null }) {
+  const queryClient = useQueryClient();
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  
+  const { data: alumnos = [] } = useQuery({
+    queryKey: ['alumnos'],
+    queryFn: () => base44.entities.Alumno.list(),
+  });
+  
+  const alumnosActivos = alumnos.filter(a => a.estado !== 'pausado');
+  
+  const [formData, setFormData] = useState({
+    fecha: new Date(),
+    hora_inicio: '09:00',
+    duracion: 50,
+    tipo: 'individual',
+    sede: '',
+    cancha: '',
+    alumnos_ids: recupero ? [recupero.alumno_id] : [],
+    precio: '',
+    notas: '',
+    es_recupero: !!recupero,
+    clase_original_id: recupero?.clase_original_id || '',
+  });
+
+  useEffect(() => {
+    if (recupero) {
+      setFormData(prev => ({
+        ...prev,
+        alumnos_ids: [recupero.alumno_id],
+        es_recupero: true,
+        clase_original_id: recupero.clase_original_id,
+        notas: `Recupero de clase del ${recupero.fecha_original}`,
+      }));
+    }
+  }, [recupero]);
+
+  const handleAlumnoToggle = (alumnoId) => {
+    setFormData(prev => ({
+      ...prev,
+      alumnos_ids: prev.alumnos_ids.includes(alumnoId)
+        ? prev.alumnos_ids.filter(id => id !== alumnoId)
+        : [...prev.alumnos_ids, alumnoId]
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (formData.alumnos_ids.length === 0) {
+      return;
+    }
+    
+    setLoading(true);
+    
+    try {
+      const alumnosSeleccionados = alumnosActivos.filter(a => formData.alumnos_ids.includes(a.id));
+      
+      await base44.entities.Clase.create({
+        fecha: format(formData.fecha, 'yyyy-MM-dd'),
+        hora_inicio: formData.hora_inicio,
+        duracion: Number(formData.duracion),
+        tipo: formData.tipo,
+        sede: formData.sede,
+        cancha: formData.cancha,
+        alumnos_ids: formData.alumnos_ids,
+        alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
+        precio: formData.precio ? Number(formData.precio) : null,
+        estado: 'programada',
+        es_recupero: formData.es_recupero,
+        clase_original_id: formData.clase_original_id,
+        notas: formData.notas,
+        asistencia_registrada: false,
+      });
+      
+      // Si es recupero, actualizar el estado del recupero
+      if (recupero) {
+        await base44.entities.Recupero.update(recupero.id, {
+          estado: 'programado',
+          fecha_programada: format(formData.fecha, 'yyyy-MM-dd'),
+        });
+        
+        // Actualizar clases a recuperar del alumno
+        const alumno = alumnosActivos.find(a => a.id === recupero.alumno_id);
+        if (alumno) {
+          await base44.entities.Alumno.update(recupero.alumno_id, {
+            clases_a_recuperar: Math.max(0, (alumno.clases_a_recuperar || 1) - 1),
+          });
+        }
+      }
+      
+      setSuccess(true);
+      queryClient.invalidateQueries({ queryKey: ['clases'] });
+      queryClient.invalidateQueries({ queryKey: ['recuperos'] });
+      queryClient.invalidateQueries({ queryKey: ['alumnos'] });
+      
+      setTimeout(() => {
+        setSuccess(false);
+        onOpenChange(false);
+        setFormData({
+          fecha: new Date(),
+          hora_inicio: '09:00',
+          duracion: 50,
+          tipo: 'individual',
+          sede: '',
+          cancha: '',
+          alumnos_ids: [],
+          precio: '',
+          notas: '',
+          es_recupero: false,
+          clase_original_id: '',
+        });
+      }, 1500);
+      
+    } catch (error) {
+      console.error('Error creando clase:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (success) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <div className="py-12 text-center">
+            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="w-8 h-8 text-emerald-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900">¡Clase programada!</h3>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Plus className="w-5 h-5" />
+            {recupero ? 'Programar recupero' : 'Nueva clase'}
+          </DialogTitle>
+        </DialogHeader>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Fecha</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start text-left font-normal">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {format(formData.fecha, "d 'de' MMM", { locale: es })}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={formData.fecha}
+                    onSelect={(date) => date && setFormData({ ...formData, fecha: date })}
+                    locale={es}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Hora inicio</Label>
+              <Input
+                type="time"
+                value={formData.hora_inicio}
+                onChange={(e) => setFormData({ ...formData, hora_inicio: e.target.value })}
+                required
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Tipo</Label>
+              <Select
+                value={formData.tipo}
+                onValueChange={(v) => setFormData({ ...formData, tipo: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="individual">Individual</SelectItem>
+                  <SelectItem value="grupal">Grupal</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Duración (min)</Label>
+              <Input
+                type="number"
+                value={formData.duracion}
+                onChange={(e) => setFormData({ ...formData, duracion: e.target.value })}
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Sede</Label>
+              <Input
+                value={formData.sede}
+                onChange={(e) => setFormData({ ...formData, sede: e.target.value })}
+                placeholder="Nombre de la sede"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Cancha</Label>
+              <Input
+                value={formData.cancha}
+                onChange={(e) => setFormData({ ...formData, cancha: e.target.value })}
+                placeholder="Opcional"
+              />
+            </div>
+          </div>
+          
+          {/* Selección de alumnos */}
+          <div className="space-y-2">
+            <Label>Alumnos</Label>
+            <div className="border rounded-lg max-h-40 overflow-y-auto">
+              {alumnosActivos.map((alumno) => (
+                <div
+                  key={alumno.id}
+                  className={cn(
+                    'flex items-center gap-3 p-3 border-b last:border-b-0 cursor-pointer hover:bg-slate-50',
+                    formData.alumnos_ids.includes(alumno.id) && 'bg-emerald-50'
+                  )}
+                  onClick={() => !recupero && handleAlumnoToggle(alumno.id)}
+                >
+                  <Checkbox
+                    checked={formData.alumnos_ids.includes(alumno.id)}
+                    disabled={!!recupero}
+                  />
+                  <span className="text-sm font-medium">{alumno.nombre}</span>
+                </div>
+              ))}
+            </div>
+            {formData.alumnos_ids.length === 0 && (
+              <p className="text-xs text-rose-500">Selecciona al menos un alumno</p>
+            )}
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Precio (opcional)</Label>
+            <Input
+              type="number"
+              value={formData.precio}
+              onChange={(e) => setFormData({ ...formData, precio: e.target.value })}
+              placeholder="Dejar vacío para usar precio mensual"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Notas</Label>
+            <Textarea
+              value={formData.notas}
+              onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
+              placeholder="Observaciones..."
+              rows={2}
+            />
+          </div>
+          
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancelar
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={loading || formData.alumnos_ids.length === 0}
+              className="bg-emerald-600 hover:bg-emerald-700"
+            >
+              {loading ? 'Guardando...' : recupero ? 'Programar recupero' : 'Crear clase'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
