@@ -4,10 +4,10 @@ import Configuracion from './pages/Configuracion';
 import Dashboard from './pages/Dashboard';
 import Pagos from './pages/Pagos';
 import Recordatorios from './pages/Recordatorios';
+import RecordatoriosCanchaAdmin from './pages/RecordatoriosCanchaAdmin';
+import RecordatoriosCanchaEmpleado from './pages/RecordatoriosCanchaEmpleado';
 import Recuperos from './pages/Recuperos';
 import Reportes from './pages/Reportes';
-import RecordatoriosCanchaEmpleado from './pages/RecordatoriosCanchaEmpleado';
-import RecordatoriosCanchaAdmin from './pages/RecordatoriosCanchaAdmin';
 import __Layout from './Layout.jsx';
 
 
@@ -18,10 +18,10 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "Pagos": Pagos,
     "Recordatorios": Recordatorios,
+    "RecordatoriosCanchaAdmin": RecordatoriosCanchaAdmin,
+    "RecordatoriosCanchaEmpleado": RecordatoriosCanchaEmpleado,
     "Recuperos": Recuperos,
     "Reportes": Reportes,
-    "RecordatoriosCanchaEmpleado": RecordatoriosCanchaEmpleado,
-    "RecordatoriosCanchaAdmin": RecordatoriosCanchaAdmin,
 }
 
 export const pagesConfig = {
