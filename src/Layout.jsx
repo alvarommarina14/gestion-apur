@@ -52,8 +52,7 @@ export default function Layout({ children, currentPageName }) {
                 <span className="text-white font-bold text-lg">C</span>
               </div>
               <div>
-                <span className="font-bold text-slate-800">Control de</span>
-                <span className="font-light text-slate-500"> clases</span>
+                <span className="font-bold text-slate-800">Control de clases</span>
               </div>
             </div>
             <Button 
