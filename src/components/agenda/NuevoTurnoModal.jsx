@@ -113,9 +113,27 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
   };
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.TurnoCancha.create(data),
+    mutationFn: async (data) => {
+      const turnoCreado = await base44.entities.TurnoCancha.create(data);
+      
+      // Crear recordatorio de cancha vinculado automáticamente
+      await base44.entities.RecordatorioCancha.create({
+        turno_cancha_id: turnoCreado.id,
+        fecha: data.fecha,
+        hora: data.hora_inicio,
+        cancha: data.cancha,
+        profesor: data.profesor || 'Sin asignar',
+        monto: data.monto,
+        repeticion_semanal: false,
+        dia_semana: new Date(data.fecha).toLocaleDateString('es-ES', { weekday: 'long' }),
+        notas: `Turno creado desde Agenda - Cliente: ${data.cliente}`,
+      });
+      
+      return turnoCreado;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
@@ -125,9 +143,24 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.TurnoCancha.update(id, data),
+    mutationFn: async ({ id, data }) => {
+      await base44.entities.TurnoCancha.update(id, data);
+      
+      // Buscar y actualizar recordatorio vinculado
+      const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: id });
+      if (recordatorios.length > 0) {
+        await base44.entities.RecordatorioCancha.update(recordatorios[0].id, {
+          fecha: data.fecha,
+          hora: data.hora_inicio,
+          cancha: data.cancha,
+          profesor: data.profesor || recordatorios[0].profesor,
+          monto: data.monto,
+        });
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
@@ -137,9 +170,19 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.TurnoCancha.delete(id),
+    mutationFn: async (id) => {
+      // Eliminar recordatorio vinculado primero
+      const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: id });
+      for (const rec of recordatorios) {
+        await base44.entities.RecordatorioCancha.delete(rec.id);
+      }
+      
+      // Luego eliminar el turno
+      await base44.entities.TurnoCancha.delete(id);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
       onOpenChange(false);
     },
   });

@@ -24,12 +24,20 @@ export default function RecordatoriosCanchaEmpleado() {
 
   const marcarHechoMutation = useMutation({
     mutationFn: async (recordatorio) => {
+      // Actualizar recordatorio
       await base44.entities.RecordatorioCancha.update(recordatorio.id, {
         estado: 'hecho',
         hecho_por: user.email,
         hecho_por_nombre: user.full_name,
         fecha_confirmacion: new Date().toISOString(),
       });
+
+      // Si está vinculado a un turno, marcarlo como pagado
+      if (recordatorio.turno_cancha_id) {
+        await base44.entities.TurnoCancha.update(recordatorio.turno_cancha_id, {
+          pagado: true,
+        });
+      }
 
       // Si tiene repetición semanal, crear el siguiente
       if (recordatorio.repeticion_semanal) {
@@ -52,6 +60,7 @@ export default function RecordatoriosCanchaEmpleado() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
     },
   });
 

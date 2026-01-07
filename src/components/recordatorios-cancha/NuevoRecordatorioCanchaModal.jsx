@@ -67,7 +67,13 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
   }, [recordatorio, open]);
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.RecordatorioCancha.create(data),
+    mutationFn: async (data) => {
+      // Crear recordatorio sin vinculación a turno (creación manual)
+      await base44.entities.RecordatorioCancha.create({
+        ...data,
+        turno_cancha_id: null, // Sin vinculación a turno de agenda
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
       setSuccess(true);
