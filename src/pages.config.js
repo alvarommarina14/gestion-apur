@@ -8,6 +8,7 @@ import RecordatoriosCanchaAdmin from './pages/RecordatoriosCanchaAdmin';
 import RecordatoriosCanchaEmpleado from './pages/RecordatoriosCanchaEmpleado';
 import Recuperos from './pages/Recuperos';
 import Reportes from './pages/Reportes';
+import DashboardOcupacion from './pages/DashboardOcupacion';
 import __Layout from './Layout.jsx';
 
 
@@ -22,6 +23,7 @@ export const PAGES = {
     "RecordatoriosCanchaEmpleado": RecordatoriosCanchaEmpleado,
     "Recuperos": Recuperos,
     "Reportes": Reportes,
+    "DashboardOcupacion": DashboardOcupacion,
 }
 
 export const pagesConfig = {
