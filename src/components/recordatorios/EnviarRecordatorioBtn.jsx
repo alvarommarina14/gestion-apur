@@ -105,7 +105,7 @@ export default function EnviarRecordatorioBtn({ alumno, variant = "outline", siz
         onClick={() => setOpen(true)}
       >
         <MessageCircle className="w-4 h-4 mr-1" />
-        Recordatorio
+        Recordar
       </Button>
       
       <Dialog open={open} onOpenChange={setOpen}>
