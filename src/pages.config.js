@@ -1,27 +1,23 @@
-import Agenda from './pages/Agenda';
-import Alumnos from './pages/Alumnos';
-import Configuracion from './pages/Configuracion';
 import Dashboard from './pages/Dashboard';
+import Alumnos from './pages/Alumnos';
+import Agenda from './pages/Agenda';
 import Pagos from './pages/Pagos';
-import Recordatorios from './pages/Recordatorios';
 import Recuperos from './pages/Recuperos';
 import Reportes from './pages/Reportes';
-import OperacionesClub from './pages/OperacionesClub';
-import RecordatoriosEmpleado from './pages/RecordatoriosEmpleado';
+import Configuracion from './pages/Configuracion';
+import Recordatorios from './pages/Recordatorios';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Agenda": Agenda,
-    "Alumnos": Alumnos,
-    "Configuracion": Configuracion,
     "Dashboard": Dashboard,
+    "Alumnos": Alumnos,
+    "Agenda": Agenda,
     "Pagos": Pagos,
-    "Recordatorios": Recordatorios,
     "Recuperos": Recuperos,
     "Reportes": Reportes,
-    "OperacionesClub": OperacionesClub,
-    "RecordatoriosEmpleado": RecordatoriosEmpleado,
+    "Configuracion": Configuracion,
+    "Recordatorios": Recordatorios,
 }
 
 export const pagesConfig = {
