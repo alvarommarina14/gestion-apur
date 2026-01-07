@@ -203,7 +203,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
     const data = {
       ...formData,
       hora_fin: horaFin,
-      monto: Number(formData.monto),
+      monto: formData.pagado ? 0 : Number(formData.monto),
     };
 
     if (turno) {
@@ -349,17 +349,6 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label>Monto</Label>
-            <Input
-              type="number"
-              value={formData.monto}
-              onChange={(e) => setFormData({ ...formData, monto: e.target.value })}
-              placeholder="0"
-              required
-            />
-          </div>
-
           <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
             <div>
               <Label className="font-medium text-slate-800">Pagado</Label>
@@ -370,6 +359,19 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
               onCheckedChange={(checked) => setFormData({ ...formData, pagado: checked })}
             />
           </div>
+
+          {!formData.pagado && (
+            <div className="space-y-2">
+              <Label>Monto</Label>
+              <Input
+                type="number"
+                value={formData.monto}
+                onChange={(e) => setFormData({ ...formData, monto: e.target.value })}
+                placeholder="0"
+                required
+              />
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label>Notas (opcional)</Label>
