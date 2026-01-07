@@ -49,11 +49,11 @@ export default function Layout({ children, currentPageName }) {
           <div className="h-16 flex items-center justify-between px-4 border-b border-slate-100">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 bg-emerald-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">T</span>
+                <span className="text-white font-bold text-lg">C</span>
               </div>
               <div>
-                <span className="font-bold text-slate-800">Tennis</span>
-                <span className="font-light text-slate-500">Pro</span>
+                <span className="font-bold text-slate-800">Control de</span>
+                <span className="font-light text-slate-500"> clases</span>
               </div>
             </div>
             <Button 
