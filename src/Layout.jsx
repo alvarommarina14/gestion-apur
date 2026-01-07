@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Settings
 } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
@@ -26,8 +27,18 @@ const navigation = [
   { name: 'Configuración', href: 'Configuracion', icon: Settings },
 ];
 
+const navigationCancha = [
+  { name: 'Canchas Admin', href: 'RecordatoriosCanchaAdmin', icon: Calendar, adminOnly: true },
+  { name: 'Mis Recordatorios', href: 'RecordatoriosCanchaEmpleado', icon: Calendar },
+];
+
 export default function Layout({ children, currentPageName }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [user, setUser] = React.useState(null);
+
+  React.useEffect(() => {
+    base44.auth.me().then(setUser).catch(() => {});
+  }, []);
   
   return (
     <div className="min-h-screen bg-slate-50">
@@ -66,11 +77,11 @@ export default function Layout({ children, currentPageName }) {
           </div>
           
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-1">
+          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
             {navigation.map((item) => {
               const isActive = currentPageName === item.href;
               const Icon = item.icon;
-              
+
               return (
                 <Link
                   key={item.href}
@@ -94,6 +105,43 @@ export default function Layout({ children, currentPageName }) {
                 </Link>
               );
             })}
+
+            {/* Sección Recordatorios Cancha */}
+            <div className="pt-4 mt-4 border-t border-slate-200">
+              <p className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                Recordatorios Cancha
+              </p>
+              {navigationCancha.map((item) => {
+                // Filtrar según rol
+                if (item.adminOnly && user?.role !== 'admin') return null;
+
+                const isActive = currentPageName === item.href;
+                const Icon = item.icon;
+
+                return (
+                  <Link
+                    key={item.href}
+                    to={createPageUrl(item.href)}
+                    onClick={() => setSidebarOpen(false)}
+                    className={cn(
+                      'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
+                      isActive 
+                        ? 'bg-emerald-50 text-emerald-700' 
+                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    )}
+                  >
+                    <Icon className={cn(
+                      'w-5 h-5',
+                      isActive ? 'text-emerald-600' : 'text-slate-400'
+                    )} />
+                    {item.name}
+                    {isActive && (
+                      <ChevronRight className="w-4 h-4 ml-auto text-emerald-400" />
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
           </nav>
           
           {/* Footer */}
