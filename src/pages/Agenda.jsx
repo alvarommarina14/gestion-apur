@@ -1,86 +1,79 @@
 import React, { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { 
-  format, 
-  startOfWeek, 
-  endOfWeek, 
-  addDays, 
-  addWeeks, 
-  subWeeks,
-  isSameDay,
-  parseISO,
-  isToday
-} from 'date-fns';
+import { format, addDays, subDays, startOfWeek, addWeeks, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
-import {
-  ChevronLeft,
-  ChevronRight,
-  Plus,
-  Calendar,
-  Clock,
-  MapPin,
-  User,
-  Users
-} from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, Calendar, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import StatusBadge from '@/components/ui/StatusBadge';
-import NuevaClaseModal from '@/components/modals/NuevaClaseModal';
-import CancelarClaseModal from '@/components/modals/CancelarClaseModal';
-import RegistrarAsistenciaModal from '@/components/modals/RegistrarAsistenciaModal';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import VistaCalendarioCancha from '@/components/agenda/VistaCalendarioCancha';
+import NuevoTurnoModal from '@/components/agenda/NuevoTurnoModal';
 import { cn } from '@/lib/utils';
 
 export default function Agenda() {
-  const [currentWeek, setCurrentWeek] = useState(new Date());
+  const queryClient = useQueryClient();
+  const [vista, setVista] = useState('dia');
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [nuevaClaseModal, setNuevaClaseModal] = useState({ open: false, recupero: null });
-  const [cancelarModal, setCancelarModal] = useState({ open: false, clase: null });
-  const [asistenciaModal, setAsistenciaModal] = useState({ open: false, clase: null });
-  
-  const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
-  const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 });
-  
-  const { data: clases = [], isLoading } = useQuery({
-    queryKey: ['clases'],
-    queryFn: () => base44.entities.Clase.list('-fecha'),
+  const [selectedCancha, setSelectedCancha] = useState('todas');
+  const [turnoModal, setTurnoModal] = useState({ open: false, turno: null });
+
+  const { data: user } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => base44.auth.me(),
   });
-  
-  // Días de la semana
-  const weekDays = useMemo(() => {
-    const days = [];
-    for (let i = 0; i < 7; i++) {
-      days.push(addDays(weekStart, i));
+
+  const { data: turnos = [], isLoading } = useQuery({
+    queryKey: ['turnos-cancha'],
+    queryFn: () => base44.entities.TurnoCancha.list('-fecha'),
+  });
+
+  const isAdmin = user?.role === 'admin';
+
+  const turnosFiltrados = useMemo(() => {
+    const fechaStr = format(selectedDate, 'yyyy-MM-dd');
+    let filtered = turnos.filter(t => t.fecha === fechaStr);
+    
+    if (selectedCancha !== 'todas') {
+      filtered = filtered.filter(t => t.cancha === selectedCancha);
     }
-    return days;
-  }, [weekStart]);
-  
-  // Clases por día
-  const clasesPorDia = useMemo(() => {
-    const map = {};
-    weekDays.forEach(day => {
-      const dayStr = format(day, 'yyyy-MM-dd');
-      map[dayStr] = clases
-        .filter(c => c.fecha === dayStr)
-        .sort((a, b) => (a.hora_inicio || '').localeCompare(b.hora_inicio || ''));
-    });
-    return map;
-  }, [clases, weekDays]);
-  
-  // Clases del día seleccionado
-  const clasesDelDia = useMemo(() => {
-    const dayStr = format(selectedDate, 'yyyy-MM-dd');
-    return clases
-      .filter(c => c.fecha === dayStr)
-      .sort((a, b) => (a.hora_inicio || '').localeCompare(b.hora_inicio || ''));
-  }, [clases, selectedDate]);
-  
-  const handlePrevWeek = () => setCurrentWeek(subWeeks(currentWeek, 1));
-  const handleNextWeek = () => setCurrentWeek(addWeeks(currentWeek, 1));
-  const handleToday = () => {
-    setCurrentWeek(new Date());
-    setSelectedDate(new Date());
+    
+    return filtered;
+  }, [turnos, selectedDate, selectedCancha]);
+
+  const turnosPendientesPago = useMemo(() => {
+    const hoy = format(new Date(), 'yyyy-MM-dd');
+    return turnos.filter(t => t.fecha === hoy && !t.pagado);
+  }, [turnos]);
+
+  const stats = useMemo(() => {
+    const total = turnosFiltrados.length;
+    const pagados = turnosFiltrados.filter(t => t.pagado).length;
+    const pendientes = total - pagados;
+    const montoPagado = turnosFiltrados.filter(t => t.pagado).reduce((sum, t) => sum + (t.monto || 0), 0);
+    const montoPendiente = turnosFiltrados.filter(t => !t.pagado).reduce((sum, t) => sum + (t.monto || 0), 0);
+    
+    return { total, pagados, pendientes, montoPagado, montoPendiente };
+  }, [turnosFiltrados]);
+
+  const formatMoney = (amount) => {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      minimumFractionDigits: 0,
+    }).format(amount || 0);
   };
+
+  const handlePrevDay = () => setSelectedDate(subDays(selectedDate, 1));
+  const handleNextDay = () => setSelectedDate(addDays(selectedDate, 1));
+  const handleToday = () => setSelectedDate(new Date());
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
@@ -88,204 +81,131 @@ export default function Agenda() {
         {/* Header */}
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Agenda</h1>
-            <p className="text-slate-500 text-sm">
-              {format(weekStart, "d MMM", { locale: es })} - {format(weekEnd, "d MMM yyyy", { locale: es })}
-            </p>
+            <h1 className="text-2xl font-bold text-slate-900">Agenda de Canchas</h1>
+            <p className="text-slate-500 text-sm">Sistema de reservas del club</p>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center bg-white border rounded-lg">
-              <Button variant="ghost" size="sm" onClick={handlePrevWeek}>
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              <Button variant="ghost" size="sm" onClick={handleToday}>
-                Hoy
-              </Button>
-              <Button variant="ghost" size="sm" onClick={handleNextWeek}>
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </div>
-            <Button 
-              onClick={() => setNuevaClaseModal({ open: true, recupero: null })}
+          {isAdmin && (
+            <Button
+              onClick={() => setTurnoModal({ open: true, turno: null })}
               className="bg-emerald-600 hover:bg-emerald-700"
             >
               <Plus className="w-4 h-4 mr-2" />
-              Nueva clase
+              Nuevo turno
+            </Button>
+          )}
+        </header>
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="shadow-sm">
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
+                <p className="text-sm text-slate-500 mt-1">Turnos</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm border-emerald-200 bg-emerald-50/30">
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-emerald-600">{stats.pagados}</p>
+                <p className="text-sm text-slate-500 mt-1">Pagados</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm border-rose-200 bg-rose-50/30">
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-rose-600">{stats.pendientes}</p>
+                <p className="text-sm text-slate-500 mt-1">Pendientes</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm border-blue-200 bg-blue-50/30">
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <p className="text-lg font-bold text-blue-600">{formatMoney(stats.montoPagado)}</p>
+                <p className="text-xs text-slate-500 mt-1">
+                  de {formatMoney(stats.montoPagado + stats.montoPendiente)}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Controles */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" onClick={handlePrevDay}>
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <div className="min-w-[200px] text-center">
+              <p className="font-semibold text-slate-900">
+                {format(selectedDate, "EEEE d 'de' MMMM", { locale: es })}
+              </p>
+              <p className="text-xs text-slate-500">{format(selectedDate, 'yyyy')}</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={handleNextDay}>
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleToday}>
+              Hoy
             </Button>
           </div>
-        </header>
-        
-        {/* Week Calendar */}
-        <Card className="shadow-sm overflow-hidden">
-          <div className="grid grid-cols-7 border-b">
-            {weekDays.map((day) => {
-              const dayStr = format(day, 'yyyy-MM-dd');
-              const clasesCount = clasesPorDia[dayStr]?.length || 0;
-              const isSelected = isSameDay(day, selectedDate);
-              const isCurrentDay = isToday(day);
-              
-              return (
-                <button
-                  key={dayStr}
-                  onClick={() => setSelectedDate(day)}
-                  className={cn(
-                    'p-4 text-center border-r last:border-r-0 transition-colors',
-                    isSelected && 'bg-emerald-50',
-                    !isSelected && 'hover:bg-slate-50'
-                  )}
-                >
-                  <p className={cn(
-                    'text-xs font-medium uppercase',
-                    isCurrentDay ? 'text-emerald-600' : 'text-slate-500'
-                  )}>
-                    {format(day, 'EEE', { locale: es })}
-                  </p>
-                  <p className={cn(
-                    'text-2xl font-bold mt-1',
-                    isCurrentDay && 'text-emerald-600',
-                    isSelected && !isCurrentDay && 'text-slate-900',
-                    !isSelected && !isCurrentDay && 'text-slate-700'
-                  )}>
-                    {format(day, 'd')}
-                  </p>
-                  {clasesCount > 0 && (
-                    <div className="mt-2 flex justify-center gap-1">
-                      {[...Array(Math.min(clasesCount, 4))].map((_, i) => (
-                        <div 
-                          key={i} 
-                          className={cn(
-                            'w-1.5 h-1.5 rounded-full',
-                            isCurrentDay ? 'bg-emerald-500' : 'bg-slate-400'
-                          )} 
-                        />
-                      ))}
-                      {clasesCount > 4 && (
-                        <span className="text-xs text-slate-500">+{clasesCount - 4}</span>
-                      )}
-                    </div>
-                  )}
-                </button>
-              );
-            })}
+
+          <div className="flex items-center gap-3">
+            <Select value={selectedCancha} onValueChange={setSelectedCancha}>
+              <SelectTrigger className="w-36">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todas">Todas las canchas</SelectItem>
+                <SelectItem value="1">Cancha 1</SelectItem>
+                <SelectItem value="2">Cancha 2</SelectItem>
+                <SelectItem value="3">Cancha 3</SelectItem>
+                <SelectItem value="4">Cancha 4</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          
-          {/* Day Detail */}
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Calendar className="w-5 h-5 text-emerald-600" />
-              <h3 className="font-semibold text-lg">
-                {format(selectedDate, "EEEE d 'de' MMMM", { locale: es })}
-              </h3>
-              <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs rounded">
-                {clasesDelDia.length} clases
-              </span>
-            </div>
-            
-            {clasesDelDia.length === 0 ? (
-              <div className="text-center py-12 text-slate-500">
-                <Calendar className="w-12 h-12 mx-auto mb-3 opacity-40" />
-                <p className="font-medium">No hay clases programadas</p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="mt-4"
-                  onClick={() => setNuevaClaseModal({ open: true, recupero: null })}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Agregar clase
-                </Button>
+        </div>
+
+        {/* Alerta de pagos pendientes */}
+        {turnosPendientesPago.length > 0 && (
+          <Card className="shadow-sm border-rose-200 bg-rose-50">
+            <CardContent className="py-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-semibold text-rose-900">
+                    ⚠️ {turnosPendientesPago.length} turno(s) pendiente(s) de pago hoy
+                  </p>
+                  <p className="text-sm text-rose-700 mt-0.5">
+                    Total a cobrar: {formatMoney(turnosPendientesPago.reduce((sum, t) => sum + (t.monto || 0), 0))}
+                  </p>
+                </div>
               </div>
-            ) : (
-              <div className="space-y-3">
-                {clasesDelDia.map((clase) => (
-                  <div 
-                    key={clase.id}
-                    className={cn(
-                      'group p-4 rounded-xl border transition-all cursor-pointer hover:shadow-md',
-                      clase.estado === 'realizada' && 'bg-emerald-50/50 border-emerald-200',
-                      clase.estado === 'programada' && 'bg-white border-slate-200 hover:border-slate-300',
-                      ['cancelada_anticipada', 'cancelada_tarde', 'no_show', 'suspendida'].includes(clase.estado) && 'bg-slate-50 border-slate-200 opacity-60'
-                    )}
-                    onClick={() => {
-                      if (clase.estado === 'programada' && !clase.asistencia_registrada) {
-                        setAsistenciaModal({ open: true, clase });
-                      } else {
-                        setCancelarModal({ open: true, clase });
-                      }
-                    }}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="text-lg font-bold text-slate-800">{clase.hora_inicio}</span>
-                          <StatusBadge status={clase.estado} size="sm" />
-                          {clase.es_recupero && (
-                            <span className="px-2 py-0.5 bg-teal-100 text-teal-700 text-xs font-medium rounded">
-                              Recupero
-                            </span>
-                          )}
-                        </div>
-                        
-                        <div className="flex items-center gap-4 text-sm text-slate-600">
-                          <span className="flex items-center gap-1.5">
-                            {clase.tipo === 'individual' ? (
-                              <User className="w-4 h-4" />
-                            ) : (
-                              <Users className="w-4 h-4" />
-                            )}
-                            {clase.alumnos_nombres?.join(', ') || 'Sin alumnos'}
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <MapPin className="w-4 h-4" />
-                            {clase.sede} {clase.cancha && `- ${clase.cancha}`}
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <Clock className="w-4 h-4" />
-                            {clase.duracion || 50} min
-                          </span>
-                        </div>
-                      </div>
-                      
-                      {clase.estado === 'programada' && !clase.asistencia_registrada && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setAsistenciaModal({ open: true, clase });
-                          }}
-                        >
-                          Registrar asistencia
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Vista de calendario */}
+        <VistaCalendarioCancha
+          turnos={turnosFiltrados}
+          fecha={selectedDate}
+          isAdmin={isAdmin}
+          onTurnoClick={(turno) => isAdmin && setTurnoModal({ open: true, turno })}
+          isLoading={isLoading}
+        />
       </div>
-      
-      {/* Modals */}
-      <NuevaClaseModal 
-        open={nuevaClaseModal.open}
-        onOpenChange={(open) => setNuevaClaseModal({ ...nuevaClaseModal, open })}
-        recupero={nuevaClaseModal.recupero}
-      />
-      
-      <CancelarClaseModal 
-        open={cancelarModal.open}
-        onOpenChange={(open) => setCancelarModal({ ...cancelarModal, open })}
-        clase={cancelarModal.clase}
-      />
-      
-      <RegistrarAsistenciaModal 
-        open={asistenciaModal.open}
-        onOpenChange={(open) => setAsistenciaModal({ ...asistenciaModal, open })}
-        clase={asistenciaModal.clase}
-      />
+
+      {/* Modal */}
+      {isAdmin && (
+        <NuevoTurnoModal
+          open={turnoModal.open}
+          onOpenChange={(open) => setTurnoModal({ ...turnoModal, open })}
+          turno={turnoModal.turno}
+          fecha={selectedDate}
+        />
+      )}
     </div>
   );
 }
