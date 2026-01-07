@@ -23,6 +23,8 @@ const navigation = [
   { name: 'Pagos', href: 'Pagos', icon: DollarSign },
   { name: 'Recuperos', href: 'Recuperos', icon: RefreshCw },
   { name: 'Reportes', href: 'Reportes', icon: FileText },
+  { name: 'Operaciones Club', href: 'OperacionesClub', icon: Settings },
+  { name: 'Mis Tareas', href: 'RecordatoriosEmpleado', icon: Calendar },
   { name: 'Configuración', href: 'Configuracion', icon: Settings },
 ];
 
