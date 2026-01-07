@@ -291,7 +291,7 @@ export default function RecordatoriosCanchaAdmin() {
                         {rec.estado === 'hecho' && (
                           <div className="text-xs text-slate-500">
                             ✓ Completado por {rec.hecho_por_nombre} el{' '}
-                            {format(parseISO(rec.fecha_confirmacion), "d/MM/yyyy 'a las' HH:mm")}
+                            {format(parseISO(rec.hora_confirmacion), "d/MM/yyyy 'a las' HH:mm")}
                           </div>
                         )}
                       </div>

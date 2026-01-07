@@ -29,7 +29,7 @@ export default function RecordatoriosCanchaEmpleado() {
         estado: 'hecho',
         hecho_por: user.email,
         hecho_por_nombre: user.full_name,
-        fecha_confirmacion: new Date().toISOString(),
+        hora_confirmacion: new Date().toISOString(),
       });
 
       // Si está vinculado a un turno, marcarlo como pagado
@@ -199,7 +199,7 @@ export default function RecordatoriosCanchaEmpleado() {
                         {recordatorio.estado === 'hecho' && (
                           <div className="text-xs text-slate-500 pt-1">
                             ✓ Confirmado por {recordatorio.hecho_por_nombre} a las{' '}
-                            {format(parseISO(recordatorio.fecha_confirmacion), 'HH:mm')}
+                            {format(parseISO(recordatorio.hora_confirmacion), 'HH:mm')}
                           </div>
                         )}
                       </div>
