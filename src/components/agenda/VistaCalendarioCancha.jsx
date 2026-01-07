@@ -159,12 +159,26 @@ export default function VistaCalendarioCancha({ turnos, fecha, isAdmin, onTurnoC
                                   </p>
                                 </div>
 
-                                {turno.profesor && (
-                                  <div className="flex items-center gap-1.5 text-sm text-slate-600">
-                                    <User className="w-4 h-4" />
-                                    <span>{turno.profesor}</span>
-                                  </div>
-                                )}
+                                {/* Tipo de turno */}
+                                <div className="flex items-center gap-1.5">
+                                  {turno.tipo_turno === 'clase' ? (
+                                    <>
+                                      <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-semibold">
+                                        Clase
+                                      </span>
+                                      {turno.profesor && (
+                                        <div className="flex items-center gap-1 text-sm text-slate-600">
+                                          <User className="w-3.5 h-3.5" />
+                                          <span>{turno.profesor}</span>
+                                        </div>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs font-semibold">
+                                      Alquiler - {turno.modalidad_alquiler === 'abono' ? 'Abono' : 'Suelto'}
+                                    </span>
+                                  )}
+                                </div>
 
                                 <div className="flex items-center gap-1.5">
                                   <DollarSign className="w-4 h-4 text-slate-500" />
