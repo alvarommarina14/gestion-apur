@@ -66,10 +66,10 @@ export default function Layout({ children, currentPageName }) {
           <div className="h-16 flex items-center justify-between px-4 border-b border-slate-100">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 bg-emerald-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">C</span>
+                <span className="text-white font-bold text-lg">G</span>
               </div>
               <div>
-                <span className="font-bold text-slate-800">Control de clases</span>
+                <span className="font-bold text-slate-800">Gestión APUR</span>
               </div>
             </div>
             <Button 
