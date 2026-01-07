@@ -76,40 +76,47 @@ function AlumnoCobroItem({ alumno, isMoroso, onRegistrarPago, onEnviarRecordator
       'rounded-lg border p-3 transition-all',
       isMoroso ? 'bg-rose-50/50 border-rose-200' : 'bg-white border-slate-200'
     )}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <span className="font-medium text-slate-800">{alumno.nombre}</span>
-            <StatusBadge status={alumno.estado} size="sm" />
-          </div>
-          <div className="flex items-center gap-3 text-sm flex-wrap">
-            <span className={cn(
-              'font-semibold',
-              isMoroso ? 'text-rose-600' : 'text-slate-600'
-            )}>
-              {formatMoney(alumno.precio_mensual)}
-            </span>
-            {alumno.deuda_total > 0 && (
-              <span className="text-rose-600 text-xs">
-                Deuda: {formatMoney(alumno.deuda_total)}
-              </span>
-            )}
-          </div>
+      <div className="space-y-2.5">
+        {/* Nombre y estado */}
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-slate-800 text-sm">{alumno.nombre}</span>
+          <StatusBadge status={alumno.estado} size="sm" />
         </div>
         
-        <div className="flex items-center gap-2 shrink-0">
-          <EnviarRecordatorioBtn alumno={alumno} variant="ghost" size="sm" className="h-8 w-8 p-0 shrink-0" />
+        {/* Montos */}
+        <div className="flex items-center gap-3 text-sm">
+          <span className={cn(
+            'font-semibold',
+            isMoroso ? 'text-rose-600' : 'text-slate-700'
+          )}>
+            {formatMoney(alumno.precio_mensual)}
+          </span>
+          {alumno.deuda_total > 0 && (
+            <span className="text-rose-600 text-xs">
+              Deuda: {formatMoney(alumno.deuda_total)}
+            </span>
+          )}
+        </div>
+        
+        {/* Botones */}
+        <div className="flex items-center gap-2 pt-1">
           <Button
             size="sm"
             onClick={() => onRegistrarPago?.(alumno)}
             className={cn(
-              'h-8 shrink-0',
-              isMoroso ? 'bg-rose-600 hover:bg-rose-700' : ''
+              'flex-1',
+              isMoroso ? 'bg-rose-600 hover:bg-rose-700' : 'bg-emerald-600 hover:bg-emerald-700'
             )}
           >
             <DollarSign className="w-4 h-4 mr-1" />
             Cobrar
           </Button>
+          <EnviarRecordatorioBtn 
+            alumno={alumno} 
+            variant="outline" 
+            size="sm" 
+            className="h-9 px-3"
+          />
         </div>
       </div>
     </div>
