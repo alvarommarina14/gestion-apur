@@ -76,36 +76,34 @@ function AlumnoCobroItem({ alumno, isMoroso, onRegistrarPago, onEnviarRecordator
       'rounded-lg border p-3 transition-all',
       isMoroso ? 'bg-rose-50/50 border-rose-200' : 'bg-white border-slate-200'
     )}>
-      <div className="flex flex-col gap-2">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <span className="font-medium text-slate-800">{alumno.nombre}</span>
-              <StatusBadge status={alumno.estado} size="sm" />
-            </div>
-            <div className="flex items-center gap-3 text-sm flex-wrap">
-              <span className={cn(
-                'font-semibold',
-                isMoroso ? 'text-rose-600' : 'text-slate-600'
-              )}>
-                {formatMoney(alumno.precio_mensual)}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <span className="font-medium text-slate-800">{alumno.nombre}</span>
+            <StatusBadge status={alumno.estado} size="sm" />
+          </div>
+          <div className="flex items-center gap-3 text-sm flex-wrap">
+            <span className={cn(
+              'font-semibold',
+              isMoroso ? 'text-rose-600' : 'text-slate-600'
+            )}>
+              {formatMoney(alumno.precio_mensual)}
+            </span>
+            {alumno.deuda_total > 0 && (
+              <span className="text-rose-600 text-xs">
+                Deuda: {formatMoney(alumno.deuda_total)}
               </span>
-              {alumno.deuda_total > 0 && (
-                <span className="text-rose-600 text-xs">
-                  Deuda: {formatMoney(alumno.deuda_total)}
-                </span>
-              )}
-            </div>
+            )}
           </div>
         </div>
         
-        <div className="flex items-center gap-1.5 justify-end">
-          <EnviarRecordatorioBtn alumno={alumno} variant="ghost" size="sm" className="h-8 w-8 p-0" />
+        <div className="flex items-center gap-2 shrink-0">
+          <EnviarRecordatorioBtn alumno={alumno} variant="ghost" size="sm" className="h-8 w-8 p-0 shrink-0" />
           <Button
             size="sm"
             onClick={() => onRegistrarPago?.(alumno)}
             className={cn(
-              'h-8',
+              'h-8 shrink-0',
               isMoroso ? 'bg-rose-600 hover:bg-rose-700' : ''
             )}
           >
