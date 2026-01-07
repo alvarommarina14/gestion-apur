@@ -15,7 +15,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Calendar, CheckCircle } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Calendar, CheckCircle, Bell } from 'lucide-react';
 
 export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recordatorio }) {
   const queryClient = useQueryClient();
@@ -29,6 +36,8 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
           profesor: recordatorio.profesor,
           monto: recordatorio.monto,
           repeticion_semanal: recordatorio.repeticion_semanal || false,
+          notificar: recordatorio.notificar !== false,
+          minutos_antes: recordatorio.minutos_antes || 10,
           notas: recordatorio.notas || '',
         }
       : {
@@ -38,6 +47,8 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
           profesor: '',
           monto: '',
           repeticion_semanal: false,
+          notificar: true,
+          minutos_antes: 10,
           notas: '',
         }
   );
@@ -51,6 +62,8 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
         profesor: recordatorio.profesor,
         monto: recordatorio.monto,
         repeticion_semanal: recordatorio.repeticion_semanal || false,
+        notificar: recordatorio.notificar !== false,
+        minutos_antes: recordatorio.minutos_antes || 10,
         notas: recordatorio.notas || '',
       });
     } else {
@@ -61,6 +74,8 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
         profesor: '',
         monto: '',
         repeticion_semanal: false,
+        notificar: true,
+        minutos_antes: 10,
         notas: '',
       });
     }
@@ -209,6 +224,52 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
                 setFormData({ ...formData, repeticion_semanal: checked })
               }
             />
+          </div>
+
+          {/* Configuración de notificaciones push */}
+          <div className="space-y-3 p-4 bg-amber-50 rounded-lg border border-amber-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Bell className="w-5 h-5 text-amber-600" />
+                <div>
+                  <Label className="font-medium text-slate-800">Notificación push</Label>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Enviar alerta automática a los empleados
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={formData.notificar}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, notificar: checked })
+                }
+              />
+            </div>
+
+            {formData.notificar && (
+              <div className="space-y-2 pt-2">
+                <Label className="text-sm">Avisar con anticipación</Label>
+                <Select
+                  value={formData.minutos_antes.toString()}
+                  onValueChange={(v) =>
+                    setFormData({ ...formData, minutos_antes: Number(v) })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5">5 minutos antes</SelectItem>
+                    <SelectItem value="10">10 minutos antes</SelectItem>
+                    <SelectItem value="15">15 minutos antes</SelectItem>
+                    <SelectItem value="30">30 minutos antes</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-slate-500">
+                  Los empleados recibirán una notificación en su dispositivo
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
