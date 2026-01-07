@@ -17,6 +17,8 @@ import {
 import { base44 } from '@/api/base44Client';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import NotificationPermissionModal from '@/components/NotificationPermissionModal';
+import NotificationManager from '@/components/NotificationManager';
 
 const navigationGestionClases = [
   { name: 'Dashboard', href: 'Dashboard', icon: LayoutDashboard },
@@ -56,6 +58,10 @@ export default function Layout({ children, currentPageName }) {
   
   return (
     <div className="min-h-screen bg-slate-50">
+      {/* Notificaciones Push */}
+      <NotificationPermissionModal />
+      <NotificationManager />
+      
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div 
