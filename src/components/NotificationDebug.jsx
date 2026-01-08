@@ -81,20 +81,43 @@ export default function NotificationDebug() {
     const recordatorioTime = new Date();
     recordatorioTime.setHours(hours, minutes, 0, 0);
     
-    const minutesUntil = differenceInMinutes(recordatorioTime, currentTime);
-    const minutosAntes = rec.minutos_antes || 10;
-    const notificationTime = minutesUntil + minutosAntes;
-
-    if (notificationTime > 0) {
-      return `Faltan ${notificationTime} min para la notificación`;
-    } else if (minutesUntil > 0) {
-      return `⏰ Debería notificar AHORA (${minutosAntes} min antes)`;
-    } else if (minutesUntil > -5) {
-      return `⏰ Es la hora exacta! (${rec.hora})`;
+    if (user?.role === 'admin') {
+      // Para admin: calcular basado en el FIN del turno
+      const turno = turnos.find(t => t.id === rec.turno_cancha_id);
+      const duracion = turno?.duracion || 60;
+      const finTurno = new Date(recordatorioTime.getTime() + duracion * 60000);
+      const minutesUntilEnd = differenceInMinutes(finTurno, currentTime);
+      const minutosAntes = user.minutos_antes_fin_cancha || 10;
+      
+      if (minutesUntilEnd > minutosAntes) {
+        return `Faltan ${minutesUntilEnd - minutosAntes} min para la notificación (${minutosAntes} min antes del fin)`;
+      } else if (minutesUntilEnd > 0) {
+        return `⏰ Debería notificar AHORA (termina en ${minutesUntilEnd} min)`;
+      } else {
+        return `Ya terminó (hace ${Math.abs(minutesUntilEnd)} min)`;
+      }
     } else {
-      return `Ya pasó (${Math.abs(minutesUntil)} min)`;
+      // Para empleado: basado en el INICIO
+      const minutesUntil = differenceInMinutes(recordatorioTime, currentTime);
+      const minutosAntes = rec.minutos_antes || 10;
+      const notificationTime = minutesUntil + minutosAntes;
+
+      if (notificationTime > 0) {
+        return `Faltan ${notificationTime} min para la notificación`;
+      } else if (minutesUntil > 0) {
+        return `⏰ Debería notificar AHORA (${minutosAntes} min antes)`;
+      } else if (minutesUntil > -5) {
+        return `⏰ Es la hora exacta! (${rec.hora})`;
+      } else {
+        return `Ya pasó (${Math.abs(minutesUntil)} min)`;
+      }
     }
   };
+  
+  const { data: turnos = [] } = useQuery({
+    queryKey: ['turnos-cancha-debug', today],
+    queryFn: () => base44.entities.TurnoCancha.filter({ fecha: today }),
+  });
 
   if (!user) {
     return null;
@@ -138,17 +161,22 @@ export default function NotificationDebug() {
 
           <div className="flex items-center justify-between p-3 bg-white rounded-lg border">
             <div className="flex items-center gap-3">
-              {user.role === 'admin' ? (
-                <XCircle className="w-5 h-5 text-amber-600" />
+              {user.recibir_notificaciones_cancha === false ? (
+                <XCircle className="w-5 h-5 text-rose-600" />
               ) : (
                 <CheckCircle className="w-5 h-5 text-emerald-600" />
               )}
               <div>
-                <p className="font-medium text-slate-900">Tu rol: {user.role}</p>
+                <p className="font-medium text-slate-900">
+                  Tu rol: {user.role} - 
+                  {user.recibir_notificaciones_cancha === false ? ' Notificaciones OFF' : ' Notificaciones ON'}
+                </p>
                 <p className="text-sm text-slate-500">
-                  {user.role === 'admin' 
-                    ? '⚠️ Los admins NO reciben notificaciones' 
-                    : '✅ Los empleados reciben notificaciones'}
+                  {user.recibir_notificaciones_cancha === false 
+                    ? '❌ Has desactivado las notificaciones' 
+                    : user.role === 'admin'
+                    ? `✅ Recibirás notificaciones ${user.minutos_antes_fin_cancha || 10} min antes del FIN`
+                    : '✅ Recibirás notificaciones antes del INICIO'}
                 </p>
               </div>
             </div>
@@ -235,10 +263,12 @@ export default function NotificationDebug() {
           <ul className="text-xs text-slate-600 space-y-1">
             <li>✅ Permisos de notificación activados</li>
             <li>✅ La app debe estar abierta en el navegador</li>
-            <li>✅ Debes ser empleado (no admin)</li>
+            <li>✅ Tener notificaciones activadas (en Configuración)</li>
             <li>✅ El recordatorio debe ser de hoy</li>
             <li>✅ El recordatorio debe tener notificar=true</li>
             <li>✅ El recordatorio debe estar pendiente</li>
+            <li>📌 Admins: Notifican antes del FIN del turno</li>
+            <li>📌 Empleados: Notifican antes del INICIO del turno</li>
           </ul>
         </div>
       </CardContent>

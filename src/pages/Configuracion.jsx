@@ -37,6 +37,7 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import ConfiguracionNotificaciones from '@/components/ConfiguracionNotificaciones';
 
 export default function Configuracion() {
   const queryClient = useQueryClient();
@@ -232,6 +233,9 @@ export default function Configuracion() {
             })
           )}
         </div>
+
+        {/* Configuración de Notificaciones Push */}
+        <ConfiguracionNotificaciones />
       </div>
       
       {/* Modal edición */}
