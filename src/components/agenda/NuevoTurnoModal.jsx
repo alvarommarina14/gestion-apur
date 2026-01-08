@@ -55,8 +55,18 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
     minutos_antes: 10,
   });
 
+  // Cargar recordatorio asociado al turno
+  const { data: recordatoriosDelTurno = [] } = useQuery({
+    queryKey: ['recordatorio-turno', turno?.id],
+    queryFn: () => base44.entities.RecordatorioCancha.filter({ turno_cancha_id: turno.id }),
+    enabled: !!turno && open,
+  });
+
   useEffect(() => {
     if (turno && open) {
+      // Obtener los valores de notificación del recordatorio asociado
+      const recordatorio = recordatoriosDelTurno[0];
+      
       setFormData({
         fecha: turno.fecha,
         hora_inicio: turno.hora_inicio,
@@ -70,8 +80,8 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
         pagado: turno.pagado || false,
         notas: turno.notas || '',
         repeticion_semanal: false,
-        notificar: true,
-        minutos_antes: 10,
+        notificar: recordatorio?.notificar !== false,
+        minutos_antes: recordatorio?.minutos_antes || 10,
       });
     } else if (!turno && open) {
       setFormData({
@@ -92,7 +102,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
       });
     }
     setError(null);
-  }, [turno, open, fecha]);
+  }, [turno, open, fecha, recordatoriosDelTurno]);
 
   const calcularHoraFin = (horaInicio, duracion) => {
     const [h, m] = horaInicio.split(':').map(Number);
@@ -312,8 +322,10 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
         }
       });
 
-      // Detectar si cambió el tiempo de notificación
-      const cambioNotificacion = data.minutos_antes !== formData.minutos_antes;
+      // Detectar si cambió el tiempo de notificación comparando con el turno original
+      const recordatorio = recordatoriosDelTurno[0];
+      const minutosAntesOriginal = recordatorio?.minutos_antes || 10;
+      const cambioNotificacion = data.minutos_antes !== minutosAntesOriginal;
 
       updateMutation.mutate({ id: turno.id, data, cambios, cambioNotificacion });
     } else {
