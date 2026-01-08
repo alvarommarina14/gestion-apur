@@ -390,7 +390,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="max-h-60">
+            <SelectContent className="max-h-[300px] overflow-y-auto">
               {Array.from({ length: 28 }, (_, i) => {
                 const h = Math.floor(i / 2) + 8;
                 const m = i % 2 === 0 ? '00' : '30';
