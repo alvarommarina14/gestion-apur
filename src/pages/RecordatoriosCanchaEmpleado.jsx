@@ -22,6 +22,11 @@ export default function RecordatoriosCanchaEmpleado() {
     queryFn: () => base44.entities.RecordatorioCancha.filter({ fecha: today }),
   });
 
+  const { data: turnos = [] } = useQuery({
+    queryKey: ['turnos-cancha', today],
+    queryFn: () => base44.entities.TurnoCancha.filter({ fecha: today }),
+  });
+
   const marcarHechoMutation = useMutation({
     mutationFn: async (recordatorio) => {
       // Actualizar recordatorio
@@ -64,15 +69,22 @@ export default function RecordatoriosCanchaEmpleado() {
     },
   });
 
+  const recordatoriosConTurnos = useMemo(() => {
+    return recordatorios.map(rec => {
+      const turno = turnos.find(t => t.id === rec.turno_cancha_id);
+      return { ...rec, turno };
+    });
+  }, [recordatorios, turnos]);
+
   const recordatoriosOrdenados = useMemo(() => {
-    return [...recordatorios].sort((a, b) => {
+    return [...recordatoriosConTurnos].sort((a, b) => {
       const estadoOrder = { pendiente: 0, hecho: 1 };
       if (estadoOrder[a.estado] !== estadoOrder[b.estado]) {
         return estadoOrder[a.estado] - estadoOrder[b.estado];
       }
       return (a.hora || '').localeCompare(b.hora || '');
     });
-  }, [recordatorios]);
+  }, [recordatoriosConTurnos]);
 
   const stats = useMemo(() => {
     const pendientes = recordatorios.filter(r => r.estado === 'pendiente').length;
@@ -182,12 +194,33 @@ export default function RecordatoriosCanchaEmpleado() {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-3 text-sm">
+                        <div className="flex items-center gap-3 text-sm flex-wrap">
+                          {recordatorio.turno && (
+                            <>
+                              <span className={cn(
+                                "px-2 py-0.5 text-xs font-medium rounded",
+                                recordatorio.turno.tipo_turno === 'clase' 
+                                  ? "bg-blue-100 text-blue-700" 
+                                  : "bg-purple-100 text-purple-700"
+                              )}>
+                                {recordatorio.turno.tipo_turno === 'clase' ? '📚 Clase' : '🎾 Alquiler'}
+                                {recordatorio.turno.modalidad_alquiler && ` (${recordatorio.turno.modalidad_alquiler})`}
+                              </span>
+                              {recordatorio.turno.cliente && (
+                                <span className="text-xs text-slate-600">
+                                  👤 {recordatorio.turno.cliente}
+                                </span>
+                              )}
+                            </>
+                          )}
                           <div className="flex items-center gap-1">
                             <DollarSign className="w-4 h-4 text-slate-400" />
                             <span className="font-semibold text-slate-700">
                               {formatMoney(recordatorio.monto)}
                             </span>
+                            {recordatorio.turno?.pagado && (
+                              <CheckCircle className="w-4 h-4 text-emerald-600 ml-1" />
+                            )}
                           </div>
                           {recordatorio.repeticion_semanal && (
                             <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded">
