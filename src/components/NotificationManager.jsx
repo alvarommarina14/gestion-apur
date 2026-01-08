@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { format, parseISO, differenceInMinutes, addMinutes } from 'date-fns';
+import { createPageUrl } from '@/utils';
 
 export default function NotificationManager() {
   const sentNotifications = useRef(new Set());
@@ -20,17 +21,19 @@ export default function NotificationManager() {
       notificar: true,
     }),
     refetchInterval: 30000,
-    enabled: !!user && user.recibir_notificaciones_cancha !== false,
+    enabled: !!user && (user.role !== 'admin' || user.recibir_notificaciones_cancha !== false),
   });
 
   const { data: turnos = [] } = useQuery({
     queryKey: ['turnos-cancha-push', today],
     queryFn: () => base44.entities.TurnoCancha.filter({ fecha: today }),
-    enabled: !!user && user.recibir_notificaciones_cancha !== false,
+    enabled: !!user && (user.role !== 'admin' || user.recibir_notificaciones_cancha !== false),
   });
 
   useEffect(() => {
-    if (!user || user.recibir_notificaciones_cancha === false) return;
+    if (!user) return;
+    // Solo bloquear notificaciones si es admin y las desactivó
+    if (user.role === 'admin' && user.recibir_notificaciones_cancha === false) return;
     if (!recordatorios.length) return;
     
     // Soporte para Safari: verificar si Notification está disponible
@@ -149,7 +152,7 @@ export default function NotificationManager() {
 
       notification.onclick = () => {
         window.focus();
-        const url = user?.role === 'admin' ? '/RecordatoriosCanchaAdmin' : '/RecordatoriosCanchaEmpleado';
+        const url = user?.role === 'admin' ? createPageUrl('RecordatoriosCanchaAdmin') : createPageUrl('RecordatoriosCanchaEmpleado');
         window.location.href = url;
         notification.close();
       };
