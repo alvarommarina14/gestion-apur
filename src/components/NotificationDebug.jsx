@@ -24,7 +24,12 @@ export default function NotificationDebug() {
       fecha: today,
       notificar: true,
     }),
-    refetchInterval: 5000, // Actualizar cada 5 segundos
+    refetchInterval: 5000,
+  });
+
+  const { data: turnos = [] } = useQuery({
+    queryKey: ['turnos-cancha-debug', today],
+    queryFn: () => base44.entities.TurnoCancha.filter({ fecha: today }),
   });
 
   useEffect(() => {
@@ -82,7 +87,6 @@ export default function NotificationDebug() {
     recordatorioTime.setHours(hours, minutes, 0, 0);
     
     if (user?.role === 'admin') {
-      // Para admin: calcular basado en el FIN del turno
       const turno = turnos.find(t => t.id === rec.turno_cancha_id);
       const duracion = turno?.duracion || 60;
       const finTurno = new Date(recordatorioTime.getTime() + duracion * 60000);
@@ -97,7 +101,6 @@ export default function NotificationDebug() {
         return `Ya terminó (hace ${Math.abs(minutesUntilEnd)} min)`;
       }
     } else {
-      // Para empleado: basado en el INICIO
       const minutesUntil = differenceInMinutes(recordatorioTime, currentTime);
       const minutosAntes = rec.minutos_antes || 10;
       const notificationTime = minutesUntil + minutosAntes;
@@ -113,11 +116,6 @@ export default function NotificationDebug() {
       }
     }
   };
-  
-  const { data: turnos = [] } = useQuery({
-    queryKey: ['turnos-cancha-debug', today],
-    queryFn: () => base44.entities.TurnoCancha.filter({ fecha: today }),
-  });
 
   if (!user) {
     return null;
