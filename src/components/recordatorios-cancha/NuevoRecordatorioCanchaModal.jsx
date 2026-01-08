@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
@@ -36,10 +35,12 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
           fecha: recordatorio.fecha,
           hora: recordatorio.hora,
           cancha: recordatorio.cancha,
+          cliente: recordatorio.cliente || '',
           tipo_turno: recordatorio.tipo_turno || 'clase',
-          profesor: recordatorio.profesor,
+          profesor: recordatorio.profesor || '',
           modalidad_alquiler: recordatorio.modalidad_alquiler || '',
           monto: recordatorio.monto,
+          pagado: recordatorio.pagado || false,
           repeticion_semanal: recordatorio.repeticion_semanal || false,
           notificar: recordatorio.notificar !== false,
           minutos_antes: recordatorio.minutos_antes || 10,
@@ -49,10 +50,12 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
           fecha: format(new Date(), 'yyyy-MM-dd'),
           hora: '09:00',
           cancha: '',
+          cliente: '',
           tipo_turno: 'clase',
           profesor: '',
           modalidad_alquiler: '',
           monto: '',
+          pagado: false,
           repeticion_semanal: false,
           notificar: true,
           minutos_antes: 10,
@@ -66,10 +69,12 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
         fecha: recordatorio.fecha,
         hora: recordatorio.hora,
         cancha: recordatorio.cancha,
+        cliente: recordatorio.cliente || '',
         tipo_turno: recordatorio.tipo_turno || 'clase',
-        profesor: recordatorio.profesor,
+        profesor: recordatorio.profesor || '',
         modalidad_alquiler: recordatorio.modalidad_alquiler || '',
         monto: recordatorio.monto,
+        pagado: recordatorio.pagado || false,
         repeticion_semanal: recordatorio.repeticion_semanal || false,
         notificar: recordatorio.notificar !== false,
         minutos_antes: recordatorio.minutos_antes || 10,
@@ -80,10 +85,12 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
         fecha: format(new Date(), 'yyyy-MM-dd'),
         hora: '09:00',
         cancha: '',
+        cliente: '',
         tipo_turno: 'clase',
         profesor: '',
         modalidad_alquiler: '',
         monto: '',
+        pagado: false,
         repeticion_semanal: false,
         notificar: true,
         minutos_antes: 10,
@@ -161,7 +168,7 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
     const data = {
       ...formData,
       dia_semana: diaSemana,
-      monto: Number(formData.monto),
+      monto: formData.pagado ? 0 : Number(formData.monto),
     };
 
     if (recordatorio) {
@@ -242,6 +249,16 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
       </div>
 
       <div className="space-y-2">
+        <Label>Cliente / Nombre</Label>
+        <Input
+          value={formData.cliente}
+          onChange={(e) => setFormData({ ...formData, cliente: e.target.value })}
+          placeholder="Nombre del cliente"
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
         <Label>Tipo de Turno</Label>
         <Select
           value={formData.tipo_turno}
@@ -286,16 +303,29 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
         </div>
       )}
 
-      <div className="space-y-2">
-        <Label>Monto a pagar</Label>
-        <Input
-          type="number"
-          value={formData.monto}
-          onChange={(e) => setFormData({ ...formData, monto: e.target.value })}
-          placeholder="0"
-          required
+      <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+        <div>
+          <Label className="font-medium text-slate-800">Pagado</Label>
+          <p className="text-xs text-slate-500 mt-0.5">Marcar si el turno ya está pago</p>
+        </div>
+        <Switch
+          checked={formData.pagado}
+          onCheckedChange={(checked) => setFormData({ ...formData, pagado: checked })}
         />
       </div>
+
+      {!formData.pagado && (
+        <div className="space-y-2">
+          <Label>Monto a pagar</Label>
+          <Input
+            type="number"
+            value={formData.monto}
+            onChange={(e) => setFormData({ ...formData, monto: e.target.value })}
+            placeholder="0"
+            required
+          />
+        </div>
+      )}
 
       <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
         <div>
