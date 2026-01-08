@@ -155,9 +155,10 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
       
       return turnoCreado;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
-      queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+      await queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+      await queryClient.refetchQueries({ queryKey: ['turnos-cancha'] });
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
@@ -205,10 +206,11 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
         }
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
-      queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
-      queryClient.invalidateQueries({ queryKey: ['auditoria'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+      await queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+      await queryClient.invalidateQueries({ queryKey: ['auditoria'] });
+      await queryClient.refetchQueries({ queryKey: ['turnos-cancha'] });
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
