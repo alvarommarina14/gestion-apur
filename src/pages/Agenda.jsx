@@ -107,6 +107,15 @@ export default function Agenda() {
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Agenda de Canchas</h1>
             <p className="text-slate-500 text-sm">Sistema de reservas del club</p>
           </div>
+          {isAdmin && (
+            <Button
+              onClick={() => setTurnoModal({ open: true, turno: null })}
+              className="bg-emerald-600 hover:bg-emerald-700 h-12 lg:h-11 px-6 text-base lg:text-sm font-semibold active:scale-95 touch-manipulation w-full sm:w-auto shadow-md"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Crear turno
+            </Button>
+          )}
         </header>
 
         {/* Stats */}
@@ -236,17 +245,6 @@ export default function Agenda() {
           />
         )}
       </div>
-
-      {/* Botón flotante para crear turno - Solo admins */}
-      {isAdmin && (
-        <Button
-          onClick={() => setTurnoModal({ open: true, turno: null })}
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-emerald-600 hover:bg-emerald-700 z-40 active:scale-95 touch-manipulation"
-          size="icon"
-        >
-          <Plus className="w-6 h-6" />
-        </Button>
-      )}
 
       {/* Modal */}
       {isAdmin && (
