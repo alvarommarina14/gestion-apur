@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import React, { useState, useEffect } from 'react';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, addMinutes } from 'date-fns';
 import { es } from 'date-fns/locale';
 import {
   Dialog,
@@ -24,50 +24,50 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Calendar, CheckCircle, Bell } from 'lucide-react';
+import { Calendar, CheckCircle, AlertTriangle, Trash2, Bell } from 'lucide-react';
 
 export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recordatorio }) {
   const queryClient = useQueryClient();
   const [success, setSuccess] = useState(false);
-  const [formData, setFormData] = useState(
-    recordatorio
-      ? {
-          fecha: recordatorio.fecha,
-          hora: recordatorio.hora,
-          cancha: recordatorio.cancha,
-          cliente: recordatorio.cliente || '',
-          tipo_turno: recordatorio.tipo_turno || 'clase',
-          profesor: recordatorio.profesor || '',
-          modalidad_alquiler: recordatorio.modalidad_alquiler || '',
-          monto: recordatorio.monto,
-          pagado: recordatorio.pagado || false,
-          repeticion_semanal: recordatorio.repeticion_semanal || false,
-          notificar: recordatorio.notificar !== false,
-          minutos_antes: recordatorio.minutos_antes || 10,
-          notas: recordatorio.notas || '',
-        }
-      : {
-          fecha: format(new Date(), 'yyyy-MM-dd'),
-          hora: '09:00',
-          cancha: '',
-          cliente: '',
-          tipo_turno: 'clase',
-          profesor: '',
-          modalidad_alquiler: '',
-          monto: '',
-          pagado: false,
-          repeticion_semanal: false,
-          notificar: true,
-          minutos_antes: 10,
-          notas: '',
-        }
-  );
+  const [error, setError] = useState(null);
 
-  React.useEffect(() => {
-    if (recordatorio) {
+  const { data: recordatoriosExistentes = [] } = useQuery({
+    queryKey: ['recordatorios-cancha'],
+    queryFn: () => base44.entities.RecordatorioCancha.list(),
+    enabled: open,
+  });
+
+  const [formData, setFormData] = useState({
+    fecha: format(new Date(), 'yyyy-MM-dd'),
+    hora_inicio: '09:00',
+    duracion: 60,
+    cancha: '1',
+    cliente: '',
+    tipo_turno: 'clase',
+    profesor: '',
+    modalidad_alquiler: '',
+    monto: '',
+    pagado: false,
+    notas: '',
+    repeticion_semanal: false,
+    notificar: true,
+    minutos_antes: 10,
+  });
+
+  useEffect(() => {
+    if (recordatorio && open) {
+      // Calcular duración si tiene hora fin
+      let duracion = 60;
+      if (recordatorio.hora && recordatorio.hora_fin) {
+        const [h1, m1] = recordatorio.hora.split(':').map(Number);
+        const [h2, m2] = recordatorio.hora_fin.split(':').map(Number);
+        duracion = (h2 * 60 + m2) - (h1 * 60 + m1);
+      }
+
       setFormData({
         fecha: recordatorio.fecha,
-        hora: recordatorio.hora,
+        hora_inicio: recordatorio.hora,
+        duracion: duracion || 60,
         cancha: recordatorio.cancha,
         cliente: recordatorio.cliente || '',
         tipo_turno: recordatorio.tipo_turno || 'clase',
@@ -75,47 +75,72 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
         modalidad_alquiler: recordatorio.modalidad_alquiler || '',
         monto: recordatorio.monto,
         pagado: recordatorio.pagado || false,
+        notas: recordatorio.notas || '',
         repeticion_semanal: recordatorio.repeticion_semanal || false,
         notificar: recordatorio.notificar !== false,
         minutos_antes: recordatorio.minutos_antes || 10,
-        notas: recordatorio.notas || '',
       });
-    } else {
+    } else if (!recordatorio && open) {
       setFormData({
         fecha: format(new Date(), 'yyyy-MM-dd'),
-        hora: '09:00',
-        cancha: '',
+        hora_inicio: '09:00',
+        duracion: 60,
+        cancha: '1',
         cliente: '',
         tipo_turno: 'clase',
         profesor: '',
         modalidad_alquiler: '',
         monto: '',
         pagado: false,
+        notas: '',
         repeticion_semanal: false,
         notificar: true,
         minutos_antes: 10,
-        notas: '',
       });
     }
+    setError(null);
   }, [recordatorio, open]);
+
+  const calcularHoraFin = (horaInicio, duracion) => {
+    const [h, m] = horaInicio.split(':').map(Number);
+    const inicio = new Date();
+    inicio.setHours(h, m, 0);
+    const fin = addMinutes(inicio, duracion);
+    return format(fin, 'HH:mm');
+  };
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      // Crear recordatorio sin vinculación a turno (creación manual)
-      const recordatorio = await base44.entities.RecordatorioCancha.create({
-        ...data,
-        turno_cancha_id: null, // Sin vinculación a turno de agenda
+      const diaSemana = format(parseISO(data.fecha), 'EEEE', { locale: es });
+      
+      const recordatorioCreado = await base44.entities.RecordatorioCancha.create({
+        turno_cancha_id: null,
+        fecha: data.fecha,
+        hora: data.hora_inicio,
+        cancha: data.cancha,
+        cliente: data.cliente,
+        tipo_turno: data.tipo_turno,
+        modalidad_alquiler: data.modalidad_alquiler || null,
+        profesor: data.profesor || (data.tipo_turno === 'clase' ? 'Sin asignar' : null),
+        monto: data.monto,
+        pagado: data.pagado,
+        repeticion_semanal: data.repeticion_semanal,
+        dia_semana: diaSemana,
+        notificar: data.notificar,
+        minutos_antes: data.minutos_antes,
+        notas: data.notas,
       });
 
-      // Registrar auditoría
       await base44.entities.LogAuditoria.create({
         entidad: 'RecordatorioCancha',
-        entidad_id: recordatorio.id,
-        entidad_nombre: `${data.profesor} - Cancha ${data.cancha}`,
+        entidad_id: recordatorioCreado.id,
+        entidad_nombre: `${data.cliente || data.profesor} - Cancha ${data.cancha}`,
         accion: 'crear',
         motivo: 'Recordatorio creado manualmente',
         fecha: new Date().toISOString(),
       });
+      
+      return recordatorioCreado;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
@@ -129,19 +154,35 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data, cambios }) => {
-      await base44.entities.RecordatorioCancha.update(id, data);
+      const diaSemana = format(parseISO(data.fecha), 'EEEE', { locale: es });
 
-      // Registrar auditoría para cada cambio
+      await base44.entities.RecordatorioCancha.update(id, {
+        fecha: data.fecha,
+        hora: data.hora_inicio,
+        cancha: data.cancha,
+        cliente: data.cliente,
+        tipo_turno: data.tipo_turno,
+        modalidad_alquiler: data.modalidad_alquiler || null,
+        profesor: data.profesor || (data.tipo_turno === 'clase' ? 'Sin asignar' : null),
+        monto: data.monto,
+        pagado: data.pagado,
+        repeticion_semanal: data.repeticion_semanal,
+        dia_semana: diaSemana,
+        notificar: data.notificar,
+        minutos_antes: data.minutos_antes,
+        notas: data.notas,
+      });
+
       if (cambios && cambios.length > 0) {
         for (const cambio of cambios) {
           await base44.entities.LogAuditoria.create({
             entidad: 'RecordatorioCancha',
             entidad_id: id,
-            entidad_nombre: `${data.profesor} - Cancha ${data.cancha}`,
+            entidad_nombre: `${data.cliente || data.profesor} - Cancha ${data.cancha}`,
             accion: 'editar',
             campo_modificado: cambio.campo,
-            valor_anterior: cambio.anterior,
-            valor_nuevo: cambio.nuevo,
+            valor_anterior: String(cambio.anterior || ''),
+            valor_nuevo: String(cambio.nuevo || ''),
             motivo: 'Recordatorio editado',
             fecha: new Date().toISOString(),
           });
@@ -159,27 +200,70 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      const recData = recordatoriosExistentes.find(r => r.id === id);
+      if (recData) {
+        await base44.entities.LogAuditoria.create({
+          entidad: 'RecordatorioCancha',
+          entidad_id: id,
+          entidad_nombre: `${recData.cliente || recData.profesor} - Cancha ${recData.cancha}`,
+          accion: 'eliminar',
+          motivo: 'Recordatorio eliminado',
+          fecha: new Date().toISOString(),
+        });
+      }
+      
+      await base44.entities.RecordatorioCancha.delete(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['auditoria'] });
+      onOpenChange(false);
+    },
+  });
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    setError(null);
 
-    const fecha = parseISO(formData.fecha);
-    const diaSemana = format(fecha, 'EEEE', { locale: es });
+    if (formData.tipo_turno === 'alquiler' && !formData.modalidad_alquiler) {
+      setError('Debes seleccionar la modalidad del alquiler (Abono o Suelto)');
+      return;
+    }
 
     const data = {
       ...formData,
-      dia_semana: diaSemana,
       monto: formData.pagado ? 0 : Number(formData.monto),
     };
 
     if (recordatorio) {
-      // Detectar cambios
       const cambios = [];
       Object.keys(data).forEach(key => {
-        if (recordatorio[key] !== data[key]) {
+        const oldValue = recordatorio[key];
+        const newValue = data[key];
+
+        if (key === 'pagado') {
+          if (!!oldValue !== !!newValue) {
+            cambios.push({
+              campo: key,
+              anterior: String(!!oldValue),
+              nuevo: String(!!newValue),
+            });
+          }
+        } else if (key === 'monto') {
+          if (Number(oldValue) !== Number(newValue)) {
+            cambios.push({
+              campo: key,
+              anterior: String(oldValue),
+              nuevo: String(newValue),
+            });
+          }
+        } else if (String(oldValue || '') !== String(newValue || '')) {
           cambios.push({
             campo: key,
-            anterior: String(recordatorio[key] || ''),
-            nuevo: String(data[key] || ''),
+            anterior: String(oldValue || ''),
+            nuevo: String(newValue || ''),
           });
         }
       });
@@ -187,6 +271,12 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
       updateMutation.mutate({ id: recordatorio.id, data, cambios });
     } else {
       createMutation.mutate(data);
+    }
+  };
+
+  const handleDelete = () => {
+    if (confirm('¿Eliminar este recordatorio?')) {
+      deleteMutation.mutate(recordatorio.id);
     }
   };
 
@@ -209,6 +299,13 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
 
   const formContent = (
     <>
+      {error && (
+        <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg flex items-start gap-2">
+          <AlertTriangle className="w-5 h-5 text-rose-600 mt-0.5" />
+          <p className="text-sm text-rose-700">{error}</p>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Fecha</Label>
@@ -220,32 +317,69 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
           />
         </div>
         <div className="space-y-2">
-          <Label>Hora</Label>
-          <Input
-            type="time"
-            value={formData.hora}
-            onChange={(e) => setFormData({ ...formData, hora: e.target.value })}
-            required
-          />
+          <Label>Cancha</Label>
+          <Select
+            value={formData.cancha}
+            onValueChange={(v) => setFormData({ ...formData, cancha: v })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar cancha" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1">Cancha 1</SelectItem>
+              <SelectItem value="2">Cancha 2</SelectItem>
+              <SelectItem value="3">Cancha 3</SelectItem>
+              <SelectItem value="4">Cancha 4</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label>Cancha</Label>
-        <Select
-          value={formData.cancha}
-          onValueChange={(v) => setFormData({ ...formData, cancha: v })}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Seleccionar cancha" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="1">Cancha 1</SelectItem>
-            <SelectItem value="2">Cancha 2</SelectItem>
-            <SelectItem value="3">Cancha 3</SelectItem>
-            <SelectItem value="4">Cancha 4</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="grid grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label>Hora inicio</Label>
+          <Select
+            value={formData.hora_inicio}
+            onValueChange={(v) => setFormData({ ...formData, hora_inicio: v })}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="max-h-60">
+              {Array.from({ length: 28 }, (_, i) => {
+                const h = Math.floor(i / 2) + 8;
+                const m = i % 2 === 0 ? '00' : '30';
+                if (h > 21 || (h === 21 && m === '30')) return null;
+                return `${h.toString().padStart(2, '0')}:${m}`;
+              }).filter(Boolean).map(hora => (
+                <SelectItem key={hora} value={hora}>{hora}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label>Duración</Label>
+          <Select
+            value={formData.duracion.toString()}
+            onValueChange={(v) => setFormData({ ...formData, duracion: Number(v) })}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="60">60 min</SelectItem>
+              <SelectItem value="90">90 min</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label>Hora fin</Label>
+          <Input
+            value={calcularHoraFin(formData.hora_inicio, formData.duracion)}
+            disabled
+            className="bg-slate-50"
+          />
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -316,7 +450,7 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
 
       {!formData.pagado && (
         <div className="space-y-2">
-          <Label>Monto a pagar</Label>
+          <Label>Monto</Label>
           <Input
             type="number"
             value={formData.monto}
@@ -342,7 +476,6 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
         />
       </div>
 
-      {/* Configuración de notificaciones push */}
       <div className="space-y-3 p-4 bg-amber-50 rounded-lg border border-amber-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -393,12 +526,23 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
         <Textarea
           value={formData.notas}
           onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
-          placeholder="Observaciones adicionales..."
+          placeholder="Observaciones..."
           rows={2}
         />
       </div>
 
-      <DialogFooter>
+      <DialogFooter className="flex-col sm:flex-row gap-2">
+        {recordatorio && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleDelete}
+            className="text-rose-600 hover:text-rose-700 sm:mr-auto"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Eliminar
+          </Button>
+        )}
         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
           Cancelar
         </Button>
