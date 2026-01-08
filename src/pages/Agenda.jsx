@@ -30,28 +30,29 @@ export default function Agenda() {
     queryFn: () => base44.auth.me(),
   });
 
+  const fechaStr = format(selectedDate, 'yyyy-MM-dd');
+
   const { data: turnos = [], isLoading } = useQuery({
-    queryKey: ['turnos-cancha'],
-    queryFn: () => base44.entities.TurnoCancha.list('-fecha'),
+    queryKey: ['turnos-cancha', fechaStr],
+    queryFn: () => base44.entities.TurnoCancha.filter({ fecha: fechaStr }),
   });
 
   const { data: recordatorios = [] } = useQuery({
-    queryKey: ['recordatorios-cancha'],
-    queryFn: () => base44.entities.RecordatorioCancha.list('-fecha'),
+    queryKey: ['recordatorios-cancha', fechaStr],
+    queryFn: () => base44.entities.RecordatorioCancha.filter({ fecha: fechaStr }),
   });
 
   const isAdmin = user?.role === 'admin';
 
   const turnosFiltrados = useMemo(() => {
-    const fechaStr = format(selectedDate, 'yyyy-MM-dd');
-    let filtered = turnos.filter(t => t.fecha === fechaStr);
+    let filtered = [...turnos];
     
     if (selectedCancha !== 'todas') {
       filtered = filtered.filter(t => t.cancha === selectedCancha);
     }
     
     return filtered;
-  }, [turnos, selectedDate, selectedCancha]);
+  }, [turnos, selectedCancha]);
 
   const turnosPendientesPago = useMemo(() => {
     const hoy = format(new Date(), 'yyyy-MM-dd');
