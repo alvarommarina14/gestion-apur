@@ -58,9 +58,10 @@ export default function NotificationManager() {
     console.log(`  Minutes until start: ${minutesUntilStart}, anticipación: ${minutosAntes}`);
     console.log(`  Flags: previo=${rec.notificado_previo}, hora=${rec.notificado_hora}`);
 
-    // Caso 1: Notificación previa (X minutos antes)
-    if (minutesUntilStart <= minutosAntes && minutesUntilStart > 0 && !rec.notificado_previo) {
-      console.log(`  ✅ ENVIANDO notificación previa`);
+    // Caso 1: Notificación previa (X minutos antes del INICIO)
+    // Ventana amplia: desde (minutosAntes + 2) hasta 1 minuto antes del inicio
+    if (minutesUntilStart <= (minutosAntes + 2) && minutesUntilStart >= 1 && !rec.notificado_previo) {
+      console.log(`  ✅ ENVIANDO notificación previa (${minutosAntes} min antes)`);
       sendNotification(rec, 'previo', minutosAntes);
       sentNotifications.current.add(notificationKey);
 
@@ -70,8 +71,8 @@ export default function NotificationManager() {
       }).catch(err => console.error('Error actualizando recordatorio:', err));
     }
 
-    // Caso 2: Notificación a la hora exacta
-    if (minutesUntilStart <= 0 && minutesUntilStart > -5 && !rec.notificado_hora) {
+    // Caso 2: Notificación a la hora exacta (ventana de -1 a -5 minutos)
+    if (minutesUntilStart <= -1 && minutesUntilStart >= -5 && !rec.notificado_hora) {
       console.log(`  ✅ ENVIANDO notificación a la hora`);
       sendNotification(rec, 'hora', minutosAntes);
       sentNotifications.current.add(notificationKey);
