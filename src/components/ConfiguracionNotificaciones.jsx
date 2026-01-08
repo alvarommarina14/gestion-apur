@@ -55,6 +55,37 @@ export default function ConfiguracionNotificaciones() {
     }
   };
 
+  const sendTestNotification = () => {
+    if (!window.Notification) {
+      alert('Tu navegador no soporta notificaciones');
+      return;
+    }
+
+    if (window.Notification.permission !== 'granted') {
+      alert('Primero debes activar los permisos de notificación');
+      return;
+    }
+
+    try {
+      const notification = new window.Notification('🧪 Notificación de Prueba', {
+        body: user.role === 'admin' 
+          ? '🧹 Preparar Cancha 1 - En 10 min (15:00). Cliente Test'
+          : '🧹 Sacar cancha 1 - En 10 min (15:00). Tocá para confirmar.',
+        tag: 'test-notification',
+      });
+
+      notification.onclick = () => {
+        window.focus();
+        notification.close();
+      };
+
+      setTimeout(() => notification.close(), 5000);
+    } catch (error) {
+      console.warn('Error enviando notificación:', error);
+      alert('Error al enviar notificación de prueba');
+    }
+  };
+
   if (!user) return null;
 
   const permissionStatus = typeof window !== 'undefined' && window.Notification ? window.Notification.permission : 'unsupported';
@@ -129,6 +160,20 @@ export default function ConfiguracionNotificaciones() {
                   setFormData({ ...formData, notificaciones_admin_sacar_cancha: checked })
                 }
               />
+            </div>
+          )}
+
+          {/* Botón de prueba */}
+          {permissionStatus === 'granted' && formData.recibir_notificaciones_cancha && (
+            <div className="flex justify-center">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={sendTestNotification}
+                className="border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+              >
+                🧪 Enviar notificación de prueba
+              </Button>
             </div>
           )}
 
