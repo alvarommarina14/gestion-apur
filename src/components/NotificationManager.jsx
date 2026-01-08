@@ -32,9 +32,6 @@ export default function NotificationManager() {
   useEffect(() => {
     if (!user || user.recibir_notificaciones_cancha === false) return;
     
-    // Admins: verificar si tienen activadas las notificaciones de sacar cancha
-    if (user.role === 'admin' && user.notificaciones_admin_sacar_cancha === false) return;
-    
     if (!recordatorios.length) return;
     
     // Soporte para Safari: verificar si Notification está disponible

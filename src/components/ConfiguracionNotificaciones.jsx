@@ -19,14 +19,12 @@ export default function ConfiguracionNotificaciones() {
 
   const [formData, setFormData] = useState({
     recibir_notificaciones_cancha: user?.recibir_notificaciones_cancha !== false,
-    notificaciones_admin_sacar_cancha: user?.notificaciones_admin_sacar_cancha !== false,
   });
 
   React.useEffect(() => {
     if (user) {
       setFormData({
         recibir_notificaciones_cancha: user.recibir_notificaciones_cancha !== false,
-        notificaciones_admin_sacar_cancha: user.notificaciones_admin_sacar_cancha !== false,
       });
     }
   }, [user]);
@@ -68,9 +66,7 @@ export default function ConfiguracionNotificaciones() {
 
     try {
       const notification = new window.Notification('🧪 Notificación de Prueba', {
-        body: user.role === 'admin' 
-          ? '🧹 Preparar Cancha 1 - En 10 min (15:00). Cliente Test'
-          : '🧹 Sacar cancha 1 - En 10 min (15:00). Tocá para confirmar.',
+        body: '🧹 Sacar cancha 1 - En 10 min (15:00). Cliente Test',
         tag: 'test-notification',
       });
 
@@ -118,17 +114,17 @@ export default function ConfiguracionNotificaciones() {
           )}
 
           {/* Switch principal */}
-          <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border">
+          <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
             <div className="flex items-center gap-3">
-              <Bell className="w-5 h-5 text-slate-600" />
+              <Bell className="w-5 h-5 text-emerald-600" />
               <div>
                 <Label className="font-medium text-slate-800">
-                  Recibir notificaciones push
+                  Recibir notificaciones de cancha
                 </Label>
                 <p className="text-sm text-slate-500 mt-0.5">
                   {user.role === 'admin' 
-                    ? 'Activa las notificaciones del sistema'
-                    : 'Notificaciones para preparar las canchas'}
+                    ? 'Alertas cuando se debe preparar una cancha para el siguiente turno'
+                    : 'Alertas para sacar y preparar las canchas'}
                 </p>
               </div>
             </div>
@@ -139,29 +135,6 @@ export default function ConfiguracionNotificaciones() {
               }
             />
           </div>
-
-          {/* Switch específico para admins: notificaciones de sacar cancha */}
-          {user.role === 'admin' && formData.recibir_notificaciones_cancha && (
-            <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
-              <div className="flex items-center gap-3">
-                <Bell className="w-5 h-5 text-emerald-600" />
-                <div>
-                  <Label className="font-medium text-slate-800">
-                    Notificaciones de "Sacar Cancha"
-                  </Label>
-                  <p className="text-sm text-slate-500 mt-0.5">
-                    Recibir alertas cuando se debe preparar una cancha para el siguiente turno
-                  </p>
-                </div>
-              </div>
-              <Switch
-                checked={formData.notificaciones_admin_sacar_cancha}
-                onCheckedChange={(checked) =>
-                  setFormData({ ...formData, notificaciones_admin_sacar_cancha: checked })
-                }
-              />
-            </div>
-          )}
 
           {/* Botón de prueba */}
           {permissionStatus === 'granted' && formData.recibir_notificaciones_cancha && (
@@ -181,9 +154,8 @@ export default function ConfiguracionNotificaciones() {
           {formData.recibir_notificaciones_cancha && (
             <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
               <p className="text-sm text-slate-700">
-                {user.role === 'admin' 
-                  ? 'El tiempo de anticipación de las notificaciones se configura al crear cada turno. Si hay múltiples canchas a la misma hora, recibirás una sola notificación agrupada.'
-                  : 'El tiempo de anticipación se configura en cada recordatorio individual.'}
+                El tiempo de anticipación de las notificaciones se configura al crear cada turno. 
+                {user.role === 'admin' && ' Si hay múltiples canchas a la misma hora, recibirás una sola notificación agrupada.'}
               </p>
             </div>
           )}
