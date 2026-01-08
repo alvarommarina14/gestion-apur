@@ -17,6 +17,11 @@ export default function ConfiguracionNotificaciones() {
     queryFn: () => base44.auth.me(),
   });
 
+  // Solo admins pueden ver y configurar esto
+  if (!user || user.role !== 'admin') {
+    return null;
+  }
+
   const [formData, setFormData] = useState({
     recibir_notificaciones_cancha: user?.recibir_notificaciones_cancha !== false,
   });
@@ -52,8 +57,6 @@ export default function ConfiguracionNotificaciones() {
       }
     }
   };
-
-  if (!user) return null;
 
   const permissionStatus = typeof window !== 'undefined' && window.Notification ? window.Notification.permission : 'unsupported';
 
@@ -93,9 +96,7 @@ export default function ConfiguracionNotificaciones() {
                   Recibir notificaciones push
                 </Label>
                 <p className="text-sm text-slate-500 mt-0.5">
-                  {user.role === 'admin' 
-                    ? 'Notificaciones cuando un turno está por finalizar'
-                    : 'Notificaciones para preparar las canchas'}
+                  Notificaciones cuando se acerque la hora de los turnos
                 </p>
               </div>
             </div>
@@ -111,9 +112,10 @@ export default function ConfiguracionNotificaciones() {
           {formData.recibir_notificaciones_cancha && (
             <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
               <p className="text-sm text-slate-700">
-                {user.role === 'admin' 
-                  ? 'El tiempo de anticipación de las notificaciones se configura al crear cada turno.'
-                  : 'El tiempo de anticipación se configura en cada recordatorio individual.'}
+                El tiempo de anticipación de las notificaciones se configura al crear cada turno.
+              </p>
+              <p className="text-xs text-slate-600 mt-2">
+                Los empleados siempre reciben notificaciones (no pueden desactivarlas).
               </p>
             </div>
           )}
