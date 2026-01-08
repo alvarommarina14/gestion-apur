@@ -100,55 +100,55 @@ export default function Agenda() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
         {/* Header */}
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Agenda de Canchas</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Agenda de Canchas</h1>
             <p className="text-slate-500 text-sm">Sistema de reservas del club</p>
           </div>
           {isAdmin && (
             <Button
               onClick={() => setTurnoModal({ open: true, turno: null })}
-              className="bg-emerald-600 hover:bg-emerald-700"
+              className="bg-emerald-600 hover:bg-emerald-700 h-11 lg:h-10 text-base lg:text-sm active:scale-95 touch-manipulation w-full sm:w-auto"
             >
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className="w-5 h-5 mr-2" />
               Nuevo turno
             </Button>
           )}
         </header>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Card className="shadow-sm">
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 sm:pt-6 pb-4">
               <div className="text-center">
-                <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
-                <p className="text-sm text-slate-500 mt-1">Turnos</p>
+                <p className="text-xl sm:text-2xl font-bold text-slate-900">{stats.total}</p>
+                <p className="text-xs sm:text-sm text-slate-500 mt-1">Turnos</p>
               </div>
             </CardContent>
           </Card>
           <Card className="shadow-sm border-emerald-200 bg-emerald-50/30">
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 sm:pt-6 pb-4">
               <div className="text-center">
-                <p className="text-2xl font-bold text-emerald-600">{stats.pagados}</p>
-                <p className="text-sm text-slate-500 mt-1">Pagados</p>
+                <p className="text-xl sm:text-2xl font-bold text-emerald-600">{stats.pagados}</p>
+                <p className="text-xs sm:text-sm text-slate-500 mt-1">Pagados</p>
               </div>
             </CardContent>
           </Card>
           <Card className="shadow-sm border-rose-200 bg-rose-50/30">
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 sm:pt-6 pb-4">
               <div className="text-center">
-                <p className="text-2xl font-bold text-rose-600">{stats.pendientes}</p>
-                <p className="text-sm text-slate-500 mt-1">Pendientes</p>
+                <p className="text-xl sm:text-2xl font-bold text-rose-600">{stats.pendientes}</p>
+                <p className="text-xs sm:text-sm text-slate-500 mt-1">Pendientes</p>
               </div>
             </CardContent>
           </Card>
           <Card className="shadow-sm border-blue-200 bg-blue-50/30">
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 sm:pt-6 pb-4">
               <div className="text-center">
-                <p className="text-lg font-bold text-blue-600">{formatMoney(stats.montoPagado)}</p>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-base sm:text-lg font-bold text-blue-600">{formatMoney(stats.montoPagado)}</p>
+                <p className="text-[10px] sm:text-xs text-slate-500 mt-1">
                   de {formatMoney(stats.montoPagado + stats.montoPendiente)}
                 </p>
               </div>
@@ -157,40 +157,40 @@ export default function Agenda() {
         </div>
 
         {/* Controles */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" onClick={handlePrevDay}>
-              <ChevronLeft className="w-4 h-4" />
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1">
+            <Button variant="outline" size="icon" onClick={handlePrevDay} className="h-10 w-10 shrink-0 active:scale-95 touch-manipulation">
+              <ChevronLeft className="w-5 h-5" />
             </Button>
-            <div className="min-w-[200px] text-center">
-              <p className="font-semibold text-slate-900">
+            <div className="min-w-[180px] text-center px-2">
+              <p className="font-semibold text-slate-900 text-sm sm:text-base">
                 {format(selectedDate, "EEEE d 'de' MMMM", { locale: es })}
               </p>
               <p className="text-xs text-slate-500">{format(selectedDate, 'yyyy')}</p>
             </div>
-            <Button variant="outline" size="sm" onClick={handleNextDay}>
-              <ChevronRight className="w-4 h-4" />
+            <Button variant="outline" size="icon" onClick={handleNextDay} className="h-10 w-10 shrink-0 active:scale-95 touch-manipulation">
+              <ChevronRight className="w-5 h-5" />
             </Button>
-            <Button variant="outline" size="sm" onClick={handleToday}>
+            <Button variant="outline" onClick={handleToday} className="h-10 px-4 shrink-0 active:scale-95 touch-manipulation">
               Hoy
             </Button>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Tabs value={showCalendario ? 'calendario' : 'lista'} onValueChange={(v) => setShowCalendario(v === 'calendario')}>
-              <TabsList>
-                <TabsTrigger value="lista">Vista Día</TabsTrigger>
-                <TabsTrigger value="calendario">Calendario</TabsTrigger>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Tabs value={showCalendario ? 'calendario' : 'lista'} onValueChange={(v) => setShowCalendario(v === 'calendario')} className="w-full sm:w-auto">
+              <TabsList className="grid w-full grid-cols-2 h-10">
+                <TabsTrigger value="lista" className="text-sm">Vista Día</TabsTrigger>
+                <TabsTrigger value="calendario" className="text-sm">Calendario</TabsTrigger>
               </TabsList>
             </Tabs>
 
             {!showCalendario && (
               <Select value={selectedCancha} onValueChange={setSelectedCancha}>
-                <SelectTrigger className="w-36">
+                <SelectTrigger className="w-full sm:w-40 h-10">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="todas">Todas las canchas</SelectItem>
+                  <SelectItem value="todas">Todas</SelectItem>
                   <SelectItem value="1">Cancha 1</SelectItem>
                   <SelectItem value="2">Cancha 2</SelectItem>
                   <SelectItem value="3">Cancha 3</SelectItem>

@@ -106,38 +106,38 @@ export default function RecordatoriosCanchaEmpleado() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
         {/* Header */}
         <header>
-          <h1 className="text-2xl font-bold text-slate-900">Recordatorios de Cancha</h1>
-          <p className="text-slate-500 text-sm">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Recordatorios de Cancha</h1>
+          <p className="text-slate-500 text-xs sm:text-sm">
             {format(new Date(), "EEEE d 'de' MMMM, yyyy", { locale: es })}
           </p>
         </header>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
           <Card className="shadow-sm">
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 sm:pt-6 pb-4">
               <div className="text-center">
-                <p className="text-3xl font-bold text-slate-900">{stats.total}</p>
-                <p className="text-sm text-slate-500 mt-1">Total</p>
+                <p className="text-2xl sm:text-3xl font-bold text-slate-900">{stats.total}</p>
+                <p className="text-xs sm:text-sm text-slate-500 mt-1">Total</p>
               </div>
             </CardContent>
           </Card>
           <Card className="shadow-sm border-amber-200 bg-amber-50/30">
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 sm:pt-6 pb-4">
               <div className="text-center">
-                <p className="text-3xl font-bold text-amber-600">{stats.pendientes}</p>
-                <p className="text-sm text-slate-500 mt-1">Pendientes</p>
+                <p className="text-2xl sm:text-3xl font-bold text-amber-600">{stats.pendientes}</p>
+                <p className="text-xs sm:text-sm text-slate-500 mt-1">Pendientes</p>
               </div>
             </CardContent>
           </Card>
           <Card className="shadow-sm border-emerald-200 bg-emerald-50/30">
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 sm:pt-6 pb-4">
               <div className="text-center">
-                <p className="text-3xl font-bold text-emerald-600">{stats.hechos}</p>
-                <p className="text-sm text-slate-500 mt-1">Completados</p>
+                <p className="text-2xl sm:text-3xl font-bold text-emerald-600">{stats.hechos}</p>
+                <p className="text-xs sm:text-sm text-slate-500 mt-1">Completados</p>
               </div>
             </CardContent>
           </Card>
@@ -242,9 +242,9 @@ export default function RecordatoriosCanchaEmpleado() {
                         <Button
                           onClick={() => marcarHechoMutation.mutate(recordatorio)}
                           disabled={marcarHechoMutation.isPending}
-                          className="bg-emerald-600 hover:bg-emerald-700 shrink-0"
+                          className="bg-emerald-600 hover:bg-emerald-700 shrink-0 h-11 px-5 text-base active:scale-95 touch-manipulation"
                         >
-                          <CheckCircle className="w-4 h-4 mr-2" />
+                          <CheckCircle className="w-5 h-5 mr-2" />
                           HECHO
                         </Button>
                       )}
