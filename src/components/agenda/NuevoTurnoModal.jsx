@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
@@ -125,17 +124,21 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
     mutationFn: async (data) => {
       const turnoCreado = await base44.entities.TurnoCancha.create(data);
       
-      // Crear recordatorio de cancha vinculado automáticamente
+      // Crear recordatorio de cancha vinculado automáticamente con todos los datos del turno
       await base44.entities.RecordatorioCancha.create({
         turno_cancha_id: turnoCreado.id,
         fecha: data.fecha,
         hora: data.hora_inicio,
         cancha: data.cancha,
-        profesor: data.profesor || 'Sin asignar',
+        cliente: data.cliente,
+        tipo_turno: data.tipo_turno,
+        modalidad_alquiler: data.modalidad_alquiler || null,
+        profesor: data.profesor || (data.tipo_turno === 'clase' ? 'Sin asignar' : null),
         monto: data.monto,
+        pagado: data.pagado,
         repeticion_semanal: false,
         dia_semana: new Date(data.fecha).toLocaleDateString('es-ES', { weekday: 'long' }),
-        notas: `Turno creado desde Agenda - Cliente: ${data.cliente}`,
+        notas: data.notas || `Sincronizado con turno de ${data.cliente}`,
       });
 
       // Registrar auditoría
@@ -165,15 +168,20 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
     mutationFn: async ({ id, data, cambios }) => {
       await base44.entities.TurnoCancha.update(id, data);
       
-      // Buscar y actualizar recordatorio vinculado
+      // Buscar y actualizar recordatorio vinculado con todos los datos del turno
       const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: id });
       if (recordatorios.length > 0) {
         await base44.entities.RecordatorioCancha.update(recordatorios[0].id, {
           fecha: data.fecha,
           hora: data.hora_inicio,
           cancha: data.cancha,
-          profesor: data.profesor || recordatorios[0].profesor,
+          cliente: data.cliente,
+          tipo_turno: data.tipo_turno,
+          modalidad_alquiler: data.modalidad_alquiler || null,
+          profesor: data.profesor || (data.tipo_turno === 'clase' ? 'Sin asignar' : null),
           monto: data.monto,
+          pagado: data.pagado,
+          notas: data.notas || recordatorios[0].notas,
         });
       }
 
