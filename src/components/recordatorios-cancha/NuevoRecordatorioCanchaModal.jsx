@@ -156,7 +156,7 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
     mutationFn: async ({ id, data, cambios }) => {
       const diaSemana = format(parseISO(data.fecha), 'EEEE', { locale: es });
 
-      await base44.entities.RecordatorioCancha.update(id, {
+      const recordatorioUpdate = {
         fecha: data.fecha,
         hora: data.hora_inicio,
         cancha: data.cancha,
@@ -171,7 +171,17 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
         notificar: data.notificar,
         minutos_antes: data.minutos_antes,
         notas: data.notas,
-      });
+      };
+
+      // Si cambió el tiempo de notificación, resetear flags
+      const cambioNotificacion = cambios?.some(c => c.campo === 'minutos_antes');
+      if (cambioNotificacion) {
+        recordatorioUpdate.notificado_previo = false;
+        recordatorioUpdate.notificado_hora = false;
+        recordatorioUpdate.reintento_enviado = false;
+      }
+
+      await base44.entities.RecordatorioCancha.update(id, recordatorioUpdate);
 
       if (cambios && cambios.length > 0) {
         for (const cambio of cambios) {
@@ -183,7 +193,7 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
             campo_modificado: cambio.campo,
             valor_anterior: String(cambio.anterior || ''),
             valor_nuevo: String(cambio.nuevo || ''),
-            motivo: 'Recordatorio editado',
+            motivo: cambioNotificacion ? 'Recordatorio editado - tiempo de notificación modificado' : 'Recordatorio editado',
             fecha: new Date().toISOString(),
           });
         }
@@ -191,6 +201,7 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha-push'] });
       queryClient.invalidateQueries({ queryKey: ['auditoria'] });
       setSuccess(true);
       setTimeout(() => {

@@ -167,12 +167,12 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data, cambios }) => {
+    mutationFn: async ({ id, data, cambios, cambioNotificacion }) => {
       await base44.entities.TurnoCancha.update(id, data);
       
       const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: id });
       if (recordatorios.length > 0) {
-        await base44.entities.RecordatorioCancha.update(recordatorios[0].id, {
+        const recordatorioUpdate = {
           fecha: data.fecha,
           hora: data.hora_inicio,
           cancha: data.cancha,
@@ -186,7 +186,16 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
           notificar: data.notificar,
           minutos_antes: data.minutos_antes,
           notas: data.notas || recordatorios[0].notas,
-        });
+        };
+
+        // Si cambió el tiempo de notificación, resetear flags para permitir reenvío
+        if (cambioNotificacion) {
+          recordatorioUpdate.notificado_previo = false;
+          recordatorioUpdate.notificado_hora = false;
+          recordatorioUpdate.reintento_enviado = false;
+        }
+
+        await base44.entities.RecordatorioCancha.update(recordatorios[0].id, recordatorioUpdate);
       }
 
       if (cambios && cambios.length > 0) {
@@ -199,7 +208,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
             campo_modificado: cambio.campo,
             valor_anterior: String(cambio.anterior || ''),
             valor_nuevo: String(cambio.nuevo || ''),
-            motivo: 'Turno editado desde Agenda',
+            motivo: cambioNotificacion ? 'Turno editado - tiempo de notificación modificado' : 'Turno editado desde Agenda',
             fecha: new Date().toISOString(),
           });
         }
@@ -208,6 +217,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha-push'] });
       queryClient.invalidateQueries({ queryKey: ['auditoria'] });
       setSuccess(true);
       setTimeout(() => {
@@ -301,8 +311,11 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
           });
         }
       });
-      
-      updateMutation.mutate({ id: turno.id, data, cambios });
+
+      // Detectar si cambió el tiempo de notificación
+      const cambioNotificacion = data.minutos_antes !== formData.minutos_antes;
+
+      updateMutation.mutate({ id: turno.id, data, cambios, cambioNotificacion });
     } else {
       createMutation.mutate(data);
     }
