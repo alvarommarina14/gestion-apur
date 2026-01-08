@@ -5,7 +5,6 @@ import { format, parseISO, differenceInMinutes, addMinutes } from 'date-fns';
 
 export default function NotificationManager() {
   const sentNotifications = useRef(new Set());
-  const lastCheckTime = useRef(new Date());
   const today = format(new Date(), 'yyyy-MM-dd');
 
   const { data: user } = useQuery({
@@ -43,12 +42,6 @@ export default function NotificationManager() {
     if (window.Notification.permission !== 'granted') return;
 
     const now = new Date();
-    
-    // Limpiar notificaciones enviadas cada minuto para permitir reenvíos
-    if (differenceInMinutes(now, lastCheckTime.current) >= 1) {
-      sentNotifications.current.clear();
-      lastCheckTime.current = now;
-    }
     
     // Agrupar recordatorios por tiempo y tipo de notificación para eficiencia
     const gruposPorTiempo = {};
