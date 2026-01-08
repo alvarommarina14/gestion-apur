@@ -39,8 +39,8 @@ export default function NotificationPermissionModal() {
         // Mostrar notificación de prueba
         new Notification('🎾 Notificaciones activadas', {
           body: 'Recibirás recordatorios de canchas en tu dispositivo',
-          icon: '/favicon.ico',
-          badge: '/favicon.ico',
+          icon: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695d6dfcd27b13c53e363146/1275db596_WhatsAppImage2026-01-06at155639.jpeg',
+          badge: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695d6dfcd27b13c53e363146/1275db596_WhatsAppImage2026-01-06at155639.jpeg',
         });
       }
       
