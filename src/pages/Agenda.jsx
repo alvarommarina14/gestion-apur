@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import VistaCalendarioCancha from '@/components/agenda/VistaCalendarioCancha';
+import CalendarioCompleto from '@/components/agenda/CalendarioCompleto';
 import NuevoTurnoModal from '@/components/agenda/NuevoTurnoModal';
 import { cn } from '@/lib/utils';
 
@@ -24,6 +25,7 @@ export default function Agenda() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedCancha, setSelectedCancha] = useState('todas');
   const [turnoModal, setTurnoModal] = useState({ open: false, turno: null });
+  const [showCalendario, setShowCalendario] = useState(false);
 
   const { data: user } = useQuery({
     queryKey: ['me'],
@@ -32,14 +34,29 @@ export default function Agenda() {
 
   const fechaStr = format(selectedDate, 'yyyy-MM-dd');
 
+  // Para vista de calendario, cargar todos los turnos del mes
+  const mesStr = format(selectedDate, 'yyyy-MM');
+  
   const { data: turnos = [], isLoading } = useQuery({
-    queryKey: ['turnos-cancha', fechaStr],
-    queryFn: () => base44.entities.TurnoCancha.filter({ fecha: fechaStr }),
+    queryKey: ['turnos-cancha', showCalendario ? mesStr : fechaStr],
+    queryFn: () => {
+      if (showCalendario) {
+        // Cargar todos los turnos del mes para el calendario
+        return base44.entities.TurnoCancha.list('-fecha', 500);
+      }
+      return base44.entities.TurnoCancha.filter({ fecha: fechaStr });
+    },
   });
 
   const { data: recordatorios = [] } = useQuery({
-    queryKey: ['recordatorios-cancha', fechaStr],
-    queryFn: () => base44.entities.RecordatorioCancha.filter({ fecha: fechaStr }),
+    queryKey: ['recordatorios-cancha', showCalendario ? mesStr : fechaStr],
+    queryFn: () => {
+      if (showCalendario) {
+        // Cargar todos los recordatorios del mes para el calendario
+        return base44.entities.RecordatorioCancha.list('-fecha', 500);
+      }
+      return base44.entities.RecordatorioCancha.filter({ fecha: fechaStr });
+    },
   });
 
   const isAdmin = user?.role === 'admin';
@@ -160,18 +177,27 @@ export default function Agenda() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Select value={selectedCancha} onValueChange={setSelectedCancha}>
-              <SelectTrigger className="w-36">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todas">Todas las canchas</SelectItem>
-                <SelectItem value="1">Cancha 1</SelectItem>
-                <SelectItem value="2">Cancha 2</SelectItem>
-                <SelectItem value="3">Cancha 3</SelectItem>
-                <SelectItem value="4">Cancha 4</SelectItem>
-              </SelectContent>
-            </Select>
+            <Tabs value={showCalendario ? 'calendario' : 'lista'} onValueChange={(v) => setShowCalendario(v === 'calendario')}>
+              <TabsList>
+                <TabsTrigger value="lista">Vista Día</TabsTrigger>
+                <TabsTrigger value="calendario">Calendario</TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            {!showCalendario && (
+              <Select value={selectedCancha} onValueChange={setSelectedCancha}>
+                <SelectTrigger className="w-36">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todas">Todas las canchas</SelectItem>
+                  <SelectItem value="1">Cancha 1</SelectItem>
+                  <SelectItem value="2">Cancha 2</SelectItem>
+                  <SelectItem value="3">Cancha 3</SelectItem>
+                  <SelectItem value="4">Cancha 4</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
           </div>
         </div>
 
@@ -193,17 +219,31 @@ export default function Agenda() {
           </Card>
         )}
 
-        {/* Vista de calendario */}
-        <VistaCalendarioCancha
-          turnos={turnosFiltrados}
-          recordatorios={recordatorios}
-          selectedDate={selectedDate}
-          selectedCancha={selectedCancha}
-          fecha={selectedDate}
-          isAdmin={isAdmin}
-          onTurnoClick={(turno) => isAdmin && setTurnoModal({ open: true, turno })}
-          isLoading={isLoading}
-        />
+        {/* Vista de calendario o día */}
+        {showCalendario ? (
+          <CalendarioCompleto
+            turnos={turnos}
+            recordatorios={recordatorios}
+            selectedDate={selectedDate}
+            onDateSelect={setSelectedDate}
+            onCreateTurno={(fecha) => {
+              setSelectedDate(fecha);
+              setTurnoModal({ open: true, turno: null });
+            }}
+            onTurnoClick={(turno) => isAdmin && setTurnoModal({ open: true, turno })}
+          />
+        ) : (
+          <VistaCalendarioCancha
+            turnos={turnosFiltrados}
+            recordatorios={recordatorios}
+            selectedDate={selectedDate}
+            selectedCancha={selectedCancha}
+            fecha={selectedDate}
+            isAdmin={isAdmin}
+            onTurnoClick={(turno) => isAdmin && setTurnoModal({ open: true, turno })}
+            isLoading={isLoading}
+          />
+        )}
       </div>
 
       {/* Modal */}
