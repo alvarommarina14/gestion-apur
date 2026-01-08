@@ -237,6 +237,17 @@ export default function Agenda() {
         )}
       </div>
 
+      {/* Botón flotante para crear turno - Solo admins */}
+      {isAdmin && (
+        <Button
+          onClick={() => setTurnoModal({ open: true, turno: null })}
+          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-emerald-600 hover:bg-emerald-700 z-40 active:scale-95 touch-manipulation"
+          size="icon"
+        >
+          <Plus className="w-6 h-6" />
+        </Button>
+      )}
+
       {/* Modal */}
       {isAdmin && (
         <NuevoTurnoModal
