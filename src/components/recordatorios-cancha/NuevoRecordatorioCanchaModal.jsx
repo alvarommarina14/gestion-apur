@@ -33,7 +33,9 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
           fecha: recordatorio.fecha,
           hora: recordatorio.hora,
           cancha: recordatorio.cancha,
+          tipo_turno: recordatorio.tipo_turno || 'clase',
           profesor: recordatorio.profesor,
+          modalidad_alquiler: recordatorio.modalidad_alquiler || '',
           monto: recordatorio.monto,
           repeticion_semanal: recordatorio.repeticion_semanal || false,
           notificar: recordatorio.notificar !== false,
@@ -44,7 +46,9 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
           fecha: format(new Date(), 'yyyy-MM-dd'),
           hora: '09:00',
           cancha: '',
+          tipo_turno: 'clase',
           profesor: '',
+          modalidad_alquiler: '',
           monto: '',
           repeticion_semanal: false,
           notificar: true,
@@ -59,7 +63,9 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
         fecha: recordatorio.fecha,
         hora: recordatorio.hora,
         cancha: recordatorio.cancha,
+        tipo_turno: recordatorio.tipo_turno || 'clase',
         profesor: recordatorio.profesor,
+        modalidad_alquiler: recordatorio.modalidad_alquiler || '',
         monto: recordatorio.monto,
         repeticion_semanal: recordatorio.repeticion_semanal || false,
         notificar: recordatorio.notificar !== false,
@@ -71,7 +77,9 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
         fecha: format(new Date(), 'yyyy-MM-dd'),
         hora: '09:00',
         cancha: '',
+        tipo_turno: 'clase',
         profesor: '',
+        modalidad_alquiler: '',
         monto: '',
         repeticion_semanal: false,
         notificar: true,
@@ -179,26 +187,68 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Cancha</Label>
+            <Select
+              value={formData.cancha}
+              onValueChange={(v) => setFormData({ ...formData, cancha: v })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar cancha" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">Cancha 1</SelectItem>
+                <SelectItem value="2">Cancha 2</SelectItem>
+                <SelectItem value="3">Cancha 3</SelectItem>
+                <SelectItem value="4">Cancha 4</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Tipo de Turno</Label>
+            <Select
+              value={formData.tipo_turno}
+              onValueChange={(v) => setFormData({ ...formData, tipo_turno: v, profesor: v === 'alquiler' ? '' : formData.profesor, modalidad_alquiler: v === 'clase' ? '' : formData.modalidad_alquiler })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="clase">Clase</SelectItem>
+                <SelectItem value="alquiler">Alquiler</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {formData.tipo_turno === 'clase' && (
             <div className="space-y-2">
-              <Label>Cancha</Label>
-              <Input
-                value={formData.cancha}
-                onChange={(e) => setFormData({ ...formData, cancha: e.target.value })}
-                placeholder="Ej: 1, 2, Central..."
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Profesor</Label>
+              <Label>Profesor (opcional)</Label>
               <Input
                 value={formData.profesor}
                 onChange={(e) => setFormData({ ...formData, profesor: e.target.value })}
                 placeholder="Nombre del profesor"
-                required
               />
             </div>
-          </div>
+          )}
+
+          {formData.tipo_turno === 'alquiler' && (
+            <div className="space-y-2">
+              <Label>Modalidad de Alquiler</Label>
+              <Select
+                value={formData.modalidad_alquiler}
+                onValueChange={(v) => setFormData({ ...formData, modalidad_alquiler: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar modalidad" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="abono">Abono</SelectItem>
+                  <SelectItem value="suelto">Suelto</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label>Monto a pagar</Label>
