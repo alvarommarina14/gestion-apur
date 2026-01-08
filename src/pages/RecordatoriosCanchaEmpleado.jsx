@@ -187,38 +187,36 @@ export default function RecordatoriosCanchaEmpleado() {
                                 Cancha {recordatorio.cancha}
                               </span>
                             </div>
-                            <div className="flex items-center gap-2 mt-1">
-                              <User className="w-4 h-4 text-slate-400" />
-                              <span className="text-sm text-slate-600">{recordatorio.profesor}</span>
-                            </div>
+                            {recordatorio.profesor && (
+                              <div className="flex items-center gap-2 mt-1">
+                                <User className="w-4 h-4 text-slate-400" />
+                                <span className="text-sm text-slate-600">{recordatorio.profesor}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
 
                         <div className="flex items-center gap-3 text-sm flex-wrap">
-                          {recordatorio.turno && (
-                            <>
-                              <span className={cn(
-                                "px-2 py-0.5 text-xs font-medium rounded",
-                                recordatorio.turno.tipo_turno === 'clase' 
-                                  ? "bg-blue-100 text-blue-700" 
-                                  : "bg-purple-100 text-purple-700"
-                              )}>
-                                {recordatorio.turno.tipo_turno === 'clase' ? '📚 Clase' : '🎾 Alquiler'}
-                                {recordatorio.turno.modalidad_alquiler && ` (${recordatorio.turno.modalidad_alquiler})`}
-                              </span>
-                              {recordatorio.turno.cliente && (
-                                <span className="text-xs text-slate-600">
-                                  👤 {recordatorio.turno.cliente}
-                                </span>
-                              )}
-                            </>
+                          <span className={cn(
+                            "px-2 py-0.5 text-xs font-medium rounded",
+                            recordatorio.tipo_turno === 'clase' 
+                              ? "bg-blue-100 text-blue-700" 
+                              : "bg-purple-100 text-purple-700"
+                          )}>
+                            {recordatorio.tipo_turno === 'clase' ? '📚 Clase' : '🎾 Alquiler'}
+                            {recordatorio.modalidad_alquiler && ` (${recordatorio.modalidad_alquiler})`}
+                          </span>
+                          {recordatorio.cliente && (
+                            <span className="text-xs text-slate-600">
+                              👤 {recordatorio.cliente}
+                            </span>
                           )}
                           <div className="flex items-center gap-1">
                             <DollarSign className="w-4 h-4 text-slate-400" />
                             <span className="font-semibold text-slate-700">
                               {formatMoney(recordatorio.monto)}
                             </span>
-                            {recordatorio.turno?.pagado && (
+                            {recordatorio.pagado && (
                               <CheckCircle className="w-4 h-4 text-emerald-600 ml-1" />
                             )}
                           </div>
