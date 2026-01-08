@@ -20,7 +20,7 @@ export default function NotificationManager() {
       estado: 'pendiente',
       notificar: true,
     }),
-    refetchInterval: 30000,
+    refetchInterval: 10000, // Revisar cada 10 segundos
     enabled: !!user && (user.role !== 'admin' || user.recibir_notificaciones_cancha !== false),
   });
 
@@ -45,9 +45,6 @@ export default function NotificationManager() {
     recordatorios.forEach((rec) => {
     const notificationKey = `${rec.id}`;
 
-    // Si ya se envió notificación para este recordatorio, skip
-    if (sentNotifications.current.has(notificationKey)) return;
-
     // Parsear hora del recordatorio
     const [hours, minutes] = rec.hora.split(':').map(Number);
     const recordatorioTime = new Date();
@@ -57,25 +54,31 @@ export default function NotificationManager() {
     const minutesUntilStart = differenceInMinutes(recordatorioTime, now);
     const minutosAntes = rec.minutos_antes || 10;
 
+    console.log(`[Notif Debug] Recordatorio ${rec.id} - Cancha ${rec.cancha} - ${rec.hora}`);
+    console.log(`  Minutes until start: ${minutesUntilStart}, anticipación: ${minutosAntes}`);
+    console.log(`  Flags: previo=${rec.notificado_previo}, hora=${rec.notificado_hora}`);
+
     // Caso 1: Notificación previa (X minutos antes)
     if (minutesUntilStart <= minutosAntes && minutesUntilStart > 0 && !rec.notificado_previo) {
+      console.log(`  ✅ ENVIANDO notificación previa`);
       sendNotification(rec, 'previo', minutosAntes);
       sentNotifications.current.add(notificationKey);
 
       // Actualizar flag en la base de datos
       base44.entities.RecordatorioCancha.update(rec.id, {
         notificado_previo: true,
-      });
+      }).catch(err => console.error('Error actualizando recordatorio:', err));
     }
 
     // Caso 2: Notificación a la hora exacta
     if (minutesUntilStart <= 0 && minutesUntilStart > -5 && !rec.notificado_hora) {
+      console.log(`  ✅ ENVIANDO notificación a la hora`);
       sendNotification(rec, 'hora', minutosAntes);
       sentNotifications.current.add(notificationKey);
 
       base44.entities.RecordatorioCancha.update(rec.id, {
         notificado_hora: true,
-      });
+      }).catch(err => console.error('Error actualizando recordatorio:', err));
     }
 
     // Caso 3: Reintento después de tolerancia
@@ -103,9 +106,17 @@ export default function NotificationManager() {
   }, [recordatorios, turnos, user]);
 
   const sendNotification = (recordatorio, tipo, minutosAntes) => {
+    console.log(`[Notif] Intentando enviar notificación tipo: ${tipo} para cancha ${recordatorio.cancha}`);
+    
     // Verificar compatibilidad
-    if (typeof window === 'undefined' || !window.Notification) return;
-    if (window.Notification.permission !== 'granted') return;
+    if (typeof window === 'undefined' || !window.Notification) {
+      console.log('[Notif] Window.Notification no disponible');
+      return;
+    }
+    if (window.Notification.permission !== 'granted') {
+      console.log('[Notif] Permiso no otorgado:', window.Notification.permission);
+      return;
+    }
     
     try {
       let title, body, tag;
@@ -149,6 +160,7 @@ export default function NotificationManager() {
       }
       
       const notification = new window.Notification(title, notificationOptions);
+      console.log(`[Notif] ✅ Notificación enviada exitosamente: ${title}`);
 
       notification.onclick = () => {
         window.focus();
@@ -157,8 +169,7 @@ export default function NotificationManager() {
         notification.close();
       };
     } catch (error) {
-      // Silenciar error en Safari
-      console.warn('Notification not supported:', error);
+      console.error('[Notif] ❌ Error enviando notificación:', error);
     }
   };
 
