@@ -19,7 +19,7 @@ export default function NotificationManager() {
       estado: 'pendiente',
       notificar: true,
     }),
-    refetchInterval: 30000, // Verificar cada 30 segundos
+    refetchInterval: 30000,
     enabled: !!user && user.recibir_notificaciones_cancha !== false,
   });
 
@@ -32,7 +32,10 @@ export default function NotificationManager() {
   useEffect(() => {
     if (!user || user.recibir_notificaciones_cancha === false) return;
     if (!recordatorios.length) return;
-    if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+    
+    // Soporte para Safari: verificar si Notification está disponible
+    if (typeof window === 'undefined' || !window.Notification) return;
+    if (window.Notification.permission !== 'granted') return;
 
     const now = new Date();
     
@@ -120,6 +123,10 @@ export default function NotificationManager() {
   }, [recordatorios, turnos, user]);
 
   const sendNotification = (recordatorio, tipo, userRole, minutosAntes) => {
+    // Verificar compatibilidad
+    if (typeof window === 'undefined' || !window.Notification) return;
+    if (window.Notification.permission !== 'granted') return;
+    
     try {
       let title, body, tag;
 
@@ -163,18 +170,20 @@ export default function NotificationManager() {
         }
       }
 
-      const notification = new Notification(title, {
+      const notificationOptions = {
         body,
-        icon: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695d6dfcd27b13c53e363146/1275db596_WhatsAppImage2026-01-06at155639.jpeg',
-        badge: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695d6dfcd27b13c53e363146/1275db596_WhatsAppImage2026-01-06at155639.jpeg',
         tag,
-        requireInteraction: tipo === 'hora' || tipo === 'escalado',
-        vibrate: [200, 100, 200],
-        data: {
-          recordatorioId: recordatorio.id,
-          url: userRole === 'admin' ? '/RecordatoriosCanchaAdmin' : '/RecordatoriosCanchaEmpleado',
-        },
-      });
+      };
+      
+      // Agregar opciones solo si son soportadas
+      if ('icon' in window.Notification.prototype) {
+        notificationOptions.icon = 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695d6dfcd27b13c53e363146/1275db596_WhatsAppImage2026-01-06at155639.jpeg';
+      }
+      if ('requireInteraction' in window.Notification.prototype) {
+        notificationOptions.requireInteraction = tipo === 'hora' || tipo === 'escalado';
+      }
+      
+      const notification = new window.Notification(title, notificationOptions);
 
       notification.onclick = () => {
         window.focus();
@@ -183,7 +192,8 @@ export default function NotificationManager() {
         notification.close();
       };
     } catch (error) {
-      console.error('Error sending notification:', error);
+      // Silenciar error en Safari
+      console.warn('Notification not supported:', error);
     }
   };
 

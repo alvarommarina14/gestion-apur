@@ -46,14 +46,18 @@ export default function ConfiguracionNotificaciones() {
   };
 
   const requestPermission = async () => {
-    if (typeof Notification !== 'undefined') {
-      await Notification.requestPermission();
+    if (typeof window !== 'undefined' && window.Notification) {
+      try {
+        await window.Notification.requestPermission();
+      } catch (error) {
+        console.warn('Notification permission error:', error);
+      }
     }
   };
 
   if (!user) return null;
 
-  const permissionStatus = typeof Notification !== 'undefined' ? Notification.permission : 'unsupported';
+  const permissionStatus = typeof window !== 'undefined' && window.Notification ? window.Notification.permission : 'unsupported';
 
   return (
     <Card className="shadow-sm">

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 export default function NotificationDebug() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [permissionStatus, setPermissionStatus] = useState(
-    typeof Notification !== 'undefined' ? Notification.permission : 'unsupported'
+    typeof window !== 'undefined' && window.Notification ? window.Notification.permission : 'unsupported'
   );
   const today = format(new Date(), 'yyyy-MM-dd');
 
@@ -40,18 +40,25 @@ export default function NotificationDebug() {
   }, []);
 
   const requestPermission = async () => {
-    if (typeof Notification !== 'undefined') {
-      const permission = await Notification.requestPermission();
-      setPermissionStatus(permission);
+    if (typeof window !== 'undefined' && window.Notification) {
+      try {
+        const permission = await window.Notification.requestPermission();
+        setPermissionStatus(permission);
+      } catch (error) {
+        console.warn('Notification permission error:', error);
+      }
     }
   };
 
   const sendTestNotification = () => {
-    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-      new Notification('🧪 Prueba de Notificación', {
-        body: 'Si ves esto, las notificaciones funcionan correctamente',
-        icon: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695d6dfcd27b13c53e363146/1275db596_WhatsAppImage2026-01-06at155639.jpeg',
-      });
+    if (typeof window !== 'undefined' && window.Notification && window.Notification.permission === 'granted') {
+      try {
+        new window.Notification('🧪 Prueba de Notificación', {
+          body: 'Si ves esto, las notificaciones funcionan correctamente',
+        });
+      } catch (error) {
+        console.warn('Test notification error:', error);
+      }
     }
   };
 
