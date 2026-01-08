@@ -17,6 +17,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Calendar, CheckCircle, AlertTriangle, Trash2, Bell } from 'lucide-react';
 
 export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
@@ -316,13 +323,6 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
     }
   };
 
-  const HORARIOS = Array.from({ length: 28 }, (_, i) => {
-    const h = Math.floor(i / 2) + 8;
-    const m = i % 2 === 0 ? '00' : '30';
-    if (h > 21 || (h === 21 && m === '30')) return null;
-    return `${h.toString().padStart(2, '0')}:${m}`;
-  }).filter(Boolean);
-
   if (success) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -341,8 +341,8 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={onOpenChange} modal={true}>
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="w-5 h-5 text-emerald-600" />
@@ -375,50 +375,63 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
                       value={formData.fecha}
                       onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
                       required
-                      className="w-full h-10 px-3 rounded-md border border-slate-300"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="cancha">Cancha</Label>
-                    <select
-                      id="cancha"
+                    <Select
                       value={formData.cancha}
-                      onChange={(e) => setFormData({ ...formData, cancha: e.target.value })}
-                      className="w-full h-10 px-3 rounded-md border border-slate-300 bg-white"
+                      onValueChange={(v) => setFormData({ ...formData, cancha: v })}
                     >
-                      <option value="1">Cancha 1</option>
-                      <option value="2">Cancha 2</option>
-                      <option value="3">Cancha 3</option>
-                      <option value="4">Cancha 4</option>
-                    </select>
+                      <SelectTrigger id="cancha">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">Cancha 1</SelectItem>
+                        <SelectItem value="2">Cancha 2</SelectItem>
+                        <SelectItem value="3">Cancha 3</SelectItem>
+                        <SelectItem value="4">Cancha 4</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="hora_inicio">Hora inicio</Label>
-                    <select
-                      id="hora_inicio"
+                    <Select
                       value={formData.hora_inicio}
-                      onChange={(e) => setFormData({ ...formData, hora_inicio: e.target.value })}
-                      className="w-full h-10 px-3 rounded-md border border-slate-300 bg-white"
+                      onValueChange={(v) => setFormData({ ...formData, hora_inicio: v })}
                     >
-                      {HORARIOS.map(hora => (
-                        <option key={hora} value={hora}>{hora}</option>
-                      ))}
-                    </select>
+                      <SelectTrigger id="hora_inicio">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 28 }, (_, i) => {
+                          const h = Math.floor(i / 2) + 8;
+                          const m = i % 2 === 0 ? '00' : '30';
+                          if (h > 21 || (h === 21 && m === '30')) return null;
+                          return `${h.toString().padStart(2, '0')}:${m}`;
+                        }).filter(Boolean).map(hora => (
+                          <SelectItem key={hora} value={hora}>{hora}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="duracion">Duración</Label>
-                    <select
-                      id="duracion"
-                      value={formData.duracion}
-                      onChange={(e) => setFormData({ ...formData, duracion: Number(e.target.value) })}
-                      className="w-full h-10 px-3 rounded-md border border-slate-300 bg-white"
+                    <Select
+                      value={formData.duracion.toString()}
+                      onValueChange={(v) => setFormData({ ...formData, duracion: Number(v) })}
                     >
-                      <option value="60">60 min</option>
-                      <option value="90">90 min</option>
-                    </select>
+                      <SelectTrigger id="duracion">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="60">60 min</SelectItem>
+                        <SelectItem value="90">90 min</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label>Hora fin</Label>
@@ -443,15 +456,18 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
 
                 <div className="space-y-2">
                   <Label htmlFor="tipo_turno">Tipo de Turno</Label>
-                  <select
-                    id="tipo_turno"
+                  <Select
                     value={formData.tipo_turno}
-                    onChange={(e) => setFormData({ ...formData, tipo_turno: e.target.value, profesor: e.target.value === 'alquiler' ? '' : formData.profesor, modalidad_alquiler: e.target.value === 'clase' ? '' : formData.modalidad_alquiler })}
-                    className="w-full h-10 px-3 rounded-md border border-slate-300 bg-white"
+                    onValueChange={(v) => setFormData({ ...formData, tipo_turno: v, profesor: v === 'alquiler' ? '' : formData.profesor, modalidad_alquiler: v === 'clase' ? '' : formData.modalidad_alquiler })}
                   >
-                    <option value="clase">Clase</option>
-                    <option value="alquiler">Alquiler</option>
-                  </select>
+                    <SelectTrigger id="tipo_turno">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="clase">Clase</SelectItem>
+                      <SelectItem value="alquiler">Alquiler</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {formData.tipo_turno === 'clase' && (
@@ -469,16 +485,18 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
                 {formData.tipo_turno === 'alquiler' && (
                   <div className="space-y-2">
                     <Label htmlFor="modalidad">Modalidad de Alquiler</Label>
-                    <select
-                      id="modalidad"
+                    <Select
                       value={formData.modalidad_alquiler}
-                      onChange={(e) => setFormData({ ...formData, modalidad_alquiler: e.target.value })}
-                      className="w-full h-10 px-3 rounded-md border border-slate-300 bg-white"
+                      onValueChange={(v) => setFormData({ ...formData, modalidad_alquiler: v })}
                     >
-                      <option value="">Seleccionar modalidad</option>
-                      <option value="abono">Abono</option>
-                      <option value="suelto">Suelto</option>
-                    </select>
+                      <SelectTrigger id="modalidad">
+                        <SelectValue placeholder="Seleccionar modalidad" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="abono">Abono</SelectItem>
+                        <SelectItem value="suelto">Suelto</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 )}
 
@@ -544,17 +562,22 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
                   {formData.notificar && (
                     <div className="space-y-2 pt-2">
                       <Label htmlFor="minutos_antes" className="text-sm">Avisar con anticipación</Label>
-                      <select
-                        id="minutos_antes"
-                        value={formData.minutos_antes}
-                        onChange={(e) => setFormData({ ...formData, minutos_antes: Number(e.target.value) })}
-                        className="w-full h-10 px-3 rounded-md border border-slate-300 bg-white"
+                      <Select
+                        value={formData.minutos_antes.toString()}
+                        onValueChange={(v) =>
+                          setFormData({ ...formData, minutos_antes: Number(v) })
+                        }
                       >
-                        <option value="5">5 minutos antes</option>
-                        <option value="10">10 minutos antes</option>
-                        <option value="15">15 minutos antes</option>
-                        <option value="30">30 minutos antes</option>
-                      </select>
+                        <SelectTrigger id="minutos_antes">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="5">5 minutos antes</SelectItem>
+                          <SelectItem value="10">10 minutos antes</SelectItem>
+                          <SelectItem value="15">15 minutos antes</SelectItem>
+                          <SelectItem value="30">30 minutos antes</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <p className="text-xs text-slate-500">
                         Los empleados recibirán una notificación en su dispositivo
                       </p>
@@ -621,50 +644,63 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
                   value={formData.fecha}
                   onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
                   required
-                  className="w-full h-10 px-3 rounded-md border border-slate-300"
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="cancha">Cancha</Label>
-                <select
-                  id="cancha"
+                <Select
                   value={formData.cancha}
-                  onChange={(e) => setFormData({ ...formData, cancha: e.target.value })}
-                  className="w-full h-10 px-3 rounded-md border border-slate-300 bg-white"
+                  onValueChange={(v) => setFormData({ ...formData, cancha: v })}
                 >
-                  <option value="1">Cancha 1</option>
-                  <option value="2">Cancha 2</option>
-                  <option value="3">Cancha 3</option>
-                  <option value="4">Cancha 4</option>
-                </select>
+                  <SelectTrigger id="cancha">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Cancha 1</SelectItem>
+                    <SelectItem value="2">Cancha 2</SelectItem>
+                    <SelectItem value="3">Cancha 3</SelectItem>
+                    <SelectItem value="4">Cancha 4</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="hora_inicio">Hora inicio</Label>
-                <select
-                  id="hora_inicio"
+                <Select
                   value={formData.hora_inicio}
-                  onChange={(e) => setFormData({ ...formData, hora_inicio: e.target.value })}
-                  className="w-full h-10 px-3 rounded-md border border-slate-300 bg-white"
+                  onValueChange={(v) => setFormData({ ...formData, hora_inicio: v })}
                 >
-                  {HORARIOS.map(hora => (
-                    <option key={hora} value={hora}>{hora}</option>
-                  ))}
-                </select>
+                  <SelectTrigger id="hora_inicio">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 28 }, (_, i) => {
+                      const h = Math.floor(i / 2) + 8;
+                      const m = i % 2 === 0 ? '00' : '30';
+                      if (h > 21 || (h === 21 && m === '30')) return null;
+                      return `${h.toString().padStart(2, '0')}:${m}`;
+                    }).filter(Boolean).map(hora => (
+                      <SelectItem key={hora} value={hora}>{hora}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="duracion">Duración</Label>
-                <select
-                  id="duracion"
-                  value={formData.duracion}
-                  onChange={(e) => setFormData({ ...formData, duracion: Number(e.target.value) })}
-                  className="w-full h-10 px-3 rounded-md border border-slate-300 bg-white"
+                <Select
+                  value={formData.duracion.toString()}
+                  onValueChange={(v) => setFormData({ ...formData, duracion: Number(v) })}
                 >
-                  <option value="60">60 min</option>
-                  <option value="90">90 min</option>
-                </select>
+                  <SelectTrigger id="duracion">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="60">60 min</SelectItem>
+                    <SelectItem value="90">90 min</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label>Hora fin</Label>
@@ -689,15 +725,18 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
 
             <div className="space-y-2">
               <Label htmlFor="tipo_turno">Tipo de Turno</Label>
-              <select
-                id="tipo_turno"
+              <Select
                 value={formData.tipo_turno}
-                onChange={(e) => setFormData({ ...formData, tipo_turno: e.target.value, profesor: e.target.value === 'alquiler' ? '' : formData.profesor, modalidad_alquiler: e.target.value === 'clase' ? '' : formData.modalidad_alquiler })}
-                className="w-full h-10 px-3 rounded-md border border-slate-300 bg-white"
+                onValueChange={(v) => setFormData({ ...formData, tipo_turno: v, profesor: v === 'alquiler' ? '' : formData.profesor, modalidad_alquiler: v === 'clase' ? '' : formData.modalidad_alquiler })}
               >
-                <option value="clase">Clase</option>
-                <option value="alquiler">Alquiler</option>
-              </select>
+                <SelectTrigger id="tipo_turno">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="clase">Clase</SelectItem>
+                  <SelectItem value="alquiler">Alquiler</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {formData.tipo_turno === 'clase' && (
@@ -715,16 +754,18 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
             {formData.tipo_turno === 'alquiler' && (
               <div className="space-y-2">
                 <Label htmlFor="modalidad">Modalidad de Alquiler</Label>
-                <select
-                  id="modalidad"
+                <Select
                   value={formData.modalidad_alquiler}
-                  onChange={(e) => setFormData({ ...formData, modalidad_alquiler: e.target.value })}
-                  className="w-full h-10 px-3 rounded-md border border-slate-300 bg-white"
+                  onValueChange={(v) => setFormData({ ...formData, modalidad_alquiler: v })}
                 >
-                  <option value="">Seleccionar modalidad</option>
-                  <option value="abono">Abono</option>
-                  <option value="suelto">Suelto</option>
-                </select>
+                  <SelectTrigger id="modalidad">
+                    <SelectValue placeholder="Seleccionar modalidad" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="abono">Abono</SelectItem>
+                    <SelectItem value="suelto">Suelto</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             )}
 
@@ -790,17 +831,22 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
               {formData.notificar && (
                 <div className="space-y-2 pt-2">
                   <Label htmlFor="minutos_antes" className="text-sm">Avisar con anticipación</Label>
-                  <select
-                    id="minutos_antes"
-                    value={formData.minutos_antes}
-                    onChange={(e) => setFormData({ ...formData, minutos_antes: Number(e.target.value) })}
-                    className="w-full h-10 px-3 rounded-md border border-slate-300 bg-white"
+                  <Select
+                    value={formData.minutos_antes.toString()}
+                    onValueChange={(v) =>
+                      setFormData({ ...formData, minutos_antes: Number(v) })
+                    }
                   >
-                    <option value="5">5 minutos antes</option>
-                    <option value="10">10 minutos antes</option>
-                    <option value="15">15 minutos antes</option>
-                    <option value="30">30 minutos antes</option>
-                  </select>
+                    <SelectTrigger id="minutos_antes">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="5">5 minutos antes</SelectItem>
+                      <SelectItem value="10">10 minutos antes</SelectItem>
+                      <SelectItem value="15">15 minutos antes</SelectItem>
+                      <SelectItem value="30">30 minutos antes</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <p className="text-xs text-slate-500">
                     Los empleados recibirán una notificación en su dispositivo
                   </p>
