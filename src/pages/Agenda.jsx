@@ -107,15 +107,6 @@ export default function Agenda() {
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Agenda de Canchas</h1>
             <p className="text-slate-500 text-sm">Sistema de reservas del club</p>
           </div>
-          {isAdmin && (
-            <Button
-              onClick={() => setTurnoModal({ open: true, turno: null })}
-              className="bg-emerald-600 hover:bg-emerald-700 h-11 lg:h-10 text-base lg:text-sm active:scale-95 touch-manipulation w-full sm:w-auto"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Nuevo turno
-            </Button>
-          )}
         </header>
 
         {/* Stats */}
