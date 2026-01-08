@@ -604,7 +604,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[95vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="w-5 h-5 text-emerald-600" />
@@ -613,26 +613,30 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
         </DialogHeader>
 
         {turno ? (
-          <Tabs defaultValue="datos">
+          <Tabs defaultValue="datos" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="datos">Datos</TabsTrigger>
               <TabsTrigger value="historial">Historial</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="datos" className="mt-4 max-h-[60vh] overflow-y-auto">
-              <form onSubmit={handleSubmit} className="space-y-4 pr-2">
-                {formContent}
-              </form>
+            <TabsContent value="datos" className="mt-4">
+              <div className="max-h-[55vh] overflow-y-auto pr-1">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  {formContent}
+                </form>
+              </div>
             </TabsContent>
             
-            <TabsContent value="historial" className="mt-4">
+            <TabsContent value="historial" className="mt-4 max-h-[55vh] overflow-y-auto">
               <HistorialAuditoria entidadId={turno?.id} entidad="TurnoCancha" />
             </TabsContent>
           </Tabs>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4 mt-4 max-h-[60vh] overflow-y-auto pr-2">
-            {formContent}
-          </form>
+          <div className="max-h-[55vh] overflow-y-auto pr-1 mt-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {formContent}
+            </form>
+          </div>
         )}
       </DialogContent>
     </Dialog>
