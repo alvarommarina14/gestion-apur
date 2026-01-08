@@ -31,6 +31,10 @@ export default function NotificationManager() {
 
   useEffect(() => {
     if (!user || user.recibir_notificaciones_cancha === false) return;
+    
+    // Admins: verificar si tienen activadas las notificaciones de sacar cancha
+    if (user.role === 'admin' && user.notificaciones_admin_sacar_cancha === false) return;
+    
     if (!recordatorios.length) return;
     
     // Soporte para Safari: verificar si Notification está disponible
@@ -39,35 +43,27 @@ export default function NotificationManager() {
 
     const now = new Date();
     
+    // Agrupar recordatorios por tiempo y tipo de notificación para eficiencia
+    const gruposPorTiempo = {};
+    
     recordatorios.forEach((rec) => {
-      const notificationKey = `${rec.id}`;
-      
-      // Si ya se envió notificación para este recordatorio, skip
-      if (sentNotifications.current.has(notificationKey)) return;
-
       // Parsear hora del recordatorio
       const [hours, minutes] = rec.hora.split(':').map(Number);
       const recordatorioTime = new Date();
       recordatorioTime.setHours(hours, minutes, 0, 0);
 
-      // Para admins: calcular tiempo antes del FIN del turno
-      // Para empleados: calcular tiempo antes del INICIO del turno
       let minutesUntilNotification;
       let minutosAntes;
 
       if (user.role === 'admin') {
-        // Admin: notificar X minutos antes del FIN
-        // Buscar el turno asociado o calcular duración por defecto (60 min)
         const turno = turnos.find(t => t.id === rec.turno_cancha_id);
         const duracion = turno?.duracion || 60;
-        
         const finTurno = addMinutes(recordatorioTime, duracion);
         const minutesUntilEnd = differenceInMinutes(finTurno, now);
         
         minutosAntes = rec.minutos_antes || 10;
         minutesUntilNotification = minutesUntilEnd;
       } else {
-        // Empleado: notificar X minutos antes del INICIO
         const minutesUntilStart = differenceInMinutes(recordatorioTime, now);
         minutosAntes = rec.minutos_antes || 10;
         minutesUntilNotification = minutesUntilStart;
@@ -75,35 +71,31 @@ export default function NotificationManager() {
 
       // Caso 1: Notificación previa (X minutos antes)
       if (minutesUntilNotification <= minutosAntes && minutesUntilNotification > 0 && !rec.notificado_previo) {
-        sendNotification(rec, 'previo', user.role, minutosAntes);
-        sentNotifications.current.add(notificationKey);
-        
-        // Actualizar flag en la base de datos
-        base44.entities.RecordatorioCancha.update(rec.id, {
-          notificado_previo: true,
-        });
+        const groupKey = `previo_${rec.hora}_${minutosAntes}`;
+        if (!gruposPorTiempo[groupKey]) {
+          gruposPorTiempo[groupKey] = { tipo: 'previo', recordatorios: [], minutosAntes, hora: rec.hora };
+        }
+        gruposPorTiempo[groupKey].recordatorios.push(rec);
       }
 
       // Caso 2: Notificación a la hora exacta (solo empleados)
       if (user.role !== 'admin' && minutesUntilNotification <= 0 && minutesUntilNotification > -5 && !rec.notificado_hora) {
-        sendNotification(rec, 'hora', user.role, minutosAntes);
-        sentNotifications.current.add(notificationKey);
-        
-        base44.entities.RecordatorioCancha.update(rec.id, {
-          notificado_hora: true,
-        });
+        const groupKey = `hora_${rec.hora}`;
+        if (!gruposPorTiempo[groupKey]) {
+          gruposPorTiempo[groupKey] = { tipo: 'hora', recordatorios: [], hora: rec.hora };
+        }
+        gruposPorTiempo[groupKey].recordatorios.push(rec);
       }
 
       // Caso 3: Reintento después de tolerancia (solo empleados)
       if (user.role !== 'admin') {
         const minutosTolerancia = rec.minutos_tolerancia || 10;
         if (minutesUntilNotification <= -minutosTolerancia && minutesUntilNotification > -(minutosTolerancia + 5) && !rec.reintento_enviado) {
-          sendNotification(rec, 'reintento', user.role, minutosAntes);
-          sentNotifications.current.add(notificationKey + '_reintento');
-          
-          base44.entities.RecordatorioCancha.update(rec.id, {
-            reintento_enviado: true,
-          });
+          const groupKey = `reintento_${rec.hora}`;
+          if (!gruposPorTiempo[groupKey]) {
+            gruposPorTiempo[groupKey] = { tipo: 'reintento', recordatorios: [], hora: rec.hora };
+          }
+          gruposPorTiempo[groupKey].recordatorios.push(rec);
         }
       }
 
@@ -111,61 +103,114 @@ export default function NotificationManager() {
       if (user.role !== 'admin') {
         const minutosEscalado = rec.minutos_escalado || 25;
         if (minutesUntilNotification <= -minutosEscalado && !rec.escalado_admin) {
-          sendNotification(rec, 'escalado', user.role, minutosAntes);
-          sentNotifications.current.add(notificationKey + '_escalado');
-          
-          base44.entities.RecordatorioCancha.update(rec.id, {
-            escalado_admin: true,
-          });
+          const groupKey = `escalado_${rec.hora}`;
+          if (!gruposPorTiempo[groupKey]) {
+            gruposPorTiempo[groupKey] = { tipo: 'escalado', recordatorios: [], hora: rec.hora };
+          }
+          gruposPorTiempo[groupKey].recordatorios.push(rec);
         }
       }
     });
+
+    // Enviar notificaciones agrupadas
+    Object.entries(gruposPorTiempo).forEach(([groupKey, grupo]) => {
+      if (sentNotifications.current.has(groupKey)) return;
+      
+      sendGroupedNotification(grupo, user.role);
+      sentNotifications.current.add(groupKey);
+      
+      // Actualizar flags en la base de datos
+      grupo.recordatorios.forEach(rec => {
+        const updateData = {};
+        if (grupo.tipo === 'previo') updateData.notificado_previo = true;
+        if (grupo.tipo === 'hora') updateData.notificado_hora = true;
+        if (grupo.tipo === 'reintento') updateData.reintento_enviado = true;
+        if (grupo.tipo === 'escalado') updateData.escalado_admin = true;
+        
+        if (Object.keys(updateData).length > 0) {
+          base44.entities.RecordatorioCancha.update(rec.id, updateData);
+        }
+      });
+    });
   }, [recordatorios, turnos, user]);
 
-  const sendNotification = (recordatorio, tipo, userRole, minutosAntes) => {
+  const sendGroupedNotification = (grupo, userRole) => {
     // Verificar compatibilidad
     if (typeof window === 'undefined' || !window.Notification) return;
     if (window.Notification.permission !== 'granted') return;
     
     try {
+      const recordatorios = grupo.recordatorios;
+      const cantidad = recordatorios.length;
       let title, body, tag;
 
       if (userRole === 'admin') {
         // Notificaciones para admin
-        switch (tipo) {
-          case 'previo':
-            title = `⏰ Turno finalizando - Cancha ${recordatorio.cancha}`;
-            body = `El turno termina en ${minutosAntes} minutos (${recordatorio.hora}). ${recordatorio.cliente || recordatorio.profesor}`;
-            tag = `cancha-admin-previo-${recordatorio.id}`;
-            break;
-          default:
-            return; // Admins solo reciben notificación previa
+        if (grupo.tipo === 'previo') {
+          if (cantidad === 1) {
+            const rec = recordatorios[0];
+            title = `🧹 Preparar Cancha ${rec.cancha}`;
+            body = `En ${grupo.minutosAntes} min (${rec.hora}). ${rec.cliente || rec.profesor}`;
+          } else {
+            const canchas = recordatorios.map(r => r.cancha).sort().join(', ');
+            title = `🧹 Preparar ${cantidad} Canchas`;
+            body = `En ${grupo.minutosAntes} min (${grupo.hora}) - Canchas: ${canchas}`;
+          }
+          tag = `cancha-admin-previo-${grupo.hora}`;
         }
       } else {
         // Notificaciones para empleados
-        switch (tipo) {
+        switch (grupo.tipo) {
           case 'previo':
-            title = `🧹 Sacar cancha ${recordatorio.cancha}`;
-            body = `En ${minutosAntes} minutos (${recordatorio.hora}). Tocá para confirmar cuando esté lista.`;
-            tag = `cancha-previo-${recordatorio.id}`;
+            if (cantidad === 1) {
+              const rec = recordatorios[0];
+              title = `🧹 Sacar cancha ${rec.cancha}`;
+              body = `En ${grupo.minutosAntes} min (${rec.hora}). Tocá para confirmar cuando esté lista.`;
+            } else {
+              const canchas = recordatorios.map(r => r.cancha).sort().join(', ');
+              title = `🧹 Sacar ${cantidad} canchas`;
+              body = `En ${grupo.minutosAntes} min (${grupo.hora}) - Canchas: ${canchas}. Tocá para ver detalles.`;
+            }
+            tag = `cancha-previo-${grupo.hora}`;
             break;
 
           case 'hora':
-            title = `🧹 Sacar cancha ${recordatorio.cancha} AHORA`;
-            body = `Es hora de preparar la cancha (${recordatorio.hora}). Tocá para confirmar.`;
-            tag = `cancha-hora-${recordatorio.id}`;
+            if (cantidad === 1) {
+              const rec = recordatorios[0];
+              title = `🧹 Sacar cancha ${rec.cancha} AHORA`;
+              body = `Es hora de preparar (${rec.hora}). Tocá para confirmar.`;
+            } else {
+              const canchas = recordatorios.map(r => r.cancha).sort().join(', ');
+              title = `🧹 Sacar ${cantidad} canchas AHORA`;
+              body = `Hora: ${grupo.hora} - Canchas: ${canchas}`;
+            }
+            tag = `cancha-hora-${grupo.hora}`;
             break;
 
           case 'reintento':
-            title = `⚠️ Recordatorio: Cancha ${recordatorio.cancha}`;
-            body = `¿Ya sacaste la cancha? Recordá confirmar cuando esté lista.`;
-            tag = `cancha-reintento-${recordatorio.id}`;
+            if (cantidad === 1) {
+              const rec = recordatorios[0];
+              title = `⚠️ Recordatorio: Cancha ${rec.cancha}`;
+              body = `¿Ya sacaste la cancha? Recordá confirmar.`;
+            } else {
+              const canchas = recordatorios.map(r => r.cancha).sort().join(', ');
+              title = `⚠️ Recordatorio: ${cantidad} canchas`;
+              body = `Canchas ${canchas} - ¿Ya las sacaste? Confirmá cuando estén listas.`;
+            }
+            tag = `cancha-reintento-${grupo.hora}`;
             break;
 
           case 'escalado':
-            title = `🚨 URGENTE: Cancha ${recordatorio.cancha}`;
-            body = `La cancha aún no fue confirmada. Por favor verificar.`;
-            tag = `cancha-escalado-${recordatorio.id}`;
+            if (cantidad === 1) {
+              const rec = recordatorios[0];
+              title = `🚨 URGENTE: Cancha ${rec.cancha}`;
+              body = `Aún no fue confirmada. Por favor verificar.`;
+            } else {
+              const canchas = recordatorios.map(r => r.cancha).sort().join(', ');
+              title = `🚨 URGENTE: ${cantidad} canchas`;
+              body = `Canchas ${canchas} aún sin confirmar. Verificar urgente.`;
+            }
+            tag = `cancha-escalado-${grupo.hora}`;
             break;
         }
       }
@@ -176,9 +221,8 @@ export default function NotificationManager() {
       };
       
       // Agregar opciones solo si son soportadas
-      // Icon removido para mejor performance
       if ('requireInteraction' in window.Notification.prototype) {
-        notificationOptions.requireInteraction = tipo === 'hora' || tipo === 'escalado';
+        notificationOptions.requireInteraction = grupo.tipo === 'hora' || grupo.tipo === 'escalado';
       }
       
       const notification = new window.Notification(title, notificationOptions);

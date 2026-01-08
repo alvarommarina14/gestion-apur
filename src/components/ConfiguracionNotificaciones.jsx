@@ -19,12 +19,14 @@ export default function ConfiguracionNotificaciones() {
 
   const [formData, setFormData] = useState({
     recibir_notificaciones_cancha: user?.recibir_notificaciones_cancha !== false,
+    notificaciones_admin_sacar_cancha: user?.notificaciones_admin_sacar_cancha !== false,
   });
 
   React.useEffect(() => {
     if (user) {
       setFormData({
         recibir_notificaciones_cancha: user.recibir_notificaciones_cancha !== false,
+        notificaciones_admin_sacar_cancha: user.notificaciones_admin_sacar_cancha !== false,
       });
     }
   }, [user]);
@@ -94,7 +96,7 @@ export default function ConfiguracionNotificaciones() {
                 </Label>
                 <p className="text-sm text-slate-500 mt-0.5">
                   {user.role === 'admin' 
-                    ? 'Notificaciones cuando un turno está por finalizar'
+                    ? 'Activa las notificaciones del sistema'
                     : 'Notificaciones para preparar las canchas'}
                 </p>
               </div>
@@ -107,12 +109,35 @@ export default function ConfiguracionNotificaciones() {
             />
           </div>
 
+          {/* Switch específico para admins: notificaciones de sacar cancha */}
+          {user.role === 'admin' && formData.recibir_notificaciones_cancha && (
+            <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+              <div className="flex items-center gap-3">
+                <Bell className="w-5 h-5 text-emerald-600" />
+                <div>
+                  <Label className="font-medium text-slate-800">
+                    Notificaciones de "Sacar Cancha"
+                  </Label>
+                  <p className="text-sm text-slate-500 mt-0.5">
+                    Recibir alertas cuando se debe preparar una cancha para el siguiente turno
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={formData.notificaciones_admin_sacar_cancha}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, notificaciones_admin_sacar_cancha: checked })
+                }
+              />
+            </div>
+          )}
+
           {/* Explicación */}
           {formData.recibir_notificaciones_cancha && (
             <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
               <p className="text-sm text-slate-700">
                 {user.role === 'admin' 
-                  ? 'El tiempo de anticipación de las notificaciones se configura al crear cada turno.'
+                  ? 'El tiempo de anticipación de las notificaciones se configura al crear cada turno. Si hay múltiples canchas a la misma hora, recibirás una sola notificación agrupada.'
                   : 'El tiempo de anticipación se configura en cada recordatorio individual.'}
               </p>
             </div>
