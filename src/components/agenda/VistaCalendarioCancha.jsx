@@ -38,7 +38,15 @@ export default function VistaCalendarioCancha({ turnos, recordatorios = [], sele
     );
 
     recordatoriosFiltrados.forEach(rec => {
-      const hora = rec.hora.length === 5 ? rec.hora : rec.hora.substring(0, 5); // Asegurar formato HH:MM
+      let hora = rec.hora.length === 5 ? rec.hora : rec.hora.substring(0, 5); // Asegurar formato HH:MM
+
+      // Si la hora no existe en los slots (ej: 18:22), redondear al slot más cercano
+      if (map[rec.cancha] && map[rec.cancha][hora] === undefined) {
+        const [h, m] = hora.split(':').map(Number);
+        const minutos = m < 30 ? '00' : '30';
+        hora = `${h.toString().padStart(2, '0')}:${minutos}`;
+      }
+
       if (map[rec.cancha] && map[rec.cancha][hora] !== undefined && !map[rec.cancha][hora]) {
         map[rec.cancha][hora] = { ...rec, tipo: 'recordatorio' };
       }
