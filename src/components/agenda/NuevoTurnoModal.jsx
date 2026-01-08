@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Calendar, CheckCircle, AlertTriangle, Trash2, Bell } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
   const queryClient = useQueryClient();
@@ -35,12 +36,6 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
     queryKey: ['turnos-cancha'],
     queryFn: () => base44.entities.TurnoCancha.list(),
     enabled: open,
-  });
-
-  const { data: recordatorios = [] } = useQuery({
-    queryKey: ['recordatorios-cancha-modal'],
-    queryFn: () => base44.entities.RecordatorioCancha.list(),
-    enabled: open && !!turno,
   });
 
   const [formData, setFormData] = useState({
@@ -62,8 +57,6 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
 
   useEffect(() => {
     if (turno && open) {
-      const recordatorio = recordatorios.find(r => r.turno_cancha_id === turno.id);
-      
       setFormData({
         fecha: turno.fecha,
         hora_inicio: turno.hora_inicio,
@@ -76,9 +69,9 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
         monto: turno.monto,
         pagado: turno.pagado || false,
         notas: turno.notas || '',
-        repeticion_semanal: recordatorio?.repeticion_semanal || false,
-        notificar: recordatorio?.notificar ?? true,
-        minutos_antes: recordatorio?.minutos_antes || 10,
+        repeticion_semanal: false,
+        notificar: true,
+        minutos_antes: 10,
       });
     } else if (!turno && open) {
       setFormData({
@@ -99,7 +92,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
       });
     }
     setError(null);
-  }, [turno, open, fecha, recordatorios]);
+  }, [turno, open, fecha]);
 
   const calcularHoraFin = (horaInicio, duracion) => {
     const [h, m] = horaInicio.split(':').map(Number);
@@ -162,9 +155,9 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
       
       return turnoCreado;
     },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
-      await queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
@@ -212,10 +205,10 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
         }
       }
     },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
-      await queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
-      await queryClient.invalidateQueries({ queryKey: ['auditoria'] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['auditoria'] });
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
@@ -364,7 +357,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
             onValueChange={(v) => setFormData({ ...formData, cancha: v })}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Seleccionar cancha" />
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="1">Cancha 1</SelectItem>

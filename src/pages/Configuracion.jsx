@@ -234,6 +234,8 @@ export default function Configuracion() {
           )}
         </div>
 
+        {/* Configuración de Notificaciones Push */}
+        <ConfiguracionNotificaciones />
       </div>
       
       {/* Modal edición */}

@@ -95,8 +95,15 @@ export default function RecordatoriosCanchaAdmin() {
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Recordatorios de Cancha</h1>
-            <p className="text-slate-500 text-sm">Métricas y gestión administrativa</p>
+            <p className="text-slate-500 text-sm">Gestión administrativa</p>
           </div>
+          <Button
+            onClick={() => setNuevoModal({ open: true, recordatorio: null })}
+            className="bg-emerald-600 hover:bg-emerald-700"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nuevo recordatorio
+          </Button>
         </header>
 
         {/* Stats */}

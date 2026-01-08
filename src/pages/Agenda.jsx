@@ -110,10 +110,10 @@ export default function Agenda() {
           {isAdmin && (
             <Button
               onClick={() => setTurnoModal({ open: true, turno: null })}
-              className="bg-emerald-600 hover:bg-emerald-700 h-12 lg:h-11 px-6 text-base lg:text-sm font-semibold active:scale-95 touch-manipulation w-full sm:w-auto shadow-md"
+              className="bg-emerald-600 hover:bg-emerald-700 h-11 lg:h-10 text-base lg:text-sm active:scale-95 touch-manipulation w-full sm:w-auto"
             >
               <Plus className="w-5 h-5 mr-2" />
-              Crear turno
+              Nuevo turno
             </Button>
           )}
         </header>
