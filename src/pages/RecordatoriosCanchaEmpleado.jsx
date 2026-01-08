@@ -260,6 +260,9 @@ export default function RecordatoriosCanchaEmpleado() {
             )}
           </CardContent>
         </Card>
+
+        {/* Debug de notificaciones */}
+        <NotificationDebug />
       </div>
     </div>
   );
