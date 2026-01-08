@@ -21,11 +21,13 @@ export default function RecordatoriosCanchaEmpleado() {
   const { data: recordatorios = [], isLoading } = useQuery({
     queryKey: ['recordatorios-cancha', today],
     queryFn: () => base44.entities.RecordatorioCancha.filter({ fecha: today }),
+    staleTime: 30000,
   });
 
   const { data: turnos = [] } = useQuery({
     queryKey: ['turnos-cancha', today],
     queryFn: () => base44.entities.TurnoCancha.filter({ fecha: today }),
+    staleTime: 30000,
   });
 
   const marcarHechoMutation = useMutation({

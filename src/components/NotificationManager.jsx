@@ -176,9 +176,7 @@ export default function NotificationManager() {
       };
       
       // Agregar opciones solo si son soportadas
-      if ('icon' in window.Notification.prototype) {
-        notificationOptions.icon = 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695d6dfcd27b13c53e363146/1275db596_WhatsAppImage2026-01-06at155639.jpeg';
-      }
+      // Icon removido para mejor performance
       if ('requireInteraction' in window.Notification.prototype) {
         notificationOptions.requireInteraction = tipo === 'hora' || tipo === 'escalado';
       }
