@@ -55,34 +55,52 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
     minutos_antes: 10,
   });
 
-  // Cargar recordatorio asociado al turno
-  const { data: recordatoriosDelTurno = [] } = useQuery({
-    queryKey: ['recordatorio-turno', turno?.id],
-    queryFn: () => base44.entities.RecordatorioCancha.filter({ turno_cancha_id: turno.id }),
-    enabled: !!turno && open,
-  });
-
   useEffect(() => {
     if (turno && open) {
-      // Obtener los valores de notificación del recordatorio asociado
-      const recordatorio = recordatoriosDelTurno[0];
+      // Cargar recordatorio asociado de forma asíncrona
+      const loadRecordatorio = async () => {
+        try {
+          const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: turno.id });
+          const recordatorio = recordatorios[0];
+          
+          setFormData({
+            fecha: turno.fecha,
+            hora_inicio: turno.hora_inicio,
+            duracion: turno.duracion || 60,
+            cancha: turno.cancha,
+            cliente: turno.cliente,
+            tipo_turno: turno.tipo_turno || 'clase',
+            profesor: turno.profesor || '',
+            modalidad_alquiler: turno.modalidad_alquiler || '',
+            monto: turno.monto,
+            pagado: turno.pagado || false,
+            notas: turno.notas || '',
+            repeticion_semanal: false,
+            notificar: recordatorio?.notificar !== false,
+            minutos_antes: recordatorio?.minutos_antes || 10,
+          });
+        } catch (error) {
+          console.error('Error loading recordatorio:', error);
+          setFormData({
+            fecha: turno.fecha,
+            hora_inicio: turno.hora_inicio,
+            duracion: turno.duracion || 60,
+            cancha: turno.cancha,
+            cliente: turno.cliente,
+            tipo_turno: turno.tipo_turno || 'clase',
+            profesor: turno.profesor || '',
+            modalidad_alquiler: turno.modalidad_alquiler || '',
+            monto: turno.monto,
+            pagado: turno.pagado || false,
+            notas: turno.notas || '',
+            repeticion_semanal: false,
+            notificar: true,
+            minutos_antes: 10,
+          });
+        }
+      };
       
-      setFormData({
-        fecha: turno.fecha,
-        hora_inicio: turno.hora_inicio,
-        duracion: turno.duracion || 60,
-        cancha: turno.cancha,
-        cliente: turno.cliente,
-        tipo_turno: turno.tipo_turno || 'clase',
-        profesor: turno.profesor || '',
-        modalidad_alquiler: turno.modalidad_alquiler || '',
-        monto: turno.monto,
-        pagado: turno.pagado || false,
-        notas: turno.notas || '',
-        repeticion_semanal: false,
-        notificar: recordatorio?.notificar !== false,
-        minutos_antes: recordatorio?.minutos_antes || 10,
-      });
+      loadRecordatorio();
     } else if (!turno && open) {
       setFormData({
         fecha: format(fecha || new Date(), 'yyyy-MM-dd'),
@@ -102,7 +120,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
       });
     }
     setError(null);
-  }, [turno, open, fecha, recordatoriosDelTurno]);
+  }, [turno, open, fecha]);
 
   const calcularHoraFin = (horaInicio, duracion) => {
     const [h, m] = horaInicio.split(':').map(Number);
@@ -322,10 +340,8 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
         }
       });
 
-      // Detectar si cambió el tiempo de notificación comparando con el turno original
-      const recordatorio = recordatoriosDelTurno[0];
-      const minutosAntesOriginal = recordatorio?.minutos_antes || 10;
-      const cambioNotificacion = data.minutos_antes !== minutosAntesOriginal;
+      // Detectar si cambió el tiempo de notificación
+      const cambioNotificacion = cambios.some(c => c.campo === 'minutos_antes' || c.campo === 'notificar');
 
       updateMutation.mutate({ id: turno.id, data, cambios, cambioNotificacion });
     } else {
