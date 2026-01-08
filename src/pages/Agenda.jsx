@@ -35,6 +35,11 @@ export default function Agenda() {
     queryFn: () => base44.entities.TurnoCancha.list('-fecha'),
   });
 
+  const { data: recordatorios = [] } = useQuery({
+    queryKey: ['recordatorios-cancha'],
+    queryFn: () => base44.entities.RecordatorioCancha.list('-fecha'),
+  });
+
   const isAdmin = user?.role === 'admin';
 
   const turnosFiltrados = useMemo(() => {
@@ -190,6 +195,9 @@ export default function Agenda() {
         {/* Vista de calendario */}
         <VistaCalendarioCancha
           turnos={turnosFiltrados}
+          recordatorios={recordatorios}
+          selectedDate={selectedDate}
+          selectedCancha={selectedCancha}
           fecha={selectedDate}
           isAdmin={isAdmin}
           onTurnoClick={(turno) => isAdmin && setTurnoModal({ open: true, turno })}

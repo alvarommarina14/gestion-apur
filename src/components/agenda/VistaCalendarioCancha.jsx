@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
+import { format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, XCircle, Clock, User, DollarSign } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, User, DollarSign, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const HORARIOS = [];
@@ -11,7 +12,7 @@ for (let h = 8; h <= 21; h++) {
 
 const CANCHAS = ['1', '2', '3', '4'];
 
-export default function VistaCalendarioCancha({ turnos, fecha, isAdmin, onTurnoClick, isLoading }) {
+export default function VistaCalendarioCancha({ turnos, recordatorios = [], selectedDate, selectedCancha, fecha, isAdmin, onTurnoClick, isLoading }) {
   const turnosPorCanchaHora = useMemo(() => {
     const map = {};
     CANCHAS.forEach(cancha => {
@@ -21,14 +22,30 @@ export default function VistaCalendarioCancha({ turnos, fecha, isAdmin, onTurnoC
       });
     });
     
+    // Primero agregar turnos reales
     turnos.forEach(turno => {
       if (map[turno.cancha] && map[turno.cancha][turno.hora_inicio] !== undefined) {
-        map[turno.cancha][turno.hora_inicio] = turno;
+        map[turno.cancha][turno.hora_inicio] = { ...turno, tipo: 'turno' };
+      }
+    });
+
+    // Luego agregar recordatorios que NO tienen turno asociado
+    const fechaStr = format(selectedDate, 'yyyy-MM-dd');
+    const recordatoriosFiltrados = recordatorios.filter(r => 
+      r.fecha === fechaStr && 
+      !r.turno_cancha_id && // Solo los que NO están vinculados a un turno
+      (selectedCancha === 'todas' || r.cancha === selectedCancha)
+    );
+
+    recordatoriosFiltrados.forEach(rec => {
+      const hora = rec.hora.length === 5 ? rec.hora : rec.hora.substring(0, 5); // Asegurar formato HH:MM
+      if (map[rec.cancha] && map[rec.cancha][hora] !== undefined && !map[rec.cancha][hora]) {
+        map[rec.cancha][hora] = { ...rec, tipo: 'recordatorio' };
       }
     });
     
     return map;
-  }, [turnos]);
+  }, [turnos, recordatorios, selectedDate, selectedCancha]);
 
   const calcularFilas = (turno) => {
     if (!turno) return 1;
@@ -101,8 +118,69 @@ export default function VistaCalendarioCancha({ turnos, fecha, isAdmin, onTurnoC
                     {CANCHAS.map(cancha => {
                       const turno = turnosPorCanchaHora[cancha][hora];
                       
-                      // Si hay turno en este slot
+                      // Si hay turno o recordatorio en este slot
                       if (turno) {
+                        // Si es un recordatorio sin turno
+                        if (turno.tipo === 'recordatorio') {
+                          return (
+                            <td
+                              key={cancha}
+                              className="p-2 border-r border-slate-200 align-top"
+                            >
+                              <div
+                                className={cn(
+                                  'h-full rounded-lg border-2 p-3 transition-all',
+                                  turno.estado === 'hecho'
+                                    ? 'bg-emerald-50 border-emerald-400'
+                                    : 'bg-amber-50 border-amber-400'
+                                )}
+                              >
+                                {/* Header con estado */}
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className={cn(
+                                    'px-2 py-1 rounded-md text-xs font-bold flex items-center gap-1',
+                                    turno.estado === 'hecho'
+                                      ? 'bg-emerald-100 text-emerald-700'
+                                      : 'bg-amber-100 text-amber-700'
+                                  )}>
+                                    <Bell className="w-3 h-3" />
+                                    {turno.estado === 'hecho' ? 'LISTO' : 'PENDIENTE'}
+                                  </span>
+                                </div>
+
+                                {/* Contenido */}
+                                <div className="space-y-2">
+                                  <div>
+                                    <p className="text-xs font-semibold text-amber-700 mb-1">
+                                      🧹 Sacar cancha
+                                    </p>
+                                    <p className="font-bold text-slate-900 text-base leading-tight">
+                                      {turno.profesor}
+                                    </p>
+                                    <p className="text-sm text-slate-600 mt-0.5">
+                                      {turno.hora}
+                                    </p>
+                                  </div>
+
+                                  <div className="flex items-center gap-1.5">
+                                    <DollarSign className="w-4 h-4 text-slate-500" />
+                                    <span className="font-bold text-slate-900 text-base">
+                                      {formatMoney(turno.monto)}
+                                    </span>
+                                  </div>
+
+                                  {turno.notas && (
+                                    <p className="text-xs text-slate-500 italic mt-2 border-t pt-2">
+                                      {turno.notas}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+                          );
+                        }
+
+                        // Si es un turno real
                         const filas = calcularFilas(turno);
                         
                         return (
@@ -113,7 +191,7 @@ export default function VistaCalendarioCancha({ turnos, fecha, isAdmin, onTurnoC
                               'p-2 border-r border-slate-200 align-top',
                               isAdmin && 'cursor-pointer hover:bg-slate-100'
                             )}
-                            onClick={() => onTurnoClick?.(turno)}
+                            onClick={() => turno.tipo === 'turno' && onTurnoClick?.(turno)}
                           >
                             <div
                               className={cn(
