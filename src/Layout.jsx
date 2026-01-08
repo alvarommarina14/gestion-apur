@@ -79,12 +79,11 @@ export default function Layout({ children, currentPageName }) {
           {/* Logo */}
           <div className="h-16 flex items-center justify-between px-4 border-b border-slate-100">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-emerald-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">G</span>
-              </div>
-              <div>
-                <span className="font-bold text-slate-800">Gestión APUR</span>
-              </div>
+              <img 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695d6dfcd27b13c53e363146/fd5853c43_WhatsAppImage2026-01-06at155639.jpeg" 
+                alt="APUR Logo" 
+                className="h-10 w-auto"
+              />
             </div>
             <Button 
               variant="ghost" 
