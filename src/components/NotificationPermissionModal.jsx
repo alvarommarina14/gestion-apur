@@ -13,15 +13,15 @@ import { Button } from '@/components/ui/button';
 export default function NotificationPermissionModal() {
   const [open, setOpen] = useState(false);
   const [permission, setPermission] = useState(
-    typeof Notification !== 'undefined' ? Notification.permission : 'default'
+    typeof window !== 'undefined' && window.Notification ? window.Notification.permission : 'default'
   );
 
   useEffect(() => {
-    // Verificar si ya se pidió permiso antes
+    if (typeof window === 'undefined' || !window.Notification) return;
+    
     const permissionAsked = localStorage.getItem('notification_permission_asked');
     
     if (!permissionAsked && permission === 'default') {
-      // Esperar 2 segundos después del login para mostrar el modal
       const timer = setTimeout(() => {
         setOpen(true);
       }, 2000);
@@ -30,23 +30,26 @@ export default function NotificationPermissionModal() {
   }, [permission]);
 
   const handleRequestPermission = async () => {
+    if (typeof window === 'undefined' || !window.Notification) return;
+    
     try {
-      const result = await Notification.requestPermission();
+      const result = await window.Notification.requestPermission();
       setPermission(result);
       localStorage.setItem('notification_permission_asked', 'true');
       
       if (result === 'granted') {
-        // Mostrar notificación de prueba
-        new Notification('🎾 Notificaciones activadas', {
-          body: 'Recibirás recordatorios de canchas en tu dispositivo',
-          icon: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695d6dfcd27b13c53e363146/1275db596_WhatsAppImage2026-01-06at155639.jpeg',
-          badge: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/695d6dfcd27b13c53e363146/1275db596_WhatsAppImage2026-01-06at155639.jpeg',
-        });
+        try {
+          new window.Notification('🎾 Notificaciones activadas', {
+            body: 'Recibirás recordatorios de canchas en tu dispositivo',
+          });
+        } catch (e) {
+          console.warn('Test notification error:', e);
+        }
       }
       
       setOpen(false);
     } catch (error) {
-      console.error('Error requesting notification permission:', error);
+      console.warn('Error requesting notification permission:', error);
       localStorage.setItem('notification_permission_asked', 'true');
       setOpen(false);
     }
@@ -57,8 +60,8 @@ export default function NotificationPermissionModal() {
     setOpen(false);
   };
 
-  if (typeof Notification === 'undefined') {
-    return null; // Browser doesn't support notifications
+  if (typeof window === 'undefined' || !window.Notification) {
+    return null;
   }
 
   return (
