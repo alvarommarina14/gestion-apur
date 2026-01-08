@@ -84,6 +84,28 @@ export default function ConfiguracionNotificaciones() {
 
   if (!user) return null;
 
+  // Solo admins pueden configurar notificaciones
+  if (user.role !== 'admin') {
+    return (
+      <Card className="shadow-sm">
+        <CardHeader className="border-b">
+          <CardTitle className="flex items-center gap-2">
+            <Bell className="w-5 h-5 text-slate-600" />
+            Notificaciones
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-sm text-slate-700">
+              Como empleado, recibís automáticamente todas las notificaciones de cancha. 
+              Solo los administradores pueden modificar esta configuración.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const permissionStatus = typeof window !== 'undefined' && window.Notification ? window.Notification.permission : 'unsupported';
 
   return (
@@ -113,7 +135,7 @@ export default function ConfiguracionNotificaciones() {
             </div>
           )}
 
-          {/* Switch principal */}
+          {/* Switch principal - solo admins */}
           <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
             <div className="flex items-center gap-3">
               <Bell className="w-5 h-5 text-emerald-600" />
@@ -122,9 +144,7 @@ export default function ConfiguracionNotificaciones() {
                   Recibir notificaciones de cancha
                 </Label>
                 <p className="text-sm text-slate-500 mt-0.5">
-                  {user.role === 'admin' 
-                    ? 'Alertas cuando se debe preparar una cancha para el siguiente turno'
-                    : 'Alertas para sacar y preparar las canchas'}
+                  Alertas cuando se debe preparar una cancha para el siguiente turno
                 </p>
               </div>
             </div>
@@ -155,7 +175,7 @@ export default function ConfiguracionNotificaciones() {
             <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
               <p className="text-sm text-slate-700">
                 El tiempo de anticipación de las notificaciones se configura al crear cada turno. 
-                {user.role === 'admin' && ' Si hay múltiples canchas a la misma hora, recibirás una sola notificación agrupada.'}
+                Si hay múltiples canchas a la misma hora, recibirás una sola notificación agrupada.
               </p>
             </div>
           )}

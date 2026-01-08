@@ -20,17 +20,20 @@ export default function NotificationManager() {
       notificar: true,
     }),
     refetchInterval: 30000,
-    enabled: !!user && user.recibir_notificaciones_cancha !== false,
+    enabled: !!user && (user.role !== 'admin' || user.recibir_notificaciones_cancha !== false),
   });
 
   const { data: turnos = [] } = useQuery({
     queryKey: ['turnos-cancha-push', today],
     queryFn: () => base44.entities.TurnoCancha.filter({ fecha: today }),
-    enabled: !!user && user.recibir_notificaciones_cancha !== false,
+    enabled: !!user && (user.role !== 'admin' || user.recibir_notificaciones_cancha !== false),
   });
 
   useEffect(() => {
-    if (!user || user.recibir_notificaciones_cancha === false) return;
+    if (!user) return;
+    
+    // Empleados siempre reciben notificaciones, admins pueden desactivarlas
+    if (user.role === 'admin' && user.recibir_notificaciones_cancha === false) return;
     
     if (!recordatorios.length) return;
     
