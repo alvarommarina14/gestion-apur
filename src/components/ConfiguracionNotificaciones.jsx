@@ -19,14 +19,12 @@ export default function ConfiguracionNotificaciones() {
 
   const [formData, setFormData] = useState({
     recibir_notificaciones_cancha: user?.recibir_notificaciones_cancha !== false,
-    minutos_antes_fin_cancha: user?.minutos_antes_fin_cancha || 10,
   });
 
   React.useEffect(() => {
     if (user) {
       setFormData({
         recibir_notificaciones_cancha: user.recibir_notificaciones_cancha !== false,
-        minutos_antes_fin_cancha: user.minutos_antes_fin_cancha || 10,
       });
     }
   }, [user]);
@@ -109,44 +107,13 @@ export default function ConfiguracionNotificaciones() {
             />
           </div>
 
-          {/* Configuración de tiempo (solo para admins) */}
-          {user.role === 'admin' && formData.recibir_notificaciones_cancha && (
-            <div className="space-y-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="flex items-center gap-2">
-                <Bell className="w-5 h-5 text-blue-600" />
-                <Label className="font-medium text-slate-800">
-                  Cuándo notificar
-                </Label>
-              </div>
-              <Select
-                value={formData.minutos_antes_fin_cancha.toString()}
-                onValueChange={(v) =>
-                  setFormData({ ...formData, minutos_antes_fin_cancha: Number(v) })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="5">5 minutos antes que termine</SelectItem>
-                  <SelectItem value="10">10 minutos antes que termine</SelectItem>
-                  <SelectItem value="15">15 minutos antes que termine</SelectItem>
-                  <SelectItem value="20">20 minutos antes que termine</SelectItem>
-                  <SelectItem value="30">30 minutos antes que termine</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-slate-600">
-                Recibirás una notificación X minutos antes de que finalice cada turno de cancha
-              </p>
-            </div>
-          )}
-
-          {/* Explicación para empleados */}
-          {user.role !== 'admin' && formData.recibir_notificaciones_cancha && (
+          {/* Explicación */}
+          {formData.recibir_notificaciones_cancha && (
             <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
               <p className="text-sm text-slate-700">
-                <span className="font-medium">Como empleado</span>, recibirás notificaciones antes de que empiecen 
-                los turnos para preparar las canchas. El tiempo de anticipación se configura en cada recordatorio individual.
+                {user.role === 'admin' 
+                  ? 'El tiempo de anticipación de las notificaciones se configura al crear cada turno.'
+                  : 'El tiempo de anticipación se configura en cada recordatorio individual.'}
               </p>
             </div>
           )}

@@ -64,7 +64,7 @@ export default function NotificationManager() {
         const finTurno = addMinutes(recordatorioTime, duracion);
         const minutesUntilEnd = differenceInMinutes(finTurno, now);
         
-        minutosAntes = user.minutos_antes_fin_cancha || 10;
+        minutosAntes = rec.minutos_antes || 10;
         minutesUntilNotification = minutesUntilEnd;
       } else {
         // Empleado: notificar X minutos antes del INICIO
