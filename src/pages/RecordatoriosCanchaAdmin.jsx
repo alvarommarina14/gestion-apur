@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, addDays, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Plus, ChevronLeft, ChevronRight, Calendar, Filter, Edit, Trash2 } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, Calendar, Filter, Edit, Trash2, CheckCircle, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -21,6 +21,11 @@ export default function RecordatoriosCanchaAdmin() {
     queryFn: () => base44.entities.RecordatorioCancha.list('-fecha'),
   });
 
+  const { data: turnos = [] } = useQuery({
+    queryKey: ['turnos-cancha-all'],
+    queryFn: () => base44.entities.TurnoCancha.list(),
+  });
+
   const eliminarMutation = useMutation({
     mutationFn: (id) => base44.entities.RecordatorioCancha.delete(id),
     onSuccess: () => {
@@ -31,14 +36,21 @@ export default function RecordatoriosCanchaAdmin() {
   const weekStart = startOfWeek(currentWeek, { locale: es });
   const weekEnd = endOfWeek(currentWeek, { locale: es });
 
+  const recordatoriosConTurnos = useMemo(() => {
+    return recordatorios.map(rec => {
+      const turno = turnos.find(t => t.id === rec.turno_cancha_id);
+      return { ...rec, turno };
+    });
+  }, [recordatorios, turnos]);
+
   const recordatoriosFiltrados = useMemo(() => {
-    if (vista === 'todos') return recordatorios;
+    if (vista === 'todos') return recordatoriosConTurnos;
     
-    return recordatorios.filter(r => {
+    return recordatoriosConTurnos.filter(r => {
       const fecha = parseISO(r.fecha);
       return fecha >= weekStart && fecha <= weekEnd;
     });
-  }, [recordatorios, vista, weekStart, weekEnd]);
+  }, [recordatoriosConTurnos, vista, weekStart, weekEnd]);
 
   const recordatoriosPorDia = useMemo(() => {
     const dias = {};
@@ -210,8 +222,24 @@ export default function RecordatoriosCanchaAdmin() {
                             <div className="font-semibold text-slate-800">{rec.hora}</div>
                             <div className="text-slate-600">Cancha {rec.cancha}</div>
                             <div className="text-slate-500">{rec.profesor}</div>
-                            <div className="font-semibold text-emerald-600">
+                            {rec.turno && (
+                              <>
+                                <span className={cn(
+                                  "inline-block px-1.5 py-0.5 text-[10px] font-medium rounded",
+                                  rec.turno.tipo_turno === 'clase' 
+                                    ? "bg-blue-100 text-blue-700" 
+                                    : "bg-purple-100 text-purple-700"
+                                )}>
+                                  {rec.turno.tipo_turno === 'clase' ? 'Clase' : 'Alquiler'}
+                                </span>
+                                {rec.turno.cliente && (
+                                  <div className="text-[10px] text-slate-600">👤 {rec.turno.cliente}</div>
+                                )}
+                              </>
+                            )}
+                            <div className="flex items-center gap-1 font-semibold text-emerald-600">
                               {formatMoney(rec.monto)}
+                              {rec.turno?.pagado && <CheckCircle className="w-3 h-3" />}
                             </div>
                             {rec.repeticion_semanal && (
                               <span className="inline-block px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-medium rounded">
@@ -285,8 +313,25 @@ export default function RecordatoriosCanchaAdmin() {
                         <div className="text-sm text-slate-600">
                           Cancha {rec.cancha} - {rec.profesor}
                         </div>
-                        <div className="text-sm font-semibold text-emerald-600">
+                        {rec.turno && (
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className={cn(
+                              "px-2 py-0.5 text-xs font-medium rounded",
+                              rec.turno.tipo_turno === 'clase' 
+                                ? "bg-blue-100 text-blue-700" 
+                                : "bg-purple-100 text-purple-700"
+                            )}>
+                              {rec.turno.tipo_turno === 'clase' ? '📚 Clase' : '🎾 Alquiler'}
+                              {rec.turno.modalidad_alquiler && ` (${rec.turno.modalidad_alquiler})`}
+                            </span>
+                            {rec.turno.cliente && (
+                              <span className="text-xs text-slate-600">👤 {rec.turno.cliente}</span>
+                            )}
+                          </div>
+                        )}
+                        <div className="flex items-center gap-1 text-sm font-semibold text-emerald-600">
                           {formatMoney(rec.monto)}
+                          {rec.turno?.pagado && <CheckCircle className="w-4 h-4 ml-1" />}
                         </div>
                         {rec.estado === 'hecho' && (
                           <div className="text-xs text-slate-500">
