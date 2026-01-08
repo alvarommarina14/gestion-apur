@@ -157,7 +157,7 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="w-5 h-5 text-emerald-600" />
@@ -165,7 +165,7 @@ export default function NuevoRecordatorioCanchaModal({ open, onOpenChange, recor
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto space-y-4 px-1">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Fecha</Label>
