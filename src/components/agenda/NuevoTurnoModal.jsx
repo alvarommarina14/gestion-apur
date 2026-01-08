@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
@@ -136,6 +137,16 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
         dia_semana: new Date(data.fecha).toLocaleDateString('es-ES', { weekday: 'long' }),
         notas: `Turno creado desde Agenda - Cliente: ${data.cliente}`,
       });
+
+      // Registrar auditoría
+      await base44.entities.LogAuditoria.create({
+        entidad: 'TurnoCancha',
+        entidad_id: turnoCreado.id,
+        entidad_nombre: `${data.cliente} - Cancha ${data.cancha}`,
+        accion: 'crear',
+        motivo: 'Turno creado desde Agenda',
+        fecha: new Date().toISOString(),
+      });
       
       return turnoCreado;
     },
@@ -151,7 +162,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }) => {
+    mutationFn: async ({ id, data, cambios }) => {
       await base44.entities.TurnoCancha.update(id, data);
       
       // Buscar y actualizar recordatorio vinculado
@@ -165,10 +176,28 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
           monto: data.monto,
         });
       }
+
+      // Registrar auditoría para cada cambio
+      if (cambios && cambios.length > 0) {
+        for (const cambio of cambios) {
+          await base44.entities.LogAuditoria.create({
+            entidad: 'TurnoCancha',
+            entidad_id: id,
+            entidad_nombre: `${data.cliente} - Cancha ${data.cancha}`,
+            accion: 'editar',
+            campo_modificado: cambio.campo,
+            valor_anterior: String(cambio.anterior || ''),
+            valor_nuevo: String(cambio.nuevo || ''),
+            motivo: 'Turno editado desde Agenda',
+            fecha: new Date().toISOString(),
+          });
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['auditoria'] });
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
@@ -179,6 +208,19 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
 
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
+      // Registrar auditoría antes de eliminar
+      const turnoData = turnosExistentes.find(t => t.id === id);
+      if (turnoData) {
+        await base44.entities.LogAuditoria.create({
+          entidad: 'TurnoCancha',
+          entidad_id: id,
+          entidad_nombre: `${turnoData.cliente} - Cancha ${turnoData.cancha}`,
+          accion: 'eliminar',
+          motivo: 'Turno eliminado desde Agenda',
+          fecha: new Date().toISOString(),
+        });
+      }
+
       // Eliminar recordatorio vinculado primero
       const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: id });
       for (const rec of recordatorios) {
@@ -191,6 +233,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['auditoria'] });
       onOpenChange(false);
     },
   });
@@ -221,7 +264,43 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
     };
 
     if (turno) {
-      updateMutation.mutate({ id: turno.id, data });
+      // Detectar cambios
+      const cambios = [];
+      Object.keys(data).forEach(key => {
+        // Excluir 'hora_fin' from change detection as it's derived
+        if (key === 'hora_fin') return;
+
+        const oldValue = turno[key];
+        const newValue = data[key];
+
+        // Special handling for boolean 'pagado' and number 'monto' to ensure correct comparison
+        if (key === 'pagado') {
+          if (!!oldValue !== !!newValue) {
+            cambios.push({
+              campo: key,
+              anterior: String(!!oldValue),
+              nuevo: String(!!newValue),
+            });
+          }
+        } else if (key === 'monto') {
+          // Compare numbers
+          if (Number(oldValue) !== Number(newValue)) {
+            cambios.push({
+              campo: key,
+              anterior: String(oldValue),
+              nuevo: String(newValue),
+            });
+          }
+        } else if (String(oldValue || '') !== String(newValue || '')) {
+          cambios.push({
+            campo: key,
+            anterior: String(oldValue || ''),
+            nuevo: String(newValue || ''),
+          });
+        }
+      });
+      
+      updateMutation.mutate({ id: turno.id, data, cambios });
     } else {
       createMutation.mutate(data);
     }
@@ -260,7 +339,15 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {turno ? (
+          <Tabs defaultValue="datos" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="datos">Datos</TabsTrigger>
+              <TabsTrigger value="historial">Historial</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="datos" className="mt-4">
+              <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg flex items-start gap-2">
               <AlertTriangle className="w-5 h-5 text-rose-600 mt-0.5" />
@@ -457,6 +544,200 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
             </Button>
           </DialogFooter>
         </form>
+            </TabsContent>
+            
+            <TabsContent value="historial" className="mt-4">
+              <HistorialAuditoria entidadId={turno?.id} entidad="TurnoCancha" />
+            </TabsContent>
+          </Tabs>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg flex items-start gap-2">
+                <AlertTriangle className="w-5 h-5 text-rose-600 mt-0.5" />
+                <p className="text-sm text-rose-700">{error}</p>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Fecha</Label>
+              <Input
+                type="date"
+                value={formData.fecha}
+                onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Cancha</Label>
+              <Select
+                value={formData.cancha}
+                onValueChange={(v) => setFormData({ ...formData, cancha: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">Cancha 1</SelectItem>
+                  <SelectItem value="2">Cancha 2</SelectItem>
+                  <SelectItem value="3">Cancha 3</SelectItem>
+                  <SelectItem value="4">Cancha 4</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label>Hora inicio</Label>
+              <Select
+                value={formData.hora_inicio}
+                onValueChange={(v) => setFormData({ ...formData, hora_inicio: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="max-h-60">
+                  {Array.from({ length: 28 }, (_, i) => {
+                    const h = Math.floor(i / 2) + 8;
+                    const m = i % 2 === 0 ? '00' : '30';
+                    if (h > 21 || (h === 21 && m === '30')) return null;
+                    return `${h.toString().padStart(2, '0')}:${m}`;
+                  }).filter(Boolean).map(hora => (
+                    <SelectItem key={hora} value={hora}>{hora}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Duración</Label>
+              <Select
+                value={formData.duracion.toString()}
+                onValueChange={(v) => setFormData({ ...formData, duracion: Number(v) })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="60">60 min</SelectItem>
+                  <SelectItem value="90">90 min</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Hora fin</Label>
+              <Input
+                value={calcularHoraFin(formData.hora_inicio, formData.duracion)}
+                disabled
+                className="bg-slate-50"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Cliente / Nombre</Label>
+            <Input
+              value={formData.cliente}
+              onChange={(e) => setFormData({ ...formData, cliente: e.target.value })}
+              placeholder="Nombre del cliente"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Tipo de Turno</Label>
+            <Select
+              value={formData.tipo_turno}
+              onValueChange={(v) => setFormData({ ...formData, tipo_turno: v, profesor: v === 'alquiler' ? '' : formData.profesor, modalidad_alquiler: v === 'clase' ? '' : formData.modalidad_alquiler })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="clase">Clase</SelectItem>
+                <SelectItem value="alquiler">Alquiler</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {formData.tipo_turno === 'clase' && (
+            <div className="space-y-2">
+              <Label>Profesor (opcional)</Label>
+              <Input
+                value={formData.profesor}
+                onChange={(e) => setFormData({ ...formData, profesor: e.target.value })}
+                placeholder="Nombre del profesor"
+              />
+            </div>
+          )}
+
+          {formData.tipo_turno === 'alquiler' && (
+            <div className="space-y-2">
+              <Label>Modalidad de Alquiler</Label>
+              <Select
+                value={formData.modalidad_alquiler}
+                onValueChange={(v) => setFormData({ ...formData, modalidad_alquiler: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar modalidad" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="abono">Abono</SelectItem>
+                  <SelectItem value="suelto">Suelto</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+            <div>
+              <Label className="font-medium text-slate-800">Pagado</Label>
+              <p className="text-xs text-slate-500 mt-0.5">Marcar si el turno ya está pago</p>
+            </div>
+            <Switch
+              checked={formData.pagado}
+              onCheckedChange={(checked) => setFormData({ ...formData, pagado: checked })}
+            />
+          </div>
+
+          {!formData.pagado && (
+            <div className="space-y-2">
+              <Label>Monto</Label>
+              <Input
+                type="number"
+                value={formData.monto}
+                onChange={(e) => setFormData({ ...formData, monto: e.target.value })}
+                placeholder="0"
+                required
+              />
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label>Notas (opcional)</Label>
+            <Textarea
+              value={formData.notas}
+              onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
+              placeholder="Observaciones..."
+              rows={2}
+            />
+          </div>
+
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              disabled={createMutation.isPending || updateMutation.isPending}
+              className="bg-emerald-600 hover:bg-emerald-700"
+            >
+              {turno ? 'Actualizar' : 'Crear turno'}
+            </Button>
+          </DialogFooter>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );
