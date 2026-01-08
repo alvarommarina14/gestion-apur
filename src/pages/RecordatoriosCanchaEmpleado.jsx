@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import NotificationDebug from '@/components/NotificationDebug';
+import NotificationDebugDetailed from '@/components/NotificationDebugDetailed';
 
 export default function RecordatoriosCanchaEmpleado() {
   const queryClient = useQueryClient();
@@ -262,6 +263,7 @@ export default function RecordatoriosCanchaEmpleado() {
         </Card>
 
         {/* Debug de notificaciones */}
+        <NotificationDebugDetailed />
         <NotificationDebug />
       </div>
     </div>
