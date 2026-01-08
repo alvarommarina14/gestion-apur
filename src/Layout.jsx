@@ -65,36 +65,37 @@ export default function Layout({ children, currentPageName }) {
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm transition-opacity duration-300"
           onClick={() => setSidebarOpen(false)}
         />
       )}
       
       {/* Sidebar */}
       <aside className={cn(
-        'fixed top-0 left-0 z-50 h-full w-64 bg-white border-r border-slate-200 transform transition-transform duration-200 ease-in-out lg:translate-x-0',
+        'fixed top-0 left-0 z-50 h-full w-72 bg-white border-r border-slate-200 transform transition-transform duration-300 ease-out shadow-2xl lg:w-64 lg:shadow-none lg:translate-x-0',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       )}>
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="h-16 flex items-center justify-between px-4 border-b border-slate-100">
+          <div className="h-16 flex items-center justify-between px-5 border-b border-slate-100">
             <div className="flex items-center gap-3">
-                <div className="h-10 w-10 bg-emerald-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">A</span>
-                </div>
+              <div className="h-11 w-11 bg-emerald-600 rounded-xl flex items-center justify-center shadow-md">
+                <span className="text-white font-bold text-xl">A</span>
               </div>
+              <span className="font-bold text-slate-800 text-lg lg:hidden">APUR</span>
+            </div>
             <Button 
               variant="ghost" 
-              size="sm" 
-              className="lg:hidden"
+              size="icon"
+              className="lg:hidden h-10 w-10 hover:bg-slate-100"
               onClick={() => setSidebarOpen(false)}
             >
-              <X className="w-5 h-5" />
+              <X className="w-6 h-6" />
             </Button>
           </div>
           
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+          <nav className="flex-1 p-4 lg:p-4 space-y-1 overflow-y-auto touch-pan-y">
             {/* Gestión de Clases - Solo Administradores */}
             {user?.role === 'admin' && (
               <div>
@@ -243,12 +244,12 @@ export default function Layout({ children, currentPageName }) {
             <Button
               variant="ghost"
               onClick={handleLogout}
-              className="w-full justify-start text-slate-600 hover:text-rose-600 hover:bg-rose-50"
+              className="w-full justify-start text-slate-600 hover:text-rose-600 hover:bg-rose-50 h-12 lg:h-10 text-base lg:text-sm active:scale-95"
             >
-              <LogOut className="w-5 h-5 mr-3" />
+              <LogOut className="w-6 h-6 lg:w-5 lg:h-5 mr-3" />
               Cerrar sesión
             </Button>
-            <div className="text-xs text-slate-400 text-center">
+            <div className="text-xs text-slate-400 text-center lg:block hidden">
               Sistema de Gestión de Clases
             </div>
           </div>
@@ -258,17 +259,17 @@ export default function Layout({ children, currentPageName }) {
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 h-16 bg-white/80 backdrop-blur-sm border-b border-slate-200 flex items-center px-4 lg:px-6">
+        <header className="sticky top-0 z-30 h-14 lg:h-16 bg-white/80 backdrop-blur-sm border-b border-slate-200 flex items-center px-3 lg:px-6">
           <Button 
             variant="ghost" 
-            size="sm" 
-            className="lg:hidden mr-3"
+            size="icon"
+            className="lg:hidden mr-2 h-10 w-10 active:scale-95"
             onClick={() => setSidebarOpen(true)}
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-6 h-6" />
           </Button>
-          
-          <h1 className="text-lg font-semibold text-slate-800">
+
+          <h1 className="text-base lg:text-lg font-semibold text-slate-800 truncate">
             {[...navigationGestionClases, ...navigationAgenda, ...navigationCancha, ...navigationConfiguracion]
               .find(n => n.href === currentPageName)?.name || currentPageName}
           </h1>
