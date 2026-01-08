@@ -604,7 +604,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-visible">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="w-5 h-5 text-emerald-600" />
@@ -612,28 +612,30 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
           </DialogTitle>
         </DialogHeader>
 
-        {turno ? (
-          <Tabs defaultValue="datos" className="flex-1 flex flex-col overflow-hidden">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="datos">Datos</TabsTrigger>
-              <TabsTrigger value="historial">Historial</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="datos" className="flex-1 overflow-y-auto mt-4">
-              <form onSubmit={handleSubmit} className="space-y-4 px-1">
-                {formContent}
-              </form>
-            </TabsContent>
-            
-            <TabsContent value="historial" className="flex-1 overflow-y-auto mt-4">
-              <HistorialAuditoria entidadId={turno?.id} entidad="TurnoCancha" />
-            </TabsContent>
-          </Tabs>
-        ) : (
-          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto space-y-4 px-1">
-            {formContent}
-          </form>
-        )}
+        <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
+          {turno ? (
+            <Tabs defaultValue="datos">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="datos">Datos</TabsTrigger>
+                <TabsTrigger value="historial">Historial</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="datos" className="mt-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  {formContent}
+                </form>
+              </TabsContent>
+              
+              <TabsContent value="historial" className="mt-4">
+                <HistorialAuditoria entidadId={turno?.id} entidad="TurnoCancha" />
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+              {formContent}
+            </form>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
