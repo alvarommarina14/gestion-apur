@@ -19,15 +19,13 @@ export default function NotificationManager() {
       estado: 'pendiente',
       notificar: true,
     }),
-    refetchInterval: 60000, // Reducido a 1 minuto
-    staleTime: 30000,
+    refetchInterval: 30000,
     enabled: !!user && user.recibir_notificaciones_cancha !== false,
   });
 
   const { data: turnos = [] } = useQuery({
     queryKey: ['turnos-cancha-push', today],
     queryFn: () => base44.entities.TurnoCancha.filter({ fecha: today }),
-    staleTime: 60000,
     enabled: !!user && user.recibir_notificaciones_cancha !== false,
   });
 

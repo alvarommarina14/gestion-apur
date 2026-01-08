@@ -46,7 +46,6 @@ export default function Agenda() {
       }
       return base44.entities.TurnoCancha.filter({ fecha: fechaStr });
     },
-    staleTime: 30000,
   });
 
   const { data: recordatorios = [] } = useQuery({
@@ -58,7 +57,6 @@ export default function Agenda() {
       }
       return base44.entities.RecordatorioCancha.filter({ fecha: fechaStr });
     },
-    staleTime: 30000,
   });
 
   const isAdmin = user?.role === 'admin';

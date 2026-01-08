@@ -14,7 +14,6 @@ import {
   Settings,
   LogOut
 } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -45,12 +44,11 @@ const navigationConfiguracion = [
 
 export default function Layout({ children, currentPageName }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [user, setUser] = React.useState(null);
 
-  const { data: user } = useQuery({
-    queryKey: ['me'],
-    queryFn: () => base44.auth.me(),
-    staleTime: 5 * 60 * 1000, // Cache por 5 minutos
-  });
+  React.useEffect(() => {
+    base44.auth.me().then(setUser).catch(() => {});
+  }, []);
 
   const handleLogout = () => {
     if (confirm('¿Querés cerrar sesión?')) {
