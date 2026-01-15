@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import NotificationPermissionModal from '@/components/NotificationPermissionModal';
 import NotificationManager from '@/components/NotificationManager';
+import PushNotificationManager from '@/components/PushNotificationManager';
 
 const navigationGestionClases = [
   { name: 'Dashboard', href: 'Dashboard', icon: LayoutDashboard },
@@ -61,6 +62,7 @@ export default function Layout({ children, currentPageName }) {
       {/* Notificaciones Push */}
       <NotificationPermissionModal />
       <NotificationManager />
+      <PushNotificationManager />
       
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
