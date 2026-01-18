@@ -13,7 +13,7 @@ const firebaseConfig = {
   appId: "1:43346834046:web:e10bf11482fe421184de2f"
 };
 
-const VAPID_KEY = 'BKLJw62FZZWoMh1-ITeGLKIfrnyBG4zpZX_d3-IZrgLe4w32fcuZZ73N3B8NL2jm3FvAcwYg8u-MsE1x-GytLss';
+// Nota: Usar la Web Push certificate de Firebase Console, no VAPID keys personalizadas
 
 const app = initializeApp(firebaseConfig);
 
@@ -54,7 +54,6 @@ export default function PushNotificationManager() {
         const messaging = getMessaging(app);
         
         const token = await getToken(messaging, {
-          vapidKey: VAPID_KEY,
           serviceWorkerRegistration: registration,
         });
 
