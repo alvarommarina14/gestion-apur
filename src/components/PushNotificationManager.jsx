@@ -43,9 +43,8 @@ export default function PushNotificationManager() {
           return;
         }
 
-        const permission = await Notification.requestPermission();
-        if (permission !== 'granted') {
-          console.log('Notification permission denied');
+        if (Notification.permission !== 'granted') {
+          console.log('Waiting for notification permission');
           return;
         }
 
