@@ -25,6 +25,8 @@ export default async function enviarNotificacionesPush() {
 
         const now = new Date();
 
+        console.log("Recordatorios encontrados:", recordatorios);
+
         for (const rec of recordatorios) {
                 const [hours, minutes] = rec.hora.split(":").map(Number);
                 const recordatorioTime = new Date();
@@ -130,6 +132,10 @@ export default async function enviarNotificacionesPush() {
                                         });
 
                                         try {
+                                                console.log(
+                                                        "Enviando notificación push:",
+                                                        payload,
+                                                );
                                                 await webpush.sendNotification(
                                                         JSON.parse(
                                                                 usuario.push_subscription,
