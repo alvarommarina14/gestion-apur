@@ -38,35 +38,44 @@ export default function PushNotificationManager() {
 
     const subscribeToPush = async () => {
       try {
+        console.log('🔄 Iniciando suscripción push para:', user.email);
+        
         if (!('serviceWorker' in navigator)) {
-          console.warn('Service Worker not supported');
+          console.warn('❌ Service Worker not supported');
           return;
         }
 
         if (Notification.permission !== 'granted') {
-          console.log('Waiting for notification permission');
+          console.log('⏳ Esperando permisos de notificación. Estado actual:', Notification.permission);
           return;
         }
 
+        console.log('✅ Permisos otorgados, registrando service worker...');
         const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+        console.log('✅ Service worker registrado:', registration);
+        
         await navigator.serviceWorker.ready;
+        console.log('✅ Service worker listo');
 
         const messaging = getMessaging(app);
+        console.log('✅ Firebase Messaging inicializado');
         
         const token = await getToken(messaging, {
           serviceWorkerRegistration: registration,
         });
+        console.log('✅ Token FCM obtenido:', token?.substring(0, 50) + '...');
 
         if (token) {
+          console.log('💾 Guardando token en base de datos...');
           await savePushSubscriptionMutation.mutateAsync({
             push_subscription: token,
           });
 
           subscribed.current = true;
-          console.log('FCM token saved successfully');
+          console.log('✅ FCM token guardado exitosamente en User:', user.email);
 
           onMessage(messaging, (payload) => {
-            console.log('Foreground message received:', payload);
+            console.log('📩 Mensaje en foreground:', payload);
             
             if (Notification.permission === 'granted') {
               new Notification(payload.notification?.title || 'Nueva notificación', {
@@ -76,9 +85,12 @@ export default function PushNotificationManager() {
               });
             }
           });
+        } else {
+          console.error('❌ No se pudo obtener el token FCM');
         }
       } catch (error) {
-        console.error('Error subscribing to FCM:', error);
+        console.error('❌ Error suscribiendo a FCM:', error);
+        console.error('Stack:', error.stack);
       }
     };
 
