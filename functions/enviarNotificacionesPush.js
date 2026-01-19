@@ -8,6 +8,7 @@ import {
 
 Deno.serve(async (req) => {
         try {
+                console.log("req: ", req);
                 const errors = [];
                 let responseFromGoogle;
                 console.log("🚀 Iniciando envío de notificaciones push...");
@@ -186,7 +187,7 @@ Deno.serve(async (req) => {
                                         ) {
                                                 debeNotificar = true;
                                                 title = `🧹 Sacar cancha ${rec.cancha}`;
-                                                body = `En ${minutosAntes} min (${rec.hora}). Tocá para confirmar.`;
+                                                body = `Tocá para confirmar.`;
                                                 tag = `cancha-empleado-${rec.id}`;
                                                 url =
                                                         "/RecordatoriosCanchaEmpleado";
