@@ -9,7 +9,7 @@ import {
 Deno.serve(async (req) => {
         try {
                 const errors: string[] = [];
-                let responseFromGoogle = null;
+                let responseFromGoogle;
                 console.log("🚀 Iniciando envío de notificaciones push...");
                 const base44 = createClientFromRequest(req);
 
@@ -101,23 +101,23 @@ Deno.serve(async (req) => {
                         const minutosAntes = rec.minutos_antes || 10;
 
                         for (const usuario of usuarios) {
-                                if (
-                                        usuario.role === "admin" &&
-                                        usuario.recibir_notificaciones_cancha ===
-                                                false
-                                ) {
-                                        console.log(
-                                                `   ⏭️ Saltando admin ${usuario.email} (notificaciones desactivadas)`,
-                                        );
-                                        continue;
-                                }
+                                // if (
+                                //         usuario.role === "admin" &&
+                                //         usuario.recibir_notificaciones_cancha ===
+                                //                 false
+                                // ) {
+                                //         console.log(
+                                //                 `   ⏭️ Saltando admin ${usuario.email} (notificaciones desactivadas)`,
+                                //         );
+                                //         continue;
+                                // }
 
-                                if (!usuario.push_subscription) {
-                                        console.log(
-                                                `   ⏭️ Saltando ${usuario.email} (sin push_subscription)`,
-                                        );
-                                        continue;
-                                }
+                                // if (!usuario.push_subscription) {
+                                //         console.log(
+                                //                 `   ⏭️ Saltando ${usuario.email} (sin push_subscription)`,
+                                //         );
+                                //         continue;
+                                // }
 
                                 console.log(
                                         `   👤 Evaluando ${usuario.email} (${usuario.role})`,
@@ -245,8 +245,7 @@ Deno.serve(async (req) => {
                                                                 ),
                                                         },
                                                 );
-                                                let responseFromGoogle =
-                                                        response;
+                                                responseFromGoogle = response;
                                                 if (response.ok) {
                                                         const responseData =
                                                                 await response.json();
