@@ -134,8 +134,9 @@ Deno.serve(async (req) => {
                                 }
 
                                 if (debeNotificar) {
-                                        try {
-                                                const response = await fetch(
+                                  console.log(`📤 Enviando notificación: "${title}" - "${body}"`);
+                                  try {
+                                    const response = await fetch(
                                                         `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
                                                         {
                                                                 method: "POST",
@@ -206,7 +207,9 @@ Deno.serve(async (req) => {
                         recordatoriosRevisados: recordatorios.length,
                 });
         } catch (error) {
-                return Response.json({ error: error.message }, { status: 500 });
+          console.error('❌ ERROR GENERAL:', error.message);
+          console.error('Stack:', error.stack);
+          return Response.json({ error: error.message }, { status: 500 });
         }
 });
 
