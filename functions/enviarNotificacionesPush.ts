@@ -69,6 +69,7 @@ Deno.serve(async (req) => {
                         );
                 }
 
+                console.log(`🔑 Obteniendo access token de Firebase...`);
                 const accessToken = await getAccessToken(
                         clientEmail,
                         privateKey,
