@@ -17,16 +17,19 @@ Deno.serve(async (req) => {
                 const recordatorios =
                         await base44.asServiceRole.entities.RecordatorioCancha.filter(
                                 {
+                                        fecha: today,
                                         estado: "pendiente",
                                         notificar: true,
                                 },
                         );
-                console.log(`📋 Recordatorios encontrados: ${recordatorios.length}`);
+                console.log(
+                        `📋 Recordatorios encontrados: ${recordatorios.length}`,
+                );
 
                 const usuarios =
                         await base44.asServiceRole.entities.User.list();
                 console.log(`👥 Usuarios totales: ${usuarios.length}`);
-                
+
                 const turnos =
                         await base44.asServiceRole.entities.TurnoCancha.filter({
                                 fecha: today,
@@ -34,7 +37,7 @@ Deno.serve(async (req) => {
                 console.log(`📅 Turnos de hoy: ${turnos.length}`);
 
                 const now = new Date();
-                console.log(`⏰ Hora actual: ${format(now, 'HH:mm:ss')}`);
+                console.log(`⏰ Hora actual: ${format(now, "HH:mm:ss")}`);
                 let notificacionesEnviadas = 0;
 
                 const projectId = Deno.env.get("FIREBASE_PROJECT_ID");
@@ -46,7 +49,7 @@ Deno.serve(async (req) => {
                 console.log(`🔑 Project ID: ${projectId}`);
                 console.log(`🔑 Client Email: ${clientEmail}`);
                 console.log(`🔑 Obteniendo access token de Firebase...`);
-                
+
                 const accessToken = await getAccessToken(
                         clientEmail,
                         privateKey,
@@ -54,9 +57,13 @@ Deno.serve(async (req) => {
                 console.log(`✅ Access token obtenido`);
 
                 for (const rec of recordatorios) {
-                        console.log(`\n🔔 Procesando recordatorio: Cancha ${rec.cancha} - ${rec.hora} (${rec.cliente || rec.profesor})`);
-                        console.log(`   Fecha: ${rec.fecha}, Estado: ${rec.estado}, Notificado previo: ${rec.notificado_previo}`);
-                        
+                        console.log(
+                                `\n🔔 Procesando recordatorio: Cancha ${rec.cancha} - ${rec.hora} (${rec.cliente || rec.profesor})`,
+                        );
+                        console.log(
+                                `   Fecha: ${rec.fecha}, Estado: ${rec.estado}, Notificado previo: ${rec.notificado_previo}`,
+                        );
+
                         const [hours, minutes] = rec.hora
                                 .split(":")
                                 .map(Number);
@@ -71,16 +78,22 @@ Deno.serve(async (req) => {
                                         usuario.recibir_notificaciones_cancha ===
                                                 false
                                 ) {
-                                        console.log(`   ⏭️ Saltando admin ${usuario.email} (notificaciones desactivadas)`);
+                                        console.log(
+                                                `   ⏭️ Saltando admin ${usuario.email} (notificaciones desactivadas)`,
+                                        );
                                         continue;
                                 }
 
                                 if (!usuario.push_subscription) {
-                                        console.log(`   ⏭️ Saltando ${usuario.email} (sin push_subscription)`);
+                                        console.log(
+                                                `   ⏭️ Saltando ${usuario.email} (sin push_subscription)`,
+                                        );
                                         continue;
                                 }
-                                
-                                console.log(`   👤 Evaluando ${usuario.email} (${usuario.role})`);
+
+                                console.log(
+                                        `   👤 Evaluando ${usuario.email} (${usuario.role})`,
+                                );
 
                                 let debeNotificar = false;
                                 let title, body, tag, url;
@@ -101,7 +114,9 @@ Deno.serve(async (req) => {
                                                         finTurno,
                                                         now,
                                                 );
-                                        console.log(`      Admin: minutos hasta fin del turno = ${minutesUntilEnd}, umbral = ${minutosAntes}`);
+                                        console.log(
+                                                `      Admin: minutos hasta fin del turno = ${minutesUntilEnd}, umbral = ${minutosAntes}`,
+                                        );
 
                                         if (
                                                 minutesUntilEnd <=
@@ -130,7 +145,9 @@ Deno.serve(async (req) => {
                                                         recordatorioTime,
                                                         now,
                                                 );
-                                        console.log(`      Empleado: minutos hasta inicio = ${minutesUntilStart}, umbral = ${minutosAntes}`);
+                                        console.log(
+                                                `      Empleado: minutos hasta inicio = ${minutesUntilStart}, umbral = ${minutosAntes}`,
+                                        );
 
                                         if (
                                                 minutesUntilStart <=
@@ -156,11 +173,15 @@ Deno.serve(async (req) => {
                                 }
 
                                 if (debeNotificar) {
-                                  console.log(`      ✅ DEBE NOTIFICAR`);
-                                  console.log(`      📤 Enviando a ${usuario.email}: "${title}" - "${body}"`);
-                                  console.log(`      🔑 Token: ${usuario.push_subscription.substring(0, 20)}...`);
-                                  try {
-                                    const response = await fetch(
+                                        console.log(`      ✅ DEBE NOTIFICAR`);
+                                        console.log(
+                                                `      📤 Enviando a ${usuario.email}: "${title}" - "${body}"`,
+                                        );
+                                        console.log(
+                                                `      🔑 Token: ${usuario.push_subscription.substring(0, 20)}...`,
+                                        );
+                                        try {
+                                                const response = await fetch(
                                                         `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
                                                         {
                                                                 method: "POST",
@@ -198,40 +219,62 @@ Deno.serve(async (req) => {
                                                 );
 
                                                 if (response.ok) {
-                                                        const responseData = await response.json();
-                                                        console.log(`      ✅ Notificación enviada exitosamente a ${usuario.email}`);
-                                                        console.log(`      Response:`, responseData);
+                                                        const responseData =
+                                                                await response.json();
+                                                        console.log(
+                                                                `      ✅ Notificación enviada exitosamente a ${usuario.email}`,
+                                                        );
+                                                        console.log(
+                                                                `      Response:`,
+                                                                responseData,
+                                                        );
                                                         notificacionesEnviadas++;
                                                 } else {
-                                                        const error = await response.text();
-                                                        console.error(`      ❌ Error FCM status ${response.status}:`, error);
+                                                        const error =
+                                                                await response.text();
+                                                        console.error(
+                                                                `      ❌ Error FCM status ${response.status}:`,
+                                                                error,
+                                                        );
                                                 }
                                         } catch (error) {
-                                                console.error(`      ❌ Error enviando a ${usuario.email}:`, error.message);
-                                                console.error(`      Stack:`, error.stack);
+                                                console.error(
+                                                        `      ❌ Error enviando a ${usuario.email}:`,
+                                                        error.message,
+                                                );
+                                                console.error(
+                                                        `      Stack:`,
+                                                        error.stack,
+                                                );
                                         }
                                 } else {
-                                        console.log(`      ⏭️ No debe notificar en este momento`);
+                                        console.log(
+                                                `      ⏭️ No debe notificar en este momento`,
+                                        );
                                 }
                         }
                 }
 
                 console.log(`\n📊 ═══════════════════════════════════════`);
                 console.log(`   RESUMEN FINAL`);
-                console.log(`   ✅ Notificaciones enviadas: ${notificacionesEnviadas}`);
-                console.log(`   📋 Recordatorios revisados: ${recordatorios.length}`);
+                console.log(
+                        `   ✅ Notificaciones enviadas: ${notificacionesEnviadas}`,
+                );
+                console.log(
+                        `   📋 Recordatorios revisados: ${recordatorios.length}`,
+                );
                 console.log(`   👥 Usuarios procesados: ${usuarios.length}`);
                 console.log(`═══════════════════════════════════════\n`);
-                
+
                 return Response.json({
                         success: true,
                         notificacionesEnviadas,
                         recordatoriosRevisados: recordatorios.length,
                 });
         } catch (error) {
-          console.error('❌ ERROR GENERAL:', error.message);
-          console.error('Stack:', error.stack);
-          return Response.json({ error: error.message }, { status: 500 });
+                console.error("❌ ERROR GENERAL:", error.message);
+                console.error("Stack:", error.stack);
+                return Response.json({ error: error.message }, { status: 500 });
         }
 });
 
