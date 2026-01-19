@@ -13,12 +13,12 @@ export default async function enviarNotificacionesPush() {
         const today = format(new Date(), "yyyy-MM-dd");
 
         // Obtener recordatorios pendientes de hoy
-        const recordatorios =
+        const recordatorios = (
                 await base44.asServiceRole.entities.RecordatorioCancha.filter({
-                        fecha: today,
                         estado: "pendiente",
                         notificar: true,
-                });
+                })
+        ).getFirst();
 
         // Obtener todos los usuarios con suscripciones
         const usuarios = await base44.asServiceRole.entities.User.list();
