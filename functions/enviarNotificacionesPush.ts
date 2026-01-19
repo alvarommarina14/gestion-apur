@@ -47,9 +47,24 @@ Deno.serve(async (req) => {
                         .replace(/\\n/g, "\n");
                 const clientEmail = Deno.env.get("FIREBASE_CLIENT_EMAIL");
 
-                console.log(`🔑 Project ID: ${projectId}`);
-                console.log(`🔑 Client Email: ${clientEmail}`);
-                console.log(`🔑 Obteniendo access token de Firebase...`);
+                if (!projectId || !privateKey || !clientEmail) {
+                        console.error("❌ Faltan credenciales de Firebase:");
+                        console.error(
+                                `   Project ID: ${projectId ? "✅" : "❌"}`,
+                        );
+                        console.error(
+                                `   Private Key: ${privateKey ? "✅" : "❌"}`,
+                        );
+                        console.error(
+                                `   Client Email: ${clientEmail ? "✅" : "❌"}`,
+                        );
+                        return Response.json(
+                                {
+                                        error: "Credenciales de Firebase no configuradas",
+                                },
+                                { status: 500 },
+                        );
+                }
 
                 const accessToken = await getAccessToken(
                         clientEmail,
