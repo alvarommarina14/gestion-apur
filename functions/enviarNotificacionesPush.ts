@@ -8,6 +8,7 @@ import {
 
 Deno.serve(async (req) => {
         try {
+                const errors: string[] = [];
                 console.log("🚀 Iniciando envío de notificaciones push...");
                 const base44 = createClientFromRequest(req);
 
@@ -232,9 +233,8 @@ Deno.serve(async (req) => {
                                                 } else {
                                                         const error =
                                                                 await response.text();
-                                                        console.error(
-                                                                `      ❌ Error FCM status ${response.status}:`,
-                                                                error,
+                                                        errors.push(
+                                                                `Error enviando a ${usuario.email}: ${error}`,
                                                         );
                                                 }
                                         } catch (error) {
@@ -270,6 +270,7 @@ Deno.serve(async (req) => {
                         success: true,
                         notificacionesEnviadas,
                         recordatoriosRevisados: recordatorios.length,
+                        errors: errors,
                 });
         } catch (error) {
                 console.error("❌ ERROR GENERAL:", error.message);
