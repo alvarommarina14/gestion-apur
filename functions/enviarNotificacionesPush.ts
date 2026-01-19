@@ -9,6 +9,7 @@ import {
 Deno.serve(async (req) => {
         try {
                 const errors: string[] = [];
+                let responseFromGoogle = null;
                 console.log("🚀 Iniciando envío de notificaciones push...");
                 const base44 = createClientFromRequest(req);
 
@@ -244,7 +245,8 @@ Deno.serve(async (req) => {
                                                                 ),
                                                         },
                                                 );
-
+                                                let responseFromGoogle =
+                                                        response;
                                                 if (response.ok) {
                                                         const responseData =
                                                                 await response.json();
@@ -298,6 +300,7 @@ Deno.serve(async (req) => {
                         notificacionesEnviadas,
                         recordatoriosRevisados: recordatorios.length,
                         errors: errors,
+                        response: responseFromGoogle,
                 });
         } catch (error) {
                 console.error("❌ ERROR GENERAL:", error.message);
