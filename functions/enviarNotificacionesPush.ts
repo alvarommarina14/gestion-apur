@@ -42,19 +42,10 @@ Deno.serve(async (req) => {
                 let notificacionesEnviadas = 0;
 
                 const projectId = Deno.env.get("FIREBASE_PROJECT_ID");
-                const privateKeyRaw = Deno.env.get("FIREBASE_PRIVATE_KEY");
-                const privateKey = privateKeyRaw ? privateKeyRaw.replace(/\\n/g, "\n") : null;
+                const privateKey = Deno.env
+                        .get("FIREBASE_PRIVATE_KEY")
+                        .replace(/\\n/g, "\n");
                 const clientEmail = Deno.env.get("FIREBASE_CLIENT_EMAIL");
-                
-                if (!projectId || !privateKey || !clientEmail) {
-                        console.error("❌ Faltan credenciales de Firebase:");
-                        console.error(`   Project ID: ${projectId ? "✅" : "❌"}`);
-                        console.error(`   Private Key: ${privateKey ? "✅" : "❌"}`);
-                        console.error(`   Client Email: ${clientEmail ? "✅" : "❌"}`);
-                        return Response.json({ 
-                                error: "Credenciales de Firebase no configuradas" 
-                        }, { status: 500 });
-                }
 
                 console.log(`🔑 Project ID: ${projectId}`);
                 console.log(`🔑 Client Email: ${clientEmail}`);
@@ -242,9 +233,7 @@ Deno.serve(async (req) => {
                                                 } else {
                                                         const error =
                                                                 await response.text();
-                                                        errors.push(
-                                                                `Error enviando a ${usuario.email}: ${error}`,
-                                                        );
+                                                        errors.push(error);
                                                 }
                                         } catch (error) {
                                                 console.error(
