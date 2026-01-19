@@ -8,9 +8,9 @@ import {
 
 Deno.serve(async (req) => {
         try {
-                const errors: string[] = [];
+                const errors = [];
                 let responseFromGoogle;
-                console.log("🚀 Iniciando envío de notificaciones push...");
+                console.log("🚀 Iniciando envío de notificaciones push (v2)...");
                 const base44 = createClientFromRequest(req);
 
                 const today = format(new Date(), "yyyy-MM-dd");
