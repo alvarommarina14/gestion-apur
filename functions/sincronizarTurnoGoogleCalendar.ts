@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'No autorizado' }, { status: 403 });
     }
 
-    const { turno_id } = await req.json();
+    const { turno_id, action } = await req.json();
     
     if (!turno_id) {
       return Response.json({ error: 'turno_id requerido' }, { status: 400 });
@@ -28,6 +28,26 @@ Deno.serve(async (req) => {
     
     // Obtener access token de Google Calendar
     const accessToken = await base44.asServiceRole.connectors.getAccessToken('googlecalendar');
+
+    // Si la acción es eliminar
+    if (action === 'delete' && turno.gcal_event_id) {
+      const deleteResponse = await fetch(
+        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events/${turno.gcal_event_id}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (!deleteResponse.ok && deleteResponse.status !== 404) {
+        const error = await deleteResponse.text();
+        console.error('Error eliminando de Google Calendar:', error);
+      }
+
+      return Response.json({ success: true, deleted: true });
+    }
 
     // Preparar evento para Google Calendar
     // Construir fecha/hora directamente en formato ISO para Argentina

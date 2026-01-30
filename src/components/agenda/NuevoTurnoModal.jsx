@@ -300,6 +300,19 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
       const turnoData = turnosExistentes.find(t => t.id === id);
+
+      // Eliminar de Google Calendar primero
+      if (turnoData?.gcal_event_id) {
+        try {
+          await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
+            turno_id: id, 
+            action: 'delete' 
+          });
+        } catch (err) {
+          console.error('Error eliminando de Google Calendar:', err);
+        }
+      }
+
       if (turnoData) {
         await base44.entities.LogAuditoria.create({
           entidad: 'TurnoCancha',
@@ -315,7 +328,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
       for (const rec of recordatorios) {
         await base44.entities.RecordatorioCancha.delete(rec.id);
       }
-      
+
       await base44.entities.TurnoCancha.delete(id);
     },
     onSuccess: () => {
