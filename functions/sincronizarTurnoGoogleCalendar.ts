@@ -96,8 +96,8 @@ Deno.serve(async (req) => {
     const startDateTime = `${turno.fecha}T${turno.hora_inicio}:00`;
     const endDateTime = `${turno.fecha}T${turno.hora_fin}:00`;
 
-    // Notificación 10 minutos antes del INICIO del turno
-    const minutosParaNotificar = 10;
+    // Notificación 10 minutos antes del FIN del turno
+    const minutosAntesDelFin = turno.duracion - 10;
 
     const evento = {
       summary: `🎾 Cancha ${turno.cancha} - ${turno.cliente}`,
@@ -109,7 +109,7 @@ Monto: $${turno.monto}
 ${turno.pagado ? '✅ Pagado' : '⏳ Pendiente de pago'}
 ${turno.notas ? `Notas: ${turno.notas}` : ''}
 
-🔔 Recordatorio: 10 minutos antes del inicio
+🔔 Recordatorio: 10 minutos antes del fin del turno
       `.trim(),
       start: {
         dateTime: startDateTime,
@@ -120,10 +120,14 @@ ${turno.notas ? `Notas: ${turno.notas}` : ''}
         timeZone: 'America/Argentina/Buenos_Aires',
       },
       location: `Cancha ${turno.cancha}`,
+      attendees: turno.empleados_asignados_emails?.map(email => ({ 
+        email,
+        responseStatus: 'accepted',
+      })) || [],
       reminders: {
         useDefault: false,
         overrides: [
-          { method: 'popup', minutes: 10 },
+          { method: 'popup', minutes: minutosAntesDelFin },
         ],
       },
       extendedProperties: {
