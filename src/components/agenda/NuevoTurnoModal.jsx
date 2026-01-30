@@ -38,6 +38,12 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
     enabled: open,
   });
 
+  const { data: empleados = [] } = useQuery({
+    queryKey: ['empleados'],
+    queryFn: () => base44.entities.Empleado.filter({ activo: true }),
+    enabled: open,
+  });
+
   const [formData, setFormData] = useState({
     fecha: format(fecha || new Date(), 'yyyy-MM-dd'),
     hora_inicio: '09:00',
@@ -53,6 +59,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
     repeticion_semanal: false,
     notificar: true,
     minutos_antes: 10,
+    empleado_asignado_id: '',
   });
 
   useEffect(() => {
@@ -78,6 +85,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
             repeticion_semanal: false,
             notificar: recordatorio?.notificar !== false,
             minutos_antes: recordatorio?.minutos_antes || 10,
+            empleado_asignado_id: turno.empleado_asignado_id || '',
           });
         } catch (error) {
           console.error('Error loading recordatorio:', error);
@@ -96,6 +104,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
             repeticion_semanal: false,
             notificar: true,
             minutos_antes: 10,
+            empleado_asignado_id: turno.empleado_asignado_id || '',
           });
         }
       };
@@ -117,6 +126,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
         repeticion_semanal: false,
         notificar: true,
         minutos_antes: 10,
+        empleado_asignado_id: '',
       });
     }
     setError(null);
@@ -150,7 +160,16 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      const turnoCreado = await base44.entities.TurnoCancha.create(data);
+      const empleado = empleados.find(e => e.id === data.empleado_asignado_id);
+      const turnoData = {
+        ...data,
+        empleado_asignado_email: empleado?.email_gmail,
+        empleado_asignado_nombre: empleado?.nombre,
+        estado: 'activo',
+        make_sync_status: 'pendiente',
+        base44_agenda_link: `${window.location.origin}/AgendaEmpleados`,
+      };
+      const turnoCreado = await base44.entities.TurnoCancha.create(turnoData);
       
       const diaSemana = format(parseISO(data.fecha), 'EEEE', { locale: es });
       
@@ -196,7 +215,15 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data, cambios, cambioNotificacion }) => {
-      await base44.entities.TurnoCancha.update(id, data);
+      const empleado = empleados.find(e => e.id === data.empleado_asignado_id);
+      const turnoData = {
+        ...data,
+        empleado_asignado_email: empleado?.email_gmail,
+        empleado_asignado_nombre: empleado?.nombre,
+        make_sync_status: 'pendiente',
+        base44_agenda_link: `${window.location.origin}/AgendaEmpleados`,
+      };
+      await base44.entities.TurnoCancha.update(id, turnoData);
       
       const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: id });
       if (recordatorios.length > 0) {
@@ -287,6 +314,11 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     setError(null);
+
+    if (!formData.empleado_asignado_id) {
+      setError('Debes seleccionar un empleado asignado');
+      return;
+    }
 
     if (formData.tipo_turno === 'alquiler' && !formData.modalidad_alquiler) {
       setError('Debes seleccionar la modalidad del alquiler (Abono o Suelto)');
@@ -465,6 +497,25 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
           placeholder="Nombre del cliente"
           required
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Empleado asignado *</Label>
+        <Select
+          value={formData.empleado_asignado_id}
+          onValueChange={(v) => setFormData({ ...formData, empleado_asignado_id: v })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Seleccionar empleado" />
+          </SelectTrigger>
+          <SelectContent>
+            {empleados.map((emp) => (
+              <SelectItem key={emp.id} value={emp.id}>
+                {emp.nombre} ({emp.email_gmail})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-2">

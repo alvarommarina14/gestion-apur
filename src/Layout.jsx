@@ -32,6 +32,7 @@ const navigationGestionClases = [
 const navigationAgenda = [
   { name: 'Agenda', href: 'Agenda', icon: Calendar },
   { name: 'Dashboard de Ocupación', href: 'DashboardOcupacion', icon: LayoutDashboard },
+  { name: 'Mi Agenda', href: 'AgendaEmpleados', icon: Calendar, empleadoOnly: true },
 ];
 
 const navigationCancha = [
@@ -140,8 +141,9 @@ export default function Layout({ children, currentPageName }) {
                 Booking de Canchas
               </p>
               {navigationAgenda.map((item) => {
-                // Empleados solo ven Agenda, no Dashboard de Ocupación
+                // Empleados solo ven Agenda y Mi Agenda
                 if (user?.role !== 'admin' && item.href === 'DashboardOcupacion') return null;
+                if (user?.role === 'admin' && item.empleadoOnly) return null;
 
                 const isActive = currentPageName === item.href;
                 const Icon = item.icon;
