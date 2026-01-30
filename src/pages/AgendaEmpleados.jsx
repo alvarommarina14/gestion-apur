@@ -23,15 +23,21 @@ export default function AgendaEmpleados() {
     enabled: !!user?.email,
   });
 
-  const { data: turnos = [], isLoading } = useQuery({
-    queryKey: ['turnos-empleado', empleado?.id, today],
+  const { data: allTurnos = [], isLoading } = useQuery({
+    queryKey: ['turnos-empleado', today],
     queryFn: () => base44.entities.TurnoCancha.filter({ 
       fecha: today,
-      empleado_asignado_id: empleado.id,
       estado: 'activo',
     }),
     enabled: !!empleado?.id,
   });
+
+  const turnos = useMemo(() => {
+    if (!empleado?.id) return [];
+    return allTurnos.filter(t => 
+      t.empleados_asignados_ids && t.empleados_asignados_ids.includes(empleado.id)
+    );
+  }, [allTurnos, empleado?.id]);
 
   const turnoActual = useMemo(() => {
     return turnos.find(turno => {

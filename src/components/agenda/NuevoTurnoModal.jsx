@@ -24,7 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Calendar, CheckCircle, AlertTriangle, Trash2, Bell } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Calendar, CheckCircle, AlertTriangle, Trash2, Bell, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
@@ -59,7 +60,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
     repeticion_semanal: false,
     notificar: true,
     minutos_antes: 10,
-    empleado_asignado_id: '',
+    empleados_asignados_ids: [],
   });
 
   useEffect(() => {
@@ -85,7 +86,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
             repeticion_semanal: false,
             notificar: recordatorio?.notificar !== false,
             minutos_antes: recordatorio?.minutos_antes || 10,
-            empleado_asignado_id: turno.empleado_asignado_id || '',
+            empleados_asignados_ids: turno.empleados_asignados_ids || [],
           });
         } catch (error) {
           console.error('Error loading recordatorio:', error);
@@ -104,7 +105,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
             repeticion_semanal: false,
             notificar: true,
             minutos_antes: 10,
-            empleado_asignado_id: turno.empleado_asignado_id || '',
+            empleados_asignados_ids: turno.empleados_asignados_ids || [],
           });
         }
       };
@@ -126,7 +127,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
         repeticion_semanal: false,
         notificar: true,
         minutos_antes: 10,
-        empleado_asignado_id: '',
+        empleados_asignados_ids: [],
       });
     }
     setError(null);
@@ -160,11 +161,11 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      const empleado = empleados.find(e => e.id === data.empleado_asignado_id);
+      const empleadosSeleccionados = empleados.filter(e => data.empleados_asignados_ids.includes(e.id));
       const turnoData = {
         ...data,
-        empleado_asignado_email: empleado?.email_gmail,
-        empleado_asignado_nombre: empleado?.nombre,
+        empleados_asignados_emails: empleadosSeleccionados.map(e => e.email_gmail),
+        empleados_asignados_nombres: empleadosSeleccionados.map(e => e.nombre),
         estado: 'activo',
         make_sync_status: 'pendiente',
         base44_agenda_link: `${window.location.origin}/AgendaEmpleados`,
@@ -215,11 +216,11 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data, cambios, cambioNotificacion }) => {
-      const empleado = empleados.find(e => e.id === data.empleado_asignado_id);
+      const empleadosSeleccionados = empleados.filter(e => data.empleados_asignados_ids.includes(e.id));
       const turnoData = {
         ...data,
-        empleado_asignado_email: empleado?.email_gmail,
-        empleado_asignado_nombre: empleado?.nombre,
+        empleados_asignados_emails: empleadosSeleccionados.map(e => e.email_gmail),
+        empleados_asignados_nombres: empleadosSeleccionados.map(e => e.nombre),
         make_sync_status: 'pendiente',
         base44_agenda_link: `${window.location.origin}/AgendaEmpleados`,
       };
@@ -315,8 +316,8 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
     e.preventDefault();
     setError(null);
 
-    if (!formData.empleado_asignado_id) {
-      setError('Debes seleccionar un empleado asignado');
+    if (!formData.empleados_asignados_ids || formData.empleados_asignados_ids.length === 0) {
+      setError('Debes seleccionar al menos un empleado asignado');
       return;
     }
 
@@ -500,22 +501,55 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
       </div>
 
       <div className="space-y-2">
-        <Label>Empleado asignado *</Label>
-        <Select
-          value={formData.empleado_asignado_id}
-          onValueChange={(v) => setFormData({ ...formData, empleado_asignado_id: v })}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Seleccionar empleado" />
-          </SelectTrigger>
-          <SelectContent>
-            {empleados.map((emp) => (
-              <SelectItem key={emp.id} value={emp.id}>
-                {emp.nombre} ({emp.email_gmail})
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Label>Empleados asignados *</Label>
+        <div className="border rounded-lg p-3 space-y-2 bg-slate-50">
+          {empleados.map((emp) => (
+            <div key={emp.id} className="flex items-center gap-2">
+              <Checkbox
+                id={`emp-${emp.id}`}
+                checked={formData.empleados_asignados_ids.includes(emp.id)}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    setFormData({
+                      ...formData,
+                      empleados_asignados_ids: [...formData.empleados_asignados_ids, emp.id]
+                    });
+                  } else {
+                    setFormData({
+                      ...formData,
+                      empleados_asignados_ids: formData.empleados_asignados_ids.filter(id => id !== emp.id)
+                    });
+                  }
+                }}
+              />
+              <label htmlFor={`emp-${emp.id}`} className="text-sm cursor-pointer">
+                {emp.nombre} <span className="text-slate-500">({emp.email_gmail})</span>
+              </label>
+            </div>
+          ))}
+        </div>
+        {formData.empleados_asignados_ids.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {formData.empleados_asignados_ids.map(id => {
+              const emp = empleados.find(e => e.id === id);
+              return emp ? (
+                <div key={id} className="flex items-center gap-1 bg-emerald-100 text-emerald-700 px-2 py-1 rounded-md text-xs">
+                  {emp.nombre}
+                  <button
+                    type="button"
+                    onClick={() => setFormData({
+                      ...formData,
+                      empleados_asignados_ids: formData.empleados_asignados_ids.filter(i => i !== id)
+                    })}
+                    className="hover:text-emerald-900"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ) : null;
+            })}
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">
