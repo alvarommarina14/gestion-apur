@@ -33,15 +33,17 @@ Deno.serve(async (req) => {
     const [horaInicio, minInicio] = turno.hora_inicio.split(':');
     const [horaFin, minFin] = turno.hora_fin.split(':');
     
-    const startDateTime = new Date(turno.fecha);
-    startDateTime.setHours(parseInt(horaInicio), parseInt(minInicio), 0);
+    // Argentina está GMT-3, crear fecha correctamente
+    const fechaParts = turno.fecha.split('-');
+    const year = parseInt(fechaParts[0]);
+    const month = parseInt(fechaParts[1]) - 1; // Mes en JS es 0-indexed
+    const day = parseInt(fechaParts[2]);
     
-    const endDateTime = new Date(turno.fecha);
-    endDateTime.setHours(parseInt(horaFin), parseInt(minFin), 0);
+    const startDateTime = new Date(year, month, day, parseInt(horaInicio), parseInt(minInicio), 0);
+    const endDateTime = new Date(year, month, day, parseInt(horaFin), parseInt(minFin), 0);
 
-    // Calcular minutos para notificar 10 min antes del FIN del turno
-    const duracionMinutos = turno.duracion || 60;
-    const minutosParaNotificar = duracionMinutos - 10;
+    // Notificación 10 minutos antes del INICIO del turno
+    const minutosParaNotificar = 10;
 
     const evento = {
       summary: `🎾 Cancha ${turno.cancha} - ${turno.cliente}`,
@@ -53,7 +55,7 @@ Monto: $${turno.monto}
 ${turno.pagado ? '✅ Pagado' : '⏳ Pendiente de pago'}
 ${turno.notas ? `Notas: ${turno.notas}` : ''}
 
-🔔 Recordatorio: 10 minutos antes de finalizar
+🔔 Recordatorio: 10 minutos antes del inicio
       `.trim(),
       start: {
         dateTime: startDateTime.toISOString(),
@@ -71,8 +73,7 @@ ${turno.notas ? `Notas: ${turno.notas}` : ''}
       reminders: {
         useDefault: false,
         overrides: [
-          { method: 'popup', minutes: minutosParaNotificar }, // 10 min antes del fin
-          { method: 'email', minutes: minutosParaNotificar }, // Email también
+          { method: 'popup', minutes: 10 }, // 10 min antes del inicio
         ],
       },
       guestsCanModify: false,
