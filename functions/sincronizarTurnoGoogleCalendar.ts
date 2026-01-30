@@ -92,12 +92,15 @@ Deno.serve(async (req) => {
     }
 
     // Preparar evento para Google Calendar
-    // Construir fecha/hora directamente en formato ISO para Argentina
-    const startDateTime = `${turno.fecha}T${turno.hora_inicio}:00`;
+    // El evento mostrará los últimos 10 minutos del turno para que la alerta sea exacta
+    // Ejemplo: turno 10:00-11:00 → evento 10:50-11:00 con alerta al inicio
+    const [h, m] = turno.hora_inicio.split(':').map(Number);
+    const inicioTurno = new Date(`${turno.fecha}T${turno.hora_inicio}:00`);
+    const finTurno = new Date(`${turno.fecha}T${turno.hora_fin}:00`);
+    const alertTime = new Date(finTurno.getTime() - 10 * 60000); // 10 min antes del fin
+    
+    const alertTimeStr = alertTime.toISOString().slice(0, 16);
     const endDateTime = `${turno.fecha}T${turno.hora_fin}:00`;
-
-    // Notificación 10 minutos antes del FIN del turno
-    const minutosAntesDelFin = turno.duracion - 10;
 
     const evento = {
       summary: `🎾 Cancha ${turno.cancha} - ${turno.cliente}`,
@@ -109,10 +112,10 @@ Monto: $${turno.monto}
 ${turno.pagado ? '✅ Pagado' : '⏳ Pendiente de pago'}
 ${turno.notas ? `Notas: ${turno.notas}` : ''}
 
-🔔 Recordatorio: 10 minutos antes del fin del turno
+🔔 Sacar cancha 10 minutos antes del fin (${turno.hora_inicio} - ${turno.hora_fin})
       `.trim(),
       start: {
-        dateTime: startDateTime,
+        dateTime: alertTimeStr,
         timeZone: 'America/Argentina/Buenos_Aires',
       },
       end: {
@@ -120,14 +123,10 @@ ${turno.notas ? `Notas: ${turno.notas}` : ''}
         timeZone: 'America/Argentina/Buenos_Aires',
       },
       location: `Cancha ${turno.cancha}`,
-      attendees: turno.empleados_asignados_emails?.map(email => ({ 
-        email,
-        responseStatus: 'accepted',
-      })) || [],
       reminders: {
         useDefault: false,
         overrides: [
-          { method: 'popup', minutes: minutosAntesDelFin },
+          { method: 'popup', minutes: 0 },
         ],
       },
       extendedProperties: {
