@@ -60,13 +60,18 @@ ${turno.notas ? `Notas: ${turno.notas}` : ''}
       location: `Cancha ${turno.cancha}`,
       attendees: turno.empleados_asignados_emails?.map(email => ({ 
         email,
-        responseStatus: 'accepted', // Auto-aceptar para que aparezca directamente
+        responseStatus: 'accepted',
       })) || [],
       reminders: {
         useDefault: false,
         overrides: [
-          { method: 'popup', minutes: 10 }, // 10 min antes del inicio
+          { method: 'popup', minutes: 10 },
         ],
+      },
+      extendedProperties: {
+        private: {
+          turno_id: turno_id,
+        },
       },
       guestsCanModify: false,
       guestsCanInviteOthers: false,
@@ -74,11 +79,45 @@ ${turno.notas ? `Notas: ${turno.notas}` : ''}
     };
 
     let response;
+    let eventIdToUse = turno.gcal_event_id;
+
+    // Buscar si ya existe un evento para este turno_id (evitar duplicados)
+    if (!eventIdToUse) {
+      const searchResponse = await fetch(
+        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?privateExtendedProperty=turno_id=${turno_id}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (searchResponse.ok) {
+        const searchData = await searchResponse.json();
+        if (searchData.items && searchData.items.length > 0) {
+          // Ya existe un evento para este turno, usar su ID
+          eventIdToUse = searchData.items[0].id;
+          
+          // Eliminar eventos duplicados si hay más de uno
+          for (let i = 1; i < searchData.items.length; i++) {
+            await fetch(
+              `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events/${searchData.items[i].id}`,
+              {
+                method: 'DELETE',
+                headers: {
+                  'Authorization': `Bearer ${accessToken}`,
+                },
+              }
+            );
+          }
+        }
+      }
+    }
     
-    if (turno.gcal_event_id) {
+    if (eventIdToUse) {
       // Actualizar evento existente
       response = await fetch(
-        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events/${turno.gcal_event_id}`,
+        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events/${eventIdToUse}`,
         {
           method: 'PUT',
           headers: {
