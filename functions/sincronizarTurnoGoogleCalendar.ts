@@ -36,6 +36,10 @@ Deno.serve(async (req) => {
     const endDateTime = new Date(turno.fecha);
     endDateTime.setHours(parseInt(horaFin), parseInt(minFin), 0);
 
+    // Calcular minutos para notificar 10 min antes del FIN del turno
+    const duracionMinutos = turno.duracion || 60;
+    const minutosParaNotificar = duracionMinutos - 10;
+
     const evento = {
       summary: `🎾 Cancha ${turno.cancha} - ${turno.cliente}`,
       description: `
@@ -46,7 +50,7 @@ Monto: $${turno.monto}
 ${turno.pagado ? '✅ Pagado' : '⏳ Pendiente de pago'}
 ${turno.notas ? `Notas: ${turno.notas}` : ''}
 
-Empleados asignados: ${turno.empleados_asignados_nombres?.join(', ') || 'N/A'}
+🔔 Recordatorio: 10 minutos antes de finalizar
       `.trim(),
       start: {
         dateTime: startDateTime.toISOString(),
@@ -57,13 +61,20 @@ Empleados asignados: ${turno.empleados_asignados_nombres?.join(', ') || 'N/A'}
         timeZone: 'America/Argentina/Buenos_Aires',
       },
       location: `Cancha ${turno.cancha}`,
-      attendees: turno.empleados_asignados_emails?.map(email => ({ email })) || [],
+      attendees: turno.empleados_asignados_emails?.map(email => ({ 
+        email,
+        responseStatus: 'accepted', // Auto-aceptar para que aparezca directamente
+      })) || [],
       reminders: {
         useDefault: false,
         overrides: [
-          { method: 'popup', minutes: 10 }, // 10 min antes del fin del turno
+          { method: 'popup', minutes: minutosParaNotificar }, // 10 min antes del fin
+          { method: 'email', minutes: minutosParaNotificar }, // Email también
         ],
       },
+      guestsCanModify: false,
+      guestsCanInviteOthers: false,
+      guestsCanSeeOtherGuests: true,
     };
 
     let response;
