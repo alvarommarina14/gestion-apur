@@ -301,16 +301,15 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
     mutationFn: async (id) => {
       const turnoData = turnosExistentes.find(t => t.id === id);
 
-      // Eliminar de Google Calendar primero
-      if (turnoData?.gcal_event_id) {
-        try {
-          await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
-            turno_id: id, 
-            action: 'delete' 
-          });
-        } catch (err) {
-          console.error('Error eliminando de Google Calendar:', err);
-        }
+      // Eliminar de Google Calendar primero (antes de borrar de la BD)
+      try {
+        await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
+          turno_id: id, 
+          action: 'delete' 
+        });
+      } catch (err) {
+        console.error('Error eliminando de Google Calendar:', err);
+        // Continuar con la eliminación aunque falle Calendar
       }
 
       if (turnoData) {
