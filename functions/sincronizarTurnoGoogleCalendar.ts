@@ -23,6 +23,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Turno no encontrado' }, { status: 404 });
     }
 
+    // ID del calendario compartido
+    const CALENDAR_ID = 'f6f2dcd149e0fee6eb7056b8fef6bdb7e8c8f09324a222f1427adc59c40c3400@group.calendar.google.com';
+    
     // Obtener access token de Google Calendar
     const accessToken = await base44.asServiceRole.connectors.getAccessToken('googlecalendar');
 
@@ -82,7 +85,7 @@ ${turno.notas ? `Notas: ${turno.notas}` : ''}
     if (turno.gcal_event_id) {
       // Actualizar evento existente
       response = await fetch(
-        `https://www.googleapis.com/calendar/v3/calendars/primary/events/${turno.gcal_event_id}`,
+        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events/${turno.gcal_event_id}`,
         {
           method: 'PUT',
           headers: {
@@ -95,7 +98,7 @@ ${turno.notas ? `Notas: ${turno.notas}` : ''}
     } else {
       // Crear nuevo evento
       response = await fetch(
-        'https://www.googleapis.com/calendar/v3/calendars/primary/events',
+        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events`,
         {
           method: 'POST',
           headers: {
