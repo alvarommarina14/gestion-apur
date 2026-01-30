@@ -60,7 +60,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
     repeticion_semanal: false,
     notificar: true,
     minutos_antes: 10,
-    empleados_asignados_ids: [],
+    empleados_asignados_ids: empleados.map(e => e.id),
   });
 
   useEffect(() => {
@@ -127,7 +127,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
         repeticion_semanal: false,
         notificar: true,
         minutos_antes: 10,
-        empleados_asignados_ids: [],
+        empleados_asignados_ids: empleados.map(e => e.id),
       });
     }
     setError(null);
@@ -330,28 +330,30 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
     e.preventDefault();
     setError(null);
 
-    if (!formData.empleados_asignados_ids || formData.empleados_asignados_ids.length === 0) {
-      setError('Debes seleccionar al menos un empleado asignado');
-      return;
-    }
+      // Asignar automáticamente a todos los empleados
+      const todosLosEmpleadosIds = empleados.map(e => e.id);
+      const dataConEmpleados = {
+        ...formData,
+        empleados_asignados_ids: todosLosEmpleadosIds,
+      };
 
-    if (formData.tipo_turno === 'alquiler' && !formData.modalidad_alquiler) {
+    if (dataConEmpleados.tipo_turno === 'alquiler' && !dataConEmpleados.modalidad_alquiler) {
       setError('Debes seleccionar la modalidad del alquiler (Abono o Suelto)');
       return;
     }
 
-    const horaFin = calcularHoraFin(formData.hora_inicio, formData.duracion);
-    
-    const solapados = validarSolapamiento(formData);
+    const horaFin = calcularHoraFin(dataConEmpleados.hora_inicio, dataConEmpleados.duracion);
+
+    const solapados = validarSolapamiento(dataConEmpleados);
     if (solapados.length > 0) {
-      setError(`Ya existe un turno en Cancha ${formData.cancha} a las ${solapados[0].hora_inicio}`);
+      setError(`Ya existe un turno en Cancha ${dataConEmpleados.cancha} a las ${solapados[0].hora_inicio}`);
       return;
     }
 
     const data = {
-      ...formData,
+      ...dataConEmpleados,
       hora_fin: horaFin,
-      monto: formData.pagado ? 0 : Number(formData.monto),
+      monto: dataConEmpleados.pagado ? 0 : Number(dataConEmpleados.monto),
     };
 
     if (turno) {
@@ -514,57 +516,6 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
         />
       </div>
 
-      <div className="space-y-2">
-        <Label>Empleados asignados *</Label>
-        <div className="border rounded-lg p-3 space-y-2 bg-slate-50">
-          {empleados.map((emp) => (
-            <div key={emp.id} className="flex items-center gap-2">
-              <Checkbox
-                id={`emp-${emp.id}`}
-                checked={formData.empleados_asignados_ids.includes(emp.id)}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    setFormData({
-                      ...formData,
-                      empleados_asignados_ids: [...formData.empleados_asignados_ids, emp.id]
-                    });
-                  } else {
-                    setFormData({
-                      ...formData,
-                      empleados_asignados_ids: formData.empleados_asignados_ids.filter(id => id !== emp.id)
-                    });
-                  }
-                }}
-              />
-              <label htmlFor={`emp-${emp.id}`} className="text-sm cursor-pointer">
-                {emp.full_name} <span className="text-slate-500">({emp.email})</span>
-              </label>
-            </div>
-          ))}
-        </div>
-        {formData.empleados_asignados_ids.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-2">
-            {formData.empleados_asignados_ids.map(id => {
-              const emp = empleados.find(e => e.id === id);
-              return emp ? (
-                <div key={id} className="flex items-center gap-1 bg-emerald-100 text-emerald-700 px-2 py-1 rounded-md text-xs">
-                  {emp.full_name}
-                  <button
-                    type="button"
-                    onClick={() => setFormData({
-                      ...formData,
-                      empleados_asignados_ids: formData.empleados_asignados_ids.filter(i => i !== id)
-                    })}
-                    className="hover:text-emerald-900"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ) : null;
-            })}
-          </div>
-        )}
-      </div>
 
       <div className="space-y-2">
         <Label>Tipo de Turno</Label>
