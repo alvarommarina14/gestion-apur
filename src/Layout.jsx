@@ -20,7 +20,6 @@ import { Button } from '@/components/ui/button';
 import NotificationPermissionModal from '@/components/NotificationPermissionModal';
 import NotificationManager from '@/components/NotificationManager';
 import PushNotificationManager from '@/components/PushNotificationManager';
-import GoogleCalendarAuthModal from '@/components/GoogleCalendarAuthModal';
 
 const navigationGestionClases = [
   { name: 'Dashboard', href: 'Dashboard', icon: LayoutDashboard },
@@ -62,9 +61,6 @@ export default function Layout({ children, currentPageName }) {
   
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Autorización Google Calendar */}
-      {user?.role === 'admin' && <GoogleCalendarAuthModal />}
-
       {/* Notificaciones Push */}
       <NotificationPermissionModal />
       <NotificationManager />

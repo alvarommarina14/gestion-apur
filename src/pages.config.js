@@ -48,35 +48,35 @@
  * The mainPage value must match a key in the PAGES object exactly.
  */
 import Agenda from './pages/Agenda';
+import AgendaEmpleados from './pages/AgendaEmpleados';
 import Alumnos from './pages/Alumnos';
 import Configuracion from './pages/Configuracion';
 import Dashboard from './pages/Dashboard';
 import DashboardOcupacion from './pages/DashboardOcupacion';
+import Empleados from './pages/Empleados';
 import Pagos from './pages/Pagos';
 import Recordatorios from './pages/Recordatorios';
 import RecordatoriosCanchaAdmin from './pages/RecordatoriosCanchaAdmin';
 import RecordatoriosCanchaEmpleado from './pages/RecordatoriosCanchaEmpleado';
 import Recuperos from './pages/Recuperos';
 import Reportes from './pages/Reportes';
-import AgendaEmpleados from './pages/AgendaEmpleados';
-import Empleados from './pages/Empleados';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "Agenda": Agenda,
+    "AgendaEmpleados": AgendaEmpleados,
     "Alumnos": Alumnos,
     "Configuracion": Configuracion,
     "Dashboard": Dashboard,
     "DashboardOcupacion": DashboardOcupacion,
+    "Empleados": Empleados,
     "Pagos": Pagos,
     "Recordatorios": Recordatorios,
     "RecordatoriosCanchaAdmin": RecordatoriosCanchaAdmin,
     "RecordatoriosCanchaEmpleado": RecordatoriosCanchaEmpleado,
     "Recuperos": Recuperos,
     "Reportes": Reportes,
-    "AgendaEmpleados": AgendaEmpleados,
-    "Empleados": Empleados,
 }
 
 export const pagesConfig = {
