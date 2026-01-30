@@ -40,8 +40,8 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
   });
 
   const { data: empleados = [] } = useQuery({
-    queryKey: ['empleados'],
-    queryFn: () => base44.entities.Empleado.filter({ activo: true }),
+    queryKey: ['users-empleados'],
+    queryFn: () => base44.entities.User.list(),
     enabled: open,
   });
 
@@ -172,6 +172,13 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
       };
       const turnoCreado = await base44.entities.TurnoCancha.create(turnoData);
       
+      // Sincronizar con Google Calendar
+      try {
+        await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { turno_id: turnoCreado.id });
+      } catch (err) {
+        console.error('Error sincronizando con Google Calendar:', err);
+      }
+      
       const diaSemana = format(parseISO(data.fecha), 'EEEE', { locale: es });
       
       await base44.entities.RecordatorioCancha.create({
@@ -225,6 +232,13 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
         base44_agenda_link: `${window.location.origin}/AgendaEmpleados`,
       };
       await base44.entities.TurnoCancha.update(id, turnoData);
+      
+      // Sincronizar con Google Calendar
+      try {
+        await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { turno_id: id });
+      } catch (err) {
+        console.error('Error sincronizando con Google Calendar:', err);
+      }
       
       const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: id });
       if (recordatorios.length > 0) {
