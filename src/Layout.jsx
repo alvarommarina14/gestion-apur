@@ -41,6 +41,7 @@ const navigationCancha = [
 ];
 
 const navigationConfiguracion = [
+  { name: 'Empleados', href: 'Empleados', icon: Users },
   { name: 'Configuración', href: 'Configuracion', icon: Settings },
 ];
 
