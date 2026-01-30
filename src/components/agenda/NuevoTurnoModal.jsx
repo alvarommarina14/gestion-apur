@@ -164,8 +164,8 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
       const empleadosSeleccionados = empleados.filter(e => data.empleados_asignados_ids.includes(e.id));
       const turnoData = {
         ...data,
-        empleados_asignados_emails: empleadosSeleccionados.map(e => e.email_gmail),
-        empleados_asignados_nombres: empleadosSeleccionados.map(e => e.nombre),
+        empleados_asignados_emails: empleadosSeleccionados.map(e => e.email),
+        empleados_asignados_nombres: empleadosSeleccionados.map(e => e.full_name),
         estado: 'activo',
         make_sync_status: 'pendiente',
         base44_agenda_link: `${window.location.origin}/AgendaEmpleados`,
@@ -219,8 +219,8 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
       const empleadosSeleccionados = empleados.filter(e => data.empleados_asignados_ids.includes(e.id));
       const turnoData = {
         ...data,
-        empleados_asignados_emails: empleadosSeleccionados.map(e => e.email_gmail),
-        empleados_asignados_nombres: empleadosSeleccionados.map(e => e.nombre),
+        empleados_asignados_emails: empleadosSeleccionados.map(e => e.email),
+        empleados_asignados_nombres: empleadosSeleccionados.map(e => e.full_name),
         make_sync_status: 'pendiente',
         base44_agenda_link: `${window.location.origin}/AgendaEmpleados`,
       };
@@ -523,7 +523,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
                 }}
               />
               <label htmlFor={`emp-${emp.id}`} className="text-sm cursor-pointer">
-                {emp.nombre} <span className="text-slate-500">({emp.email_gmail})</span>
+                {emp.full_name} <span className="text-slate-500">({emp.email})</span>
               </label>
             </div>
           ))}
@@ -534,7 +534,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
               const emp = empleados.find(e => e.id === id);
               return emp ? (
                 <div key={id} className="flex items-center gap-1 bg-emerald-100 text-emerald-700 px-2 py-1 rounded-md text-xs">
-                  {emp.nombre}
+                  {emp.full_name}
                   <button
                     type="button"
                     onClick={() => setFormData({
