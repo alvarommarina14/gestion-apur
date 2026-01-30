@@ -58,10 +58,6 @@ ${turno.notas ? `Notas: ${turno.notas}` : ''}
         timeZone: 'America/Argentina/Buenos_Aires',
       },
       location: `Cancha ${turno.cancha}`,
-      attendees: turno.empleados_asignados_emails?.map(email => ({ 
-        email,
-        responseStatus: 'accepted',
-      })) || [],
       reminders: {
         useDefault: false,
         overrides: [
