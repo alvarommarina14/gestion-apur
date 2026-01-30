@@ -17,11 +17,7 @@ export default function AgendaEmpleados() {
     queryFn: () => base44.auth.me(),
   });
 
-  const { data: empleado } = useQuery({
-    queryKey: ['empleado', user?.email],
-    queryFn: () => base44.entities.Empleado.filter({ email_gmail: user.email }).then(emps => emps[0]),
-    enabled: !!user?.email,
-  });
+  const empleado = user;
 
   const { data: allTurnos = [], isLoading } = useQuery({
     queryKey: ['turnos-empleado', today],
@@ -95,7 +91,7 @@ export default function AgendaEmpleados() {
           </p>
           {empleado && (
             <p className="text-emerald-600 text-sm font-medium mt-1">
-              👤 {empleado.nombre}
+              👤 {empleado.full_name}
             </p>
           )}
         </header>
