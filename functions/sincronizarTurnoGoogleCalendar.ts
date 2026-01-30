@@ -30,7 +30,46 @@ Deno.serve(async (req) => {
     const accessToken = await base44.asServiceRole.connectors.getAccessToken('googlecalendar');
 
     // Si la acción es eliminar
-    if (action === 'delete' && turno.gcal_event_id) {
+    if (action === 'delete') {
+      console.log('Intentando eliminar evento de Calendar:', { turno_id, gcal_event_id: turno.gcal_event_id });
+      
+      if (!turno.gcal_event_id) {
+        console.log('No hay gcal_event_id, buscando por turno_id...');
+        
+        // Buscar el evento por turno_id en propiedades extendidas
+        const searchResponse = await fetch(
+          `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?privateExtendedProperty=turno_id=${turno_id}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        if (searchResponse.ok) {
+          const searchData = await searchResponse.json();
+          if (searchData.items && searchData.items.length > 0) {
+            // Eliminar todos los eventos encontrados con este turno_id
+            for (const item of searchData.items) {
+              console.log('Eliminando evento encontrado:', item.id);
+              const delResp = await fetch(
+                `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events/${item.id}`,
+                {
+                  method: 'DELETE',
+                  headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                  },
+                }
+              );
+              console.log('Resultado eliminación:', delResp.status);
+            }
+            return Response.json({ success: true, deleted: true, deleted_count: searchData.items.length });
+          }
+        }
+        
+        return Response.json({ success: true, deleted: false, message: 'No se encontró evento en Calendar' });
+      }
+      
       const deleteResponse = await fetch(
         `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events/${turno.gcal_event_id}`,
         {
@@ -41,9 +80,12 @@ Deno.serve(async (req) => {
         }
       );
 
+      console.log('Resultado eliminación por gcal_event_id:', deleteResponse.status);
+
       if (!deleteResponse.ok && deleteResponse.status !== 404) {
         const error = await deleteResponse.text();
         console.error('Error eliminando de Google Calendar:', error);
+        return Response.json({ success: false, error }, { status: 500 });
       }
 
       return Response.json({ success: true, deleted: true });
