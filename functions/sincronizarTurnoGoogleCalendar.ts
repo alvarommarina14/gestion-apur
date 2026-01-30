@@ -30,17 +30,9 @@ Deno.serve(async (req) => {
     const accessToken = await base44.asServiceRole.connectors.getAccessToken('googlecalendar');
 
     // Preparar evento para Google Calendar
-    const [horaInicio, minInicio] = turno.hora_inicio.split(':');
-    const [horaFin, minFin] = turno.hora_fin.split(':');
-    
-    // Argentina está GMT-3, crear fecha correctamente
-    const fechaParts = turno.fecha.split('-');
-    const year = parseInt(fechaParts[0]);
-    const month = parseInt(fechaParts[1]) - 1; // Mes en JS es 0-indexed
-    const day = parseInt(fechaParts[2]);
-    
-    const startDateTime = new Date(year, month, day, parseInt(horaInicio), parseInt(minInicio), 0);
-    const endDateTime = new Date(year, month, day, parseInt(horaFin), parseInt(minFin), 0);
+    // Construir fecha/hora directamente en formato ISO para Argentina
+    const startDateTime = `${turno.fecha}T${turno.hora_inicio}:00`;
+    const endDateTime = `${turno.fecha}T${turno.hora_fin}:00`;
 
     // Notificación 10 minutos antes del INICIO del turno
     const minutosParaNotificar = 10;
@@ -58,11 +50,11 @@ ${turno.notas ? `Notas: ${turno.notas}` : ''}
 🔔 Recordatorio: 10 minutos antes del inicio
       `.trim(),
       start: {
-        dateTime: startDateTime.toISOString(),
+        dateTime: startDateTime,
         timeZone: 'America/Argentina/Buenos_Aires',
       },
       end: {
-        dateTime: endDateTime.toISOString(),
+        dateTime: endDateTime,
         timeZone: 'America/Argentina/Buenos_Aires',
       },
       location: `Cancha ${turno.cancha}`,
