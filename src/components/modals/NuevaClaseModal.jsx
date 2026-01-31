@@ -350,9 +350,9 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
             <div className="space-y-2">
               <Label>Tipo</Label>
               <Select
-                value={formData.tipo}
-                onValueChange={(v) => setFormData({ ...formData, tipo: v })}
-              >
+                 value={formData.tipo}
+                 onValueChange={(v) => setFormData(prev => ({ ...prev, tipo: v }))}
+               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
