@@ -15,7 +15,8 @@ import {
   Edit,
   Trash2,
   Eye,
-  RefreshCw
+  RefreshCw,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -46,6 +47,7 @@ import NuevoAlumnoModal from '@/components/modals/NuevoAlumnoModal';
 import RegistrarPagoModal from '@/components/modals/RegistrarPagoModal';
 import DetalleAlumnoModal from '@/components/modals/DetalleAlumnoModal';
 import EnviarRecordatorioBtn from '@/components/recordatorios/EnviarRecordatorioBtn';
+import ReporteAlumnoModal from '@/components/alumnos/ReporteAlumnoModal';
 import { cn } from '@/lib/utils';
 
 export default function Alumnos() {
@@ -55,6 +57,7 @@ export default function Alumnos() {
   const [nuevoModal, setNuevoModal] = useState({ open: false, alumno: null });
   const [pagoModal, setPagoModal] = useState({ open: false, alumno: null });
   const [detalleModal, setDetalleModal] = useState({ open: false, alumno: null });
+  const [reporteModal, setReporteModal] = useState({ open: false, alumno: null });
   
   const { data: alumnos = [], isLoading } = useQuery({
     queryKey: ['alumnos'],
@@ -249,6 +252,13 @@ export default function Alumnos() {
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={(e) => {
                               e.stopPropagation();
+                              setReporteModal({ open: true, alumno });
+                            }}>
+                              <FileText className="w-4 h-4 mr-2" />
+                              Reporte detallado
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
                               setPagoModal({ open: true, alumno });
                             }}>
                               <DollarSign className="w-4 h-4 mr-2" />
@@ -305,6 +315,12 @@ export default function Alumnos() {
         open={detalleModal.open}
         onOpenChange={(open) => setDetalleModal({ ...detalleModal, open })}
         alumno={detalleModal.alumno}
+      />
+      
+      <ReporteAlumnoModal 
+        open={reporteModal.open}
+        onOpenChange={(open) => setReporteModal({ ...reporteModal, open })}
+        alumno={reporteModal.alumno}
       />
     </div>
   );
