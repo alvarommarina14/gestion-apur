@@ -431,7 +431,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
             </div>
             <Switch
               checked={formData.pagado}
-              onCheckedChange={(checked) => setFormData({ ...formData, pagado: checked })}
+              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, pagado: checked }))}
             />
           </div>
 
