@@ -57,8 +57,8 @@ export default function Layout({ children, currentPageName }) {
         
         // No verificar rol si estamos en la página de selección de rol
         if (currentPageName !== 'SeleccionRol') {
-          // Si el usuario no tiene rol definido, redirigir a selección de rol
-          if (!currentUser.rol_usuario) {
+          // Si el usuario no tiene rol definido o es 'user', redirigir a selección de rol
+          if (!currentUser.role || currentUser.role === 'user') {
             window.location.href = createPageUrl('SeleccionRol');
             return;
           }
@@ -83,7 +83,7 @@ export default function Layout({ children, currentPageName }) {
 
   const handleLogout = () => {
     if (confirm('¿Querés cerrar sesión?')) {
-      base44.auth.logout('/');
+      base44.auth.logout();
     }
   };
   
@@ -129,7 +129,7 @@ export default function Layout({ children, currentPageName }) {
           {/* Navigation */}
           <nav className="flex-1 p-4 lg:p-4 space-y-1 overflow-y-auto touch-pan-y">
             {/* Gestión de Clases - Solo Administradores */}
-            {user?.rol_usuario === 'admin' && (
+            {user?.role === 'admin' && (
               <div>
                 <p className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
                   Gestión de Clases
@@ -167,14 +167,14 @@ export default function Layout({ children, currentPageName }) {
             )}
 
             {/* Booking de Canchas - Todos */}
-            <div className={cn(user?.rol_usuario === 'admin' && 'pt-4 mt-4 border-t border-slate-200')}>
+            <div className={cn(user?.role === 'admin' && 'pt-4 mt-4 border-t border-slate-200')}>
               <p className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
                 Booking de Canchas
               </p>
               {navigationAgenda.map((item) => {
                 // Filtrar por rol
-                if (item.adminOnly && user?.rol_usuario !== 'admin') return null;
-                if (item.empleadoOnly && user?.rol_usuario === 'admin') return null;
+                if (item.adminOnly && user?.role !== 'admin') return null;
+                if (item.empleadoOnly && user?.role === 'admin') return null;
 
                 const isActive = currentPageName === item.href;
                 const Icon = item.icon;
@@ -205,7 +205,7 @@ export default function Layout({ children, currentPageName }) {
             </div>
 
             {/* Gestión de Clientes - Solo Administradores */}
-            {user?.rol_usuario === 'admin' && (
+            {user?.role === 'admin' && (
               <div className="pt-4 mt-4 border-t border-slate-200">
                 <p className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
                   Gestión de Clientes
@@ -243,7 +243,7 @@ export default function Layout({ children, currentPageName }) {
 
 
             {/* Configuración - Solo Administradores */}
-            {user?.rol_usuario === 'admin' && (
+            {user?.role === 'admin' && (
               <div className="pt-4 mt-4 border-t border-slate-200">
                 {navigationConfiguracion.map((item) => {
                   const isActive = currentPageName === item.href;
