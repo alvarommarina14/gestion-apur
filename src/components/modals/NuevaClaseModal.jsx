@@ -114,22 +114,27 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
         const cantidadSemanas = formData.recurrencia_tipo === 'semanal' ? 1 : 2;
         
         for (let i = 0; i < formData.recurrencia_cantidad; i++) {
-          const fechaClase = addWeeks(formData.fecha, i * cantidadSemanas);
+          const fechaClase = formData.repeticion_semanal 
+            ? addWeeks(formData.fecha, i) 
+            : formData.fecha;
+
+          if (!formData.repeticion_semanal && i > 0) break;
+
           clases.push({
             fecha: format(fechaClase, 'yyyy-MM-dd'),
             hora_inicio: formData.hora_inicio,
             duracion: Number(formData.duracion),
             tipo: formData.tipo,
-            sede: formData.sede,
-            cancha: formData.cancha,
+            sede: 'Sistema',
+            cancha: formData.cancha || '',
             alumnos_ids: formData.alumnos_ids,
             alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
             precio: formData.precio ? Number(formData.precio) : null,
             estado: 'programada',
             es_recupero: false,
-            es_recurrente: true,
-            recurrencia_tipo: formData.recurrencia_tipo,
-            serie_recurrente_id: serieId,
+            es_recurrente: formData.repeticion_semanal,
+            recurrencia_tipo: formData.repeticion_semanal ? 'semanal' : null,
+            serie_recurrente_id: formData.repeticion_semanal ? serieId : null,
             notas: formData.notas,
             asistencia_registrada: false,
           });
