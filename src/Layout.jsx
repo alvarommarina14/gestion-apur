@@ -57,7 +57,7 @@ export default function Layout({ children, currentPageName }) {
         setUser(currentUser);
         
         // No verificar rol si estamos en las páginas especiales
-        if (currentPageName !== 'SeleccionRol' && currentPageName !== 'PendienteAprobacion') {
+        if (currentPageName !== 'SeleccionRol' && currentPageName !== 'PendienteAprobacion' && currentPageName !== 'ProfesorMenu') {
           // Si el usuario no tiene rol definido, redirigir a selección de rol
           if (!currentUser.rol) {
             window.location.href = createPageUrl('SeleccionRol');
@@ -67,6 +67,12 @@ export default function Layout({ children, currentPageName }) {
           // Si tiene rol admin pero está pendiente de aprobación, redirigir
           if (currentUser.rol === 'admin' && currentUser.estado_aprobacion === 'pendiente') {
             window.location.href = createPageUrl('PendienteAprobacion');
+            return;
+          }
+          
+          // Si es profesor, redirigir a su menú
+          if (currentUser.rol === 'profesor') {
+            window.location.href = createPageUrl('ProfesorMenu');
             return;
           }
         }
