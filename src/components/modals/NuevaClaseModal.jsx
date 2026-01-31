@@ -323,9 +323,9 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
             <div className="space-y-2">
               <Label>Duración</Label>
               <Select
-                value={formData.duracion.toString()}
-                onValueChange={(v) => setFormData({ ...formData, duracion: Number(v) })}
-              >
+                 value={formData.duracion.toString()}
+                 onValueChange={(v) => setFormData(prev => ({ ...prev, duracion: Number(v) }))}
+               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
