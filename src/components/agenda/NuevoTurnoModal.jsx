@@ -465,21 +465,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
 
        updateMutation.mutate({ id: turno.id, data, cambios });
      } else {
-       // Si hay repetición semanal, crear múltiples turnos
-       if (dataConEmpleados.repeticion_semanal) {
-         const turnos = [];
-         for (let i = 0; i < 4; i++) {
-           const fechaTurno = addWeeks(parseISO(dataConEmpleados.fecha), i);
-           turnos.push({
-             ...data,
-             fecha: format(fechaTurno, 'yyyy-MM-dd'),
-             repeticion_semanal: true,
-           });
-         }
-         Promise.all(turnos.map(t => createMutation.mutateAsync(t)));
-       } else {
-         createMutation.mutate(data);
-       }
+       createMutation.mutate(data);
      }
    };
 
