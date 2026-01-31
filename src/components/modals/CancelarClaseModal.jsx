@@ -87,7 +87,7 @@ export default function CancelarClaseModal({ open, onOpenChange, clase }) {
     if (!clase || !motivo) return;
     if (motivo === 'reprogramar' && (!nuevaFecha || !nuevaHora)) return;
     
-    // Solo admin puede cancelar
+    // Solo admin puede cancelar (sin restricción para sus propias clases)
     if (user?.rol !== 'admin') {
       alert('Solo administradores pueden cancelar clases');
       return;
