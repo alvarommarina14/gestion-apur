@@ -47,6 +47,18 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
     enabled: open,
   });
 
+  const { data: profesores = [] } = useQuery({
+    queryKey: ['profesores'],
+    queryFn: () => base44.entities.Profesor.list(),
+    enabled: open,
+  });
+
+  const { data: alumnos = [] } = useQuery({
+    queryKey: ['alumnos'],
+    queryFn: () => base44.entities.Alumno.list(),
+    enabled: open,
+  });
+
   const [formData, setFormData] = useState({
     fecha: format(fecha || new Date(), 'yyyy-MM-dd'),
     hora_inicio: '09:00',
