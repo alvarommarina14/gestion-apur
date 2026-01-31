@@ -12,8 +12,11 @@ import {
   DollarSign,
   Users,
   ChevronRight,
-  Filter
+  Filter,
+  FileDown
 } from 'lucide-react';
+import { jsPDF } from 'jspdf';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -220,6 +223,129 @@ export default function Dashboard() {
   }, [alumnos, clasesHoy, recuperos, currentDay, today]);
   
   const isLoading = loadingAlumnos || loadingClases;
+  
+  // Exportar Dashboard a PDF
+  const exportarDashboardPDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    // Header
+    doc.setFontSize(20);
+    doc.text('Dashboard - Reporte Mensual', pageWidth / 2, 20, { align: 'center' });
+    doc.setFontSize(12);
+    doc.text(format(today, "MMMM yyyy", { locale: es }).toUpperCase(), pageWidth / 2, 28, { align: 'center' });
+    
+    if (profesorSeleccionado) {
+      doc.setFontSize(11);
+      doc.text(`Profesor: ${profesorSeleccionado.nombre}`, pageWidth / 2, 35, { align: 'center' });
+    }
+    
+    let y = 45;
+    
+    // Resumen General
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text('Resumen General', 20, y);
+    y += 8;
+    
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Alumnos activos: ${alumnos.filter(a => a.estado !== 'pausado').length}`, 25, y);
+    y += 5;
+    doc.text(`Alumnos morosos: ${stats.cantidadMorosos}`, 25, y);
+    y += 5;
+    doc.text(`Clases de hoy: ${stats.clasesHoy}`, 25, y);
+    y += 5;
+    doc.text(`Clases realizadas este mes: ${stats.realizadas}`, 25, y);
+    y += 5;
+    doc.text(`Clases canceladas: ${stats.canceladas}`, 25, y);
+    y += 5;
+    doc.text(`Recuperos pendientes: ${stats.aRecuperar}`, 25, y);
+    y += 10;
+    
+    // Ingresos
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text('Ingresos del Mes', 20, y);
+    y += 8;
+    
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    const porcentajeCobrado = stats.ingresoEsperado > 0 ? Math.round((stats.ingresoReal / stats.ingresoEsperado) * 100) : 0;
+    
+    doc.text(`Ingreso esperado: $${stats.ingresoEsperado.toLocaleString('es-AR')}`, 25, y);
+    y += 5;
+    doc.text(`Ingreso real: $${stats.ingresoReal.toLocaleString('es-AR')}`, 25, y);
+    y += 5;
+    doc.text(`Porcentaje cobrado: ${porcentajeCobrado}%`, 25, y);
+    y += 5;
+    doc.text(`Deuda total: $${stats.deudaTotal.toLocaleString('es-AR')}`, 25, y);
+    y += 10;
+    
+    // Agenda de Hoy
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text(`Agenda de Hoy (${format(today, 'd MMM', { locale: es })})`, 20, y);
+    y += 8;
+    
+    if (clasesHoy.length === 0) {
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.text('No hay clases programadas para hoy', 25, y);
+      y += 10;
+    } else {
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      clasesHoy.slice(0, 10).forEach((clase, idx) => {
+        if (y > 260) {
+          doc.addPage();
+          y = 20;
+        }
+        
+        const alumnosNombres = clase.alumnos_nombres?.join(', ') || 'Sin alumnos';
+        doc.text(`${clase.hora_inicio} - ${alumnosNombres} (${clase.tipo})`, 25, y);
+        y += 5;
+      });
+      y += 5;
+    }
+    
+    // Alumnos Morosos
+    if (stats.cantidadMorosos > 0) {
+      if (y > 240) {
+        doc.addPage();
+        y = 20;
+      }
+      
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.text('Alumnos Morosos', 20, y);
+      y += 8;
+      
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      alumnos.filter(a => a.estado === 'moroso').slice(0, 10).forEach((alumno, idx) => {
+        if (y > 260) {
+          doc.addPage();
+          y = 20;
+        }
+        
+        doc.text(`${alumno.nombre} - Deuda: $${(alumno.deuda_total || 0).toLocaleString('es-AR')}`, 25, y);
+        y += 5;
+      });
+    }
+    
+    // Footer
+    doc.setFontSize(8);
+    doc.text(
+      `Generado el ${format(new Date(), "dd/MM/yyyy 'a las' HH:mm")}`,
+      pageWidth / 2,
+      doc.internal.pageSize.getHeight() - 10,
+      { align: 'center' }
+    );
+    
+    const filename = `dashboard_${profesorSeleccionado ? profesorSeleccionado.nombre.replace(/\s+/g, '_') : 'general'}_${format(today, 'yyyy-MM')}.pdf`;
+    doc.save(filename);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
@@ -233,6 +359,14 @@ export default function Dashboard() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <Button 
+              variant="outline"
+              onClick={exportarDashboardPDF}
+              className="gap-2"
+            >
+              <FileDown className="w-4 h-4" />
+              Exportar PDF
+            </Button>
             <Button 
               onClick={() => setNuevaClaseModal({ open: true, recupero: null })}
               className="bg-emerald-600 hover:bg-emerald-700"
