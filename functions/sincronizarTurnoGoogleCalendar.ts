@@ -49,6 +49,9 @@ Deno.serve(async (req) => {
       return Response.json({ success: true, deleted: true });
     }
 
+    // Obtener todos los empleados activos para agregarlos como invitados
+    const empleados = await base44.asServiceRole.entities.Empleado.filter({ activo: true });
+    
     // Preparar evento para Google Calendar
     // Construir fecha/hora con offset de zona horaria de Argentina (-03:00)
     const startDateTime = `${turno.fecha}T${turno.hora_inicio}:00-03:00`;
@@ -78,6 +81,10 @@ ${turno.notas ? `Notas: ${turno.notas}` : ''}
         timeZone: 'America/Argentina/Buenos_Aires',
       },
       location: `Cancha ${turno.cancha}`,
+      attendees: empleados.map(emp => ({
+        email: emp.email_gmail,
+        responseStatus: 'accepted',
+      })),
       reminders: {
         useDefault: false,
         overrides: [
