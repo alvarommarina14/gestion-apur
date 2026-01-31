@@ -54,7 +54,7 @@ export default function SeleccionRol() {
         setUser(currentUser);
         
         // Si ya tiene rol definido, redirigir
-        if (currentUser.role && currentUser.role !== 'user') {
+        if (currentUser.rol_usuario) {
           navigate(createPageUrl('Agenda'));
         }
       } catch (error) {
@@ -72,7 +72,7 @@ export default function SeleccionRol() {
     
     setSaving(true);
     try {
-      await base44.auth.updateMe({ role: selectedRol });
+      await base44.auth.updateMe({ rol_usuario: selectedRol });
       
       // Recargar la página para que el Layout detecte el nuevo rol
       window.location.reload();
