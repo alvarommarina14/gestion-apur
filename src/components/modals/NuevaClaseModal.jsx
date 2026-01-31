@@ -109,73 +109,22 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
     try {
       const alumnosSeleccionados = alumnosActivos.filter(a => formData.alumnos_ids.includes(a.id));
       
-      const horaFin = calcularHoraFin(formData.hora_inicio, formData.duracion);
-      const alumnosNombres = alumnosSeleccionados.map(a => a.nombre).join(', ');
-      
-      // Si es recurrente, crear clases para 52 semanas
+      // Si es recurrente, llamar función backend para crear 52 clases en paralelo
       if (formData.repeticion_semanal) {
-        const empleados = await base44.entities.User.list();
-        const empleadosIds = empleados.map(e => e.id);
-        const empleadosEmails = empleados.map(e => e.email);
-        const empleadosNombres = empleados.map(e => e.full_name);
-
-        for (let i = 0; i < 52; i++) {
-          const fechaClase = addWeeks(parseISO(format(formData.fecha, 'yyyy-MM-dd')), i);
-          
-          const claseData = {
-            fecha: format(fechaClase, 'yyyy-MM-dd'),
-            hora_inicio: formData.hora_inicio,
-            duracion: Number(formData.duracion),
-            tipo: formData.tipo,
-            sede: 'Sistema',
-            cancha: formData.cancha || '',
-            alumnos_ids: formData.alumnos_ids,
-            alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
-            precio: formData.precio ? Number(formData.precio) : null,
-            estado: 'programada',
-            es_recupero: formData.es_recupero,
-            clase_original_id: formData.clase_original_id,
-            notas: formData.notas,
-            asistencia_registrada: false,
-            profesor_id: user?.id,
-            estado_aprobacion: user?.rol === 'profesor' ? 'pendiente' : 'aprobada',
-            es_recurrente: true,
-            recurrencia_tipo: 'semanal',
-          };
-
-          const claseCreada = await base44.entities.Clase.create(claseData);
-
-          // Si es admin, crear TurnoCancha correspondiente
-          if (user?.rol === 'admin') {
-            try {
-              await base44.entities.TurnoCancha.create({
-                fecha: format(fechaClase, 'yyyy-MM-dd'),
-                hora_inicio: formData.hora_inicio,
-                hora_fin: horaFin,
-                duracion: Number(formData.duracion),
-                cancha: formData.cancha || '',
-                cliente: alumnosNombres || 'Clase',
-                tipo_turno: 'clase',
-                monto: formData.precio ? Number(formData.precio) : 0,
-                pagado: formData.pagado,
-                empleados_asignados_ids: empleadosIds,
-                empleados_asignados_emails: empleadosEmails,
-                empleados_asignados_nombres: empleadosNombres,
-                estado: 'activo',
-                notas: formData.notas || `Clase - ${alumnosNombres}`,
-              });
-            } catch (err) {
-              console.error('Error creando TurnoCancha:', err);
-            }
-
-            // Sincronizar con Google Calendar
-            try {
-              await base44.functions.invoke('sincronizarClaseGoogleCalendar', { clase_id: claseCreada.id });
-            } catch (err) {
-              console.error('Error sincronizando con Google Calendar:', err);
-            }
-          }
-        }
+        await base44.functions.invoke('crearClasesRecurrentes', {
+          fecha: format(formData.fecha, 'yyyy-MM-dd'),
+          hora_inicio: formData.hora_inicio,
+          duracion: formData.duracion,
+          tipo: formData.tipo,
+          cancha: formData.cancha,
+          alumnos_ids: formData.alumnos_ids,
+          alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
+          precio: formData.precio,
+          pagado: formData.pagado,
+          notas: formData.notas,
+          es_recupero: formData.es_recupero,
+          clase_original_id: formData.clase_original_id,
+        });
       } else {
         // Crear una sola clase sin repetición
         const claseData = {
