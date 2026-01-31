@@ -83,7 +83,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
         try {
           const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: turno.id });
           const recordatorio = recordatorios[0];
-          
+
           setFormData({
             fecha: turno.fecha,
             hora_inicio: turno.hora_inicio,
@@ -91,7 +91,8 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
             cancha: turno.cancha,
             cliente: turno.cliente,
             tipo_turno: turno.tipo_turno || 'clase',
-            profesor: turno.profesor || '',
+            profesor_id: turno.profesor_id || '',
+            alumnos_ids: turno.alumnos_ids || [],
             modalidad_alquiler: turno.modalidad_alquiler || '',
             monto: turno.monto,
             pagado: turno.pagado || false,
@@ -108,7 +109,8 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
             cancha: turno.cancha,
             cliente: turno.cliente,
             tipo_turno: turno.tipo_turno || 'clase',
-            profesor: turno.profesor || '',
+            profesor_id: turno.profesor_id || '',
+            alumnos_ids: turno.alumnos_ids || [],
             modalidad_alquiler: turno.modalidad_alquiler || '',
             monto: turno.monto,
             pagado: turno.pagado || false,
@@ -118,7 +120,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
           });
         }
       };
-      
+
       loadRecordatorio();
     } else if (!turno && open) {
       setFormData({
