@@ -84,6 +84,10 @@ export default function Layout({ children, currentPageName }) {
             if (!currentUser.profesor_id) {
               window.location.href = createPageUrl('ProfesorRegistro');
               return;
+            } else if (currentPageName === 'SeleccionRol' || currentPageName === 'ProfesorRegistro' || currentPageName === 'ProfesorMenu') {
+              // Si ya tiene profesor seleccionado, ir directo al Dashboard
+              window.location.href = createPageUrl('Dashboard');
+              return;
             }
           }
         }
