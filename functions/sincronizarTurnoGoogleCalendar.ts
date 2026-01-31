@@ -60,6 +60,13 @@ Deno.serve(async (req) => {
     // Notificación 10 minutos antes del INICIO del turno
     const minutosParaNotificar = 10;
 
+    // Filtrar empleados que tengan email_gmail válido
+    const attendees = empleados
+      .filter(emp => emp.email_gmail && emp.email_gmail.trim() !== '')
+      .map(emp => ({
+        email: emp.email_gmail,
+      }));
+
     const evento = {
       summary: `🎾 Cancha ${turno.cancha} - ${turno.cliente}`,
       description: `
@@ -81,9 +88,7 @@ ${turno.notas ? `Notas: ${turno.notas}` : ''}
         timeZone: 'America/Argentina/Buenos_Aires',
       },
       location: `Cancha ${turno.cancha}`,
-      attendees: empleados.map(emp => ({
-        email: emp.email_gmail,
-      })),
+      ...(attendees.length > 0 && { attendees }),
       reminders: {
         useDefault: false,
         overrides: [
