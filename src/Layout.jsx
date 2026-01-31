@@ -34,6 +34,15 @@ const navigationAgenda = [
   { name: 'Mis Recordatorios', href: 'RecordatoriosCanchaEmpleado', icon: Calendar, empleadoOnly: true },
 ];
 
+const navigationProfesor = [
+  { name: 'Dashboard', href: 'Dashboard', icon: LayoutDashboard },
+  { name: 'Calendario', href: 'CalendarioClases', icon: Calendar },
+  { name: 'Alumnos', href: 'Alumnos', icon: Users },
+  { name: 'Pagos', href: 'Pagos', icon: DollarSign },
+  { name: 'Recordatorios', href: 'Recordatorios', icon: RefreshCw },
+  { name: 'Reportes', href: 'Reportes', icon: FileText },
+];
+
 const navigationClientes = [
   { name: 'Clientes', href: 'Clientes', icon: Users },
 ];
