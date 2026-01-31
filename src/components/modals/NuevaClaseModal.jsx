@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { format, addDays, addWeeks } from 'date-fns';
+import { format, addDays, addWeeks, addMinutes } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { v4 as uuidv4 } from 'uuid';
 import {
