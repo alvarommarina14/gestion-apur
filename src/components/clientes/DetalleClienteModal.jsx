@@ -97,7 +97,6 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente, turno
   const clasificacionConfig = {
     nuevo: { icon: UserPlus, color: 'bg-blue-100 text-blue-700', label: 'Nuevo' },
     recurrente: { icon: UserCheck, color: 'bg-emerald-100 text-emerald-700', label: 'Recurrente' },
-    vip: { icon: Star, color: 'bg-amber-100 text-amber-700', label: 'VIP' },
   };
 
   const config = clasificacionConfig[cliente.clasificacion];
@@ -176,22 +175,39 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente, turno
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>Clasificación</Label>
-                <Select
-                  value={formData.clasificacion}
-                  onValueChange={(v) => setFormData({ ...formData, clasificacion: v })}
-                  disabled={!editando}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="nuevo">Nuevo</SelectItem>
-                    <SelectItem value="recurrente">Recurrente</SelectItem>
-                    <SelectItem value="vip">VIP</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Clasificación</Label>
+                  <Select
+                    value={formData.clasificacion}
+                    onValueChange={(v) => setFormData({ ...formData, clasificacion: v })}
+                    disabled={!editando}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="nuevo">Nuevo</SelectItem>
+                      <SelectItem value="recurrente">Recurrente</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Tipo</Label>
+                  <Select
+                    value={formData.tipo_cliente || 'clase'}
+                    onValueChange={(v) => setFormData({ ...formData, tipo_cliente: v })}
+                    disabled={!editando}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="clase">Clase</SelectItem>
+                      <SelectItem value="abono">Abono</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               <div className="space-y-2">

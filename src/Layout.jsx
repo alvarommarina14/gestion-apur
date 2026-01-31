@@ -32,8 +32,11 @@ const navigationGestionClases = [
 const navigationAgenda = [
   { name: 'Agenda', href: 'Agenda', icon: Calendar },
   { name: 'Dashboard de Ocupación', href: 'DashboardOcupacion', icon: LayoutDashboard },
-  { name: 'Clientes', href: 'Clientes', icon: Users },
   { name: 'Mi Agenda', href: 'AgendaEmpleados', icon: Calendar, empleadoOnly: true },
+];
+
+const navigationClientes = [
+  { name: 'Clientes', href: 'Clientes', icon: Users },
 ];
 
 const navigationCancha = [
@@ -175,6 +178,42 @@ export default function Layout({ children, currentPageName }) {
               })}
             </div>
 
+            {/* Gestión de Clientes - Solo Administradores */}
+            {user?.role === 'admin' && (
+              <div className="pt-4 mt-4 border-t border-slate-200">
+                <p className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                  Gestión de Clientes
+                </p>
+                {navigationClientes.map((item) => {
+                  const isActive = currentPageName === item.href;
+                  const Icon = item.icon;
+
+                  return (
+                    <Link
+                      key={item.href}
+                      to={createPageUrl(item.href)}
+                      onClick={() => setSidebarOpen(false)}
+                      className={cn(
+                        'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
+                        isActive 
+                          ? 'bg-emerald-50 text-emerald-700' 
+                          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      )}
+                    >
+                      <Icon className={cn(
+                        'w-5 h-5',
+                        isActive ? 'text-emerald-600' : 'text-slate-400'
+                      )} />
+                      {item.name}
+                      {isActive && (
+                        <ChevronRight className="w-4 h-4 ml-auto text-emerald-400" />
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+
             {/* Recordatorios Cancha - Todos */}
             <div className="pt-4 mt-4 border-t border-slate-200">
               <p className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
@@ -276,7 +315,7 @@ export default function Layout({ children, currentPageName }) {
           </Button>
 
           <h1 className="text-base lg:text-lg font-semibold text-slate-800 truncate">
-            {[...navigationGestionClases, ...navigationAgenda, ...navigationCancha, ...navigationConfiguracion]
+            {[...navigationGestionClases, ...navigationAgenda, ...navigationClientes, ...navigationCancha, ...navigationConfiguracion]
               .find(n => n.href === currentPageName)?.name || currentPageName}
           </h1>
         </header>

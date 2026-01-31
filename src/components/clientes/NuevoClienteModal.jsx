@@ -29,6 +29,7 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
     telefono: '',
     email: '',
     clasificacion: 'nuevo',
+    tipo_cliente: 'clase',
     notas: '',
   });
 
@@ -39,6 +40,7 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
         telefono: '',
         email: '',
         clasificacion: 'nuevo',
+        tipo_cliente: 'clase',
         notas: '',
       });
       setSuccess(false);
@@ -119,21 +121,37 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label>Clasificación</Label>
-            <Select
-              value={formData.clasificacion}
-              onValueChange={(v) => setFormData({ ...formData, clasificacion: v })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="nuevo">Nuevo</SelectItem>
-                <SelectItem value="recurrente">Recurrente</SelectItem>
-                <SelectItem value="vip">VIP</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Clasificación</Label>
+              <Select
+                value={formData.clasificacion}
+                onValueChange={(v) => setFormData({ ...formData, clasificacion: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="nuevo">Nuevo</SelectItem>
+                  <SelectItem value="recurrente">Recurrente</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Tipo</Label>
+              <Select
+                value={formData.tipo_cliente}
+                onValueChange={(v) => setFormData({ ...formData, tipo_cliente: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="clase">Clase</SelectItem>
+                  <SelectItem value="abono">Abono</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="space-y-2">

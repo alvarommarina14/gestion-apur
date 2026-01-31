@@ -69,17 +69,17 @@ export default function ClientesPage() {
     const total = clientes.length;
     const nuevos = clientes.filter(c => c.clasificacion === 'nuevo').length;
     const recurrentes = clientes.filter(c => c.clasificacion === 'recurrente').length;
-    const vips = clientes.filter(c => c.clasificacion === 'vip').length;
+    const clases = clientes.filter(c => c.tipo_cliente === 'clase').length;
+    const abonos = clientes.filter(c => c.tipo_cliente === 'abono').length;
     const totalIngresos = clientes.reduce((sum, c) => sum + (c.total_gastado || 0), 0);
     const promedioGasto = total > 0 ? (totalIngresos / total).toFixed(0) : 0;
 
-    return { total, nuevos, recurrentes, vips, totalIngresos, promedioGasto };
+    return { total, nuevos, recurrentes, clases, abonos, totalIngresos, promedioGasto };
   }, [clientes]);
 
   const clasificacionConfig = {
     nuevo: { icon: UserPlus, color: 'bg-blue-100 text-blue-700', label: 'Nuevo' },
     recurrente: { icon: UserCheck, color: 'bg-emerald-100 text-emerald-700', label: 'Recurrente' },
-    vip: { icon: Star, color: 'bg-amber-100 text-amber-700', label: 'VIP' },
   };
 
   return (
@@ -126,19 +126,19 @@ export default function ClientesPage() {
               </div>
             </CardContent>
           </Card>
-          <Card className="shadow-sm border-amber-200 bg-amber-50/30">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-amber-600">{stats.vips}</p>
-                <p className="text-sm text-slate-500 mt-1">VIP</p>
-              </div>
-            </CardContent>
-          </Card>
           <Card className="shadow-sm border-purple-200 bg-purple-50/30">
             <CardContent className="pt-6">
               <div className="text-center">
-                <p className="text-xl font-bold text-purple-600">${stats.promedioGasto}</p>
-                <p className="text-sm text-slate-500 mt-1">Gasto promedio</p>
+                <p className="text-2xl font-bold text-purple-600">{stats.clases}</p>
+                <p className="text-sm text-slate-500 mt-1">Clases</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm border-amber-200 bg-amber-50/30">
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-amber-600">{stats.abonos}</p>
+                <p className="text-sm text-slate-500 mt-1">Abonos</p>
               </div>
             </CardContent>
           </Card>
@@ -162,7 +162,6 @@ export default function ClientesPage() {
               <TabsTrigger value="todos">Todos</TabsTrigger>
               <TabsTrigger value="nuevo">Nuevos</TabsTrigger>
               <TabsTrigger value="recurrente">Recurrentes</TabsTrigger>
-              <TabsTrigger value="vip">VIP</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
