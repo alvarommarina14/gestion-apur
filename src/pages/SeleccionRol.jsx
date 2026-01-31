@@ -72,17 +72,21 @@ export default function SeleccionRol() {
     
     setSaving(true);
     try {
-      // Si selecciona admin, marcar como pendiente de aprobación
-      if (selectedRol === 'admin') {
-        await base44.auth.updateMe({ 
-          rol: selectedRol,
-          estado_aprobacion: 'pendiente'
-        });
-      } else {
-        // Empleado y profesor se aprueban automáticamente
+      // Verificar si es el primer usuario (owner)
+      const allUsers = await base44.entities.User.list();
+      const isOwner = allUsers.length === 1 && allUsers[0]?.id === user.id;
+      
+      // Si es el owner o selecciona empleado/profesor, aprobar automáticamente
+      if (isOwner || selectedRol !== 'admin') {
         await base44.auth.updateMe({ 
           rol: selectedRol,
           estado_aprobacion: 'aprobado'
+        });
+      } else {
+        // Si no es owner y selecciona admin, marcar como pendiente
+        await base44.auth.updateMe({ 
+          rol: selectedRol,
+          estado_aprobacion: 'pendiente'
         });
       }
       
