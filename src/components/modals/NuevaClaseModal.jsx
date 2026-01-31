@@ -231,7 +231,6 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
           hora_inicio: '09:00',
           duracion: 50,
           tipo: 'individual',
-          sede: '',
           cancha: '',
           alumnos_ids: [],
           precio: '',
@@ -240,9 +239,6 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
           repeticion_semanal: false,
           es_recupero: false,
           clase_original_id: '',
-          es_recurrente: false,
-          recurrencia_tipo: 'semanal',
-          recurrencia_cantidad: 4,
         });
       }, 1500);
       
