@@ -109,80 +109,8 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
     try {
       const alumnosSeleccionados = alumnosActivos.filter(a => formData.alumnos_ids.includes(a.id));
       
-      // Si es recurrente, crear múltiples clases
-      if (formData.es_recurrente && !recupero) {
-        const serieId = uuidv4();
-        const clases = [];
-        const cantidadSemanas = formData.recurrencia_tipo === 'semanal' ? 1 : 2;
-        
-        for (let i = 0; i < formData.recurrencia_cantidad; i++) {
-          const fechaClase = formData.repeticion_semanal 
-            ? addWeeks(formData.fecha, i) 
-            : formData.fecha;
-
-          if (!formData.repeticion_semanal && i > 0) break;
-
-          clases.push({
-            fecha: format(fechaClase, 'yyyy-MM-dd'),
-            hora_inicio: formData.hora_inicio,
-            duracion: Number(formData.duracion),
-            tipo: formData.tipo,
-            sede: 'Sistema',
-            cancha: formData.cancha || '',
-            alumnos_ids: formData.alumnos_ids,
-            alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
-            precio: formData.precio ? Number(formData.precio) : null,
-            estado: 'programada',
-            es_recupero: false,
-            es_recurrente: formData.repeticion_semanal,
-            recurrencia_tipo: formData.repeticion_semanal ? 'semanal' : null,
-            serie_recurrente_id: formData.repeticion_semanal ? serieId : null,
-            notas: formData.notas,
-            asistencia_registrada: false,
-          });
-        }
-        
-        // Crear todas las clases
-        await Promise.all(clases.map(clase => base44.entities.Clase.create({
-          ...clase,
-          profesor_id: user?.id,
-          estado_aprobacion: user?.rol === 'profesor' ? 'pendiente' : 'aprobada',
-          estado: 'programada',
-        })));
-      } else if (formData.repeticion_semanal) {
-        // Crear clases semanales
-        const clases = [];
-        const serieId = uuidv4();
-
-        for (let i = 0; i < 4; i++) {
-          const fechaClase = addWeeks(formData.fecha, i);
-          clases.push({
-            fecha: format(fechaClase, 'yyyy-MM-dd'),
-            hora_inicio: formData.hora_inicio,
-            duracion: Number(formData.duracion),
-            tipo: formData.tipo,
-            sede: 'Sistema',
-            cancha: formData.cancha || '',
-            alumnos_ids: formData.alumnos_ids,
-            alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
-            precio: formData.precio ? Number(formData.precio) : null,
-            estado: 'programada',
-            es_recupero: false,
-            es_recurrente: true,
-            recurrencia_tipo: 'semanal',
-            serie_recurrente_id: serieId,
-            notas: formData.notas,
-            asistencia_registrada: false,
-          });
-        }
-
-        await Promise.all(clases.map(clase => base44.entities.Clase.create({
-          ...clase,
-          profesor_id: user?.id,
-          estado_aprobacion: user?.rol === 'profesor' ? 'pendiente' : 'aprobada',
-          estado: 'programada',
-        })));
-      } else {
+      // Si es recurrente, crear una sola clase con repetición indefinida
+      if (formData.repeticion_semanal) {
         // Crear clase única o repetida indefinidamente
           const claseData = {
             fecha: format(formData.fecha, 'yyyy-MM-dd'),
