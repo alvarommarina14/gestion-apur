@@ -399,26 +399,11 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
                     'flex items-center gap-3 p-3 border-b last:border-b-0 cursor-pointer hover:bg-slate-50',
                     formData.alumnos_ids.includes(alumno.id) && 'bg-emerald-50'
                   )}
-                  onClick={() => !recupero && handleAlumnoToggle(alumno.id)}
                 >
                   <Checkbox
                     checked={formData.alumnos_ids.includes(alumno.id)}
                     disabled={!!recupero}
-                    onCheckedChange={(checked) => {
-                      if (!recupero) {
-                        if (checked) {
-                          setFormData(prev => ({
-                            ...prev,
-                            alumnos_ids: [...prev.alumnos_ids, alumno.id]
-                          }));
-                        } else {
-                          setFormData(prev => ({
-                            ...prev,
-                            alumnos_ids: prev.alumnos_ids.filter(id => id !== alumno.id)
-                          }));
-                        }
-                      }
-                    }}
+                    onCheckedChange={() => !recupero && handleAlumnoToggle(alumno.id)}
                   />
                   <span className="text-sm font-medium">{alumno.nombre}</span>
                 </div>
