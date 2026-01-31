@@ -523,7 +523,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
           />
         </div>
         <div className="space-y-2">
-          <Label>Cancha</Label>
+          <Label>Cancha {formData.tipo_turno === 'clase' ? '*' : ''}</Label>
           <Select
             value={formData.cancha}
             onValueChange={(v) => setFormData({ ...formData, cancha: v })}
