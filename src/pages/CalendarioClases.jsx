@@ -7,6 +7,7 @@ import { Plus } from 'lucide-react';
 import CalendarioClases from '@/components/clases/CalendarioClases';
 import NuevaClaseModal from '@/components/modals/NuevaClaseModal';
 import CancelarClaseModal from '@/components/modals/CancelarClaseModal';
+import EditarClaseModal from '@/components/modals/EditarClaseModal';
 
 export default function CalendarioClasesPage() {
   const [nuevaClaseModal, setNuevaClaseModal] = useState(false);
