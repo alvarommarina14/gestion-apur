@@ -203,8 +203,39 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
           estado_aprobacion: user?.rol === 'profesor' ? 'pendiente' : 'aprobada',
         });
 
-        // Sincronizar con Google Calendar si es admin
+        // Si es admin, crear TurnoCancha y sincronizar con Google Calendar
         if (user?.rol === 'admin') {
+          const horaFin = calcularHoraFin(formData.hora_inicio, formData.duracion);
+          const alumnosNombres = alumnosSeleccionados.map(a => a.nombre).join(', ');
+
+          try {
+            // Obtener todos los empleados
+            const empleados = await base44.entities.User.list();
+            const empleadosIds = empleados.map(e => e.id);
+            const empleadosEmails = empleados.map(e => e.email);
+            const empleadosNombres = empleados.map(e => e.full_name);
+
+            await base44.entities.TurnoCancha.create({
+              fecha: format(formData.fecha, 'yyyy-MM-dd'),
+              hora_inicio: formData.hora_inicio,
+              hora_fin: horaFin,
+              duracion: Number(formData.duracion),
+              cancha: formData.cancha || '',
+              cliente: alumnosNombres || 'Clase',
+              tipo_turno: 'clase',
+              monto: formData.precio ? Number(formData.precio) : 0,
+              pagado: formData.pagado,
+              empleados_asignados_ids: empleadosIds,
+              empleados_asignados_emails: empleadosEmails,
+              empleados_asignados_nombres: empleadosNombres,
+              estado: 'activo',
+              notas: formData.notas || `Clase - ${alumnosNombres}`,
+            });
+          } catch (err) {
+            console.error('Error creando TurnoCancha:', err);
+          }
+
+          // Sincronizar con Google Calendar
           try {
             await base44.functions.invoke('sincronizarClaseGoogleCalendar', { clase_id: claseCreada.id });
           } catch (err) {
