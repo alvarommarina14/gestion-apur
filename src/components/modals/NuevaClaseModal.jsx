@@ -319,7 +319,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
             </div>
           </div>
           
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Duración</Label>
               <Select
