@@ -70,9 +70,9 @@ export default function Layout({ children, currentPageName }) {
             return;
           }
           
-          // Si es profesor, redirigir a su menú
+          // Si es profesor, redirigir a registro/selección de profesor
           if (currentUser.rol === 'profesor') {
-            window.location.href = createPageUrl('ProfesorMenu');
+            window.location.href = createPageUrl('ProfesorRegistro');
             return;
           }
         }
