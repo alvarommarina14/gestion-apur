@@ -12,7 +12,8 @@ import {
   X,
   ChevronRight,
   Settings,
-  LogOut
+  LogOut,
+  Shield
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { cn } from '@/lib/utils';
@@ -39,6 +40,7 @@ const navigationClientes = [
 
 const navigationConfiguracion = [
   { name: 'Empleados', href: 'Empleados', icon: Users },
+  { name: 'Roles y Permisos', href: 'GestionRoles', icon: Shield },
   { name: 'Configuración', href: 'Configuracion', icon: Settings },
 ];
 

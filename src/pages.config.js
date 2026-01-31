@@ -64,6 +64,7 @@ import Reportes from './pages/Reportes';
 import Profesores from './pages/Profesores';
 import CalendarioClases from './pages/CalendarioClases';
 import ProfesorMenu from './pages/ProfesorMenu';
+import GestionRoles from './pages/GestionRoles';
 import __Layout from './Layout.jsx';
 
 
@@ -85,6 +86,7 @@ export const PAGES = {
     "Profesores": Profesores,
     "CalendarioClases": CalendarioClases,
     "ProfesorMenu": ProfesorMenu,
+    "GestionRoles": GestionRoles,
 }
 
 export const pagesConfig = {
