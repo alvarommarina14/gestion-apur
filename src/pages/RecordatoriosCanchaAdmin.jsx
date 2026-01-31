@@ -326,7 +326,7 @@ export default function RecordatoriosCanchaAdmin() {
                           {formatMoney(rec.monto)}
                           {rec.turno?.pagado && <CheckCircle className="w-4 h-4 ml-1" />}
                         </div>
-                        {rec.estado === 'hecho' && (
+                        {rec.estado === 'hecho' && rec.hora_confirmacion && (
                           <div className="text-xs text-slate-500">
                             ✓ Completado por {rec.hecho_por_nombre} el{' '}
                             {format(parseISO(rec.hora_confirmacion), "d/MM/yyyy 'a las' HH:mm")}
