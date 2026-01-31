@@ -42,17 +42,25 @@ export default function CalendarioClasesPage() {
     queryFn: () => base44.auth.me(),
   });
 
-  // Filtrar clases por profesor si hay uno seleccionado
+  // Filtrar clases por profesor y por aprobación
   const clasesFiltradas = React.useMemo(() => {
-    if (!profesorSeleccionado) return clases;
+    let filtradas = clases;
     
-    const alumnosProfesor = alumnos
-      .filter(a => a.profesor_id === profesorSeleccionado.id)
-      .map(a => a.id);
+    // Filtrar solo clases aprobadas o creadas por admin
+    filtradas = filtradas.filter(c => c.estado_aprobacion === 'aprobada');
     
-    return clases.filter(c => 
-      c.alumnos_ids?.some(id => alumnosProfesor.includes(id))
-    );
+    // Si hay profesor seleccionado, filtrar por alumnos del profesor
+    if (profesorSeleccionado) {
+      const alumnosProfesor = alumnos
+        .filter(a => a.profesor_id === profesorSeleccionado.id)
+        .map(a => a.id);
+      
+      filtradas = filtradas.filter(c => 
+        c.alumnos_ids?.some(id => alumnosProfesor.includes(id))
+      );
+    }
+    
+    return filtradas;
   }, [clases, alumnos, profesorSeleccionado]);
 
   const handleClaseClick = (clase) => {
