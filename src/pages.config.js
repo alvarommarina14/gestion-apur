@@ -69,6 +69,7 @@ import Recuperos from './pages/Recuperos';
 import Reportes from './pages/Reportes';
 import SeleccionRol from './pages/SeleccionRol';
 import ProfesorRegistro from './pages/ProfesorRegistro';
+import AprobacionClases from './pages/AprobacionClases';
 import __Layout from './Layout.jsx';
 
 
@@ -95,6 +96,7 @@ export const PAGES = {
     "Reportes": Reportes,
     "SeleccionRol": SeleccionRol,
     "ProfesorRegistro": ProfesorRegistro,
+    "AprobacionClases": AprobacionClases,
 }
 
 export const pagesConfig = {
