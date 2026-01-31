@@ -70,10 +70,13 @@ export default function Layout({ children, currentPageName }) {
             return;
           }
           
-          // Si es profesor, redirigir a registro/selección de profesor
+          // Si es profesor, verificar si tiene profesor seleccionado
           if (currentUser.rol === 'profesor') {
-            window.location.href = createPageUrl('ProfesorRegistro');
-            return;
+            const profesorGuardado = localStorage.getItem('profesor_seleccionado');
+            if (!profesorGuardado) {
+              window.location.href = createPageUrl('ProfesorRegistro');
+              return;
+            }
           }
         }
         
