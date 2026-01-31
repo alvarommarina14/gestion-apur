@@ -123,24 +123,24 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
 
       loadRecordatorio();
     } else if (!turno && open) {
-      setFormData({
-        fecha: format(fecha || new Date(), 'yyyy-MM-dd'),
-        hora_inicio: '09:00',
-        duracion: 60,
-        cancha: '1',
-        cliente: '',
-        tipo_turno: 'clase',
-        profesor_id: '',
-        alumnos_ids: [],
-        modalidad_alquiler: '',
-        monto: '',
-        pagado: false,
-        notas: '',
-        repeticion_semanal: false,
-        notificar: true,
-        minutos_antes: 10,
-        empleados_asignados_ids: empleados.map(e => e.id),
-      });
+     setFormData({
+       fecha: format(fecha || new Date(), 'yyyy-MM-dd'),
+       hora_inicio: '09:00',
+       duracion: 60,
+       cancha: '1',
+       cliente: '',
+       tipo_turno: 'alquiler',
+       profesor_id: '',
+       alumnos_ids: [],
+       modalidad_alquiler: '',
+       monto: '',
+       pagado: false,
+       notas: '',
+       repeticion_semanal: false,
+       notificar: true,
+       minutos_antes: 10,
+       empleados_asignados_ids: empleados.map(e => e.id),
+     });
     }
     setError(null);
   }, [turno, open, fecha]);
