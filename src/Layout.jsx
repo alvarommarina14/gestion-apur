@@ -36,7 +36,6 @@ const navigationAgenda = [
 
 const navigationProfesor = [
   { name: 'Dashboard', href: 'Dashboard', icon: LayoutDashboard },
-  { name: 'Calendario', href: 'CalendarioClases', icon: Calendar },
   { name: 'Alumnos', href: 'Alumnos', icon: Users },
   { name: 'Pagos', href: 'Pagos', icon: DollarSign },
   { name: 'Recordatorios', href: 'Recordatorios', icon: RefreshCw },
