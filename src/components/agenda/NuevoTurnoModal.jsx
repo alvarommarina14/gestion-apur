@@ -605,7 +605,107 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
         </div>
 
         {formData.tipo_turno === 'clase' ? (
-          <FormularioClaseAdmin fecha={formData.fecha} onDataChange={setClaseData} />
+          <>
+            <div className="space-y-2">
+              <Label>Profesor *</Label>
+              <Select
+                value={formData.profesor_id}
+                onValueChange={(v) => setFormData({ ...formData, profesor_id: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar profesor" />
+                </SelectTrigger>
+                <SelectContent>
+                  {profesores.map(profesor => (
+                    <SelectItem key={profesor.id} value={profesor.id}>
+                      {profesor.nombre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {formData.profesor_id && (
+              <div className="space-y-2">
+                <Label>Alumnos *</Label>
+                <div className="border rounded-lg max-h-40 overflow-y-auto">
+                  {alumnos.filter(a => a.profesor_id === formData.profesor_id && a.estado !== 'pausado').map((alumno) => (
+                    <div
+                      key={alumno.id}
+                      className={cn(
+                        'flex items-center gap-3 p-3 border-b last:border-b-0 cursor-pointer hover:bg-slate-50',
+                        formData.alumnos_ids.includes(alumno.id) && 'bg-emerald-50'
+                      )}
+                    >
+                      <Checkbox
+                        checked={formData.alumnos_ids.includes(alumno.id)}
+                        onCheckedChange={() => {
+                          setFormData(prev => ({
+                            ...prev,
+                            alumnos_ids: prev.alumnos_ids.includes(alumno.id)
+                              ? prev.alumnos_ids.filter(id => id !== alumno.id)
+                              : [...prev.alumnos_ids, alumno.id]
+                          }));
+                        }}
+                      />
+                      <span className="text-sm font-medium">{alumno.nombre}</span>
+                    </div>
+                  ))}
+                </div>
+                {formData.alumnos_ids.length === 0 && (
+                  <p className="text-xs text-rose-500">Selecciona al menos un alumno</p>
+                )}
+              </div>
+            )}
+
+            <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+              <div>
+                <Label className="font-medium text-slate-800">Pagado</Label>
+                <p className="text-xs text-slate-500 mt-0.5">Marcar si la clase ya está paga</p>
+              </div>
+              <Switch
+                checked={formData.pagado}
+                onCheckedChange={(checked) => setFormData({ ...formData, pagado: checked })}
+              />
+            </div>
+
+            {!formData.pagado && (
+              <div className="space-y-2">
+                <Label>Precio (opcional)</Label>
+                <Input
+                  type="number"
+                  value={formData.monto}
+                  onChange={(e) => setFormData({ ...formData, monto: e.target.value })}
+                  placeholder="0"
+                />
+              </div>
+            )}
+
+            <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div>
+                <Label className="font-medium text-slate-800">Repetición semanal</Label>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Se creará automáticamente cada semana
+                </p>
+              </div>
+              <Switch
+                checked={formData.repeticion_semanal}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, repeticion_semanal: checked })
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Notas (opcional)</Label>
+              <Textarea
+                value={formData.notas}
+                onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
+                placeholder="Observaciones..."
+                rows={2}
+              />
+            </div>
+          </>
         ) : (
           <>
             <div className="space-y-2">
