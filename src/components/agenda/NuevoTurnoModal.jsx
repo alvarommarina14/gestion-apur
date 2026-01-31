@@ -344,101 +344,12 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
      e.preventDefault();
      setError(null);
 
-     // Si es tipo clase, crear clase en lugar de turno
-     if (formData.tipo_turno === 'clase') {
-       if (!formData.alumnos_ids || formData.alumnos_ids.length === 0) {
-         setError('Debes seleccionar al menos un alumno');
-         return;
-       }
-
-       if (!formData.profesor_id) {
-         setError('Debes seleccionar un profesor');
-         return;
-       }
-
-       if (!formData.cancha) {
-         setError('Debes seleccionar una cancha');
-         return;
-       }
-
-       const crearClase = async () => {
-         try {
-           const alumnosSeleccionados = alumnos.filter(a => formData.alumnos_ids.includes(a.id));
-           const serieId = formData.repeticion_semanal ? `clase-${Date.now()}` : null;
-           const clasesACrear = [];
-
-           if (formData.repeticion_semanal) {
-             // Crear clases para 52 semanas (1 año)
-             for (let i = 0; i < 52; i++) {
-               const fechaClase = addWeeks(parseISO(formData.fecha), i);
-               clasesACrear.push({
-                 fecha: format(fechaClase, 'yyyy-MM-dd'),
-                 hora_inicio: formData.hora_inicio,
-                 duracion: Number(formData.duracion),
-                 tipo: 'individual',
-                 sede: 'Sistema',
-                 cancha: formData.cancha,
-                 alumnos_ids: formData.alumnos_ids,
-                 alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
-                 precio: formData.monto ? Number(formData.monto) : null,
-                 estado: 'programada',
-                 es_recurrente: true,
-                 recurrencia_tipo: 'semanal',
-                 serie_recurrente_id: serieId,
-                 notas: formData.notas,
-                 asistencia_registrada: false,
-                 profesor_id: formData.profesor_id,
-                 estado_aprobacion: 'aprobada',
-               });
-             }
-           } else {
-             clasesACrear.push({
-               fecha: formData.fecha,
-               hora_inicio: formData.hora_inicio,
-               duracion: Number(formData.duracion),
-               tipo: 'individual',
-               sede: 'Sistema',
-               cancha: formData.cancha,
-               alumnos_ids: formData.alumnos_ids,
-               alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
-               precio: formData.monto ? Number(formData.monto) : null,
-               estado: 'programada',
-               notas: formData.notas,
-               asistencia_registrada: false,
-               profesor_id: formData.profesor_id,
-               estado_aprobacion: 'aprobada',
-             });
-           }
-
-           // Crear todas las clases
-           for (const clase of clasesACrear) {
-             await base44.entities.Clase.create(clase);
-           }
-
-           setSuccess(true);
-           queryClient.invalidateQueries({ queryKey: ['clases'] });
-           queryClient.invalidateQueries({ queryKey: ['alumnos'] });
-           setTimeout(() => {
-             setSuccess(false);
-             onOpenChange(false);
-           }, 1500);
-         } catch (err) {
-           console.error('Error creando clase:', err);
-           setError('Error al crear la clase');
-         }
-       };
-
-       crearClase();
-       return;
-     }
-
-     // Lógica original para alquiler
-       // Asignar automáticamente a todos los empleados
-       const todosLosEmpleadosIds = empleados.map(e => e.id);
-       const dataConEmpleados = {
-         ...formData,
-         empleados_asignados_ids: todosLosEmpleadosIds,
-       };
+     // Asignar automáticamente a todos los empleados
+     const todosLosEmpleadosIds = empleados.map(e => e.id);
+     const dataConEmpleados = {
+       ...formData,
+       empleados_asignados_ids: todosLosEmpleadosIds,
+     };
 
      if (dataConEmpleados.tipo_turno === 'alquiler' && !dataConEmpleados.modalidad_alquiler) {
        setError('Debes seleccionar la modalidad del alquiler (Abono o Suelto)');
