@@ -6,7 +6,7 @@ import { es } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { TrendingUp, TrendingDown, Clock, Calendar, Activity } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, Calendar, Activity, DollarSign, CheckCircle, AlertCircle, Lightbulb, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const HORARIOS = [];
@@ -103,6 +103,21 @@ export default function DashboardOcupacion() {
     const diaMaximo = ocupacionPorDia.reduce((max, d) => d.cantidad > max.cantidad ? d : max, ocupacionPorDia[0]);
     const diaMinimo = ocupacionPorDia.reduce((min, d) => d.cantidad < min.cantidad ? d : min, ocupacionPorDia[0]);
     
+    // Métricas financieras
+    const ingresoTotal = turnosFiltrados.reduce((sum, t) => sum + (t.monto || 0), 0);
+    const ingresoCobrado = turnosFiltrados.filter(t => t.pagado).reduce((sum, t) => sum + (t.monto || 0), 0);
+    const ingresoPendiente = ingresoTotal - ingresoCobrado;
+    const turnosPagados = turnosFiltrados.filter(t => t.pagado).length;
+    const turnosPendientes = totalTurnos - turnosPagados;
+    const tasaCobro = totalTurnos > 0 ? ((turnosPagados / totalTurnos) * 100).toFixed(1) : 0;
+    
+    // Ingresos por tipo
+    const ingresoClases = turnosFiltrados.filter(t => t.tipo_turno === 'clase').reduce((sum, t) => sum + (t.monto || 0), 0);
+    const ingresoAlquileres = turnosFiltrados.filter(t => t.tipo_turno === 'alquiler').reduce((sum, t) => sum + (t.monto || 0), 0);
+    
+    // Promedio por turno
+    const promedioTurno = totalTurnos > 0 ? (ingresoTotal / totalTurnos).toFixed(0) : 0;
+    
     return {
       totalTurnos,
       ocupacionPorcentaje,
@@ -112,6 +127,15 @@ export default function DashboardOcupacion() {
       menosUsados,
       diaMaximo,
       diaMinimo,
+      ingresoTotal,
+      ingresoCobrado,
+      ingresoPendiente,
+      turnosPagados,
+      turnosPendientes,
+      tasaCobro,
+      ingresoClases,
+      ingresoAlquileres,
+      promedioTurno,
     };
   }, [turnosFiltrados, ocupacionPorHorario, ocupacionPorDia, mesSeleccionado]);
 
@@ -331,28 +355,235 @@ export default function DashboardOcupacion() {
           </CardContent>
         </Card>
 
-        {/* Recomendaciones */}
-        <Card className="shadow-sm border-blue-200 bg-blue-50">
-          <CardHeader className="border-b border-blue-200">
-            <CardTitle className="text-lg text-blue-900">💡 Recomendaciones</CardTitle>
+        {/* Métricas Financieras */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card className="shadow-sm border-emerald-200 bg-emerald-50/30">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-600">Ingreso Total</p>
+                  <p className="text-2xl font-bold text-emerald-700">
+                    ${metricas.ingresoTotal.toLocaleString('es-AR')}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Promedio: ${metricas.promedioTurno}/turno
+                  </p>
+                </div>
+                <DollarSign className="w-10 h-10 text-emerald-200" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-sm border-blue-200 bg-blue-50/30">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-600">Cobrado</p>
+                  <p className="text-2xl font-bold text-blue-700">
+                    ${metricas.ingresoCobrado.toLocaleString('es-AR')}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {metricas.turnosPagados} turnos ({metricas.tasaCobro}%)
+                  </p>
+                </div>
+                <CheckCircle className="w-10 h-10 text-blue-200" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-sm border-amber-200 bg-amber-50/30">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-600">Pendiente</p>
+                  <p className="text-2xl font-bold text-amber-700">
+                    ${metricas.ingresoPendiente.toLocaleString('es-AR')}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {metricas.turnosPendientes} turnos por cobrar
+                  </p>
+                </div>
+                <AlertCircle className="w-10 h-10 text-amber-200" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Distribución de Ingresos */}
+        <Card className="shadow-sm">
+          <CardHeader className="border-b">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <DollarSign className="w-5 h-5 text-emerald-600" />
+              Distribución de Ingresos
+            </CardTitle>
           </CardHeader>
-          <CardContent className="pt-4">
-            <ul className="space-y-2 text-sm text-blue-800">
-              {metricas.ocupacionPorcentaje < 50 && (
-                <li>• La ocupación general está por debajo del 50%. Considera promociones en horarios de baja demanda.</li>
-              )}
-              {metricas.menosUsados[0]?.cantidad < 3 && (
-                <li>• El horario {metricas.menosUsados[0]?.hora} tiene muy baja demanda. Podrías ofrecer descuentos especiales.</li>
-              )}
-              {metricas.masUsados[0]?.cantidad > 15 && (
-                <li>• El horario {metricas.masUsados[0]?.hora} está en alta demanda. Considera ajustar precios o agregar capacidad.</li>
-              )}
-              {metricas.diaMinimo?.cantidad < 5 && (
-                <li>• Los {metricas.diaMinimo?.dia}s tienen baja ocupación. Podrías lanzar promociones para ese día.</li>
-              )}
-            </ul>
+          <CardContent className="pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-slate-700">Clases</span>
+                    <span className="text-lg font-bold text-blue-600">
+                      ${metricas.ingresoClases.toLocaleString('es-AR')}
+                    </span>
+                  </div>
+                  <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-blue-500 rounded-full transition-all"
+                      style={{ width: `${metricas.ingresoTotal > 0 ? (metricas.ingresoClases / metricas.ingresoTotal * 100) : 0}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {metricas.ingresoTotal > 0 ? ((metricas.ingresoClases / metricas.ingresoTotal * 100).toFixed(1)) : 0}% del total
+                  </p>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-slate-700">Alquileres</span>
+                    <span className="text-lg font-bold text-purple-600">
+                      ${metricas.ingresoAlquileres.toLocaleString('es-AR')}
+                    </span>
+                  </div>
+                  <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-purple-500 rounded-full transition-all"
+                      style={{ width: `${metricas.ingresoTotal > 0 ? (metricas.ingresoAlquileres / metricas.ingresoTotal * 100) : 0}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {metricas.ingresoTotal > 0 ? ((metricas.ingresoAlquileres / metricas.ingresoTotal * 100).toFixed(1)) : 0}% del total
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-slate-700 mb-3">Resumen Financiero</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Tasa de cobro:</span>
+                    <span className="font-semibold text-slate-900">{metricas.tasaCobro}%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Promedio por turno:</span>
+                    <span className="font-semibold text-slate-900">${metricas.promedioTurno}</span>
+                  </div>
+                  <div className="flex justify-between pt-2 border-t">
+                    <span className="text-slate-600">Total a cobrar:</span>
+                    <span className="font-semibold text-amber-700">${metricas.ingresoPendiente.toLocaleString('es-AR')}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
+
+        {/* Recomendaciones Inteligentes */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Card className="shadow-sm border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50">
+            <CardHeader className="border-b border-blue-200">
+              <CardTitle className="text-lg text-blue-900 flex items-center gap-2">
+                <Lightbulb className="w-5 h-5" />
+                Oportunidades de Optimización
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4">
+              <div className="space-y-3">
+                {metricas.ocupacionPorcentaje < 50 && (
+                  <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-blue-200">
+                    <Target className="w-5 h-5 text-blue-600 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-slate-800 text-sm">Ocupación baja ({metricas.ocupacionPorcentaje}%)</p>
+                      <p className="text-xs text-slate-600 mt-1">Lanza promociones "2x1" en horarios valle o paquetes mensuales con descuento.</p>
+                    </div>
+                  </div>
+                )}
+                
+                {metricas.menosUsados[0]?.cantidad < 3 && (
+                  <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-blue-200">
+                    <Clock className="w-5 h-5 text-blue-600 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-slate-800 text-sm">Horario {metricas.menosUsados[0]?.hora} muy libre</p>
+                      <p className="text-xs text-slate-600 mt-1">Ofrece -30% en este horario o crea "Happy Hour" con bebidas incluidas.</p>
+                    </div>
+                  </div>
+                )}
+
+                {metricas.diaMinimo?.cantidad < 5 && (
+                  <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-blue-200">
+                    <Calendar className="w-5 h-5 text-blue-600 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-slate-800 text-sm">{metricas.diaMinimo?.dia}s con poca demanda</p>
+                      <p className="text-xs text-slate-600 mt-1">Crea "Día del Vecino" con precio especial o torneos gratuitos para atraer público.</p>
+                    </div>
+                  </div>
+                )}
+
+                {metricas.masUsados[0]?.cantidad > 15 && (
+                  <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-emerald-200">
+                    <TrendingUp className="w-5 h-5 text-emerald-600 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-slate-800 text-sm">Horario {metricas.masUsados[0]?.hora} en alta demanda</p>
+                      <p className="text-xs text-slate-600 mt-1">Considera aumentar precio +20% o implementar reserva anticipada con bonificación.</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-sm border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50">
+            <CardHeader className="border-b border-emerald-200">
+              <CardTitle className="text-lg text-emerald-900 flex items-center gap-2">
+                <DollarSign className="w-5 h-5" />
+                Estrategias de Cobro
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4">
+              <div className="space-y-3">
+                {metricas.tasaCobro < 70 && (
+                  <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-200">
+                    <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-slate-800 text-sm">Tasa de cobro baja ({metricas.tasaCobro}%)</p>
+                      <p className="text-xs text-slate-600 mt-1">Implementa pago anticipado obligatorio o seña del 50% para confirmar reservas.</p>
+                    </div>
+                  </div>
+                )}
+
+                {metricas.turnosPendientes > 10 && (
+                  <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-amber-200">
+                    <DollarSign className="w-5 h-5 text-amber-600 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-slate-800 text-sm">{metricas.turnosPendientes} turnos sin cobrar</p>
+                      <p className="text-xs text-slate-600 mt-1">Envía recordatorios automáticos o establece límite: "máximo 2 turnos pendientes por cliente".</p>
+                    </div>
+                  </div>
+                )}
+
+                {metricas.ingresoAlquileres < metricas.ingresoClases * 0.3 && (
+                  <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-emerald-200">
+                    <Target className="w-5 h-5 text-emerald-600 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-slate-800 text-sm">Potencial en alquileres</p>
+                      <p className="text-xs text-slate-600 mt-1">Alquileres generan menos. Promociona "Alquiler + Pelotas gratis" o abonos mensuales.</p>
+                    </div>
+                  </div>
+                )}
+
+                {metricas.promedioTurno < 15000 && (
+                  <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-emerald-200">
+                    <TrendingUp className="w-5 h-5 text-emerald-600 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-slate-800 text-sm">Ticket promedio: ${metricas.promedioTurno}</p>
+                      <p className="text-xs text-slate-600 mt-1">Ofrece upgrades: turno de 90min por +30%, o "Paquete Premium" con extras.</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
