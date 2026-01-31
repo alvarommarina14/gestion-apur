@@ -526,16 +526,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
         </Select>
       </div>
 
-      {formData.tipo_turno === 'clase' && (
-        <div className="space-y-2">
-          <Label>Profesor (opcional)</Label>
-          <Input
-            value={formData.profesor}
-            onChange={(e) => setFormData({ ...formData, profesor: e.target.value })}
-            placeholder="Nombre del profesor"
-          />
-        </div>
-      )}
+
 
       {formData.tipo_turno === 'alquiler' && (
         <div className="space-y-2">
