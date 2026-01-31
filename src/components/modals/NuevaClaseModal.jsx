@@ -183,56 +183,32 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
           estado: 'programada',
         })));
       } else {
-        // Crear clase única o repetida
-          const clasesACrear = [];
+        // Crear clase única o repetida indefinidamente
+          const claseData = {
+            fecha: format(formData.fecha, 'yyyy-MM-dd'),
+            hora_inicio: formData.hora_inicio,
+            duracion: Number(formData.duracion),
+            tipo: formData.tipo,
+            sede: 'Sistema',
+            cancha: formData.cancha || '',
+            alumnos_ids: formData.alumnos_ids,
+            alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
+            precio: formData.precio ? Number(formData.precio) : null,
+            estado: 'programada',
+            es_recupero: formData.es_recupero,
+            clase_original_id: formData.clase_original_id,
+            notas: formData.notas,
+            asistencia_registrada: false,
+            profesor_id: user?.id,
+            estado_aprobacion: user?.rol === 'profesor' ? 'pendiente' : 'aprobada',
+          };
+
           if (formData.repeticion_semanal) {
-            for (let i = 0; i < 4; i++) {
-              const fechaClase = addWeeks(formData.fecha, i);
-              clasesACrear.push({
-                fecha: format(fechaClase, 'yyyy-MM-dd'),
-                hora_inicio: formData.hora_inicio,
-                duracion: Number(formData.duracion),
-                tipo: formData.tipo,
-                sede: 'Sistema',
-                cancha: formData.cancha || '',
-                alumnos_ids: formData.alumnos_ids,
-                alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
-                precio: formData.precio ? Number(formData.precio) : null,
-                estado: 'programada',
-                es_recupero: false,
-                es_recurrente: true,
-                recurrencia_tipo: 'semanal',
-                notas: formData.notas,
-                asistencia_registrada: false,
-                profesor_id: user?.id,
-                estado_aprobacion: user?.rol === 'profesor' ? 'pendiente' : 'aprobada',
-              });
-            }
-          } else {
-            clasesACrear.push({
-              fecha: format(formData.fecha, 'yyyy-MM-dd'),
-              hora_inicio: formData.hora_inicio,
-              duracion: Number(formData.duracion),
-              tipo: formData.tipo,
-              sede: 'Sistema',
-              cancha: formData.cancha || '',
-              alumnos_ids: formData.alumnos_ids,
-              alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
-              precio: formData.precio ? Number(formData.precio) : null,
-              estado: 'programada',
-              es_recupero: formData.es_recupero,
-              clase_original_id: formData.clase_original_id,
-              notas: formData.notas,
-              asistencia_registrada: false,
-              profesor_id: user?.id,
-              estado_aprobacion: user?.rol === 'profesor' ? 'pendiente' : 'aprobada',
-            });
+            claseData.es_recurrente = true;
+            claseData.recurrencia_tipo = 'semanal';
           }
 
-          let claseCreada = null;
-          for (const clase of clasesACrear) {
-            claseCreada = await base44.entities.Clase.create(clase);
-          }
+          const claseCreada = await base44.entities.Clase.create(claseData);
 
         // Si es admin, crear TurnoCancha y sincronizar con Google Calendar
         if (user?.rol === 'admin') {
