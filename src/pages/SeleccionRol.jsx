@@ -74,18 +74,11 @@ export default function SeleccionRol() {
     try {
       await base44.auth.updateMe({ role: selectedRol });
       
-      // Redirigir según el rol
-      if (selectedRol === 'admin') {
-        navigate(createPageUrl('Profesores'));
-      } else if (selectedRol === 'empleado') {
-        navigate(createPageUrl('AgendaEmpleados'));
-      } else if (selectedRol === 'profesor') {
-        navigate(createPageUrl('Profesores'));
-      }
+      // Recargar la página para que el Layout detecte el nuevo rol
+      window.location.reload();
     } catch (error) {
       console.error('Error al actualizar rol:', error);
       alert('Error al guardar el rol. Por favor, intenta de nuevo.');
-    } finally {
       setSaving(false);
     }
   };

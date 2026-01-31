@@ -50,21 +50,21 @@
 import Agenda from './pages/Agenda';
 import AgendaEmpleados from './pages/AgendaEmpleados';
 import Alumnos from './pages/Alumnos';
+import CalendarioClases from './pages/CalendarioClases';
 import Clientes from './pages/Clientes';
 import Configuracion from './pages/Configuracion';
 import Dashboard from './pages/Dashboard';
 import DashboardOcupacion from './pages/DashboardOcupacion';
 import Empleados from './pages/Empleados';
+import GestionRoles from './pages/GestionRoles';
 import Pagos from './pages/Pagos';
+import ProfesorMenu from './pages/ProfesorMenu';
+import Profesores from './pages/Profesores';
 import Recordatorios from './pages/Recordatorios';
 import RecordatoriosCanchaAdmin from './pages/RecordatoriosCanchaAdmin';
 import RecordatoriosCanchaEmpleado from './pages/RecordatoriosCanchaEmpleado';
 import Recuperos from './pages/Recuperos';
 import Reportes from './pages/Reportes';
-import Profesores from './pages/Profesores';
-import CalendarioClases from './pages/CalendarioClases';
-import ProfesorMenu from './pages/ProfesorMenu';
-import GestionRoles from './pages/GestionRoles';
 import SeleccionRol from './pages/SeleccionRol';
 import __Layout from './Layout.jsx';
 
@@ -73,21 +73,21 @@ export const PAGES = {
     "Agenda": Agenda,
     "AgendaEmpleados": AgendaEmpleados,
     "Alumnos": Alumnos,
+    "CalendarioClases": CalendarioClases,
     "Clientes": Clientes,
     "Configuracion": Configuracion,
     "Dashboard": Dashboard,
     "DashboardOcupacion": DashboardOcupacion,
     "Empleados": Empleados,
+    "GestionRoles": GestionRoles,
     "Pagos": Pagos,
+    "ProfesorMenu": ProfesorMenu,
+    "Profesores": Profesores,
     "Recordatorios": Recordatorios,
     "RecordatoriosCanchaAdmin": RecordatoriosCanchaAdmin,
     "RecordatoriosCanchaEmpleado": RecordatoriosCanchaEmpleado,
     "Recuperos": Recuperos,
     "Reportes": Reportes,
-    "Profesores": Profesores,
-    "CalendarioClases": CalendarioClases,
-    "ProfesorMenu": ProfesorMenu,
-    "GestionRoles": GestionRoles,
     "SeleccionRol": SeleccionRol,
 }
 

@@ -55,10 +55,13 @@ export default function Layout({ children, currentPageName }) {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
         
-        // Si el usuario no tiene rol definido o es 'user', redirigir a selección de rol
-        if (!currentUser.role || currentUser.role === 'user') {
-          window.location.href = createPageUrl('SeleccionRol');
-          return;
+        // No verificar rol si estamos en la página de selección de rol
+        if (currentPageName !== 'SeleccionRol') {
+          // Si el usuario no tiene rol definido o es 'user', redirigir a selección de rol
+          if (!currentUser.role || currentUser.role === 'user') {
+            window.location.href = createPageUrl('SeleccionRol');
+            return;
+          }
         }
         
         // Cargar profesor seleccionado del localStorage
@@ -76,7 +79,7 @@ export default function Layout({ children, currentPageName }) {
     };
     
     checkUser();
-  }, []);
+  }, [currentPageName]);
 
   const handleLogout = () => {
     if (confirm('¿Querés cerrar sesión?')) {
