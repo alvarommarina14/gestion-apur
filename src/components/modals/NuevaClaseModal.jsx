@@ -441,7 +441,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
               <Input
                 type="number"
                 value={formData.precio}
-                onChange={(e) => setFormData({ ...formData, precio: e.target.value })}
+                onChange={(e) => setFormData(prev => ({ ...prev, precio: e.target.value }))}
                 placeholder="Dejar vacío para usar precio mensual"
               />
             </div>
