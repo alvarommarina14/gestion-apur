@@ -370,7 +370,7 @@ export default function Layout({ children, currentPageName }) {
           </Button>
 
           <h1 className="text-base lg:text-lg font-semibold text-slate-800 truncate">
-            {[...navigationGestionClases, ...navigationAgenda, ...navigationClientes, ...navigationConfiguracion]
+            {[...navigationGestionClases, ...navigationProfesor, ...navigationAgenda, ...navigationClientes, ...navigationConfiguracion]
               .find(n => n.href === currentPageName)?.name || currentPageName}
           </h1>
         </header>
