@@ -124,7 +124,12 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
         }
         
         // Crear todas las clases
-        await Promise.all(clases.map(clase => base44.entities.Clase.create(clase)));
+        await Promise.all(clases.map(clase => base44.entities.Clase.create({
+          ...clase,
+          profesor_id: user?.id,
+          estado_aprobacion: user?.rol === 'profesor' ? 'pendiente' : 'aprobada',
+          estado: 'programada',
+        })));
       } else {
         // Crear clase única
         await base44.entities.Clase.create({
@@ -142,6 +147,8 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
           clase_original_id: formData.clase_original_id,
           notas: formData.notas,
           asistencia_registrada: false,
+          profesor_id: user?.id,
+          estado_aprobacion: user?.rol === 'profesor' ? 'pendiente' : 'aprobada',
         });
       }
       
