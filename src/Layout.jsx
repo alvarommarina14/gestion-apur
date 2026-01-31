@@ -50,17 +50,32 @@ export default function Layout({ children, currentPageName }) {
   const [profesorSeleccionado, setProfesorSeleccionado] = React.useState(null);
 
   React.useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
-    
-    // Cargar profesor seleccionado del localStorage
-    const profesorGuardado = localStorage.getItem('profesor_seleccionado');
-    if (profesorGuardado) {
+    const checkUser = async () => {
       try {
-        setProfesorSeleccionado(JSON.parse(profesorGuardado));
-      } catch (e) {
-        console.error('Error parsing profesor seleccionado', e);
+        const currentUser = await base44.auth.me();
+        setUser(currentUser);
+        
+        // Si el usuario no tiene rol definido o es 'user', redirigir a selección de rol
+        if (!currentUser.role || currentUser.role === 'user') {
+          window.location.href = createPageUrl('SeleccionRol');
+          return;
+        }
+        
+        // Cargar profesor seleccionado del localStorage
+        const profesorGuardado = localStorage.getItem('profesor_seleccionado');
+        if (profesorGuardado) {
+          try {
+            setProfesorSeleccionado(JSON.parse(profesorGuardado));
+          } catch (e) {
+            console.error('Error parsing profesor seleccionado', e);
+          }
+        }
+      } catch (error) {
+        console.error('Error al verificar usuario:', error);
       }
-    }
+    };
+    
+    checkUser();
   }, []);
 
   const handleLogout = () => {
