@@ -88,11 +88,20 @@ export default function Layout({ children, currentPageName }) {
           }
         }
         
-        // Cargar profesor seleccionado del localStorage
-        const profesorGuardado = localStorage.getItem('profesor_seleccionado');
-        if (profesorGuardado) {
+        // Cargar profesor seleccionado
+        if (user?.profesor_id) {
+          // Si está en base de datos, usar ese
           try {
-            setProfesorSeleccionado(JSON.parse(profesorGuardado));
+            const profesor = await base44.entities.Profesor.read(user.profesor_id);
+            setProfesorSeleccionado(profesor);
+            localStorage.setItem('profesor_seleccionado', JSON.stringify(profesor));
+          } catch (e) {
+            console.error('Error al cargar profesor:', e);
+          }
+        } else if (localStorage.getItem('profesor_seleccionado')) {
+          // Fallback a localStorage si existe
+          try {
+            setProfesorSeleccionado(JSON.parse(localStorage.getItem('profesor_seleccionado')));
           } catch (e) {
             console.error('Error parsing profesor seleccionado', e);
           }
