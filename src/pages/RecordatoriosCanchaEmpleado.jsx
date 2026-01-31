@@ -32,7 +32,6 @@ export default function RecordatoriosCanchaEmpleado() {
 
   const marcarHechoMutation = useMutation({
     mutationFn: async (recordatorio) => {
-      // Actualizar recordatorio
       await base44.entities.RecordatorioCancha.update(recordatorio.id, {
         estado: 'hecho',
         hecho_por: user.email,
@@ -40,14 +39,12 @@ export default function RecordatoriosCanchaEmpleado() {
         hora_confirmacion: new Date().toISOString(),
       });
 
-      // Si está vinculado a un turno, marcarlo como pagado
       if (recordatorio.turno_cancha_id) {
         await base44.entities.TurnoCancha.update(recordatorio.turno_cancha_id, {
           pagado: true,
         });
       }
 
-      // Si tiene repetición semanal, crear el siguiente
       if (recordatorio.repeticion_semanal) {
         const fechaActual = parseISO(recordatorio.fecha);
         const proximaSemana = new Date(fechaActual);
@@ -72,29 +69,64 @@ export default function RecordatoriosCanchaEmpleado() {
     },
   });
 
-  const recordatoriosConTurnos = useMemo(() => {
-    return recordatorios.map(rec => {
-      const turno = turnos.find(t => t.id === rec.turno_cancha_id);
-      return { ...rec, turno };
-    });
-  }, [recordatorios, turnos]);
+  const itemsCombinados = useMemo(() => {
+    const items = [];
 
-  const recordatoriosOrdenados = useMemo(() => {
-    return [...recordatoriosConTurnos].sort((a, b) => {
+    // Agregar turnos de cancha del día
+    turnos.forEach(turno => {
+      items.push({
+        id: turno.id,
+        tipo: 'turno',
+        hora_inicio: turno.hora_inicio,
+        cancha: turno.cancha,
+        cliente: turno.cliente,
+        tipo_turno: turno.tipo_turno,
+        modalidad_alquiler: turno.modalidad_alquiler,
+        monto: turno.monto,
+        pagado: turno.pagado,
+        profesor: turno.profesor,
+        estado: 'pendiente',
+        data: turno,
+      });
+    });
+
+    // Agregar recordatorios de cancha del día
+    recordatorios.forEach(rec => {
+      items.push({
+        id: rec.id,
+        tipo: 'recordatorio',
+        hora_inicio: rec.hora,
+        cancha: rec.cancha,
+        cliente: rec.cliente,
+        tipo_turno: rec.tipo_turno,
+        modalidad_alquiler: rec.modalidad_alquiler,
+        monto: rec.monto,
+        pagado: rec.pagado,
+        profesor: rec.profesor,
+        estado: rec.estado,
+        repeticion_semanal: rec.repeticion_semanal,
+        hecho_por_nombre: rec.hecho_por_nombre,
+        hora_confirmacion: rec.hora_confirmacion,
+        data: rec,
+      });
+    });
+
+    // Ordenar por hora y estado
+    return items.sort((a, b) => {
       const estadoOrder = { pendiente: 0, hecho: 1 };
       if (estadoOrder[a.estado] !== estadoOrder[b.estado]) {
         return estadoOrder[a.estado] - estadoOrder[b.estado];
       }
-      return (a.hora || '').localeCompare(b.hora || '');
+      return (a.hora_inicio || '').localeCompare(b.hora_inicio || '');
     });
-  }, [recordatoriosConTurnos]);
+  }, [recordatorios, turnos]);
 
   const stats = useMemo(() => {
-    const pendientes = recordatorios.filter(r => r.estado === 'pendiente').length;
-    const hechos = recordatorios.filter(r => r.estado === 'hecho').length;
-    const total = recordatorios.length;
+    const pendientes = itemsCombinados.filter(i => i.estado === 'pendiente').length;
+    const hechos = itemsCombinados.filter(i => i.estado === 'hecho').length;
+    const total = itemsCombinados.length;
     return { pendientes, hechos, total };
-  }, [recordatorios]);
+  }, [itemsCombinados]);
 
   const formatMoney = (amount) => {
     return new Intl.NumberFormat('es-AR', {
