@@ -63,6 +63,7 @@ import Recuperos from './pages/Recuperos';
 import Reportes from './pages/Reportes';
 import Profesores from './pages/Profesores';
 import CalendarioClases from './pages/CalendarioClases';
+import ProfesorMenu from './pages/ProfesorMenu';
 import __Layout from './Layout.jsx';
 
 
@@ -83,6 +84,7 @@ export const PAGES = {
     "Reportes": Reportes,
     "Profesores": Profesores,
     "CalendarioClases": CalendarioClases,
+    "ProfesorMenu": ProfesorMenu,
 }
 
 export const pagesConfig = {

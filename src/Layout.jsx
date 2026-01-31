@@ -23,12 +23,6 @@ import PushNotificationManager from '@/components/PushNotificationManager';
 
 const navigationGestionClases = [
   { name: 'Profesores', href: 'Profesores', icon: Users },
-  { name: 'Dashboard', href: 'Dashboard', icon: LayoutDashboard, requireProfesor: true },
-  { name: 'Calendario', href: 'CalendarioClases', icon: Calendar, requireProfesor: true },
-  { name: 'Reportes', href: 'Reportes', icon: FileText, requireProfesor: true },
-  { name: 'Alumnos', href: 'Alumnos', icon: Users, requireProfesor: true },
-  { name: 'Recordatorios', href: 'Recordatorios', icon: RefreshCw, requireProfesor: true },
-  { name: 'Pagos', href: 'Pagos', icon: DollarSign, requireProfesor: true },
 ];
 
 const navigationAgenda = [
@@ -127,11 +121,6 @@ export default function Layout({ children, currentPageName }) {
                   const isActive = currentPageName === item.href;
                   const Icon = item.icon;
 
-                  // Si el item requiere profesor y no hay uno seleccionado, no mostrarlo
-                  if (item.requireProfesor && !profesorSeleccionado) {
-                    return null;
-                  }
-
                   return (
                     <Link
                       key={item.href}
@@ -156,25 +145,7 @@ export default function Layout({ children, currentPageName }) {
                   );
                 })}
 
-                {/* Mostrar profesor seleccionado */}
-                {profesorSeleccionado && (
-                  <div className="mt-3 px-3 py-2 bg-emerald-50 rounded-lg border border-emerald-200">
-                    <p className="text-xs text-slate-500 mb-1">Profesor actual:</p>
-                    <p className="text-sm font-medium text-emerald-700 truncate">
-                      {profesorSeleccionado.nombre}
-                    </p>
-                    <button
-                      onClick={() => {
-                        localStorage.removeItem('profesor_seleccionado');
-                        setProfesorSeleccionado(null);
-                        window.location.href = createPageUrl('Profesores');
-                      }}
-                      className="text-xs text-slate-500 hover:text-slate-700 mt-1"
-                    >
-                      Cambiar profesor
-                    </button>
-                  </div>
-                )}
+
               </div>
             )}
 
