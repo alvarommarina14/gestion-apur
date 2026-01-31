@@ -273,29 +273,50 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
             </div>
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label>Tipo</Label>
+              <Label>Hora inicio</Label>
               <Select
-                value={formData.tipo}
-                onValueChange={(v) => setFormData({ ...formData, tipo: v })}
+                value={formData.hora_inicio}
+                onValueChange={(v) => setFormData({ ...formData, hora_inicio: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="max-h-60">
+                  {Array.from({ length: 28 }, (_, i) => {
+                    const h = Math.floor(i / 2) + 8;
+                    const m = i % 2 === 0 ? '00' : '30';
+                    if (h > 21 || (h === 21 && m === '30')) return null;
+                    return `${h.toString().padStart(2, '0')}:${m}`;
+                  }).filter(Boolean).map(hora => (
+                    <SelectItem key={hora} value={hora}>{hora}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Duración</Label>
+              <Select
+                value={formData.duracion.toString()}
+                onValueChange={(v) => setFormData({ ...formData, duracion: Number(v) })}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="individual">Individual</SelectItem>
-                  <SelectItem value="grupal">Grupal</SelectItem>
+                  <SelectItem value="50">50 min</SelectItem>
+                  <SelectItem value="60">60 min</SelectItem>
+                  <SelectItem value="90">90 min</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            
             <div className="space-y-2">
-              <Label>Duración (min)</Label>
+              <Label>Hora fin</Label>
               <Input
-                type="number"
-                value={formData.duracion}
-                onChange={(e) => setFormData({ ...formData, duracion: e.target.value })}
+                value={calcularHoraFin(formData.hora_inicio, formData.duracion)}
+                disabled
+                className="bg-slate-50"
               />
             </div>
           </div>
