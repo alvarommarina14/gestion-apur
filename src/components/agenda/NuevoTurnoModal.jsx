@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { format, parseISO, addMinutes } from 'date-fns';
+import { format, parseISO, addMinutes, addWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
 import {
   Dialog,
@@ -387,7 +387,21 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
 
       updateMutation.mutate({ id: turno.id, data, cambios });
     } else {
-      createMutation.mutate(data);
+      // Si hay repetición semanal, crear múltiples turnos
+      if (dataConEmpleados.repeticion_semanal) {
+        const turnos = [];
+        for (let i = 0; i < 4; i++) {
+          const fechaTurno = addWeeks(parseISO(dataConEmpleados.fecha), i);
+          turnos.push({
+            ...data,
+            fecha: format(fechaTurno, 'yyyy-MM-dd'),
+            repeticion_semanal: true,
+          });
+        }
+        Promise.all(turnos.map(t => createMutation.mutateAsync(t)));
+      } else {
+        createMutation.mutate(data);
+      }
     }
   };
 
