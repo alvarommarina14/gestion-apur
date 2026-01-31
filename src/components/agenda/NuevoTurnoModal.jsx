@@ -364,37 +364,55 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
        const crearClase = async () => {
          try {
            const alumnosSeleccionados = alumnos.filter(a => formData.alumnos_ids.includes(a.id));
-           const profesorSeleccionado = profesores.find(p => p.id === formData.profesor_id);
-
-           const claseData = {
-             fecha: formData.fecha,
-             hora_inicio: formData.hora_inicio,
-             duracion: Number(formData.duracion),
-             tipo: 'individual',
-             sede: 'Sistema',
-             cancha: formData.cancha,
-             alumnos_ids: formData.alumnos_ids,
-             alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
-             precio: formData.monto ? Number(formData.monto) : null,
-             estado: 'programada',
-             notas: formData.notas,
-             asistencia_registrada: false,
-             profesor_id: formData.profesor_id,
-             estado_aprobacion: 'aprobada',
-           };
+           const serieId = formData.repeticion_semanal ? `clase-${Date.now()}` : null;
+           const clasesACrear = [];
 
            if (formData.repeticion_semanal) {
-             claseData.es_recurrente = true;
-             claseData.recurrencia_tipo = 'semanal';
+             // Crear clases para 52 semanas (1 año)
+             for (let i = 0; i < 52; i++) {
+               const fechaClase = addWeeks(parseISO(formData.fecha), i);
+               clasesACrear.push({
+                 fecha: format(fechaClase, 'yyyy-MM-dd'),
+                 hora_inicio: formData.hora_inicio,
+                 duracion: Number(formData.duracion),
+                 tipo: 'individual',
+                 sede: 'Sistema',
+                 cancha: formData.cancha,
+                 alumnos_ids: formData.alumnos_ids,
+                 alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
+                 precio: formData.monto ? Number(formData.monto) : null,
+                 estado: 'programada',
+                 es_recurrente: true,
+                 recurrencia_tipo: 'semanal',
+                 serie_recurrente_id: serieId,
+                 notas: formData.notas,
+                 asistencia_registrada: false,
+                 profesor_id: formData.profesor_id,
+                 estado_aprobacion: 'aprobada',
+               });
+             }
+           } else {
+             clasesACrear.push({
+               fecha: formData.fecha,
+               hora_inicio: formData.hora_inicio,
+               duracion: Number(formData.duracion),
+               tipo: 'individual',
+               sede: 'Sistema',
+               cancha: formData.cancha,
+               alumnos_ids: formData.alumnos_ids,
+               alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
+               precio: formData.monto ? Number(formData.monto) : null,
+               estado: 'programada',
+               notas: formData.notas,
+               asistencia_registrada: false,
+               profesor_id: formData.profesor_id,
+               estado_aprobacion: 'aprobada',
+             });
            }
 
-           const claseCreada = await base44.entities.Clase.create(claseData);
-
-           // Sincronizar con Google Calendar
-           try {
-             await base44.functions.invoke('sincronizarClaseGoogleCalendar', { clase_id: claseCreada.id });
-           } catch (err) {
-             console.error('Error sincronizando con Google Calendar:', err);
+           // Crear todas las clases
+           for (const clase of clasesACrear) {
+             await base44.entities.Clase.create(clase);
            }
 
            setSuccess(true);
