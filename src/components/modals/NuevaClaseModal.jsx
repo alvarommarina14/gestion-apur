@@ -40,6 +40,11 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
   
   const alumnosActivos = alumnos.filter(a => a.estado !== 'pausado');
   
+  const { data: user } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => base44.auth.me(),
+  });
+
   const [formData, setFormData] = useState({
     fecha: new Date(),
     hora_inicio: '09:00',
