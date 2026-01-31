@@ -47,7 +47,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
     queryFn: () => base44.auth.me(),
   });
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState(() => ({
     fecha: new Date(),
     hora_inicio: '09:00',
     duracion: 50,
@@ -64,7 +64,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
     es_recurrente: false,
     recurrencia_tipo: 'semanal',
     recurrencia_cantidad: 4,
-  });
+  }));
 
   useEffect(() => {
     if (recupero) {
