@@ -32,6 +32,7 @@ const navigationGestionClases = [
 const navigationAgenda = [
   { name: 'Agenda', href: 'Agenda', icon: Calendar },
   { name: 'Dashboard de Ocupación', href: 'DashboardOcupacion', icon: LayoutDashboard },
+  { name: 'Clientes', href: 'Clientes', icon: Users },
   { name: 'Mi Agenda', href: 'AgendaEmpleados', icon: Calendar, empleadoOnly: true },
 ];
 
