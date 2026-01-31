@@ -47,7 +47,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
     queryFn: () => base44.auth.me(),
   });
 
-  const [formData, setFormData] = useState(() => ({
+  const getInitialFormData = () => ({
     fecha: new Date(),
     hora_inicio: '09:00',
     duracion: 50,
@@ -57,26 +57,20 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
     alumnos_ids: recupero ? [recupero.alumno_id] : [],
     precio: '',
     pagado: false,
-    notas: '',
+    notas: recupero ? `Recupero de clase del ${recupero.fecha_original}` : '',
     repeticion_semanal: false,
     es_recupero: !!recupero,
     clase_original_id: recupero?.clase_original_id || '',
     es_recurrente: false,
     recurrencia_tipo: 'semanal',
     recurrencia_cantidad: 4,
-  }));
+  });
+
+  const [formData, setFormData] = useState(getInitialFormData());
 
   useEffect(() => {
-    if (recupero && !formData.es_recupero) {
-      setFormData(prev => ({
-        ...prev,
-        alumnos_ids: [recupero.alumno_id],
-        es_recupero: true,
-        clase_original_id: recupero.clase_original_id,
-        notas: `Recupero de clase del ${recupero.fecha_original}`,
-      }));
-    }
-  }, [recupero?.id]);
+    setFormData(getInitialFormData());
+  }, [open, recupero?.id]);
 
   const calcularHoraFin = (horaInicio, duracion) => {
     if (!horaInicio) return '00:00';
