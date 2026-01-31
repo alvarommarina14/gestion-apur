@@ -366,9 +366,9 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
             <div className="space-y-2">
               <Label>Cancha</Label>
               <Select
-                value={formData.cancha}
-                onValueChange={(v) => setFormData({ ...formData, cancha: v })}
-              >
+                 value={formData.cancha}
+                 onValueChange={(v) => setFormData(prev => ({ ...prev, cancha: v }))}
+               >
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar" />
                 </SelectTrigger>
