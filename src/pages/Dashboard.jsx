@@ -18,6 +18,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 import QuickStats, { ClassStats } from '@/components/dashboard/QuickStats';
 import TodayAgenda from '@/components/dashboard/TodayAgenda';
@@ -37,6 +43,7 @@ export default function Dashboard() {
   const [asistenciaModal, setAsistenciaModal] = useState({ open: false, clase: null });
   const [nuevaClaseModal, setNuevaClaseModal] = useState({ open: false, recupero: null });
   const [cancelarModal, setCancelarModal] = useState({ open: false, clase: null });
+  const [morososModal, setMorososModal] = useState(false);
   
   const today = new Date();
   const todayStr = format(today, 'yyyy-MM-dd');
@@ -141,7 +148,7 @@ export default function Dashboard() {
         description: `${morososFuera15.length} alumno(s) sin pagar después del día 15`,
         count: morososFuera15.length,
         actions: [
-          { label: 'Ver morosos', onClick: () => {} }
+          { label: 'Ver morosos', onClick: () => setMorososModal(true) }
         ]
       });
     }
@@ -394,6 +401,73 @@ export default function Dashboard() {
         onOpenChange={(open) => setCancelarModal({ ...cancelarModal, open })}
         clase={cancelarModal.clase}
       />
+      
+      {/* Modal de Morosos */}
+      <Dialog open={morososModal} onOpenChange={setMorososModal}>
+        <DialogContent className="sm:max-w-2xl max-h-[80vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-rose-600" />
+              Alumnos Morosos ({alumnos.filter(a => a.estado === 'moroso').length})
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="flex-1 overflow-y-auto space-y-2 px-1">
+            {alumnos.filter(a => a.estado === 'moroso').length === 0 ? (
+              <div className="py-12 text-center text-slate-500">
+                <Users className="w-12 h-12 mx-auto mb-3 opacity-40" />
+                <p>No hay alumnos morosos</p>
+              </div>
+            ) : (
+              alumnos
+                .filter(a => a.estado === 'moroso')
+                .sort((a, b) => (b.deuda_total || 0) - (a.deuda_total || 0))
+                .map((alumno) => (
+                  <div
+                    key={alumno.id}
+                    className="p-4 rounded-lg border border-rose-200 bg-rose-50/50 hover:bg-rose-50 cursor-pointer transition-colors"
+                    onClick={() => {
+                      setPagoModal({ open: true, alumno });
+                      setMorososModal(false);
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-slate-900">{alumno.nombre}</h4>
+                        <p className="text-sm text-slate-500 mt-0.5">
+                          {alumno.whatsapp}
+                        </p>
+                        {alumno.ultimo_pago_fecha && (
+                          <p className="text-xs text-slate-400 mt-1">
+                            Último pago: {format(new Date(alumno.ultimo_pago_fecha), "d 'de' MMM", { locale: es })}
+                          </p>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-semibold text-rose-600">
+                          ${(alumno.deuda_total || 0).toLocaleString('es-AR')}
+                        </div>
+                        <div className="text-xs text-slate-500 mt-0.5">
+                          ${(alumno.precio_mensual || 0).toLocaleString('es-AR')}/mes
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+            )}
+          </div>
+          
+          <div className="pt-4 border-t">
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={() => setMorososModal(false)}
+            >
+              Cerrar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
