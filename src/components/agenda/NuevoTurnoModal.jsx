@@ -128,6 +128,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
   }, [turno, open, fecha]);
 
   const calcularHoraFin = (horaInicio, duracion) => {
+    if (!horaInicio) return '00:00';
     const [h, m] = horaInicio.split(':').map(Number);
     const inicio = new Date();
     inicio.setHours(h, m, 0);
