@@ -22,11 +22,12 @@ import NotificationManager from '@/components/NotificationManager';
 import PushNotificationManager from '@/components/PushNotificationManager';
 
 const navigationGestionClases = [
-  { name: 'Dashboard', href: 'Dashboard', icon: LayoutDashboard },
-  { name: 'Reportes', href: 'Reportes', icon: FileText },
-  { name: 'Alumnos', href: 'Alumnos', icon: Users },
-  { name: 'Recordatorios', href: 'Recordatorios', icon: RefreshCw },
-  { name: 'Pagos', href: 'Pagos', icon: DollarSign },
+  { name: 'Profesores', href: 'Profesores', icon: Users },
+  { name: 'Dashboard', href: 'Dashboard', icon: LayoutDashboard, requiresProfesor: true },
+  { name: 'Reportes', href: 'Reportes', icon: FileText, requiresProfesor: true },
+  { name: 'Alumnos', href: 'Alumnos', icon: Users, requiresProfesor: true },
+  { name: 'Recordatorios', href: 'Recordatorios', icon: RefreshCw, requiresProfesor: true },
+  { name: 'Pagos', href: 'Pagos', icon: DollarSign, requiresProfesor: true },
 ];
 
 const navigationAgenda = [
@@ -52,10 +53,28 @@ const navigationConfiguracion = [
 export default function Layout({ children, currentPageName }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = React.useState(null);
+  const [profesorSeleccionado, setProfesorSeleccionado] = React.useState(null);
 
   React.useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
-  }, []);
+    
+    // Obtener profesor_id de URL
+    const params = new URLSearchParams(window.location.search);
+    const profesorId = params.get('profesor_id');
+    if (profesorId) {
+      localStorage.setItem('profesor_id_seleccionado', profesorId);
+      base44.entities.Profesor.filter({ id: profesorId }).then(profs => {
+        if (profs[0]) setProfesorSeleccionado(profs[0]);
+      });
+    } else {
+      const savedId = localStorage.getItem('profesor_id_seleccionado');
+      if (savedId) {
+        base44.entities.Profesor.filter({ id: savedId }).then(profs => {
+          if (profs[0]) setProfesorSeleccionado(profs[0]);
+        });
+      }
+    }
+  }, [currentPageName]);
 
   const handleLogout = () => {
     if (confirm('¿Querés cerrar sesión?')) {
@@ -111,13 +130,19 @@ export default function Layout({ children, currentPageName }) {
                   Gestión de Clases
                 </p>
                 {navigationGestionClases.map((item) => {
+                  // Si requiere profesor y no hay uno seleccionado, no mostrar
+                  if (item.requiresProfesor && !profesorSeleccionado) return null;
+
                   const isActive = currentPageName === item.href;
                   const Icon = item.icon;
+                  const url = item.requiresProfesor && profesorSeleccionado 
+                    ? `${item.href}?profesor_id=${profesorSeleccionado.id}` 
+                    : item.href;
 
                   return (
                     <Link
                       key={item.href}
-                      to={createPageUrl(item.href)}
+                      to={createPageUrl(url)}
                       onClick={() => setSidebarOpen(false)}
                       className={cn(
                         'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
@@ -137,6 +162,27 @@ export default function Layout({ children, currentPageName }) {
                     </Link>
                   );
                 })}
+
+                {profesorSeleccionado && (
+                  <div className="mt-3 pt-3 border-t border-slate-200">
+                    <div className="px-3 py-2 bg-slate-50 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                          style={{ backgroundColor: profesorSeleccionado.color }}
+                        >
+                          {profesorSeleccionado.nombre.charAt(0)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-slate-700 truncate">
+                            {profesorSeleccionado.nombre}
+                          </p>
+                          <p className="text-xs text-slate-500">Profesor actual</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
