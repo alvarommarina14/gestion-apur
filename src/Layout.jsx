@@ -56,6 +56,21 @@ export default function Layout({ children, currentPageName }) {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
         
+        // Si es el primer usuario (owner) y no tiene rol, configurarlo como admin automáticamente
+        if (!currentUser.rol || currentUser.estado_aprobacion !== 'aprobado') {
+          const allUsers = await base44.entities.User.list();
+          const isOwner = allUsers.length === 0 || allUsers[0]?.id === currentUser.id;
+          
+          if (isOwner) {
+            await base44.auth.updateMe({ 
+              rol: 'admin',
+              estado_aprobacion: 'aprobado'
+            });
+            window.location.reload();
+            return;
+          }
+        }
+        
         // No verificar rol si estamos en las páginas especiales
         if (currentPageName !== 'SeleccionRol' && currentPageName !== 'PendienteAprobacion') {
           // Si el usuario no tiene rol definido, redirigir a selección de rol
