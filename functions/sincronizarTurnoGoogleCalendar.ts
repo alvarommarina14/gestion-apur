@@ -83,7 +83,6 @@ ${turno.notas ? `Notas: ${turno.notas}` : ''}
       location: `Cancha ${turno.cancha}`,
       attendees: empleados.map(emp => ({
         email: emp.email_gmail,
-        responseStatus: 'accepted',
       })),
       reminders: {
         useDefault: false,
