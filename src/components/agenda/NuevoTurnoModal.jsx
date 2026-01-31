@@ -65,7 +65,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
     duracion: 60,
     cancha: '1',
     cliente: '',
-    tipo_turno: 'clase',
+    tipo_turno: 'alquiler',
     profesor_id: '',
     alumnos_ids: [],
     modalidad_alquiler: '',
