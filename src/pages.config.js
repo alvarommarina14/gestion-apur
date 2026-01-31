@@ -50,6 +50,7 @@
 import Agenda from './pages/Agenda';
 import AgendaEmpleados from './pages/AgendaEmpleados';
 import Alumnos from './pages/Alumnos';
+import Clientes from './pages/Clientes';
 import Configuracion from './pages/Configuracion';
 import Dashboard from './pages/Dashboard';
 import DashboardOcupacion from './pages/DashboardOcupacion';
@@ -60,7 +61,7 @@ import RecordatoriosCanchaAdmin from './pages/RecordatoriosCanchaAdmin';
 import RecordatoriosCanchaEmpleado from './pages/RecordatoriosCanchaEmpleado';
 import Recuperos from './pages/Recuperos';
 import Reportes from './pages/Reportes';
-import Clientes from './pages/Clientes';
+import Profesores from './pages/Profesores';
 import __Layout from './Layout.jsx';
 
 
@@ -68,6 +69,7 @@ export const PAGES = {
     "Agenda": Agenda,
     "AgendaEmpleados": AgendaEmpleados,
     "Alumnos": Alumnos,
+    "Clientes": Clientes,
     "Configuracion": Configuracion,
     "Dashboard": Dashboard,
     "DashboardOcupacion": DashboardOcupacion,
@@ -78,7 +80,7 @@ export const PAGES = {
     "RecordatoriosCanchaEmpleado": RecordatoriosCanchaEmpleado,
     "Recuperos": Recuperos,
     "Reportes": Reportes,
-    "Clientes": Clientes,
+    "Profesores": Profesores,
 }
 
 export const pagesConfig = {

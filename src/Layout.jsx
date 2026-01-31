@@ -22,11 +22,12 @@ import NotificationManager from '@/components/NotificationManager';
 import PushNotificationManager from '@/components/PushNotificationManager';
 
 const navigationGestionClases = [
-  { name: 'Dashboard', href: 'Dashboard', icon: LayoutDashboard },
-  { name: 'Reportes', href: 'Reportes', icon: FileText },
-  { name: 'Alumnos', href: 'Alumnos', icon: Users },
-  { name: 'Recordatorios', href: 'Recordatorios', icon: RefreshCw },
-  { name: 'Pagos', href: 'Pagos', icon: DollarSign },
+  { name: 'Profesores', href: 'Profesores', icon: Users },
+  { name: 'Dashboard', href: 'Dashboard', icon: LayoutDashboard, requireProfesor: true },
+  { name: 'Reportes', href: 'Reportes', icon: FileText, requireProfesor: true },
+  { name: 'Alumnos', href: 'Alumnos', icon: Users, requireProfesor: true },
+  { name: 'Recordatorios', href: 'Recordatorios', icon: RefreshCw, requireProfesor: true },
+  { name: 'Pagos', href: 'Pagos', icon: DollarSign, requireProfesor: true },
 ];
 
 const navigationAgenda = [
@@ -52,9 +53,20 @@ const navigationConfiguracion = [
 export default function Layout({ children, currentPageName }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = React.useState(null);
+  const [profesorSeleccionado, setProfesorSeleccionado] = React.useState(null);
 
   React.useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
+    
+    // Cargar profesor seleccionado del localStorage
+    const profesorGuardado = localStorage.getItem('profesor_seleccionado');
+    if (profesorGuardado) {
+      try {
+        setProfesorSeleccionado(JSON.parse(profesorGuardado));
+      } catch (e) {
+        console.error('Error parsing profesor seleccionado', e);
+      }
+    }
   }, []);
 
   const handleLogout = () => {
@@ -114,6 +126,11 @@ export default function Layout({ children, currentPageName }) {
                   const isActive = currentPageName === item.href;
                   const Icon = item.icon;
 
+                  // Si el item requiere profesor y no hay uno seleccionado, no mostrarlo
+                  if (item.requireProfesor && !profesorSeleccionado) {
+                    return null;
+                  }
+
                   return (
                     <Link
                       key={item.href}
@@ -137,6 +154,26 @@ export default function Layout({ children, currentPageName }) {
                     </Link>
                   );
                 })}
+
+                {/* Mostrar profesor seleccionado */}
+                {profesorSeleccionado && (
+                  <div className="mt-3 px-3 py-2 bg-emerald-50 rounded-lg border border-emerald-200">
+                    <p className="text-xs text-slate-500 mb-1">Profesor actual:</p>
+                    <p className="text-sm font-medium text-emerald-700 truncate">
+                      {profesorSeleccionado.nombre}
+                    </p>
+                    <button
+                      onClick={() => {
+                        localStorage.removeItem('profesor_seleccionado');
+                        setProfesorSeleccionado(null);
+                        window.location.href = createPageUrl('Profesores');
+                      }}
+                      className="text-xs text-slate-500 hover:text-slate-700 mt-1"
+                    >
+                      Cambiar profesor
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
