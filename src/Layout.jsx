@@ -40,6 +40,7 @@ const navigationClientes = [
 
 const navigationConfiguracion = [
   { name: 'Empleados', href: 'Empleados', icon: Users },
+  { name: 'Aprobación Usuarios', href: 'AprobacionUsuarios', icon: Shield },
   { name: 'Roles y Permisos', href: 'GestionRoles', icon: Shield },
   { name: 'Configuración', href: 'Configuracion', icon: Settings },
 ];
@@ -55,11 +56,17 @@ export default function Layout({ children, currentPageName }) {
         const currentUser = await base44.auth.me();
         setUser(currentUser);
         
-        // No verificar rol si estamos en la página de selección de rol
-        if (currentPageName !== 'SeleccionRol') {
+        // No verificar rol si estamos en las páginas especiales
+        if (currentPageName !== 'SeleccionRol' && currentPageName !== 'PendienteAprobacion') {
           // Si el usuario no tiene rol definido, redirigir a selección de rol
           if (!currentUser.rol) {
             window.location.href = createPageUrl('SeleccionRol');
+            return;
+          }
+          
+          // Si tiene rol admin pero está pendiente de aprobación, redirigir
+          if (currentUser.rol === 'admin' && currentUser.estado_aprobacion === 'pendiente') {
+            window.location.href = createPageUrl('PendienteAprobacion');
             return;
           }
         }

@@ -72,7 +72,19 @@ export default function SeleccionRol() {
     
     setSaving(true);
     try {
-      await base44.auth.updateMe({ rol: selectedRol });
+      // Si selecciona admin, marcar como pendiente de aprobación
+      if (selectedRol === 'admin') {
+        await base44.auth.updateMe({ 
+          rol: selectedRol,
+          estado_aprobacion: 'pendiente'
+        });
+      } else {
+        // Empleado y profesor se aprueban automáticamente
+        await base44.auth.updateMe({ 
+          rol: selectedRol,
+          estado_aprobacion: 'aprobado'
+        });
+      }
       
       // Recargar la página para que el Layout detecte el nuevo rol
       window.location.reload();

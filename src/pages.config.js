@@ -66,6 +66,8 @@ import RecordatoriosCanchaEmpleado from './pages/RecordatoriosCanchaEmpleado';
 import Recuperos from './pages/Recuperos';
 import Reportes from './pages/Reportes';
 import SeleccionRol from './pages/SeleccionRol';
+import PendienteAprobacion from './pages/PendienteAprobacion';
+import AprobacionUsuarios from './pages/AprobacionUsuarios';
 import __Layout from './Layout.jsx';
 
 
@@ -89,6 +91,8 @@ export const PAGES = {
     "Recuperos": Recuperos,
     "Reportes": Reportes,
     "SeleccionRol": SeleccionRol,
+    "PendienteAprobacion": PendienteAprobacion,
+    "AprobacionUsuarios": AprobacionUsuarios,
 }
 
 export const pagesConfig = {
