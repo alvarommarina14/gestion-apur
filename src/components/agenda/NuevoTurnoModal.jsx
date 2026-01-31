@@ -514,7 +514,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
         <Label>Tipo de Turno</Label>
         <Select
           value={formData.tipo_turno}
-          onValueChange={(v) => setFormData({ ...formData, tipo_turno: v, profesor: v === 'alquiler' ? '' : formData.profesor, modalidad_alquiler: v === 'clase' ? '' : formData.modalidad_alquiler })}
+          onValueChange={(v) => setFormData({ ...formData, tipo_turno: v, modalidad_alquiler: v === 'clase' ? '' : formData.modalidad_alquiler })}
         >
           <SelectTrigger>
             <SelectValue />
