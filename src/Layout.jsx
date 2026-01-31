@@ -50,6 +50,7 @@ const navigationClientes = [
 const navigationConfiguracion = [
   { name: 'Empleados', href: 'Empleados', icon: Users },
   { name: 'Aprobación Usuarios', href: 'AprobacionUsuarios', icon: Shield },
+  { name: 'Aprobación de Clases', href: 'AprobacionClases', icon: Calendar },
   { name: 'Roles y Permisos', href: 'GestionRoles', icon: Shield },
   { name: 'Configuración', href: 'Configuracion', icon: Settings },
 ];
