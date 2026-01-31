@@ -29,7 +29,8 @@ export default function ProfesorRegistro() {
 
   const createProfesorMutation = useMutation({
     mutationFn: (data) => base44.entities.Profesor.create(data),
-    onSuccess: (newProfesor) => {
+    onSuccess: async (newProfesor) => {
+      await base44.auth.updateMe({ profesor_id: newProfesor.id });
       localStorage.setItem('profesor_seleccionado', JSON.stringify(newProfesor));
       navigate(createPageUrl('ProfesorMenu'));
     },
@@ -41,7 +42,8 @@ export default function ProfesorRegistro() {
     await createProfesorMutation.mutateAsync(formData);
   };
 
-  const handleSelectProfesor = (profesor) => {
+  const handleSelectProfesor = async (profesor) => {
+    await base44.auth.updateMe({ profesor_id: profesor.id });
     localStorage.setItem('profesor_seleccionado', JSON.stringify(profesor));
     navigate(createPageUrl('ProfesorMenu'));
   };
