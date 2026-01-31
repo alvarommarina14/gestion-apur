@@ -6,7 +6,6 @@ import {
   Bell,
   MessageCircle,
   Mail,
-  Clock,
   Save,
   Plus,
   Edit,
@@ -115,9 +114,9 @@ export default function Configuracion() {
                   Cómo funcionan los recordatorios
                 </p>
                 <ul className="text-sm text-blue-700 space-y-1">
-                  <li>• <strong>Pre-cobro:</strong> Se envía X días antes del día 5 de cada mes</li>
-                  <li>• <strong>Moroso:</strong> Se envía a alumnos sin pago después del día 15</li>
-                  <li>• Los recordatorios aparecen como "pendientes" y se envían con un clic</li>
+                  <li>• <strong>Pre-cobro:</strong> Configuración para recordatorios antes del día 5</li>
+                  <li>• <strong>Moroso:</strong> Configuración para alumnos sin pago después del día 15</li>
+                  <li>• <strong>Envío manual:</strong> Los recordatorios se generan automáticamente pero se envían manualmente desde la sección de Recordatorios</li>
                   <li>• Variables disponibles: {'{nombre}'}, {'{monto}'}, {'{mes}'}</li>
                 </ul>
               </div>
@@ -180,18 +179,11 @@ export default function Configuracion() {
                           )}
                         </div>
                         
-                        <div className="bg-slate-50 rounded-lg p-3 mb-3">
+                        <div className="bg-slate-50 rounded-lg p-3">
                           <p className="text-sm text-slate-700 font-mono">
                             {config.mensaje_template}
                           </p>
                         </div>
-                        
-                        {config.hora_envio && (
-                          <div className="flex items-center gap-2 text-sm text-slate-500">
-                            <Clock className="w-4 h-4" />
-                            <span>Enviar a las {config.hora_envio}</span>
-                          </div>
-                        )}
                       </div>
                       
                       <div className="flex items-center gap-2">
@@ -257,7 +249,6 @@ function ConfiguracionModal({ open, onOpenChange, config }) {
     dias_despues: config?.dias_despues || 1,
     mensaje_template: config?.mensaje_template || '',
     canal: config?.canal || 'whatsapp',
-    hora_envio: config?.hora_envio || '09:00',
   });
   
   React.useEffect(() => {
@@ -269,7 +260,6 @@ function ConfiguracionModal({ open, onOpenChange, config }) {
         dias_despues: config.dias_despues || 1,
         mensaje_template: config.mensaje_template,
         canal: config.canal || 'whatsapp',
-        hora_envio: config.hora_envio || '09:00',
       });
     } else {
       setFormData({
@@ -279,7 +269,6 @@ function ConfiguracionModal({ open, onOpenChange, config }) {
         dias_despues: 1,
         mensaje_template: '',
         canal: 'whatsapp',
-        hora_envio: '09:00',
       });
     }
   }, [config, open]);
@@ -390,19 +379,10 @@ function ConfiguracionModal({ open, onOpenChange, config }) {
                 onChange={(e) => setFormData({ ...formData, dias_despues: Number(e.target.value) })}
               />
               <p className="text-xs text-slate-500">
-                El recordatorio se enviará {formData.dias_despues} días después del día 15 a los morosos
+                Los recordatorios se generarán automáticamente {formData.dias_despues} días después del día 15 para envío manual
               </p>
             </div>
           )}
-          
-          <div className="space-y-2">
-            <Label>Hora de envío</Label>
-            <Input
-              type="time"
-              value={formData.hora_envio}
-              onChange={(e) => setFormData({ ...formData, hora_envio: e.target.value })}
-            />
-          </div>
           
           <div className="space-y-2">
             <Label>Mensaje del recordatorio</Label>
