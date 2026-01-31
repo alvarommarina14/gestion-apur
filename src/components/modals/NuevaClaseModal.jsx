@@ -67,7 +67,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
   }));
 
   useEffect(() => {
-    if (recupero) {
+    if (recupero && !formData.es_recupero) {
       setFormData(prev => ({
         ...prev,
         alumnos_ids: [recupero.alumno_id],
@@ -76,7 +76,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
         notas: `Recupero de clase del ${recupero.fecha_original}`,
       }));
     }
-  }, [recupero]);
+  }, [recupero?.id]);
 
   const calcularHoraFin = (horaInicio, duracion) => {
     if (!horaInicio) return '00:00';
