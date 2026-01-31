@@ -323,22 +323,38 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Sede</Label>
-              <Input
-                value={formData.sede}
-                onChange={(e) => setFormData({ ...formData, sede: e.target.value })}
-                placeholder="Nombre de la sede"
-                required
-              />
+              <Label>Tipo</Label>
+              <Select
+                value={formData.tipo}
+                onValueChange={(v) => setFormData({ ...formData, tipo: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="individual">Individual</SelectItem>
+                  <SelectItem value="grupal">Grupal</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             
             <div className="space-y-2">
               <Label>Cancha</Label>
-              <Input
+              <Select
                 value={formData.cancha}
-                onChange={(e) => setFormData({ ...formData, cancha: e.target.value })}
-                placeholder="Opcional"
-              />
+                onValueChange={(v) => setFormData({ ...formData, cancha: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={null}>Sin cancha asignada</SelectItem>
+                  <SelectItem value="1">Cancha 1</SelectItem>
+                  <SelectItem value="2">Cancha 2</SelectItem>
+                  <SelectItem value="3">Cancha 3</SelectItem>
+                  <SelectItem value="4">Cancha 4</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           
