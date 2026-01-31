@@ -46,8 +46,10 @@ export default function CalendarioClasesPage() {
   const clasesFiltradas = React.useMemo(() => {
     let filtradas = clases;
     
-    // Filtrar solo clases aprobadas o creadas por admin
-    filtradas = filtradas.filter(c => c.estado_aprobacion === 'aprobada');
+    // Filtrar clases aprobadas O creadas por el profesor actual
+    filtradas = filtradas.filter(c => 
+      c.estado_aprobacion === 'aprobada' || c.profesor_id === user?.id
+    );
     
     // Si hay profesor seleccionado, filtrar por alumnos del profesor
     if (profesorSeleccionado) {
@@ -61,7 +63,7 @@ export default function CalendarioClasesPage() {
     }
     
     return filtradas;
-  }, [clases, alumnos, profesorSeleccionado]);
+  }, [clases, alumnos, profesorSeleccionado, user?.id]);
 
   const handleClaseClick = (clase) => {
     setClaseSeleccionada(clase);
