@@ -44,17 +44,36 @@ export default function Dashboard() {
   const [nuevaClaseModal, setNuevaClaseModal] = useState({ open: false, recupero: null });
   const [cancelarModal, setCancelarModal] = useState({ open: false, clase: null });
   const [morososModal, setMorososModal] = useState(false);
+  const [profesorSeleccionado, setProfesorSeleccionado] = useState(null);
   
   const today = new Date();
   const todayStr = format(today, 'yyyy-MM-dd');
   const currentMonth = format(today, 'yyyy-MM');
   const currentDay = today.getDate();
   
+  // Cargar profesor seleccionado
+  React.useEffect(() => {
+    const profesorGuardado = localStorage.getItem('profesor_seleccionado');
+    if (profesorGuardado) {
+      try {
+        setProfesorSeleccionado(JSON.parse(profesorGuardado));
+      } catch (e) {
+        console.error('Error parsing profesor seleccionado', e);
+      }
+    }
+  }, []);
+  
   // Queries
-  const { data: alumnos = [], isLoading: loadingAlumnos } = useQuery({
+  const { data: alumnosTodos = [], isLoading: loadingAlumnos } = useQuery({
     queryKey: ['alumnos'],
     queryFn: () => base44.entities.Alumno.list(),
   });
+  
+  // Filtrar alumnos por profesor seleccionado
+  const alumnos = React.useMemo(() => {
+    if (!profesorSeleccionado) return alumnosTodos;
+    return alumnosTodos.filter(a => a.profesor_id === profesorSeleccionado.id);
+  }, [alumnosTodos, profesorSeleccionado]);
   
   const { data: clases = [], isLoading: loadingClases } = useQuery({
     queryKey: ['clases'],
@@ -372,6 +391,100 @@ export default function Dashboard() {
             </Card>
           </div>
         </div>
+        
+        {/* Alumnos del Profesor */}
+        {profesorSeleccionado && (
+          <Card className="shadow-sm">
+            <CardHeader className="pb-3 border-b">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Users className="w-5 h-5 text-emerald-600" />
+                  Alumnos de {profesorSeleccionado.nombre}
+                </CardTitle>
+                <Link to={createPageUrl('Alumnos')}>
+                  <Button variant="ghost" size="sm" className="text-slate-500">
+                    Ver todos
+                    <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-4">
+              {isLoading ? (
+                <div className="space-y-2">
+                  {[...Array(4)].map((_, i) => (
+                    <Skeleton key={i} className="h-16 rounded-lg" />
+                  ))}
+                </div>
+              ) : alumnos.length === 0 ? (
+                <div className="text-center py-8 text-slate-500">
+                  <Users className="w-10 h-10 mx-auto mb-2 opacity-40" />
+                  <p className="text-sm">No hay alumnos asignados</p>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="mt-3"
+                    onClick={() => window.location.href = createPageUrl('Alumnos')}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Agregar alumno
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {alumnos.slice(0, 5).map((alumno) => (
+                    <div
+                      key={alumno.id}
+                      className="flex items-center justify-between p-3 rounded-lg border hover:bg-slate-50 cursor-pointer transition-colors"
+                      onClick={() => window.location.href = createPageUrl('Alumnos')}
+                    >
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className={cn(
+                          'w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold',
+                          alumno.estado === 'activo' && 'bg-emerald-100 text-emerald-700',
+                          alumno.estado === 'moroso' && 'bg-rose-100 text-rose-700',
+                          alumno.estado === 'pausado' && 'bg-slate-100 text-slate-600'
+                        )}>
+                          {alumno.nombre?.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-slate-900 truncate">{alumno.nombre}</p>
+                          <div className="flex items-center gap-2 text-xs text-slate-500">
+                            <span>${(alumno.precio_mensual || 0).toLocaleString('es-AR')}/mes</span>
+                            <span>•</span>
+                            <span>{alumno.clases_por_mes || 0} clases</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {alumno.clases_a_recuperar > 0 && (
+                          <div className="px-2 py-1 bg-amber-100 text-amber-700 rounded text-xs font-medium">
+                            {alumno.clases_a_recuperar} a recuperar
+                          </div>
+                        )}
+                        {alumno.estado === 'moroso' && (
+                          <div className="px-2 py-1 bg-rose-100 text-rose-700 rounded text-xs font-medium">
+                            Moroso
+                          </div>
+                        )}
+                        {alumno.estado === 'activo' && alumno.estado_mes_actual === 'pagado' && (
+                          <div className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs font-medium">
+                            Al día
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  {alumnos.length > 5 && (
+                    <p className="text-center text-sm text-slate-500 pt-2">
+                      Y {alumnos.length - 5} más...
+                    </p>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
         
         {/* Recordatorios Pendientes */}
         <RecordatoriosPendientes compact={false} />
