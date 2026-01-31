@@ -27,18 +27,17 @@ const navigationGestionClases = [
 
 const navigationAgenda = [
   { name: 'Agenda', href: 'Agenda', icon: Calendar },
-  { name: 'Dashboard de Ocupación', href: 'DashboardOcupacion', icon: LayoutDashboard },
+  { name: 'Dashboard de Ocupación', href: 'DashboardOcupacion', icon: LayoutDashboard, adminOnly: true },
+  { name: 'Canchas Admin', href: 'RecordatoriosCanchaAdmin', icon: Calendar, adminOnly: true },
   { name: 'Mi Agenda', href: 'AgendaEmpleados', icon: Calendar, empleadoOnly: true },
+  { name: 'Mis Recordatorios', href: 'RecordatoriosCanchaEmpleado', icon: Calendar, empleadoOnly: true },
 ];
 
 const navigationClientes = [
   { name: 'Clientes', href: 'Clientes', icon: Users },
 ];
 
-const navigationCancha = [
-  { name: 'Canchas Admin', href: 'RecordatoriosCanchaAdmin', icon: Calendar, adminOnly: true },
-  { name: 'Mis Recordatorios', href: 'RecordatoriosCanchaEmpleado', icon: Calendar },
-];
+
 
 const navigationConfiguracion = [
   { name: 'Empleados', href: 'Empleados', icon: Users },
@@ -155,9 +154,8 @@ export default function Layout({ children, currentPageName }) {
                 Booking de Canchas
               </p>
               {navigationAgenda.map((item) => {
-                // Empleados solo ven Agenda y Mi Agenda
-                if (user?.role !== 'admin' && item.href === 'DashboardOcupacion') return null;
-                if (user?.role === 'admin' && item.empleadoOnly) return null;
+                if (item.adminOnly && user?.role !== 'admin') return null;
+                if (item.empleadoOnly && user?.role === 'admin') return null;
 
                 const isActive = currentPageName === item.href;
                 const Icon = item.icon;
@@ -223,41 +221,7 @@ export default function Layout({ children, currentPageName }) {
               </div>
             )}
 
-            {/* Recordatorios Cancha - Todos */}
-            <div className="pt-4 mt-4 border-t border-slate-200">
-              <p className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                Recordatorios Cancha
-              </p>
-              {navigationCancha.map((item) => {
-                if (item.adminOnly && user?.role !== 'admin') return null;
 
-                const isActive = currentPageName === item.href;
-                const Icon = item.icon;
-
-                return (
-                  <Link
-                    key={item.href}
-                    to={createPageUrl(item.href)}
-                    onClick={() => setSidebarOpen(false)}
-                    className={cn(
-                      'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
-                      isActive 
-                        ? 'bg-emerald-50 text-emerald-700' 
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                    )}
-                  >
-                    <Icon className={cn(
-                      'w-5 h-5',
-                      isActive ? 'text-emerald-600' : 'text-slate-400'
-                    )} />
-                    {item.name}
-                    {isActive && (
-                      <ChevronRight className="w-4 h-4 ml-auto text-emerald-400" />
-                    )}
-                  </Link>
-                );
-              })}
-            </div>
 
             {/* Configuración - Solo Administradores */}
             {user?.role === 'admin' && (
@@ -324,7 +288,7 @@ export default function Layout({ children, currentPageName }) {
           </Button>
 
           <h1 className="text-base lg:text-lg font-semibold text-slate-800 truncate">
-            {[...navigationGestionClases, ...navigationAgenda, ...navigationClientes, ...navigationCancha, ...navigationConfiguracion]
+            {[...navigationGestionClases, ...navigationAgenda, ...navigationClientes, ...navigationConfiguracion]
               .find(n => n.href === currentPageName)?.name || currentPageName}
           </h1>
         </header>
