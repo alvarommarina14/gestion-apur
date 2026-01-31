@@ -41,10 +41,46 @@ export default function AprobacionClases() {
 
   const aprobarMutation = useMutation({
     mutationFn: async (claseId) => {
+      // Obtener datos de la clase
+      const clases = await base44.entities.Clase.filter({ id: claseId });
+      const clase = clases[0];
+      
       // Actualizar estado de aprobación
       await base44.entities.Clase.update(claseId, {
         estado_aprobacion: 'aprobada'
       });
+
+      // Crear TurnoCancha
+      try {
+        const horaFin = new Date(0, 0, 0, parseInt(clase.hora_inicio), parseInt(clase.hora_inicio.split(':')[1]) + clase.duracion);
+        const horaFinStr = `${String(horaFin.getHours()).padStart(2, '0')}:${String(horaFin.getMinutes()).padStart(2, '0')}`;
+        
+        const empleados = await base44.entities.User.list();
+        const empleadosIds = empleados.map(e => e.id);
+        const empleadosEmails = empleados.map(e => e.email);
+        const empleadosNombres = empleados.map(e => e.full_name);
+        
+        const alumnosNombres = clase.alumnos_nombres?.join(', ') || 'Clase';
+        
+        await base44.entities.TurnoCancha.create({
+          fecha: clase.fecha,
+          hora_inicio: clase.hora_inicio,
+          hora_fin: horaFinStr,
+          duracion: clase.duracion,
+          cancha: clase.cancha || '',
+          cliente: alumnosNombres,
+          tipo_turno: 'clase',
+          monto: clase.precio || 0,
+          pagado: false,
+          empleados_asignados_ids: empleadosIds,
+          empleados_asignados_emails: empleadosEmails,
+          empleados_asignados_nombres: empleadosNombres,
+          estado: 'activo',
+          notas: clase.notas || `Clase - ${alumnosNombres}`,
+        });
+      } catch (error) {
+        console.error('Error creando TurnoCancha:', error);
+      }
 
       // Sincronizar con Google Calendar
       try {
@@ -59,6 +95,7 @@ export default function AprobacionClases() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clases-pendientes'] });
       queryClient.invalidateQueries({ queryKey: ['clases'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
       setProcesando(null);
     },
   });
