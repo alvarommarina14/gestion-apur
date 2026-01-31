@@ -27,11 +27,13 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Calendar, CheckCircle, AlertTriangle, Trash2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import FormularioClaseAdmin from '@/components/agenda/FormularioClaseAdmin';
 
 export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
   const queryClient = useQueryClient();
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
+  const [claseData, setClaseData] = useState(null);
 
   const { data: turnosExistentes = [] } = useQuery({
     queryKey: ['turnos-cancha'],
@@ -323,87 +325,163 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
   });
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    setError(null);
+     e.preventDefault();
+     setError(null);
 
-      // Asignar automáticamente a todos los empleados
-      const todosLosEmpleadosIds = empleados.map(e => e.id);
-      const dataConEmpleados = {
-        ...formData,
-        empleados_asignados_ids: todosLosEmpleadosIds,
-      };
+     // Si es tipo clase, crear clase en lugar de turno
+     if (formData.tipo_turno === 'clase') {
+       if (!claseData?.alumnos_ids || claseData.alumnos_ids.length === 0) {
+         setError('Debes seleccionar al menos un alumno');
+         return;
+       }
 
-    if (dataConEmpleados.tipo_turno === 'alquiler' && !dataConEmpleados.modalidad_alquiler) {
-      setError('Debes seleccionar la modalidad del alquiler (Abono o Suelto)');
-      return;
-    }
+       const crearClase = async () => {
+         try {
+           const { data: alumnos } = await queryClient.getQueryData(['alumnos']) || { data: [] };
+           const alumnosSeleccionados = (alumnos || []).filter(a => claseData.alumnos_ids.includes(a.id));
 
-    const horaFin = calcularHoraFin(dataConEmpleados.hora_inicio, dataConEmpleados.duracion);
+           const clasesACrear = [];
+           if (claseData.repeticion_semanal) {
+             for (let i = 0; i < 4; i++) {
+               const fechaClase = addWeeks(parseISO(claseData.fecha), i);
+               clasesACrear.push({
+                 fecha: format(fechaClase, 'yyyy-MM-dd'),
+                 hora_inicio: claseData.hora_inicio,
+                 duracion: Number(claseData.duracion),
+                 tipo: claseData.tipo,
+                 sede: 'Sistema',
+                 cancha: claseData.cancha || '',
+                 alumnos_ids: claseData.alumnos_ids,
+                 alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
+                 precio: claseData.precio ? Number(claseData.precio) : null,
+                 estado: 'programada',
+                 es_recupero: false,
+                 es_recurrente: true,
+                 recurrencia_tipo: 'semanal',
+                 notas: claseData.notas,
+                 asistencia_registrada: false,
+                 estado_aprobacion: 'aprobada',
+               });
+             }
+           } else {
+             clasesACrear.push({
+               fecha: format(parseISO(claseData.fecha), 'yyyy-MM-dd'),
+               hora_inicio: claseData.hora_inicio,
+               duracion: Number(claseData.duracion),
+               tipo: claseData.tipo,
+               sede: 'Sistema',
+               cancha: claseData.cancha || '',
+               alumnos_ids: claseData.alumnos_ids,
+               alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
+               precio: claseData.precio ? Number(claseData.precio) : null,
+               estado: 'programada',
+               es_recupero: false,
+               notas: claseData.notas,
+               asistencia_registrada: false,
+               estado_aprobacion: 'aprobada',
+             });
+           }
 
-    const solapados = validarSolapamiento(dataConEmpleados);
-    if (solapados.length > 0) {
-      setError(`Ya existe un turno en Cancha ${dataConEmpleados.cancha} a las ${solapados[0].hora_inicio}`);
-      return;
-    }
+           for (const clase of clasesACrear) {
+             await base44.entities.Clase.create(clase);
+           }
 
-    const data = {
-      ...dataConEmpleados,
-      hora_fin: horaFin,
-      monto: dataConEmpleados.pagado ? 0 : Number(dataConEmpleados.monto),
-    };
+           setSuccess(true);
+           queryClient.invalidateQueries({ queryKey: ['clases'] });
+           queryClient.invalidateQueries({ queryKey: ['alumnos'] });
+           setTimeout(() => {
+             setSuccess(false);
+             onOpenChange(false);
+           }, 1500);
+         } catch (err) {
+           console.error('Error creando clase:', err);
+           setError('Error al crear la clase');
+         }
+       };
 
-    if (turno) {
-      const cambios = [];
-      Object.keys(data).forEach(key => {
-        if (key === 'hora_fin') return;
+       crearClase();
+       return;
+     }
 
-        const oldValue = turno[key];
-        const newValue = data[key];
+     // Lógica original para alquiler
+       // Asignar automáticamente a todos los empleados
+       const todosLosEmpleadosIds = empleados.map(e => e.id);
+       const dataConEmpleados = {
+         ...formData,
+         empleados_asignados_ids: todosLosEmpleadosIds,
+       };
 
-        if (key === 'pagado') {
-          if (!!oldValue !== !!newValue) {
-            cambios.push({
-              campo: key,
-              anterior: String(!!oldValue),
-              nuevo: String(!!newValue),
-            });
-          }
-        } else if (key === 'monto') {
-          if (Number(oldValue) !== Number(newValue)) {
-            cambios.push({
-              campo: key,
-              anterior: String(oldValue),
-              nuevo: String(newValue),
-            });
-          }
-        } else if (String(oldValue || '') !== String(newValue || '')) {
-          cambios.push({
-            campo: key,
-            anterior: String(oldValue || ''),
-            nuevo: String(newValue || ''),
-          });
-        }
-      });
+     if (dataConEmpleados.tipo_turno === 'alquiler' && !dataConEmpleados.modalidad_alquiler) {
+       setError('Debes seleccionar la modalidad del alquiler (Abono o Suelto)');
+       return;
+     }
 
-      updateMutation.mutate({ id: turno.id, data, cambios });
-    } else {
-      // Si hay repetición semanal, crear múltiples turnos
-      if (dataConEmpleados.repeticion_semanal) {
-        const turnos = [];
-        for (let i = 0; i < 4; i++) {
-          const fechaTurno = addWeeks(parseISO(dataConEmpleados.fecha), i);
-          turnos.push({
-            ...data,
-            fecha: format(fechaTurno, 'yyyy-MM-dd'),
-            repeticion_semanal: true,
-          });
-        }
-        Promise.all(turnos.map(t => createMutation.mutateAsync(t)));
-      } else {
-        createMutation.mutate(data);
-      }
-    }
-  };
+     const horaFin = calcularHoraFin(dataConEmpleados.hora_inicio, dataConEmpleados.duracion);
+
+     const solapados = validarSolapamiento(dataConEmpleados);
+     if (solapados.length > 0) {
+       setError(`Ya existe un turno en Cancha ${dataConEmpleados.cancha} a las ${solapados[0].hora_inicio}`);
+       return;
+     }
+
+     const data = {
+       ...dataConEmpleados,
+       hora_fin: horaFin,
+       monto: dataConEmpleados.pagado ? 0 : Number(dataConEmpleados.monto),
+     };
+
+     if (turno) {
+       const cambios = [];
+       Object.keys(data).forEach(key => {
+         if (key === 'hora_fin') return;
+
+         const oldValue = turno[key];
+         const newValue = data[key];
+
+         if (key === 'pagado') {
+           if (!!oldValue !== !!newValue) {
+             cambios.push({
+               campo: key,
+               anterior: String(!!oldValue),
+               nuevo: String(!!newValue),
+             });
+           }
+         } else if (key === 'monto') {
+           if (Number(oldValue) !== Number(newValue)) {
+             cambios.push({
+               campo: key,
+               anterior: String(oldValue),
+               nuevo: String(newValue),
+             });
+           }
+         } else if (String(oldValue || '') !== String(newValue || '')) {
+           cambios.push({
+             campo: key,
+             anterior: String(oldValue || ''),
+             nuevo: String(newValue || ''),
+           });
+         }
+       });
+
+       updateMutation.mutate({ id: turno.id, data, cambios });
+     } else {
+       // Si hay repetición semanal, crear múltiples turnos
+       if (dataConEmpleados.repeticion_semanal) {
+         const turnos = [];
+         for (let i = 0; i < 4; i++) {
+           const fechaTurno = addWeeks(parseISO(dataConEmpleados.fecha), i);
+           turnos.push({
+             ...data,
+             fecha: format(fechaTurno, 'yyyy-MM-dd'),
+             repeticion_semanal: true,
+           });
+         }
+         Promise.all(turnos.map(t => createMutation.mutateAsync(t)));
+       } else {
+         createMutation.mutate(data);
+       }
+     }
+   };
 
   const handleDelete = () => {
     if (confirm('¿Eliminar este turno?')) {
@@ -514,110 +592,175 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
       </div>
 
       <div className="space-y-2">
-        <Label>Cliente / Nombre</Label>
-        <Input
-          value={formData.cliente}
-          onChange={(e) => setFormData({ ...formData, cliente: e.target.value })}
-          placeholder="Nombre del cliente"
-          required
-        />
-      </div>
-
-
-      <div className="space-y-2">
          <Label>Tipo de Turno</Label>
          <Select
-           value={formData.tipo_turno}
-           onValueChange={(v) => setFormData({ ...formData, tipo_turno: v, modalidad_alquiler: v === 'clase' ? '' : formData.modalidad_alquiler })}
-         >
-           <SelectTrigger>
-             <SelectValue />
-           </SelectTrigger>
-           <SelectContent>
-             <SelectItem value="clase">Clase</SelectItem>
-             <SelectItem value="alquiler">Alquiler</SelectItem>
-           </SelectContent>
-         </Select>
-       </div>
-
-       {formData.tipo_turno === 'clase' && (
-         <div className="space-y-2">
-           <Label>Profesor (opcional)</Label>
-           <Input
-             value={formData.profesor}
-             onChange={(e) => setFormData({ ...formData, profesor: e.target.value })}
-             placeholder="Nombre del profesor"
-           />
-         </div>
-       )}
-
-       {formData.tipo_turno === 'alquiler' && (
-         <div className="space-y-2">
-           <Label>Modalidad de Alquiler</Label>
-           <Select
-             value={formData.modalidad_alquiler}
-             onValueChange={(v) => setFormData({ ...formData, modalidad_alquiler: v })}
-           >
-             <SelectTrigger>
-               <SelectValue placeholder="Seleccionar modalidad" />
-             </SelectTrigger>
-             <SelectContent>
-               <SelectItem value="abono">Abono</SelectItem>
-               <SelectItem value="suelto">Suelto</SelectItem>
-             </SelectContent>
-           </Select>
-         </div>
-       )}
-
-      <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
-        <div>
-          <Label className="font-medium text-slate-800">Pagado</Label>
-          <p className="text-xs text-slate-500 mt-0.5">Marcar si el turno ya está pago</p>
+            value={formData.tipo_turno}
+            onValueChange={(v) => setFormData({ ...formData, tipo_turno: v, modalidad_alquiler: v === 'clase' ? '' : formData.modalidad_alquiler })}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="clase">Clase</SelectItem>
+              <SelectItem value="alquiler">Alquiler</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <Switch
-          checked={formData.pagado}
-          onCheckedChange={(checked) => setFormData({ ...formData, pagado: checked })}
-        />
-      </div>
 
-      {!formData.pagado && (
-        <div className="space-y-2">
-          <Label>Monto</Label>
-          <Input
-            type="number"
-            value={formData.monto}
-            onChange={(e) => setFormData({ ...formData, monto: e.target.value })}
-            placeholder="0"
-            required
-          />
-        </div>
-      )}
+        {formData.tipo_turno === 'clase' ? (
+          <FormularioClaseAdmin fecha={formData.fecha} onDataChange={setClaseData} />
+        ) : (
+          <>
+            <div className="space-y-2">
+              <Label>Cliente / Nombre</Label>
+              <Input
+                value={formData.cliente}
+                onChange={(e) => setFormData({ ...formData, cliente: e.target.value })}
+                placeholder="Nombre del cliente"
+                required
+              />
+            </div>
 
-      <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
-        <div>
-          <Label className="font-medium text-slate-800">Repetición semanal</Label>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Se creará automáticamente el mismo turno cada semana
-          </p>
-        </div>
-        <Switch
-          checked={formData.repeticion_semanal}
-          onCheckedChange={(checked) =>
-            setFormData({ ...formData, repeticion_semanal: checked })
-          }
-        />
-      </div>
+            <div className="space-y-2">
+              <Label>Cancha</Label>
+              <Select
+                value={formData.cancha}
+                onValueChange={(v) => setFormData({ ...formData, cancha: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">Cancha 1</SelectItem>
+                  <SelectItem value="2">Cancha 2</SelectItem>
+                  <SelectItem value="3">Cancha 3</SelectItem>
+                  <SelectItem value="4">Cancha 4</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>Hora inicio</Label>
+                <Select
+                  value={formData.hora_inicio}
+                  onValueChange={(v) => setFormData({ ...formData, hora_inicio: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60">
+                    {Array.from({ length: 28 }, (_, i) => {
+                      const h = Math.floor(i / 2) + 8;
+                      const m = i % 2 === 0 ? '00' : '30';
+                      if (h > 21 || (h === 21 && m === '30')) return null;
+                      return `${h.toString().padStart(2, '0')}:${m}`;
+                    }).filter(Boolean).map(hora => (
+                      <SelectItem key={hora} value={hora}>{hora}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Duración</Label>
+                <Select
+                  value={formData.duracion.toString()}
+                  onValueChange={(v) => setFormData({ ...formData, duracion: Number(v) })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="60">60 min</SelectItem>
+                    <SelectItem value="90">90 min</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Hora fin</Label>
+                <Input
+                  value={calcularHoraFin(formData.hora_inicio, formData.duracion)}
+                  disabled
+                  className="bg-slate-50"
+                />
+              </div>
+            </div>
 
-      <div className="space-y-2">
-        <Label>Notas (opcional)</Label>
-        <Textarea
-          value={formData.notas}
-          onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
-          placeholder="Observaciones..."
-          rows={2}
-        />
-      </div>
+            <div className="space-y-2">
+              <Label>Profesor (opcional)</Label>
+              <Input
+                value={formData.profesor}
+                onChange={(e) => setFormData({ ...formData, profesor: e.target.value })}
+                placeholder="Nombre del profesor"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Modalidad de Alquiler</Label>
+              <Select
+                value={formData.modalidad_alquiler}
+                onValueChange={(v) => setFormData({ ...formData, modalidad_alquiler: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar modalidad" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="abono">Abono</SelectItem>
+                  <SelectItem value="suelto">Suelto</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+              <div>
+                <Label className="font-medium text-slate-800">Pagado</Label>
+                <p className="text-xs text-slate-500 mt-0.5">Marcar si el turno ya está pago</p>
+              </div>
+              <Switch
+                checked={formData.pagado}
+                onCheckedChange={(checked) => setFormData({ ...formData, pagado: checked })}
+              />
+            </div>
+
+            {!formData.pagado && (
+              <div className="space-y-2">
+                <Label>Monto</Label>
+                <Input
+                  type="number"
+                  value={formData.monto}
+                  onChange={(e) => setFormData({ ...formData, monto: e.target.value })}
+                  placeholder="0"
+                  required
+                />
+              </div>
+            )}
+
+            <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div>
+                <Label className="font-medium text-slate-800">Repetición semanal</Label>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Se creará automáticamente el mismo turno cada semana
+                </p>
+              </div>
+              <Switch
+                checked={formData.repeticion_semanal}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, repeticion_semanal: checked })
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Notas (opcional)</Label>
+              <Textarea
+                value={formData.notas}
+                onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
+                placeholder="Observaciones..."
+                rows={2}
+              />
+            </div>
+          </>
+        )}
 
       <DialogFooter className="flex-col sm:flex-row gap-2">
         {turno && (
