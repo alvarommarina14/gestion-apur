@@ -298,18 +298,6 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
             
             <div className="space-y-2">
               <Label>Hora inicio</Label>
-              <Input
-                type="time"
-                value={formData.hora_inicio}
-                onChange={(e) => setFormData({ ...formData, hora_inicio: e.target.value })}
-                required
-              />
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label>Hora inicio</Label>
               <Select
                 value={formData.hora_inicio}
                 onValueChange={(v) => setFormData({ ...formData, hora_inicio: v })}
@@ -329,6 +317,9 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
                 </SelectContent>
               </Select>
             </div>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label>Duración</Label>
               <Select
