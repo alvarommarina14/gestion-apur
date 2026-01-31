@@ -36,9 +36,14 @@ export default function CalendarioClases({ clases, onClaseClick }) {
       const end = new Date(start);
       end.setMinutes(end.getMinutes() + (clase.duracion || 50));
 
+      const horaInicio = clase.hora_inicio || '09:00';
+      const horaFin = new Date(start);
+      horaFin.setMinutes(horaFin.getMinutes() + (clase.duracion || 50));
+      const horaFinStr = horaFin.getHours().toString().padStart(2, '0') + ':' + horaFin.getMinutes().toString().padStart(2, '0');
+      
       return {
         id: clase.id,
-        title: clase.alumnos_nombres?.join(', ') || 'Sin alumnos',
+        title: `${horaInicio} - ${horaFinStr} | ${clase.alumnos_nombres?.join(', ') || 'Sin alumnos'}`,
         start,
         end,
         resource: clase,
