@@ -286,13 +286,13 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={formData.fecha}
-                    onSelect={(date) => date && setFormData({ ...formData, fecha: date })}
-                    locale={es}
-                  />
-                </PopoverContent>
+                   <Calendar
+                     mode="single"
+                     selected={formData.fecha}
+                     onSelect={(date) => date && setFormData(prev => ({ ...prev, fecha: date }))}
+                     locale={es}
+                   />
+                 </PopoverContent>
               </Popover>
             </div>
             
