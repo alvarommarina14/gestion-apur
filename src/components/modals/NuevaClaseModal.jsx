@@ -457,7 +457,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
             <Switch
               checked={formData.repeticion_semanal}
               onCheckedChange={(checked) =>
-                setFormData({ ...formData, repeticion_semanal: checked })
+                setFormData(prev => ({ ...prev, repeticion_semanal: checked }))
               }
             />
           </div>
