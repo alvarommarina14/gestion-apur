@@ -37,6 +37,11 @@ export default function CalendarioClasesPage() {
     queryFn: () => base44.entities.Alumno.list(),
   });
 
+  const { data: user } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => base44.auth.me(),
+  });
+
   // Filtrar clases por profesor si hay uno seleccionado
   const clasesFiltradas = React.useMemo(() => {
     if (!profesorSeleccionado) return clases;
