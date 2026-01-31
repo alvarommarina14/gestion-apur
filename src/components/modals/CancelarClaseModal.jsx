@@ -76,11 +76,22 @@ export default function CancelarClaseModal({ open, onOpenChange, clase }) {
   const [nuevaFecha, setNuevaFecha] = useState(null);
   const [nuevaHora, setNuevaHora] = useState('');
 
+  const { data: user } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => base44.auth.me(),
+  });
+
   const selectedOption = motivoOptions.find(o => o.value === motivo);
 
   const handleSubmit = async () => {
     if (!clase || !motivo) return;
     if (motivo === 'reprogramar' && (!nuevaFecha || !nuevaHora)) return;
+    
+    // Solo admin puede cancelar
+    if (user?.rol !== 'admin') {
+      alert('Solo administradores pueden cancelar clases');
+      return;
+    }
     
     setLoading(true);
     
