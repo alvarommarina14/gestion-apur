@@ -50,6 +50,7 @@
 import Agenda from './pages/Agenda';
 import AgendaEmpleados from './pages/AgendaEmpleados';
 import Alumnos from './pages/Alumnos';
+import AprobacionUsuarios from './pages/AprobacionUsuarios';
 import CalendarioClases from './pages/CalendarioClases';
 import Clientes from './pages/Clientes';
 import Configuracion from './pages/Configuracion';
@@ -58,6 +59,7 @@ import DashboardOcupacion from './pages/DashboardOcupacion';
 import Empleados from './pages/Empleados';
 import GestionRoles from './pages/GestionRoles';
 import Pagos from './pages/Pagos';
+import PendienteAprobacion from './pages/PendienteAprobacion';
 import ProfesorMenu from './pages/ProfesorMenu';
 import Profesores from './pages/Profesores';
 import Recordatorios from './pages/Recordatorios';
@@ -66,8 +68,7 @@ import RecordatoriosCanchaEmpleado from './pages/RecordatoriosCanchaEmpleado';
 import Recuperos from './pages/Recuperos';
 import Reportes from './pages/Reportes';
 import SeleccionRol from './pages/SeleccionRol';
-import PendienteAprobacion from './pages/PendienteAprobacion';
-import AprobacionUsuarios from './pages/AprobacionUsuarios';
+import ProfesorRegistro from './pages/ProfesorRegistro';
 import __Layout from './Layout.jsx';
 
 
@@ -75,6 +76,7 @@ export const PAGES = {
     "Agenda": Agenda,
     "AgendaEmpleados": AgendaEmpleados,
     "Alumnos": Alumnos,
+    "AprobacionUsuarios": AprobacionUsuarios,
     "CalendarioClases": CalendarioClases,
     "Clientes": Clientes,
     "Configuracion": Configuracion,
@@ -83,6 +85,7 @@ export const PAGES = {
     "Empleados": Empleados,
     "GestionRoles": GestionRoles,
     "Pagos": Pagos,
+    "PendienteAprobacion": PendienteAprobacion,
     "ProfesorMenu": ProfesorMenu,
     "Profesores": Profesores,
     "Recordatorios": Recordatorios,
@@ -91,8 +94,7 @@ export const PAGES = {
     "Recuperos": Recuperos,
     "Reportes": Reportes,
     "SeleccionRol": SeleccionRol,
-    "PendienteAprobacion": PendienteAprobacion,
-    "AprobacionUsuarios": AprobacionUsuarios,
+    "ProfesorRegistro": ProfesorRegistro,
 }
 
 export const pagesConfig = {
