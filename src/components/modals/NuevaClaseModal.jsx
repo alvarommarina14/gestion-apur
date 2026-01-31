@@ -147,6 +147,39 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
           estado_aprobacion: user?.rol === 'profesor' ? 'pendiente' : 'aprobada',
           estado: 'programada',
         })));
+      } else if (formData.repeticion_semanal) {
+        // Crear clases semanales
+        const clases = [];
+        const serieId = uuidv4();
+
+        for (let i = 0; i < 4; i++) {
+          const fechaClase = addWeeks(formData.fecha, i);
+          clases.push({
+            fecha: format(fechaClase, 'yyyy-MM-dd'),
+            hora_inicio: formData.hora_inicio,
+            duracion: Number(formData.duracion),
+            tipo: formData.tipo,
+            sede: 'Sistema',
+            cancha: formData.cancha || '',
+            alumnos_ids: formData.alumnos_ids,
+            alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
+            precio: formData.precio ? Number(formData.precio) : null,
+            estado: 'programada',
+            es_recupero: false,
+            es_recurrente: true,
+            recurrencia_tipo: 'semanal',
+            serie_recurrente_id: serieId,
+            notas: formData.notas,
+            asistencia_registrada: false,
+          });
+        }
+
+        await Promise.all(clases.map(clase => base44.entities.Clase.create({
+          ...clase,
+          profesor_id: user?.id,
+          estado_aprobacion: user?.rol === 'profesor' ? 'pendiente' : 'aprobada',
+          estado: 'programada',
+        })));
       } else {
         // Crear clase única
         await base44.entities.Clase.create({
