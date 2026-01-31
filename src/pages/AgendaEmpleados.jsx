@@ -19,7 +19,7 @@ export default function AgendaEmpleados() {
 
   const empleado = user;
 
-  const { data: allTurnos = [], isLoading } = useQuery({
+  const { data: allTurnos = [], isLoading: loadingTurnos } = useQuery({
     queryKey: ['turnos-empleado', today],
     queryFn: () => base44.entities.TurnoCancha.filter({ 
       fecha: today,
@@ -28,12 +28,45 @@ export default function AgendaEmpleados() {
     enabled: !!empleado?.id,
   });
 
+  const { data: allClases = [], isLoading: loadingClases } = useQuery({
+    queryKey: ['clases-empleado', today],
+    queryFn: () => base44.entities.Clase.filter({ 
+      fecha: today,
+      estado: 'programada',
+    }),
+    enabled: !!empleado?.id,
+  });
+
+  const isLoading = loadingTurnos || loadingClases;
+
   const turnos = useMemo(() => {
     if (!empleado?.id) return [];
-    return allTurnos.filter(t => 
+    
+    // Turnos asignados al empleado
+    const turnosEmpleado = allTurnos.filter(t => 
       t.empleados_asignados_ids && t.empleados_asignados_ids.includes(empleado.id)
     );
-  }, [allTurnos, empleado?.id]);
+
+    // Clases convertidas a formato de turno para mostrar
+    const clasesFormato = allClases.map(clase => ({
+      ...clase,
+      hora_fin: calcularHoraFin(clase.hora_inicio, clase.duracion),
+      cancha: clase.cancha || '—',
+      cliente: clase.alumnos_nombres?.join(', ') || 'Clase',
+      tipo_turno: 'clase',
+      es_clase: true,
+    }));
+
+    return [...turnosEmpleado, ...clasesFormato].sort((a, b) => 
+      a.hora_inicio.localeCompare(b.hora_inicio)
+    );
+  }, [allTurnos, allClases, empleado?.id]);
+
+  const calcularHoraFin = (horaInicio, duracion) => {
+    const [h, m] = horaInicio.split(':').map(Number);
+    const fin = new Date(0, 0, 0, h, m + duracion);
+    return `${String(fin.getHours()).padStart(2, '0')}:${String(fin.getMinutes()).padStart(2, '0')}`;
+  };
 
   const turnoActual = useMemo(() => {
     return turnos.find(turno => {
