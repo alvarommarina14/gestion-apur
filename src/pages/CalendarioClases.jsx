@@ -12,6 +12,7 @@ import EditarClaseModal from '@/components/modals/EditarClaseModal';
 export default function CalendarioClasesPage() {
   const [nuevaClaseModal, setNuevaClaseModal] = useState(false);
   const [claseSeleccionada, setClaseSeleccionada] = useState(null);
+  const [claseEditando, setClaseEditando] = useState(null);
   const [profesorSeleccionado, setProfesorSeleccionado] = useState(null);
 
   // Cargar profesor seleccionado
