@@ -299,9 +299,9 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
             <div className="space-y-2">
               <Label>Hora inicio</Label>
               <Select
-                value={formData.hora_inicio}
-                onValueChange={(v) => setFormData({ ...formData, hora_inicio: v })}
-              >
+                 value={formData.hora_inicio}
+                 onValueChange={(v) => setFormData(prev => ({ ...prev, hora_inicio: v }))}
+               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
