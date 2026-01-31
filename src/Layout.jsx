@@ -81,8 +81,7 @@ export default function Layout({ children, currentPageName }) {
           
           // Si es profesor, verificar si tiene profesor seleccionado
           if (currentUser.rol === 'profesor') {
-            const profesorGuardado = localStorage.getItem('profesor_seleccionado');
-            if (!profesorGuardado) {
+            if (!currentUser.profesor_id) {
               window.location.href = createPageUrl('ProfesorRegistro');
               return;
             }
