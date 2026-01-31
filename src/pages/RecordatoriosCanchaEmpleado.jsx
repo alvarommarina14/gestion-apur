@@ -186,19 +186,19 @@ export default function RecordatoriosCanchaEmpleado() {
                 <Clock className="w-8 h-8 animate-spin mx-auto mb-2 opacity-40" />
                 <p>Cargando...</p>
               </div>
-            ) : recordatoriosOrdenados.length === 0 ? (
+            ) : itemsCombinados.length === 0 ? (
               <div className="p-12 text-center text-slate-500">
                 <CheckCircle className="w-12 h-12 mx-auto mb-3 opacity-40" />
-                <p className="font-medium">No hay recordatorios para hoy</p>
+                <p className="font-medium">No hay turnos ni recordatorios para hoy</p>
               </div>
             ) : (
               <div className="divide-y">
-                {recordatoriosOrdenados.map((recordatorio) => (
+                {itemsCombinados.map((item) => (
                   <div
-                    key={recordatorio.id}
+                    key={item.id}
                     className={cn(
                       'p-4 transition-all',
-                      recordatorio.estado === 'hecho' ? 'bg-slate-50' : 'bg-white hover:bg-slate-50/50'
+                      item.estado === 'hecho' ? 'bg-slate-50' : 'bg-white hover:bg-slate-50/50'
                     )}
                   >
                     <div className="flex items-start justify-between gap-4">
@@ -206,26 +206,26 @@ export default function RecordatoriosCanchaEmpleado() {
                         <div className="flex items-center gap-3">
                           <div className={cn(
                             'px-3 py-1 rounded-lg font-semibold text-lg',
-                            recordatorio.estado === 'hecho' 
+                            item.estado === 'hecho' 
                               ? 'bg-slate-200 text-slate-500' 
                               : 'bg-emerald-100 text-emerald-700'
                           )}>
-                            {recordatorio.hora}
+                            {item.hora_inicio}
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
                               <MapPin className="w-4 h-4 text-slate-400" />
                               <span className={cn(
                                 'font-medium',
-                                recordatorio.estado === 'hecho' ? 'text-slate-500 line-through' : 'text-slate-800'
+                                item.estado === 'hecho' ? 'text-slate-500 line-through' : 'text-slate-800'
                               )}>
-                                Cancha {recordatorio.cancha}
+                                Cancha {item.cancha}
                               </span>
                             </div>
-                            {recordatorio.profesor && (
+                            {item.profesor && (
                               <div className="flex items-center gap-2 mt-1">
                                 <User className="w-4 h-4 text-slate-400" />
-                                <span className="text-sm text-slate-600">{recordatorio.profesor}</span>
+                                <span className="text-sm text-slate-600">{item.profesor}</span>
                               </div>
                             )}
                           </div>
@@ -234,45 +234,45 @@ export default function RecordatoriosCanchaEmpleado() {
                         <div className="flex items-center gap-3 text-sm flex-wrap">
                           <span className={cn(
                             "px-2 py-0.5 text-xs font-medium rounded",
-                            recordatorio.tipo_turno === 'clase' 
+                            item.tipo_turno === 'clase' 
                               ? "bg-blue-100 text-blue-700" 
                               : "bg-purple-100 text-purple-700"
                           )}>
-                            {recordatorio.tipo_turno === 'clase' ? '📚 Clase' : '🎾 Alquiler'}
-                            {recordatorio.modalidad_alquiler && ` (${recordatorio.modalidad_alquiler})`}
+                            {item.tipo_turno === 'clase' ? '📚 Clase' : '🎾 Alquiler'}
+                            {item.modalidad_alquiler && ` (${item.modalidad_alquiler})`}
                           </span>
-                          {recordatorio.cliente && (
+                          {item.cliente && (
                             <span className="text-xs text-slate-600">
-                              👤 {recordatorio.cliente}
+                              👤 {item.cliente}
                             </span>
                           )}
                           <div className="flex items-center gap-1">
                             <DollarSign className="w-4 h-4 text-slate-400" />
                             <span className="font-semibold text-slate-700">
-                              {formatMoney(recordatorio.monto)}
+                              {formatMoney(item.monto)}
                             </span>
-                            {recordatorio.pagado && (
+                            {item.pagado && (
                               <CheckCircle className="w-4 h-4 text-emerald-600 ml-1" />
                             )}
                           </div>
-                          {recordatorio.repeticion_semanal && (
+                          {item.repeticion_semanal && (
                             <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded">
                               Semanal
                             </span>
                           )}
                         </div>
 
-                        {recordatorio.estado === 'hecho' && (
+                        {item.estado === 'hecho' && (
                           <div className="text-xs text-slate-500 pt-1">
-                            ✓ Confirmado por {recordatorio.hecho_por_nombre} a las{' '}
-                            {format(parseISO(recordatorio.hora_confirmacion), 'HH:mm')}
+                            ✓ Confirmado por {item.hecho_por_nombre} a las{' '}
+                            {format(parseISO(item.hora_confirmacion), 'HH:mm')}
                           </div>
                         )}
                       </div>
 
-                      {recordatorio.estado === 'pendiente' && (
+                      {item.estado === 'pendiente' && item.tipo === 'recordatorio' && (
                         <Button
-                          onClick={() => marcarHechoMutation.mutate(recordatorio)}
+                          onClick={() => marcarHechoMutation.mutate(item.data)}
                           disabled={marcarHechoMutation.isPending}
                           className="bg-emerald-600 hover:bg-emerald-700 shrink-0 h-11 px-5 text-base active:scale-95 touch-manipulation"
                         >
@@ -281,7 +281,7 @@ export default function RecordatoriosCanchaEmpleado() {
                         </Button>
                       )}
 
-                      {recordatorio.estado === 'hecho' && (
+                      {item.estado === 'hecho' && (
                         <div className="flex items-center gap-2 text-emerald-600 shrink-0">
                           <CheckCircle className="w-5 h-5" />
                           <span className="text-sm font-medium">Completado</span>
