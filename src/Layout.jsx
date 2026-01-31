@@ -81,9 +81,15 @@ export default function Layout({ children, currentPageName }) {
     checkUser();
   }, [currentPageName]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (confirm('¿Querés cerrar sesión?')) {
-      base44.auth.logout();
+      try {
+        await base44.auth.logout();
+        window.location.href = '/';
+      } catch (error) {
+        console.error('Error al cerrar sesión:', error);
+        window.location.href = '/';
+      }
     }
   };
   
