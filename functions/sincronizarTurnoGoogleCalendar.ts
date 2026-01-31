@@ -50,9 +50,9 @@ Deno.serve(async (req) => {
     }
 
     // Preparar evento para Google Calendar
-    // Construir fecha/hora directamente en formato ISO para Argentina
-    const startDateTime = `${turno.fecha}T${turno.hora_inicio}:00`;
-    const endDateTime = `${turno.fecha}T${turno.hora_fin}:00`;
+    // Construir fecha/hora con offset de zona horaria de Argentina (-03:00)
+    const startDateTime = `${turno.fecha}T${turno.hora_inicio}:00-03:00`;
+    const endDateTime = `${turno.fecha}T${turno.hora_fin}:00-03:00`;
 
     // Notificación 10 minutos antes del INICIO del turno
     const minutosParaNotificar = 10;
