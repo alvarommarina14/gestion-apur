@@ -130,7 +130,7 @@ export default function ProfesoresPage() {
               return (
                 <Link
                   key={profesor.id}
-                  to={createPageUrl('Dashboard')}
+                  to={createPageUrl('ProfesorMenu')}
                   onClick={() => handleSeleccionarProfesor(profesor)}
                 >
                   <Card className="shadow-sm hover:shadow-lg transition-all cursor-pointer border-2 hover:border-emerald-200">
