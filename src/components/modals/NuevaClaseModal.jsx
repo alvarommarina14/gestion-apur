@@ -262,8 +262,11 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
       
       setSuccess(true);
       queryClient.invalidateQueries({ queryKey: ['clases'] });
+      queryClient.invalidateQueries({ queryKey: ['mis-clases'] });
+      queryClient.invalidateQueries({ queryKey: ['clases-profesor'] });
       queryClient.invalidateQueries({ queryKey: ['recuperos'] });
       queryClient.invalidateQueries({ queryKey: ['alumnos'] });
+      queryClient.invalidateQueries({ queryKey: ['clases-pendientes'] });
       
       setTimeout(() => {
         setSuccess(false);
