@@ -452,22 +452,22 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
           />
         </div>
         <div className="space-y-2">
-          <Label>Cancha {formData.tipo_turno === 'clase' ? '*' : ''}</Label>
-          <Select
-            value={formData.cancha}
-            onValueChange={(v) => setFormData({ ...formData, cancha: v })}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="1">Cancha 1</SelectItem>
-              <SelectItem value="2">Cancha 2</SelectItem>
-              <SelectItem value="3">Cancha 3</SelectItem>
-              <SelectItem value="4">Cancha 4</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+           <Label>Cancha</Label>
+            <Select
+              value={formData.cancha}
+              onValueChange={(v) => setFormData({ ...formData, cancha: v })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">Cancha 1</SelectItem>
+                <SelectItem value="2">Cancha 2</SelectItem>
+                <SelectItem value="3">Cancha 3</SelectItem>
+                <SelectItem value="4">Cancha 4</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
