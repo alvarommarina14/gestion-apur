@@ -184,7 +184,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
         })));
       } else {
         // Crear clase única
-        await base44.entities.Clase.create({
+        const claseCreada = await base44.entities.Clase.create({
           fecha: format(formData.fecha, 'yyyy-MM-dd'),
           hora_inicio: formData.hora_inicio,
           duracion: Number(formData.duracion),
@@ -202,6 +202,15 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
           profesor_id: user?.id,
           estado_aprobacion: user?.rol === 'profesor' ? 'pendiente' : 'aprobada',
         });
+
+        // Sincronizar con Google Calendar si es admin
+        if (user?.rol === 'admin') {
+          try {
+            await base44.functions.invoke('sincronizarClaseGoogleCalendar', { clase_id: claseCreada.id });
+          } catch (err) {
+            console.error('Error sincronizando con Google Calendar:', err);
+          }
+        }
       }
       
       // Si es recupero, actualizar el estado del recupero
