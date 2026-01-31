@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { format, addDays } from 'date-fns';
+import { format, addDays, addWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { v4 as uuidv4 } from 'uuid';
 import {
   Dialog,
   DialogContent,
@@ -51,6 +52,9 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
     notas: '',
     es_recupero: !!recupero,
     clase_original_id: recupero?.clase_original_id || '',
+    es_recurrente: false,
+    recurrencia_tipo: 'semanal',
+    recurrencia_cantidad: 4,
   });
 
   useEffect(() => {
@@ -86,22 +90,55 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
     try {
       const alumnosSeleccionados = alumnosActivos.filter(a => formData.alumnos_ids.includes(a.id));
       
-      await base44.entities.Clase.create({
-        fecha: format(formData.fecha, 'yyyy-MM-dd'),
-        hora_inicio: formData.hora_inicio,
-        duracion: Number(formData.duracion),
-        tipo: formData.tipo,
-        sede: formData.sede,
-        cancha: formData.cancha,
-        alumnos_ids: formData.alumnos_ids,
-        alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
-        precio: formData.precio ? Number(formData.precio) : null,
-        estado: 'programada',
-        es_recupero: formData.es_recupero,
-        clase_original_id: formData.clase_original_id,
-        notas: formData.notas,
-        asistencia_registrada: false,
-      });
+      // Si es recurrente, crear múltiples clases
+      if (formData.es_recurrente && !recupero) {
+        const serieId = uuidv4();
+        const clases = [];
+        const cantidadSemanas = formData.recurrencia_tipo === 'semanal' ? 1 : 2;
+        
+        for (let i = 0; i < formData.recurrencia_cantidad; i++) {
+          const fechaClase = addWeeks(formData.fecha, i * cantidadSemanas);
+          clases.push({
+            fecha: format(fechaClase, 'yyyy-MM-dd'),
+            hora_inicio: formData.hora_inicio,
+            duracion: Number(formData.duracion),
+            tipo: formData.tipo,
+            sede: formData.sede,
+            cancha: formData.cancha,
+            alumnos_ids: formData.alumnos_ids,
+            alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
+            precio: formData.precio ? Number(formData.precio) : null,
+            estado: 'programada',
+            es_recupero: false,
+            es_recurrente: true,
+            recurrencia_tipo: formData.recurrencia_tipo,
+            serie_recurrente_id: serieId,
+            notas: formData.notas,
+            asistencia_registrada: false,
+          });
+        }
+        
+        // Crear todas las clases
+        await Promise.all(clases.map(clase => base44.entities.Clase.create(clase)));
+      } else {
+        // Crear clase única
+        await base44.entities.Clase.create({
+          fecha: format(formData.fecha, 'yyyy-MM-dd'),
+          hora_inicio: formData.hora_inicio,
+          duracion: Number(formData.duracion),
+          tipo: formData.tipo,
+          sede: formData.sede,
+          cancha: formData.cancha,
+          alumnos_ids: formData.alumnos_ids,
+          alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
+          precio: formData.precio ? Number(formData.precio) : null,
+          estado: 'programada',
+          es_recupero: formData.es_recupero,
+          clase_original_id: formData.clase_original_id,
+          notas: formData.notas,
+          asistencia_registrada: false,
+        });
+      }
       
       // Si es recupero, actualizar el estado del recupero
       if (recupero) {
@@ -139,6 +176,9 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
           notas: '',
           es_recupero: false,
           clase_original_id: '',
+          es_recurrente: false,
+          recurrencia_tipo: 'semanal',
+          recurrencia_cantidad: 4,
         });
       }, 1500);
       
@@ -300,6 +340,58 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
               rows={2}
             />
           </div>
+          
+          {/* Recurrencia - Solo si no es recupero */}
+          {!recupero && (
+            <div className="space-y-3 p-4 border rounded-lg bg-slate-50">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={formData.es_recurrente}
+                  onCheckedChange={(checked) => setFormData({ ...formData, es_recurrente: checked })}
+                  id="es_recurrente"
+                />
+                <Label htmlFor="es_recurrente" className="font-medium cursor-pointer">
+                  Clase recurrente
+                </Label>
+              </div>
+              
+              {formData.es_recurrente && (
+                <div className="grid grid-cols-2 gap-3 pl-6">
+                  <div className="space-y-2">
+                    <Label className="text-xs">Frecuencia</Label>
+                    <Select
+                      value={formData.recurrencia_tipo}
+                      onValueChange={(v) => setFormData({ ...formData, recurrencia_tipo: v })}
+                    >
+                      <SelectTrigger className="h-9">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="semanal">Semanal</SelectItem>
+                        <SelectItem value="quincenal">Quincenal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="text-xs">Cantidad</Label>
+                    <Input
+                      type="number"
+                      min="2"
+                      max="20"
+                      value={formData.recurrencia_cantidad}
+                      onChange={(e) => setFormData({ ...formData, recurrencia_cantidad: Number(e.target.value) })}
+                      className="h-9"
+                    />
+                  </div>
+                  
+                  <p className="text-xs text-slate-500 col-span-2">
+                    Se crearán {formData.recurrencia_cantidad} clases {formData.recurrencia_tipo === 'semanal' ? 'semanales' : 'quincenales'}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
           
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
