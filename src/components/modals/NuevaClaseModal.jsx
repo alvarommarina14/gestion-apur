@@ -109,10 +109,11 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
     try {
       const alumnosSeleccionados = alumnosActivos.filter(a => formData.alumnos_ids.includes(a.id));
       
+      const horaFin = calcularHoraFin(formData.hora_inicio, formData.duracion);
+      const alumnosNombres = alumnosSeleccionados.map(a => a.nombre).join(', ');
+      
       // Si es recurrente, crear clases para 52 semanas
       if (formData.repeticion_semanal) {
-        const horaFin = calcularHoraFin(formData.hora_inicio, formData.duracion);
-        const alumnosNombres = alumnosSeleccionados.map(a => a.nombre).join(', ');
         const empleados = await base44.entities.User.list();
         const empleadosIds = empleados.map(e => e.id);
         const empleadosEmails = empleados.map(e => e.email);
@@ -173,6 +174,64 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
             } catch (err) {
               console.error('Error sincronizando con Google Calendar:', err);
             }
+          }
+        }
+      } else {
+        // Crear una sola clase sin repetición
+        const claseData = {
+          fecha: format(formData.fecha, 'yyyy-MM-dd'),
+          hora_inicio: formData.hora_inicio,
+          duracion: Number(formData.duracion),
+          tipo: formData.tipo,
+          sede: 'Sistema',
+          cancha: formData.cancha || '',
+          alumnos_ids: formData.alumnos_ids,
+          alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
+          precio: formData.precio ? Number(formData.precio) : null,
+          estado: 'programada',
+          es_recupero: formData.es_recupero,
+          clase_original_id: formData.clase_original_id,
+          notas: formData.notas,
+          asistencia_registrada: false,
+          profesor_id: user?.id,
+          estado_aprobacion: user?.rol === 'profesor' ? 'pendiente' : 'aprobada',
+        };
+
+        const claseCreada = await base44.entities.Clase.create(claseData);
+
+        // Si es admin, crear TurnoCancha
+        if (user?.rol === 'admin') {
+          const empleados = await base44.entities.User.list();
+          const empleadosIds = empleados.map(e => e.id);
+          const empleadosEmails = empleados.map(e => e.email);
+          const empleadosNombres = empleados.map(e => e.full_name);
+
+          try {
+            await base44.entities.TurnoCancha.create({
+              fecha: format(formData.fecha, 'yyyy-MM-dd'),
+              hora_inicio: formData.hora_inicio,
+              hora_fin: horaFin,
+              duracion: Number(formData.duracion),
+              cancha: formData.cancha || '',
+              cliente: alumnosNombres || 'Clase',
+              tipo_turno: 'clase',
+              monto: formData.precio ? Number(formData.precio) : 0,
+              pagado: formData.pagado,
+              empleados_asignados_ids: empleadosIds,
+              empleados_asignados_emails: empleadosEmails,
+              empleados_asignados_nombres: empleadosNombres,
+              estado: 'activo',
+              notas: formData.notas || `Clase - ${alumnosNombres}`,
+            });
+          } catch (err) {
+            console.error('Error creando TurnoCancha:', err);
+          }
+
+          // Sincronizar con Google Calendar
+          try {
+            await base44.functions.invoke('sincronizarClaseGoogleCalendar', { clase_id: claseCreada.id });
+          } catch (err) {
+            console.error('Error sincronizando con Google Calendar:', err);
           }
         }
       }
