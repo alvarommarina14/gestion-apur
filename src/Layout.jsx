@@ -57,7 +57,7 @@ export default function Layout({ children, currentPageName }) {
         setUser(currentUser);
         
         // No verificar rol si estamos en las páginas especiales
-        if (currentPageName !== 'SeleccionRol' && currentPageName !== 'PendienteAprobacion' && currentPageName !== 'ProfesorMenu') {
+        if (currentPageName !== 'SeleccionRol' && currentPageName !== 'PendienteAprobacion' && currentPageName !== 'ProfesorRegistro' && currentPageName !== 'ProfesorMenu') {
           // Si el usuario no tiene rol definido, redirigir a selección de rol
           if (!currentUser.rol) {
             window.location.href = createPageUrl('SeleccionRol');
