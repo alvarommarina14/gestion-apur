@@ -1,6 +1,15 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import { format, addWeeks, parseISO } from 'npm:date-fns@3.6.0';
 
+function calcularHoraFin(horaInicio, duracion) {
+  if (!horaInicio) return '00:00';
+  const [h, m] = horaInicio.split(':').map(Number);
+  const totalMinutos = h * 60 + m + Number(duracion);
+  const horasFin = Math.floor(totalMinutos / 60);
+  const minutosFin = totalMinutos % 60;
+  return `${horasFin.toString().padStart(2, '0')}:${minutosFin.toString().padStart(2, '0')}`;
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -26,7 +35,6 @@ Deno.serve(async (req) => {
       clase_original_id,
     } = body;
 
-    // Crear 52 clases de una vez
     const clasesData = [];
     for (let i = 0; i < 52; i++) {
       const fechaClase = addWeeks(parseISO(fecha), i);
@@ -52,32 +60,27 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Crear todas las clases en paralelo
     const clases = await Promise.all(
       clasesData.map(claseData => base44.entities.Clase.create(claseData))
     );
 
-    // Si es admin, crear TurnoCancha para cada clase
     if (user.rol === 'admin') {
       const empleados = await base44.entities.User.list();
       const empleadosIds = empleados.map(e => e.id);
       const empleadosEmails = empleados.map(e => e.email);
       const empleadosNombres = empleados.map(e => e.full_name);
-
       const horaFin = calcularHoraFin(hora_inicio, duracion);
-      const alumnosNombres = Array.isArray(alumnos_nombres) ? alumnos_nombres.join(', ') : alumnos_nombres;
+      const alumnosNombresStr = Array.isArray(alumnos_nombres) ? alumnos_nombres.join(', ') : alumnos_nombres;
 
-      // Crear todos los turnos en paralelo
       await Promise.all(
-        clases.map((clase) => {
-          const [horas, minutos] = clase.fecha.split('-');
-          return base44.entities.TurnoCancha.create({
+        clases.map((clase) =>
+          base44.entities.TurnoCancha.create({
             fecha: clase.fecha,
             hora_inicio,
             hora_fin: horaFin,
             duracion: Number(duracion),
             cancha: cancha || '',
-            cliente: alumnosNombres || 'Clase',
+            cliente: alumnosNombresStr || 'Clase',
             tipo_turno: 'clase',
             monto: precio ? Number(precio) : 0,
             pagado: !!pagado,
@@ -85,12 +88,13 @@ Deno.serve(async (req) => {
             empleados_asignados_emails: empleadosEmails,
             empleados_asignados_nombres: empleadosNombres,
             estado: 'activo',
-            notas: notas || `Clase - ${alumnosNombres}`,
-          });
-        })
+            notas: notas || `Clase - ${alumnosNombresStr}`,
+          }).catch(err => {
+            console.error('Error creando TurnoCancha:', err);
+          })
+        )
       );
 
-      // Sincronizar con Google Calendar en paralelo
       await Promise.all(
         clases.map((clase) =>
           base44.functions.invoke('sincronizarClaseGoogleCalendar', { clase_id: clase.id }).catch(err => {
@@ -100,23 +104,9 @@ Deno.serve(async (req) => {
       );
     }
 
-    return Response.json({ 
-      success: true, 
-      clases_creadas: clases.length 
-    });
+    return Response.json({ success: true, clases_creadas: clases.length });
   } catch (error) {
     console.error('Error en crearClasesRecurrentes:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
-
-function calcularHoraFin(horaInicio, duracion) {
-  if (!horaInicio) return '00:00';
-  const [h, m] = horaInicio.split(':').map(Number);
-  const inicio = new Date();
-  inicio.setHours(h, m, 0);
-  const minutos = inicio.getMinutes() + duracion;
-  const horas = inicio.getHours() + Math.floor(minutos / 60);
-  const mins = minutos % 60;
-  return `${horas.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
-}
