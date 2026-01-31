@@ -405,7 +405,24 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
 
        updateMutation.mutate({ id: turno.id, data, cambios });
      } else {
-       createMutation.mutate(data);
+       // Si es repetición semanal, crear turnos para 52 semanas
+       if (data.repeticion_semanal) {
+         const turnosACrear = [];
+         for (let i = 0; i < 52; i++) {
+           const fechaTurno = addWeeks(parseISO(data.fecha), i);
+           turnosACrear.push({
+             ...data,
+             fecha: format(fechaTurno, 'yyyy-MM-dd'),
+           });
+         }
+
+         // Crear todos los turnos
+         turnosACrear.forEach(turnoData => {
+           createMutation.mutate(turnoData);
+         });
+       } else {
+         createMutation.mutate(data);
+       }
      }
    };
 
