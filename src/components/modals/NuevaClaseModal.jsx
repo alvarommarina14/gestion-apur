@@ -77,6 +77,15 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
     }
   }, [recupero]);
 
+  const calcularHoraFin = (horaInicio, duracion) => {
+    if (!horaInicio) return '00:00';
+    const [h, m] = horaInicio.split(':').map(Number);
+    const inicio = new Date();
+    inicio.setHours(h, m, 0);
+    const fin = addMinutes(inicio, duracion);
+    return format(fin, 'HH:mm');
+  };
+
   const handleAlumnoToggle = (alumnoId) => {
     setFormData(prev => ({
       ...prev,
