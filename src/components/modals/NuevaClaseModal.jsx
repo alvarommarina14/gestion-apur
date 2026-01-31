@@ -466,7 +466,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
             <Label>Notas (opcional)</Label>
             <Textarea
               value={formData.notas}
-              onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
+              onChange={(e) => setFormData(prev => ({ ...prev, notas: e.target.value }))}
               placeholder="Observaciones..."
               rows={2}
             />
