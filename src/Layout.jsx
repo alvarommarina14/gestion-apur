@@ -24,6 +24,7 @@ import PushNotificationManager from '@/components/PushNotificationManager';
 const navigationGestionClases = [
   { name: 'Profesores', href: 'Profesores', icon: Users },
   { name: 'Dashboard', href: 'Dashboard', icon: LayoutDashboard, requireProfesor: true },
+  { name: 'Calendario', href: 'CalendarioClases', icon: Calendar, requireProfesor: true },
   { name: 'Reportes', href: 'Reportes', icon: FileText, requireProfesor: true },
   { name: 'Alumnos', href: 'Alumnos', icon: Users, requireProfesor: true },
   { name: 'Recordatorios', href: 'Recordatorios', icon: RefreshCw, requireProfesor: true },
