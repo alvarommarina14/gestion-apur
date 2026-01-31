@@ -346,60 +346,55 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
 
      // Si es tipo clase, crear clase en lugar de turno
      if (formData.tipo_turno === 'clase') {
-       if (!claseData?.alumnos_ids || claseData.alumnos_ids.length === 0) {
+       if (!formData.alumnos_ids || formData.alumnos_ids.length === 0) {
          setError('Debes seleccionar al menos un alumno');
+         return;
+       }
+
+       if (!formData.profesor_id) {
+         setError('Debes seleccionar un profesor');
+         return;
+       }
+
+       if (!formData.cancha) {
+         setError('Debes seleccionar una cancha');
          return;
        }
 
        const crearClase = async () => {
          try {
-           const { data: alumnos } = await queryClient.getQueryData(['alumnos']) || { data: [] };
-           const alumnosSeleccionados = (alumnos || []).filter(a => claseData.alumnos_ids.includes(a.id));
+           const alumnosSeleccionados = alumnos.filter(a => formData.alumnos_ids.includes(a.id));
+           const profesorSeleccionado = profesores.find(p => p.id === formData.profesor_id);
 
-           const clasesACrear = [];
-           if (claseData.repeticion_semanal) {
-             for (let i = 0; i < 4; i++) {
-               const fechaClase = addWeeks(parseISO(claseData.fecha), i);
-               clasesACrear.push({
-                 fecha: format(fechaClase, 'yyyy-MM-dd'),
-                 hora_inicio: claseData.hora_inicio,
-                 duracion: Number(claseData.duracion),
-                 tipo: claseData.tipo,
-                 sede: 'Sistema',
-                 cancha: claseData.cancha || '',
-                 alumnos_ids: claseData.alumnos_ids,
-                 alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
-                 precio: claseData.precio ? Number(claseData.precio) : null,
-                 estado: 'programada',
-                 es_recupero: false,
-                 es_recurrente: true,
-                 recurrencia_tipo: 'semanal',
-                 notas: claseData.notas,
-                 asistencia_registrada: false,
-                 estado_aprobacion: 'aprobada',
-               });
-             }
-           } else {
-             clasesACrear.push({
-               fecha: format(parseISO(claseData.fecha), 'yyyy-MM-dd'),
-               hora_inicio: claseData.hora_inicio,
-               duracion: Number(claseData.duracion),
-               tipo: claseData.tipo,
-               sede: 'Sistema',
-               cancha: claseData.cancha || '',
-               alumnos_ids: claseData.alumnos_ids,
-               alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
-               precio: claseData.precio ? Number(claseData.precio) : null,
-               estado: 'programada',
-               es_recupero: false,
-               notas: claseData.notas,
-               asistencia_registrada: false,
-               estado_aprobacion: 'aprobada',
-             });
+           const claseData = {
+             fecha: formData.fecha,
+             hora_inicio: formData.hora_inicio,
+             duracion: Number(formData.duracion),
+             tipo: 'individual',
+             sede: 'Sistema',
+             cancha: formData.cancha,
+             alumnos_ids: formData.alumnos_ids,
+             alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
+             precio: formData.monto ? Number(formData.monto) : null,
+             estado: 'programada',
+             notas: formData.notas,
+             asistencia_registrada: false,
+             profesor_id: formData.profesor_id,
+             estado_aprobacion: 'aprobada',
+           };
+
+           if (formData.repeticion_semanal) {
+             claseData.es_recurrente = true;
+             claseData.recurrencia_tipo = 'semanal';
            }
 
-           for (const clase of clasesACrear) {
-             await base44.entities.Clase.create(clase);
+           const claseCreada = await base44.entities.Clase.create(claseData);
+
+           // Sincronizar con Google Calendar
+           try {
+             await base44.functions.invoke('sincronizarClaseGoogleCalendar', { clase_id: claseCreada.id });
+           } catch (err) {
+             console.error('Error sincronizando con Google Calendar:', err);
            }
 
            setSuccess(true);
