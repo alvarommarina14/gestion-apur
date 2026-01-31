@@ -52,7 +52,8 @@ export default function AprobacionClases() {
 
       // Crear TurnoCancha
       try {
-        const horaFin = new Date(0, 0, 0, parseInt(clase.hora_inicio), parseInt(clase.hora_inicio.split(':')[1]) + clase.duracion);
+        const [h, m] = clase.hora_inicio.split(':').map(Number);
+        const horaFin = new Date(0, 0, 0, h, m + clase.duracion);
         const horaFinStr = `${String(horaFin.getHours()).padStart(2, '0')}:${String(horaFin.getMinutes()).padStart(2, '0')}`;
         
         const empleados = await base44.entities.User.list();
