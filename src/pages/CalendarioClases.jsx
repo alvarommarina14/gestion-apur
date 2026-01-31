@@ -107,8 +107,43 @@ export default function CalendarioClasesPage() {
         onOpenChange={setNuevaClaseModal}
       />
 
+      {claseSeleccionada && !claseEditando && (
+        <div className="fixed inset-0 bg-black/50 flex items-end gap-2 p-4 z-50">
+          <Button
+            variant="outline"
+            onClick={() => setClaseSeleccionada(null)}
+            className="ml-auto"
+          >
+            Cerrar
+          </Button>
+          {user?.rol === 'admin' && (
+            <Button
+              onClick={() => setClaseEditando(claseSeleccionada)}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Editar
+            </Button>
+          )}
+          <Button
+            variant="destructive"
+            onClick={() => {
+              setClaseEditando(null);
+              setClaseSeleccionada(null);
+            }}
+          >
+            Cancelar clase
+          </Button>
+        </div>
+      )}
+
+      <EditarClaseModal 
+        open={!!claseEditando}
+        onOpenChange={(open) => !open && setClaseEditando(null)}
+        clase={claseEditando}
+      />
+
       <CancelarClaseModal 
-        open={!!claseSeleccionada}
+        open={!!claseSeleccionada && !claseEditando}
         onOpenChange={(open) => !open && setClaseSeleccionada(null)}
         clase={claseSeleccionada}
       />
