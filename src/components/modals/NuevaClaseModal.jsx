@@ -432,57 +432,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
             />
           </div>
           
-          {/* Recurrencia - Solo si no es recupero */}
-          {!recupero && (
-            <div className="space-y-3 p-4 border rounded-lg bg-slate-50">
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  checked={formData.es_recurrente}
-                  onCheckedChange={(checked) => setFormData({ ...formData, es_recurrente: checked })}
-                  id="es_recurrente"
-                />
-                <Label htmlFor="es_recurrente" className="font-medium cursor-pointer">
-                  Clase recurrente
-                </Label>
-              </div>
-              
-              {formData.es_recurrente && (
-                <div className="grid grid-cols-2 gap-3 pl-6">
-                  <div className="space-y-2">
-                    <Label className="text-xs">Frecuencia</Label>
-                    <Select
-                      value={formData.recurrencia_tipo}
-                      onValueChange={(v) => setFormData({ ...formData, recurrencia_tipo: v })}
-                    >
-                      <SelectTrigger className="h-9">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="semanal">Semanal</SelectItem>
-                        <SelectItem value="quincenal">Quincenal</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label className="text-xs">Cantidad</Label>
-                    <Input
-                      type="number"
-                      min="2"
-                      max="20"
-                      value={formData.recurrencia_cantidad}
-                      onChange={(e) => setFormData({ ...formData, recurrencia_cantidad: Number(e.target.value) })}
-                      className="h-9"
-                    />
-                  </div>
-                  
-                  <p className="text-xs text-slate-500 col-span-2">
-                    Se crearán {formData.recurrencia_cantidad} clases {formData.recurrencia_tipo === 'semanal' ? 'semanales' : 'quincenales'}
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
+
           
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
