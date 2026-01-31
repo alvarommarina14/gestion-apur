@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Calendar, CheckCircle, AlertTriangle, Trash2, Bell, X } from 'lucide-react';
+import { Calendar, CheckCircle, AlertTriangle, Trash2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
@@ -58,8 +58,6 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
     pagado: false,
     notas: '',
     repeticion_semanal: false,
-    notificar: true,
-    minutos_antes: 10,
     empleados_asignados_ids: empleados.map(e => e.id),
   });
 
@@ -84,8 +82,6 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
             pagado: turno.pagado || false,
             notas: turno.notas || '',
             repeticion_semanal: false,
-            notificar: recordatorio?.notificar !== false,
-            minutos_antes: recordatorio?.minutos_antes || 10,
             empleados_asignados_ids: turno.empleados_asignados_ids || [],
           });
         } catch (error) {
@@ -103,8 +99,6 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
             pagado: turno.pagado || false,
             notas: turno.notas || '',
             repeticion_semanal: false,
-            notificar: true,
-            minutos_antes: 10,
             empleados_asignados_ids: turno.empleados_asignados_ids || [],
           });
         }
@@ -180,7 +174,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
       }
       
       const diaSemana = format(parseISO(data.fecha), 'EEEE', { locale: es });
-      
+
       await base44.entities.RecordatorioCancha.create({
         turno_cancha_id: turnoCreado.id,
         fecha: data.fecha,
@@ -194,8 +188,6 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
         pagado: data.pagado,
         repeticion_semanal: data.repeticion_semanal,
         dia_semana: diaSemana,
-        notificar: data.notificar,
-        minutos_antes: data.minutos_antes,
         notas: data.notas || `Sincronizado con turno de ${data.cliente}`,
       });
 
@@ -222,7 +214,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data, cambios, cambioNotificacion }) => {
+    mutationFn: async ({ id, data, cambios }) => {
       const empleadosSeleccionados = empleados.filter(e => data.empleados_asignados_ids.includes(e.id));
       const turnoData = {
         ...data,
@@ -253,17 +245,8 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
           monto: data.monto,
           pagado: data.pagado,
           repeticion_semanal: data.repeticion_semanal,
-          notificar: data.notificar,
-          minutos_antes: data.minutos_antes,
           notas: data.notas || recordatorios[0].notas,
         };
-
-        // Si cambió el tiempo de notificación, resetear flags para permitir reenvío
-        if (cambioNotificacion) {
-          recordatorioUpdate.notificado_previo = false;
-          recordatorioUpdate.notificado_hora = false;
-          recordatorioUpdate.reintento_enviado = false;
-        }
 
         await base44.entities.RecordatorioCancha.update(recordatorios[0].id, recordatorioUpdate);
       }
@@ -401,10 +384,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
         }
       });
 
-      // Detectar si cambió el tiempo de notificación
-      const cambioNotificacion = cambios.some(c => c.campo === 'minutos_antes' || c.campo === 'notificar');
-
-      updateMutation.mutate({ id: turno.id, data, cambios, cambioNotificacion });
+      updateMutation.mutate({ id: turno.id, data, cambios });
     } else {
       createMutation.mutate(data);
     }
@@ -613,50 +593,6 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
         />
       </div>
 
-      <div className="space-y-3 p-4 bg-amber-50 rounded-lg border border-amber-200">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Bell className="w-5 h-5 text-amber-600" />
-            <div>
-              <Label className="font-medium text-slate-800">Notificación push</Label>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Enviar alerta automática a los empleados
-              </p>
-            </div>
-          </div>
-          <Switch
-            checked={formData.notificar}
-            onCheckedChange={(checked) =>
-              setFormData({ ...formData, notificar: checked })
-            }
-          />
-        </div>
-
-        {formData.notificar && (
-          <div className="space-y-2 pt-2">
-            <Label className="text-sm">Avisar con anticipación</Label>
-            <Select
-              value={formData.minutos_antes.toString()}
-              onValueChange={(v) =>
-                setFormData({ ...formData, minutos_antes: Number(v) })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="5">5 minutos antes</SelectItem>
-                <SelectItem value="10">10 minutos antes</SelectItem>
-                <SelectItem value="15">15 minutos antes</SelectItem>
-                <SelectItem value="30">30 minutos antes</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-slate-500">
-              Los empleados recibirán una notificación en su dispositivo
-            </p>
-          </div>
-        )}
-      </div>
 
       <div className="space-y-2">
         <Label>Notas (opcional)</Label>
