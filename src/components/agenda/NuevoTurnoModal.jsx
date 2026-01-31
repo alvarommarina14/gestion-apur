@@ -511,40 +511,49 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
 
 
       <div className="space-y-2">
-        <Label>Tipo de Turno</Label>
-        <Select
-          value={formData.tipo_turno}
-          onValueChange={(v) => setFormData({ ...formData, tipo_turno: v, modalidad_alquiler: v === 'clase' ? '' : formData.modalidad_alquiler })}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="clase">Clase</SelectItem>
-            <SelectItem value="alquiler">Alquiler</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+         <Label>Tipo de Turno</Label>
+         <Select
+           value={formData.tipo_turno}
+           onValueChange={(v) => setFormData({ ...formData, tipo_turno: v, modalidad_alquiler: v === 'clase' ? '' : formData.modalidad_alquiler })}
+         >
+           <SelectTrigger>
+             <SelectValue />
+           </SelectTrigger>
+           <SelectContent>
+             <SelectItem value="clase">Clase</SelectItem>
+             <SelectItem value="alquiler">Alquiler</SelectItem>
+           </SelectContent>
+         </Select>
+       </div>
 
+       {formData.tipo_turno === 'clase' && (
+         <div className="space-y-2">
+           <Label>Profesor (opcional)</Label>
+           <Input
+             value={formData.profesor}
+             onChange={(e) => setFormData({ ...formData, profesor: e.target.value })}
+             placeholder="Nombre del profesor"
+           />
+         </div>
+       )}
 
-
-      {formData.tipo_turno === 'alquiler' && (
-        <div className="space-y-2">
-          <Label>Modalidad de Alquiler</Label>
-          <Select
-            value={formData.modalidad_alquiler}
-            onValueChange={(v) => setFormData({ ...formData, modalidad_alquiler: v })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccionar modalidad" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="abono">Abono</SelectItem>
-              <SelectItem value="suelto">Suelto</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      )}
+       {formData.tipo_turno === 'alquiler' && (
+         <div className="space-y-2">
+           <Label>Modalidad de Alquiler</Label>
+           <Select
+             value={formData.modalidad_alquiler}
+             onValueChange={(v) => setFormData({ ...formData, modalidad_alquiler: v })}
+           >
+             <SelectTrigger>
+               <SelectValue placeholder="Seleccionar modalidad" />
+             </SelectTrigger>
+             <SelectContent>
+               <SelectItem value="abono">Abono</SelectItem>
+               <SelectItem value="suelto">Suelto</SelectItem>
+             </SelectContent>
+           </Select>
+         </div>
+       )}
 
       <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
         <div>
