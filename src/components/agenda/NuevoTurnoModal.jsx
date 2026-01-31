@@ -518,275 +518,88 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
       </div>
 
       <div className="space-y-2">
-         <Label>Tipo de Turno</Label>
-         <Select
-            value={formData.tipo_turno}
-            onValueChange={(v) => setFormData({ ...formData, tipo_turno: v, modalidad_alquiler: v === 'clase' ? '' : formData.modalidad_alquiler })}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="clase">Clase</SelectItem>
-              <SelectItem value="alquiler">Alquiler</SelectItem>
-            </SelectContent>
-          </Select>
+        <Label>Cliente / Nombre</Label>
+        <Input
+          value={formData.cliente}
+          onChange={(e) => setFormData({ ...formData, cliente: e.target.value })}
+          placeholder="Nombre del cliente"
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Modalidad de Alquiler</Label>
+        <Select
+          value={formData.modalidad_alquiler}
+          onValueChange={(v) => setFormData({ ...formData, modalidad_alquiler: v })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Seleccionar modalidad" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="abono">Abono</SelectItem>
+            <SelectItem value="suelto">Suelto</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Profesor (opcional)</Label>
+        <Input
+          value={formData.profesor}
+          onChange={(e) => setFormData({ ...formData, profesor: e.target.value })}
+          placeholder="Nombre del profesor"
+        />
+      </div>
+
+      <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+        <div>
+          <Label className="font-medium text-slate-800">Pagado</Label>
+          <p className="text-xs text-slate-500 mt-0.5">Marcar si el turno ya está pago</p>
         </div>
+        <Switch
+          checked={formData.pagado}
+          onCheckedChange={(checked) => setFormData({ ...formData, pagado: checked })}
+        />
+      </div>
 
-        {formData.tipo_turno === 'clase' ? (
-          <>
-            <div className="space-y-2">
-              <Label>Profesor *</Label>
-              <Select
-                value={formData.profesor_id}
-                onValueChange={(v) => setFormData({ ...formData, profesor_id: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar profesor" />
-                </SelectTrigger>
-                <SelectContent>
-                  {profesores.map(profesor => (
-                    <SelectItem key={profesor.id} value={profesor.id}>
-                      {profesor.nombre}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+      {!formData.pagado && (
+        <div className="space-y-2">
+          <Label>Monto</Label>
+          <Input
+            type="number"
+            value={formData.monto}
+            onChange={(e) => setFormData({ ...formData, monto: e.target.value })}
+            placeholder="0"
+            required
+          />
+        </div>
+      )}
 
-            {formData.profesor_id && (
-              <div className="space-y-2">
-                <Label>Alumnos *</Label>
-                <div className="border rounded-lg max-h-40 overflow-y-auto">
-                  {alumnos.filter(a => a.profesor_id === formData.profesor_id && a.estado !== 'pausado').map((alumno) => (
-                    <div
-                      key={alumno.id}
-                      className={cn(
-                        'flex items-center gap-3 p-3 border-b last:border-b-0 cursor-pointer hover:bg-slate-50',
-                        formData.alumnos_ids.includes(alumno.id) && 'bg-emerald-50'
-                      )}
-                    >
-                      <Checkbox
-                        checked={formData.alumnos_ids.includes(alumno.id)}
-                        onCheckedChange={() => {
-                          setFormData(prev => ({
-                            ...prev,
-                            alumnos_ids: prev.alumnos_ids.includes(alumno.id)
-                              ? prev.alumnos_ids.filter(id => id !== alumno.id)
-                              : [...prev.alumnos_ids, alumno.id]
-                          }));
-                        }}
-                      />
-                      <span className="text-sm font-medium">{alumno.nombre}</span>
-                    </div>
-                  ))}
-                </div>
-                {formData.alumnos_ids.length === 0 && (
-                  <p className="text-xs text-rose-500">Selecciona al menos un alumno</p>
-                )}
-              </div>
-            )}
+      <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <div>
+          <Label className="font-medium text-slate-800">Repetición semanal</Label>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Se creará automáticamente el mismo turno cada semana
+          </p>
+        </div>
+        <Switch
+          checked={formData.repeticion_semanal}
+          onCheckedChange={(checked) =>
+            setFormData({ ...formData, repeticion_semanal: checked })
+          }
+        />
+      </div>
 
-            <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
-              <div>
-                <Label className="font-medium text-slate-800">Pagado</Label>
-                <p className="text-xs text-slate-500 mt-0.5">Marcar si la clase ya está paga</p>
-              </div>
-              <Switch
-                checked={formData.pagado}
-                onCheckedChange={(checked) => setFormData({ ...formData, pagado: checked })}
-              />
-            </div>
-
-            {!formData.pagado && (
-              <div className="space-y-2">
-                <Label>Precio (opcional)</Label>
-                <Input
-                  type="number"
-                  value={formData.monto}
-                  onChange={(e) => setFormData({ ...formData, monto: e.target.value })}
-                  placeholder="0"
-                />
-              </div>
-            )}
-
-            <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div>
-                <Label className="font-medium text-slate-800">Repetición semanal</Label>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Se creará automáticamente cada semana
-                </p>
-              </div>
-              <Switch
-                checked={formData.repeticion_semanal}
-                onCheckedChange={(checked) =>
-                  setFormData({ ...formData, repeticion_semanal: checked })
-                }
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Notas (opcional)</Label>
-              <Textarea
-                value={formData.notas}
-                onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
-                placeholder="Observaciones..."
-                rows={2}
-              />
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="space-y-2">
-              <Label>Cliente / Nombre</Label>
-              <Input
-                value={formData.cliente}
-                onChange={(e) => setFormData({ ...formData, cliente: e.target.value })}
-                placeholder="Nombre del cliente"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Cancha</Label>
-              <Select
-                value={formData.cancha}
-                onValueChange={(v) => setFormData({ ...formData, cancha: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">Cancha 1</SelectItem>
-                  <SelectItem value="2">Cancha 2</SelectItem>
-                  <SelectItem value="3">Cancha 3</SelectItem>
-                  <SelectItem value="4">Cancha 4</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label>Hora inicio</Label>
-                <Select
-                  value={formData.hora_inicio}
-                  onValueChange={(v) => setFormData({ ...formData, hora_inicio: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-60">
-                    {Array.from({ length: 28 }, (_, i) => {
-                      const h = Math.floor(i / 2) + 8;
-                      const m = i % 2 === 0 ? '00' : '30';
-                      if (h > 21 || (h === 21 && m === '30')) return null;
-                      return `${h.toString().padStart(2, '0')}:${m}`;
-                    }).filter(Boolean).map(hora => (
-                      <SelectItem key={hora} value={hora}>{hora}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Duración</Label>
-                <Select
-                  value={formData.duracion.toString()}
-                  onValueChange={(v) => setFormData({ ...formData, duracion: Number(v) })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="60">60 min</SelectItem>
-                    <SelectItem value="90">90 min</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Hora fin</Label>
-                <Input
-                  value={calcularHoraFin(formData.hora_inicio, formData.duracion)}
-                  disabled
-                  className="bg-slate-50"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Profesor (opcional)</Label>
-              <Input
-                value={formData.profesor}
-                onChange={(e) => setFormData({ ...formData, profesor: e.target.value })}
-                placeholder="Nombre del profesor"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Modalidad de Alquiler</Label>
-              <Select
-                value={formData.modalidad_alquiler}
-                onValueChange={(v) => setFormData({ ...formData, modalidad_alquiler: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar modalidad" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="abono">Abono</SelectItem>
-                  <SelectItem value="suelto">Suelto</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
-              <div>
-                <Label className="font-medium text-slate-800">Pagado</Label>
-                <p className="text-xs text-slate-500 mt-0.5">Marcar si el turno ya está pago</p>
-              </div>
-              <Switch
-                checked={formData.pagado}
-                onCheckedChange={(checked) => setFormData({ ...formData, pagado: checked })}
-              />
-            </div>
-
-            {!formData.pagado && (
-              <div className="space-y-2">
-                <Label>Monto</Label>
-                <Input
-                  type="number"
-                  value={formData.monto}
-                  onChange={(e) => setFormData({ ...formData, monto: e.target.value })}
-                  placeholder="0"
-                  required
-                />
-              </div>
-            )}
-
-            <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div>
-                <Label className="font-medium text-slate-800">Repetición semanal</Label>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Se creará automáticamente el mismo turno cada semana
-                </p>
-              </div>
-              <Switch
-                checked={formData.repeticion_semanal}
-                onCheckedChange={(checked) =>
-                  setFormData({ ...formData, repeticion_semanal: checked })
-                }
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Notas (opcional)</Label>
-              <Textarea
-                value={formData.notas}
-                onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
-                placeholder="Observaciones..."
-                rows={2}
-              />
-            </div>
-          </>
-        )}
+      <div className="space-y-2">
+        <Label>Notas (opcional)</Label>
+        <Textarea
+          value={formData.notas}
+          onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
+          placeholder="Observaciones..."
+          rows={2}
+        />
+      </div>
 
       <DialogFooter className="flex-col sm:flex-row gap-2">
         {turno && (
