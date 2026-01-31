@@ -41,9 +41,20 @@ export default function AprobacionClases() {
 
   const aprobarMutation = useMutation({
     mutationFn: async (claseId) => {
+      // Actualizar estado de aprobación
       await base44.entities.Clase.update(claseId, {
         estado_aprobacion: 'aprobada'
       });
+
+      // Sincronizar con Google Calendar
+      try {
+        await base44.functions.invoke('sincronizarClaseGoogleCalendar', {
+          clase_id: claseId,
+        });
+      } catch (error) {
+        console.error('Error sincronizando con Google Calendar:', error);
+        // No fallar si hay error en sincronización
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clases-pendientes'] });
