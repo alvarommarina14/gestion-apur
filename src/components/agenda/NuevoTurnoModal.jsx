@@ -34,6 +34,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
   const [claseData, setClaseData] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: turnosExistentes = [] } = useQuery({
     queryKey: ['turnos-cancha', turno?.fecha || fecha ? format(turno?.fecha ? new Date(turno.fecha) : fecha || new Date(), 'yyyy-MM-dd') : ''],
