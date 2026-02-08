@@ -103,6 +103,21 @@ export default function Agenda() {
   const handleNextDay = () => setSelectedDate(addDays(selectedDate, 1));
   const handleToday = () => setSelectedDate(new Date());
 
+  const handleLimpiarGoogleCalendar = async () => {
+    if (!confirm('⚠️ Esto eliminará TODOS los turnos de Google Calendar. ¿Está seguro?')) return;
+    
+    setLimpiadoLoading(true);
+    try {
+      const response = await base44.functions.invoke('borrarTodosTurnosCancha');
+      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+      alert(`✅ ${response.data.mensaje}`);
+    } catch (error) {
+      alert(`❌ Error: ${error.message}`);
+    } finally {
+      setLimpiadoLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
