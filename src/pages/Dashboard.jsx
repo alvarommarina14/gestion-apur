@@ -643,11 +643,19 @@ export default function Dashboard() {
         recupero={nuevaClaseModal.recupero}
       />
       
-      <CancelarClaseModal 
-        open={cancelarModal.open}
-        onOpenChange={(open) => setCancelarModal({ ...cancelarModal, open })}
-        clase={cancelarModal.clase}
-      />
+      {user?.rol === 'profesor' ? (
+        <EditarClaseModal 
+          open={cancelarModal.open}
+          onOpenChange={(open) => setCancelarModal({ ...cancelarModal, open })}
+          clase={cancelarModal.clase}
+        />
+      ) : (
+        <CancelarClaseModal 
+          open={cancelarModal.open}
+          onOpenChange={(open) => setCancelarModal({ ...cancelarModal, open })}
+          clase={cancelarModal.clase}
+        />
+      )}
       
       {/* Modal de Morosos */}
       <Dialog open={morososModal} onOpenChange={setMorososModal}>
