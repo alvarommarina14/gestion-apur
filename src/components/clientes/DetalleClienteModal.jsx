@@ -41,6 +41,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import SeccionCobros from './SeccionCobros';
 
 export default function DetalleClienteModal({ open, onOpenChange, cliente, turnos = [] }) {
   const queryClient = useQueryClient();
