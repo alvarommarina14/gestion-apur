@@ -370,8 +370,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
 
         if (recordatorioBase && recordatorioBase.repeticion_semanal) {
           console.log('✅ Es recurrente, eliminando serie completa...');
-          // Buscar todos los turnos con las mismas características
-          const todosTurnos = await base44.entities.TurnoCancha.list();
+          // Buscar todos los turnos con las mismas características (ya tenemos todosTurnos)
           const turnosRelacionados = todosTurnos.filter(t => 
             t.cliente === turnoData.cliente &&
             t.cancha === turnoData.cancha &&
