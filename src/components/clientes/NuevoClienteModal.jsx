@@ -28,7 +28,7 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
     nombre: '',
     telefono: '',
     email: '',
-    clasificacion: 'nuevo',
+    clasificacion: 'ocasional',
     tipo_cliente: 'clase',
     notas: '',
   });
@@ -39,7 +39,7 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
         nombre: '',
         telefono: '',
         email: '',
-        clasificacion: 'nuevo',
+        clasificacion: 'ocasional',
         tipo_cliente: 'clase',
         notas: '',
       });
@@ -132,9 +132,9 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="nuevo">Nuevo</SelectItem>
-                  <SelectItem value="recurrente">Recurrente</SelectItem>
-                </SelectContent>
+                   <SelectItem value="ocasional">Ocasional</SelectItem>
+                   <SelectItem value="recurrente">Recurrente</SelectItem>
+                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
