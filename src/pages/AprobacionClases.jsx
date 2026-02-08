@@ -175,13 +175,60 @@ export default function AprobacionClases() {
   return (
     <div className="min-h-screen bg-slate-50 p-4 lg:p-6">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Aprobación de Clases</h1>
-          <p className="text-slate-600">
-            {clasesPendientes.length} clase{clasesPendientes.length !== 1 ? 's' : ''} pendiente{clasesPendientes.length !== 1 ? 's' : ''} de aprobación
-          </p>
-        </div>
+         {/* Header */}
+         <div className="mb-8">
+           <h1 className="text-3xl font-bold text-slate-900 mb-2">Aprobación de Clases</h1>
+           <p className="text-slate-600">
+             {clasesPendientes.length} clase{clasesPendientes.length !== 1 ? 's' : ''} pendiente{clasesPendientes.length !== 1 ? 's' : ''} de aprobación
+           </p>
+         </div>
+
+         {/* Acciones masivas */}
+         {clasesPendientes.length > 0 && (
+           <div className="mb-6 flex gap-2 flex-wrap items-center">
+             <Button
+               variant="outline"
+               size="sm"
+               onClick={seleccionarTodas}
+               className="gap-2"
+             >
+               <Checkbox 
+                 checked={seleccionadas.size === clasesPendientes.length && clasesPendientes.length > 0}
+                 className="cursor-pointer"
+               />
+               {seleccionadas.size === clasesPendientes.length ? 'Desseleccionar todas' : 'Seleccionar todas'}
+             </Button>
+
+             {seleccionadas.size > 0 && (
+               <>
+                 <span className="text-sm text-slate-600">
+                   {seleccionadas.size} seleccionada{seleccionadas.size !== 1 ? 's' : ''}
+                 </span>
+                 <Button
+                   variant="destructive"
+                   size="sm"
+                   onClick={handleEliminarSeleccionadas}
+                   disabled={procesando === 'eliminar'}
+                   className="gap-2"
+                 >
+                   <Trash2 className="w-4 h-4" />
+                   Eliminar seleccionadas
+                 </Button>
+               </>
+             )}
+
+             <Button
+               variant="destructive"
+               size="sm"
+               onClick={handleEliminarTodas}
+               disabled={procesando === 'eliminar'}
+               className="gap-2 ml-auto"
+             >
+               <Trash2 className="w-4 h-4" />
+               Eliminar todas
+             </Button>
+           </div>
+         )}
 
         {clasesPendientes.length === 0 ? (
           <Card className="text-center py-12">
