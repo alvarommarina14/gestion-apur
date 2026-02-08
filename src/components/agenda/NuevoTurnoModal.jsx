@@ -919,13 +919,13 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
         </Button>
         {!(turno && formData.tipo_turno === 'clase') && (
           <Button
-            type="submit"
-            disabled={createMutation.isPending || updateMutation.isPending || deleteMutation.isPending}
-            className={isProfesor && !turno ? "bg-blue-600 hover:bg-blue-700" : "bg-emerald-600 hover:bg-emerald-700"}
-          >
-            {createMutation.isPending || updateMutation.isPending ? 'Procesando...' : turno ? 'Actualizar' : (isProfesor ? 'Solicitar turno' : 'Crear turno')}
-          </Button>
-        )}
+              type="submit"
+              disabled={createMutation.isPending || updateMutation.isPending || deleteMutation.isPending || isSubmitting}
+              className={isProfesor && !turno ? "bg-blue-600 hover:bg-blue-700" : "bg-emerald-600 hover:bg-emerald-700"}
+            >
+              {createMutation.isPending || updateMutation.isPending || isSubmitting ? 'Procesando...' : turno ? 'Actualizar' : (isProfesor ? 'Solicitar turno' : 'Crear turno')}
+            </Button>
+          )}
       </DialogFooter>
     </>
   );
