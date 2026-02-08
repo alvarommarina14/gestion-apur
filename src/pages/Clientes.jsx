@@ -100,48 +100,40 @@ export default function ClientesPage() {
         </header>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-          <Card className="shadow-sm">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
-                <p className="text-sm text-slate-500 mt-1">Total Clientes</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="shadow-sm border-blue-200 bg-blue-50/30">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-blue-600">{stats.nuevos}</p>
-                <p className="text-sm text-slate-500 mt-1">Nuevos</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="shadow-sm border-emerald-200 bg-emerald-50/30">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-emerald-600">{stats.recurrentes}</p>
-                <p className="text-sm text-slate-500 mt-1">Recurrentes</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="shadow-sm border-purple-200 bg-purple-50/30">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-purple-600">{stats.clases}</p>
-                <p className="text-sm text-slate-500 mt-1">Clases</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="shadow-sm border-amber-200 bg-amber-50/30">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-amber-600">{stats.abonos}</p>
-                <p className="text-sm text-slate-500 mt-1">Abonos</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+           <Card className="shadow-sm">
+             <CardContent className="pt-6">
+               <div className="text-center">
+                 <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
+                 <p className="text-sm text-slate-500 mt-1">Total Clientes</p>
+               </div>
+             </CardContent>
+           </Card>
+           <Card className="shadow-sm border-emerald-200 bg-emerald-50/30">
+             <CardContent className="pt-6">
+               <div className="text-center">
+                 <p className="text-2xl font-bold text-emerald-600">{stats.recurrentes}</p>
+                 <p className="text-sm text-slate-500 mt-1">Recurrentes</p>
+               </div>
+             </CardContent>
+           </Card>
+           <Card className="shadow-sm border-purple-200 bg-purple-50/30">
+             <CardContent className="pt-6">
+               <div className="text-center">
+                 <p className="text-2xl font-bold text-purple-600">{stats.clases}</p>
+                 <p className="text-sm text-slate-500 mt-1">Clases</p>
+               </div>
+             </CardContent>
+           </Card>
+           <Card className="shadow-sm border-amber-200 bg-amber-50/30">
+             <CardContent className="pt-6">
+               <div className="text-center">
+                 <p className="text-2xl font-bold text-amber-600">{stats.abonos}</p>
+                 <p className="text-sm text-slate-500 mt-1">Abonos</p>
+               </div>
+             </CardContent>
+           </Card>
+         </div>
 
         {/* Filtros */}
         <div className="flex flex-col sm:flex-row gap-4">
