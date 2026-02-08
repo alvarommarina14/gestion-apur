@@ -29,7 +29,7 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
     telefono: '',
     email: '',
     clasificacion: 'ocasional',
-    tipo_cliente: 'clase',
+    tipo_cliente: 'alquiler',
     notas: '',
   });
 
@@ -40,7 +40,7 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
         telefono: '',
         email: '',
         clasificacion: 'ocasional',
-        tipo_cliente: 'clase',
+        tipo_cliente: 'alquiler',
         notas: '',
       });
       setSuccess(false);
@@ -147,6 +147,7 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="alquiler">Alquiler Cancha</SelectItem>
                   <SelectItem value="clase">Clase</SelectItem>
                   <SelectItem value="abono">Abono</SelectItem>
                 </SelectContent>
