@@ -83,14 +83,15 @@ export default function AprobacionClases() {
         console.error('Error creando TurnoCancha:', error);
       }
 
-      // Sincronizar con Google Calendar
+      // Sincronizar con Google Calendar (con retry)
       try {
-        await base44.functions.invoke('sincronizarClaseGoogleCalendar', {
+        const syncResult = await base44.functions.invoke('sincronizarClaseGoogleCalendar', {
           clase_id: claseId,
         });
+        console.log('✅ Clase sincronizada con Google Calendar:', syncResult.data);
       } catch (error) {
-        console.error('Error sincronizando con Google Calendar:', error);
-        // No fallar si hay error en sincronización
+        console.error('❌ Error sincronizando con Google Calendar:', error);
+        // No fallar si hay error en sincronización, pero registrar el error
       }
     },
     onSuccess: () => {
