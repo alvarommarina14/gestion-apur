@@ -144,15 +144,26 @@ export default function Agenda() {
            </div>
            <div className="flex items-center gap-2 flex-wrap">
              {isAdmin && (
-               <Button
-                 variant="outline"
-                 onClick={handleLimpiarGoogleCalendar}
-                 disabled={limpiadoLoading}
-                 className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 h-11 lg:h-10 text-base lg:text-sm active:scale-95 touch-manipulation"
-               >
-                 <Trash2 className="w-5 h-5 mr-2" />
-                 Limpiar GCal
-               </Button>
+               <>
+                 <Button
+                   variant="outline"
+                   onClick={handleBorrar50Turnos}
+                   disabled={limpiadoLoading}
+                   className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 h-11 lg:h-10 text-base lg:text-sm active:scale-95 touch-manipulation"
+                 >
+                   <Trash2 className="w-5 h-5 mr-2" />
+                   Borrar 50
+                 </Button>
+                 <Button
+                   variant="outline"
+                   onClick={handleLimpiarGoogleCalendar}
+                   disabled={limpiadoLoading}
+                   className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 h-11 lg:h-10 text-base lg:text-sm active:scale-95 touch-manipulation"
+                 >
+                   <Trash2 className="w-5 h-5 mr-2" />
+                   Limpiar GCal
+                 </Button>
+               </>
              )}
              {canEdit && (
                <Button
