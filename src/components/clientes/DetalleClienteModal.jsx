@@ -127,8 +127,9 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente, turno
         </DialogHeader>
 
         <Tabs defaultValue="info" className="flex-1 flex flex-col overflow-hidden">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="info">Información</TabsTrigger>
+            <TabsTrigger value="cobros">Cobros</TabsTrigger>
             <TabsTrigger value="historial">Historial</TabsTrigger>
             <TabsTrigger value="stats">Estadísticas</TabsTrigger>
           </TabsList>
