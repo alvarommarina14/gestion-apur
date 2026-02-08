@@ -363,7 +363,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
         // Eliminar toda la serie recurrente
         const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: id });
         const recordatorioBase = recordatorios[0];
-        
+
         if (recordatorioBase && recordatorioBase.repeticion_semanal) {
           // Buscar todos los turnos con las mismas características
           const todosTurnos = await base44.entities.TurnoCancha.list();
@@ -371,18 +371,21 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
             t.cliente === turnoData.cliente &&
             t.cancha === turnoData.cancha &&
             t.hora_inicio === turnoData.hora_inicio &&
-            format(parseISO(t.fecha), 'EEEE', { locale: es }) === format(parseISO(turnoData.fecha), 'EEEE', { locale: es })
+            format(parseISO(t.fecha), 'EEEE', { locale: es }) === format(parseISO(turnoData.fecha), 'EEEE', { locale: es }) &&
+            new Date(t.fecha) >= new Date(turnoData.fecha)
           );
 
-          // Eliminar de Calendar PRIMERO (en paralelo)
-          await Promise.all(
-            turnosRelacionados.map(turno => 
-              base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
-                turno_id: turno.id, 
-                action: 'delete' 
-              }).catch(() => {})
-            )
-          );
+          // Eliminar de Google Calendar - eliminar toda la serie recurrente
+          const primerTurnoConGcal = turnosRelacionados.find(t => t.gcal_event_id);
+          if (primerTurnoConGcal?.gcal_event_id) {
+            try {
+              await base44.functions.invoke('sincronizarSerieRecurrenteGoogleCalendar', {
+                recurringEventId: primerTurnoConGcal.gcal_event_id
+              });
+            } catch (err) {
+              console.error('Error eliminando serie recurrente de Google Calendar:', err);
+            }
+          }
 
           // Obtener todos los recordatorios relacionados
           const todosRecordatorios = await base44.entities.RecordatorioCancha.list();
@@ -408,7 +411,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
         }
 
         await base44.entities.TurnoCancha.delete(id);
-        
+
         // Intentar eliminar de Google Calendar (sin bloquear si falla)
         try {
           await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
