@@ -510,14 +510,11 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
                });
              }
 
-             // Invalidar queries y mostrar éxito
+             // Invalidar queries y cerrar
              queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
              queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
-             setSuccess(true);
-             setTimeout(() => {
-               setSuccess(false);
-               onOpenChange(false);
-             }, 1500);
+             queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha-push'] });
+             onOpenChange(false);
            } catch (err) {
              console.error('Error creando turnos semanales:', err);
              setError(`Error creando turnos: ${err.message}`);
