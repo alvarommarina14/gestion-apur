@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
-const CALENDAR_ID = '62ae5a0f9a8e8ca4a8f8e2c0b5d8c9e1@group.calendar.google.com';
+const CALENDAR_ID = 'f6f2dcd149e0fee6eb7056b8fef6bdb7e8c8f09324a222f1427adc59c40c3400@group.calendar.google.com';
 
 Deno.serve(async (req) => {
   try {
