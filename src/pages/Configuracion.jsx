@@ -36,6 +36,7 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { Trash } from 'lucide-react';
 
 export default function Configuracion() {
   const queryClient = useQueryClient();
