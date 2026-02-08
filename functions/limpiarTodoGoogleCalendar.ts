@@ -12,11 +12,21 @@ Deno.serve(async (req) => {
     const accessToken = await base44.asServiceRole.connectors.getAccessToken('googlecalendar');
     const calendarId = 'primary';
 
-    // Obtener todos los eventos del calendario (sin restricción de fecha)
+    // Obtener TODOS los eventos del calendario (pasados y futuros)
     console.log('📥 Obteniendo todos los eventos del calendario...');
+    
+    // Rango de fechas muy amplio para capturar todo
+    const hace5Años = new Date();
+    hace5Años.setFullYear(hace5Años.getFullYear() - 5);
+    const en5Años = new Date();
+    en5Años.setFullYear(en5Años.getFullYear() + 5);
 
     const listResponse = await fetch(
-      `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?maxResults=2500&showDeleted=false`,
+      `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?` +
+      `timeMin=${hace5Años.toISOString()}&` +
+      `timeMax=${en5Años.toISOString()}&` +
+      `maxResults=2500&` +
+      `showDeleted=false`,
       {
         method: 'GET',
         headers: {
@@ -32,8 +42,38 @@ Deno.serve(async (req) => {
     }
 
     const data = await listResponse.json();
-    const eventos = data.items || [];
+    let eventos = data.items || [];
     console.log(`📊 Total de eventos encontrados: ${eventos.length}`);
+    
+    // Si hay más resultados, obtener la siguiente página
+    let nextPageToken = data.nextPageToken;
+    while (nextPageToken) {
+      console.log('📄 Obteniendo página siguiente...');
+      const nextResponse = await fetch(
+        `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?` +
+        `timeMin=${hace5Años.toISOString()}&` +
+        `timeMax=${en5Años.toISOString()}&` +
+        `maxResults=2500&` +
+        `pageToken=${nextPageToken}&` +
+        `showDeleted=false`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      if (!nextResponse.ok) break;
+      
+      const nextData = await nextResponse.json();
+      eventos = [...eventos, ...(nextData.items || [])];
+      nextPageToken = nextData.nextPageToken;
+      console.log(`📊 Total acumulado: ${eventos.length}`);
+    }
+    
+    console.log(`📊 Total FINAL de eventos a eliminar: ${eventos.length}`);
 
     let eliminados = 0;
     let errores = 0;
