@@ -12,12 +12,11 @@ Deno.serve(async (req) => {
     const accessToken = await base44.asServiceRole.connectors.getAccessToken('googlecalendar');
     const calendarId = 'primary';
 
-    // Obtener todos los eventos del calendario (futuros)
-    const now = new Date().toISOString();
+    // Obtener todos los eventos del calendario (sin restricción de fecha)
     console.log('📥 Obteniendo todos los eventos del calendario...');
 
     const listResponse = await fetch(
-      `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?timeMin=${now}&maxResults=2500`,
+      `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?maxResults=2500&showDeleted=false`,
       {
         method: 'GET',
         headers: {
