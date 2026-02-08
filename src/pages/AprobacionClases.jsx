@@ -214,6 +214,15 @@ export default function AprobacionClases() {
                    {seleccionadas.size} seleccionada{seleccionadas.size !== 1 ? 's' : ''}
                  </span>
                  <Button
+                   size="sm"
+                   onClick={handleAprobarSeleccionadas}
+                   disabled={procesando === 'aprobar-masivo'}
+                   className="bg-emerald-600 hover:bg-emerald-700 gap-2"
+                 >
+                   <CheckCircle className="w-4 h-4" />
+                   Aceptar seleccionadas
+                 </Button>
+                 <Button
                    variant="destructive"
                    size="sm"
                    onClick={handleEliminarSeleccionadas}
