@@ -185,11 +185,43 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
       };
       const turnoCreado = await base44.entities.TurnoCancha.create(turnoData);
       
-      // Sincronizar con Google Calendar
-      try {
-        await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { turno_id: turnoCreado.id });
-      } catch (err) {
-        console.error('Error sincronizando con Google Calendar:', err);
+      // Si es una clase, crear también en entidad Clase y sincronizar
+      if (data.tipo_turno === 'clase') {
+        const claseData = {
+          fecha: data.fecha,
+          hora_inicio: data.hora_inicio,
+          duracion: data.duracion,
+          tipo: 'grupal',
+          sede: 'Principal',
+          cancha: data.cancha,
+          alumnos_ids: data.alumnos_ids || [],
+          alumnos_nombres: (data.alumnos_ids || []).map(id => {
+            const alumno = alumnos.find(a => a.id === id);
+            return alumno?.nombre || '';
+          }).filter(Boolean),
+          precio: data.monto || 0,
+          estado: 'programada',
+          profesor_id: data.profesor_id || '',
+          turno_cancha_id: turnoCreado.id,
+          notas: data.notas || '',
+        };
+        const claseCreada = await base44.entities.Clase.create(claseData);
+        
+        // Sincronizar clase con Google Calendar
+        try {
+          await base44.functions.invoke('sincronizarClaseGoogleCalendar', { 
+            clase_id: claseCreada.id,
+          });
+        } catch (err) {
+          console.error('Error sincronizando clase con Google Calendar:', err);
+        }
+      } else {
+        // Sincronizar turno de alquiler con Google Calendar
+        try {
+          await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { turno_id: turnoCreado.id });
+        } catch (err) {
+          console.error('Error sincronizando turno con Google Calendar:', err);
+        }
       }
       
       const diaSemana = format(parseISO(data.fecha), 'EEEE', { locale: es });
