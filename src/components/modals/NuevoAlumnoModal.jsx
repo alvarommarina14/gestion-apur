@@ -157,14 +157,25 @@ export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null, pr
 
          // Sincronizar alumno con gestión de clientes
          try {
-           const profesor = idProfesor ? await base44.entities.Profesor.read(idProfesor) : null;
+           let profesorNombre = 'Sin asignar';
+           if (idProfesor) {
+             try {
+               const profesor = await base44.entities.Profesor.read(idProfesor);
+               if (profesor?.nombre) {
+                 profesorNombre = profesor.nombre;
+               }
+             } catch (err) {
+               console.log('Error obteniendo profesor:', err);
+             }
+           }
+
            await base44.entities.Cliente.create({
              nombre: data.nombre,
              telefono: data.whatsapp || '',
              email: '',
              clasificacion: 'recurrente',
              tipo_cliente: 'clase',
-             notas: `Alumno sincronizado - Profesor: ${profesor?.nombre || 'Sin asignar'}`,
+             notas: `Alumno sincronizado - Profesor: ${profesorNombre}`,
              activo: true,
            });
          } catch (err) {
