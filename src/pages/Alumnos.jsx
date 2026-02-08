@@ -307,6 +307,12 @@ export default function Alumnos() {
             </Table>
           </div>
         </Card>
+          </TabsContent>
+
+          <TabsContent value="lista-espera">
+            <ListaEsperaPanel />
+          </TabsContent>
+        </Tabs>
       </div>
       
       {/* Modals */}
