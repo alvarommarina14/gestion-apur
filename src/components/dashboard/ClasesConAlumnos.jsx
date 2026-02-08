@@ -6,16 +6,16 @@ import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight, DollarSign, Users } from 'lucide-react';
+import { ChevronRight, DollarSign, Users, CheckCircle, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function ClasesConAlumnos({ profesorSeleccionado, onRegistrarPago }) {
   const [claseSeleccionada, setClaseSeleccionada] = useState(null);
   const [alumnoSeleccionado, setAlumnoSeleccionado] = useState(null);
 
-  const { data: clases = [] } = useQuery({
-    queryKey: ['clases-profesor'],
-    queryFn: () => base44.entities.Clase.list('-fecha'),
+  const { data: turnos = [] } = useQuery({
+    queryKey: ['turnos-profesor'],
+    queryFn: () => base44.entities.TurnoCancha.list('-fecha'),
   });
 
   const { data: alumnos = [] } = useQuery({
