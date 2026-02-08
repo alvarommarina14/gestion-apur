@@ -127,17 +127,15 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
 
         console.log(`🗑️ Eliminando ${clasesAActualizar.length} clases recurrentes...`);
 
-        // Eliminar de Google Calendar - buscar y eliminar todos los eventos de la serie
-        for (const clase of clasesAActualizar) {
-          if (clase.gcal_event_id) {
-            try {
-              await base44.functions.invoke('borrarEventosGoogleCalendar', {
-                event_id: clase.gcal_event_id,
-                recurringEventId: clase.serie_recurrente_id
-              });
-            } catch (err) {
-              console.error('Error eliminando evento de Google Calendar:', err);
-            }
+        // Eliminar de Google Calendar - eliminar toda la serie recurrente
+        const primeraClaseConSerie = clasesAActualizar.find(c => c.serie_recurrente_id);
+        if (primeraClaseConSerie?.serie_recurrente_id) {
+          try {
+            await base44.functions.invoke('sincronizarSerieRecurrenteGoogleCalendar', {
+              recurringEventId: primeraClaseConSerie.serie_recurrente_id
+            });
+          } catch (err) {
+            console.error('Error eliminando serie recurrente de Google Calendar:', err);
           }
         }
 
