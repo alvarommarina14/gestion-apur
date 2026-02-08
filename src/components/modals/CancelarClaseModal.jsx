@@ -19,7 +19,8 @@ import {
   User,
   Clock,
   CheckCircle,
-  CalendarClock
+  CalendarClock,
+  Trash2
 } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -75,6 +76,7 @@ export default function CancelarClaseModal({ open, onOpenChange, clase }) {
   const [notas, setNotas] = useState('');
   const [nuevaFecha, setNuevaFecha] = useState(null);
   const [nuevaHora, setNuevaHora] = useState('');
+  const [deleteMode, setDeleteMode] = useState(null); // 'single' o 'series'
 
   const { data: user } = useQuery({
     queryKey: ['me'],
@@ -82,6 +84,78 @@ export default function CancelarClaseModal({ open, onOpenChange, clase }) {
   });
 
   const selectedOption = motivoOptions.find(o => o.value === motivo);
+
+  const handleDeleteSingle = async () => {
+    if (!clase) return;
+    if (!confirm('¿Eliminar solo esta clase? Se eliminará de Google Calendar.')) return;
+    
+    setLoading(true);
+    try {
+      await base44.entities.Clase.delete(clase.id);
+      
+      // Eliminar de Google Calendar
+      try {
+        await base44.functions.invoke('sincronizarClaseGoogleCalendar', { 
+          clase_id: clase.id, 
+          action: 'delete' 
+        });
+      } catch (err) {
+        console.error('Error eliminando de Google Calendar:', err);
+      }
+      
+      queryClient.invalidateQueries({ queryKey: ['clases'] });
+      setSuccess(true);
+      setTimeout(() => {
+        setSuccess(false);
+        onOpenChange(false);
+        setDeleteMode(null);
+      }, 1500);
+    } catch (error) {
+      console.error('Error eliminando clase:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteSeries = async () => {
+    if (!clase || !clase.serie_recurrente_id) return;
+    if (!confirm('¿Eliminar TODA la serie de clases recurrentes? Se eliminarán todas de Google Calendar.')) return;
+    
+    setLoading(true);
+    try {
+      // Obtener todas las clases de la serie
+      const clasesSerieData = await base44.entities.Clase.filter({ 
+        serie_recurrente_id: clase.serie_recurrente_id 
+      });
+      
+      // Eliminar cada clase
+      for (const c of clasesSerieData) {
+        await base44.entities.Clase.delete(c.id);
+        
+        // Eliminar de Google Calendar
+        try {
+          await base44.functions.invoke('sincronizarClaseGoogleCalendar', { 
+            clase_id: c.id, 
+            action: 'delete' 
+          });
+        } catch (err) {
+          console.error('Error eliminando de Google Calendar:', err);
+        }
+      }
+      
+      queryClient.invalidateQueries({ queryKey: ['clases'] });
+      setSuccess(true);
+      setTimeout(() => {
+        setSuccess(false);
+        onOpenChange(false);
+        setDeleteMode(null);
+      }, 1500);
+    } catch (error) {
+      console.error('Error eliminando serie:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async () => {
     if (!clase || !motivo) return;
@@ -250,8 +324,11 @@ export default function CancelarClaseModal({ open, onOpenChange, clase }) {
               <CheckCircle className="w-8 h-8 text-emerald-600" />
             </div>
             <h3 className="text-lg font-semibold text-slate-900">
-              {motivo === 'reprogramar' ? 'Clase reprogramada' : 'Clase cancelada'}
+              {deleteMode === 'single' ? 'Clase eliminada' : deleteMode === 'series' ? 'Serie eliminada' : (motivo === 'reprogramar' ? 'Clase reprogramada' : 'Clase cancelada')}
             </h3>
+            {deleteMode === 'series' && (
+              <p className="text-slate-500 mt-1">Se eliminaron todas las clases de la serie</p>
+            )}
             {motivo === 'reprogramar' && (
               <p className="text-slate-500 mt-1">Se creó la nueva clase para {nuevaFecha && format(nuevaFecha, "d 'de' MMM", { locale: es })}</p>
             )}
@@ -259,6 +336,51 @@ export default function CancelarClaseModal({ open, onOpenChange, clase }) {
               <p className="text-slate-500 mt-1">Se generaron recuperos para los alumnos</p>
             )}
           </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // Vista de eliminación
+  if (deleteMode) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-rose-600">
+              <Trash2 className="w-5 h-5" />
+              Eliminar clase
+            </DialogTitle>
+            <DialogDescription>
+              {clase?.fecha && format(new Date(clase.fecha), "EEEE d 'de' MMMM", { locale: es })} - {clase?.hora_inicio}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4 space-y-4">
+            {deleteMode === 'single' && (
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg">
+                <p className="text-sm text-rose-700">Se eliminará solo esta clase individual de Google Calendar.</p>
+              </div>
+            )}
+            {deleteMode === 'series' && clase?.serie_recurrente_id && (
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg">
+                <p className="text-sm text-rose-700">Se eliminarán TODAS las clases de esta serie recurrente de Google Calendar.</p>
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setDeleteMode(null)}>
+              Volver
+            </Button>
+            <Button 
+              onClick={deleteMode === 'single' ? handleDeleteSingle : handleDeleteSeries}
+              disabled={loading}
+              variant="destructive"
+            >
+              {loading ? 'Eliminando...' : 'Confirmar eliminación'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     );
@@ -373,7 +495,29 @@ export default function CancelarClaseModal({ open, onOpenChange, clase }) {
           )}
         </div>
         
-        <DialogFooter>
+        <DialogFooter className="flex-col sm:flex-row gap-2">
+          <div className="w-full sm:mr-auto flex flex-col gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setDeleteMode('single')}
+              className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 w-full sm:w-auto"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Eliminar solo este día
+            </Button>
+            {clase?.serie_recurrente_id && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setDeleteMode('series')}
+                className="text-rose-700 hover:text-rose-800 hover:bg-rose-50 border-rose-300 w-full sm:w-auto"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Eliminar toda la serie
+              </Button>
+            )}
+          </div>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Volver
           </Button>
