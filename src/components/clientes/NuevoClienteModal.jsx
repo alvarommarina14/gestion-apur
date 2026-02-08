@@ -29,7 +29,7 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
     telefono: '',
     email: '',
     clasificacion: 'ocasional',
-    tipo_cliente: 'alquiler',
+    tipo_cliente: 'clase',
     notas: '',
   });
 
@@ -40,7 +40,7 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
         telefono: '',
         email: '',
         clasificacion: 'ocasional',
-        tipo_cliente: 'alquiler',
+        tipo_cliente: 'clase',
         notas: '',
       });
       setSuccess(false);
