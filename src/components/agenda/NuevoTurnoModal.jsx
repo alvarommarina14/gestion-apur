@@ -224,11 +224,8 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
-      setSuccess(true);
-      setTimeout(() => {
-        setSuccess(false);
-        onOpenChange(false);
-      }, 1500);
+      queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha-push'] });
+      onOpenChange(false);
     },
   });
 
