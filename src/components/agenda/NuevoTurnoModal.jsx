@@ -575,7 +575,6 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
              crearTurnosBatch();
          } else {
          createMutation.mutate(data);
-         setIsSubmitting(false);
          }
          }
          };
