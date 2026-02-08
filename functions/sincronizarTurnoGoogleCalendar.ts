@@ -143,17 +143,30 @@ ${turno.notas ? `Notas: ${turno.notas}` : ''}
     }
 
     if (!response.ok) {
-      console.error('Error de Google Calendar:', response.status);
-      return Response.json({ error: 'Error al sincronizar con Google Calendar' }, { status: 500 });
+      const errorText = await response.text();
+      console.error('Error de Google Calendar:', response.status, errorText);
+      
+      // Marcar como error pero permitir que continúe
+      try {
+        await base44.asServiceRole.entities.TurnoCancha.update(turno.id, {
+          make_sync_status: 'error',
+        });
+      } catch (e) {
+        console.error('Error actualizando turno:', e);
+      }
+      
+      return Response.json({ error: 'Error al sincronizar con Google Calendar', details: errorText }, { status: 500 });
     }
 
     const eventoCreado = await response.json();
+    console.log('✅ Evento creado en Google Calendar:', eventoCreado.id);
 
     // Actualizar turno con ID del evento
     await base44.asServiceRole.entities.TurnoCancha.update(turno.id, {
       gcal_event_id: eventoCreado.id,
       make_sync_status: 'sincronizado',
     });
+    console.log('✅ Turno actualizado con event_id:', eventoCreado.id);
 
     return Response.json({
       success: true,
