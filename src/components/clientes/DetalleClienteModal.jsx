@@ -68,6 +68,14 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente, turno
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (id) => base44.entities.Cliente.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clientes'] });
+      onOpenChange(false);
+    },
+  });
+
   const turnosCliente = useMemo(() => {
     if (!cliente) return [];
     return turnos
