@@ -460,12 +460,14 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
      }
 
      const data = {
-       ...dataConEmpleados,
-       hora_fin: horaFin,
-       monto: dataConEmpleados.pagado ? 0 : Number(dataConEmpleados.monto),
-     };
+          ...dataConEmpleados,
+          hora_fin: horaFin,
+          monto: dataConEmpleados.pagado ? 0 : Number(dataConEmpleados.monto),
+        };
 
-     if (turno) {
+     setIsSubmitting(false);
+
+        if (turno) {
        const cambios = [];
        Object.keys(data).forEach(key => {
          if (key === 'hora_fin') return;
