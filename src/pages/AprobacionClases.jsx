@@ -273,10 +273,10 @@ export default function AprobacionClases() {
                         {profesores[clase.profesor_id] || 'Desconocido'}
                       </p>
                     </div>
-                  </div>
+                    </div>
 
-                  {/* Alumnos */}
-                  <div className="mb-4">
+                    {/* Alumnos */}
+                    <div className="mb-4">
                     <p className="text-xs font-semibold text-slate-500 uppercase mb-2">Alumnos</p>
                     <div className="flex flex-wrap gap-2">
                       {clase.alumnos_ids?.map((alumnoId) => (
@@ -285,10 +285,10 @@ export default function AprobacionClases() {
                         </Badge>
                       ))}
                     </div>
-                  </div>
+                    </div>
 
-                  {/* Tipo y Duración */}
-                  <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b">
+                    {/* Tipo y Duración */}
+                    <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b">
                     <div>
                       <p className="text-xs text-slate-500">Tipo</p>
                       <p className="text-sm font-medium text-slate-900">
@@ -299,10 +299,10 @@ export default function AprobacionClases() {
                       <p className="text-xs text-slate-500">Duración</p>
                       <p className="text-sm font-medium text-slate-900">{clase.duracion} min</p>
                     </div>
-                  </div>
+                    </div>
 
-                  {/* Acciones */}
-                  <div className="flex gap-3">
+                    {/* Acciones */}
+                    <div className="flex gap-3">
                     <Button
                       onClick={() => {
                         setProcesando(clase.id);
@@ -326,8 +326,9 @@ export default function AprobacionClases() {
                       <XCircle className="w-4 h-4 mr-2" />
                       {procesando === clase.id ? 'Rechazando...' : 'Rechazar'}
                     </Button>
-                  </div>
-                </CardContent>
+                    </div>
+                    </div>
+                    </CardContent>
               </Card>
             ))}
           </div>
