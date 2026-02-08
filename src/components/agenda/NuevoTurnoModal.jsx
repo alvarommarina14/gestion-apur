@@ -533,9 +533,28 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
      }
    };
 
-  const handleDelete = () => {
-    if (confirm('¿Eliminar este turno?')) {
-      deleteMutation.mutate(turno.id);
+  const handleDelete = async () => {
+    // Verificar si el turno tiene repetición semanal
+    const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: turno.id });
+    const tieneRepeticion = recordatorios.length > 0 && recordatorios[0].repeticion_semanal;
+
+    if (tieneRepeticion) {
+      // Preguntar si quiere eliminar toda la serie o solo este turno
+      const eliminarTodos = confirm(
+        'Este turno forma parte de una serie recurrente.\n\n' +
+        '¿Querés eliminar TODOS los turnos de esta serie (52 semanas)?\n\n' +
+        'Presioná "Aceptar" para eliminar todos.\n' +
+        'Presioná "Cancelar" para eliminar solo este turno.'
+      );
+      
+      if (eliminarTodos === null) return; // Usuario cerró el diálogo sin elegir
+      
+      deleteMutation.mutate({ id: turno.id, eliminarSerie: eliminarTodos });
+    } else {
+      // Turno sin repetición, confirmación simple
+      if (confirm('¿Eliminar este turno?')) {
+        deleteMutation.mutate({ id: turno.id, eliminarSerie: false });
+      }
     }
   };
 
