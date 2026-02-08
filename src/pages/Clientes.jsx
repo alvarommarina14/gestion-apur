@@ -99,7 +99,7 @@ export default function ClientesPage() {
         </header>
 
         {/* Stats */}
-         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
            <Card className="shadow-sm">
              <CardContent className="pt-6">
                <div className="text-center">
@@ -121,14 +121,6 @@ export default function ClientesPage() {
                <div className="text-center">
                  <p className="text-2xl font-bold text-purple-600">{stats.clases}</p>
                  <p className="text-sm text-slate-500 mt-1">Clases</p>
-               </div>
-             </CardContent>
-           </Card>
-           <Card className="shadow-sm border-amber-200 bg-amber-50/30">
-             <CardContent className="pt-6">
-               <div className="text-center">
-                 <p className="text-2xl font-bold text-amber-600">{stats.abonos}</p>
-                 <p className="text-sm text-slate-500 mt-1">Abonos</p>
                </div>
              </CardContent>
            </Card>
