@@ -117,6 +117,50 @@ export default function AprobacionClases() {
     },
   });
 
+  const eliminarMutation = useMutation({
+    mutationFn: async (clasesIds) => {
+      await Promise.all(
+        clasesIds.map(id => base44.entities.Clase.delete(id))
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clases-pendientes'] });
+      queryClient.invalidateQueries({ queryKey: ['clases'] });
+      setSeleccionadas(new Set());
+      setProcesando(null);
+    },
+  });
+
+  const toggleSeleccion = (claseId) => {
+    const nueva = new Set(seleccionadas);
+    if (nueva.has(claseId)) {
+      nueva.delete(claseId);
+    } else {
+      nueva.add(claseId);
+    }
+    setSeleccionadas(nueva);
+  };
+
+  const seleccionarTodas = () => {
+    if (seleccionadas.size === clasesPendientes.length) {
+      setSeleccionadas(new Set());
+    } else {
+      setSeleccionadas(new Set(clasesPendientes.map(c => c.id)));
+    }
+  };
+
+  const handleEliminarSeleccionadas = async () => {
+    if (!confirm(`¿Eliminar ${seleccionadas.size} clase${seleccionadas.size !== 1 ? 's' : ''}?`)) return;
+    setProcesando('eliminar');
+    await eliminarMutation.mutateAsync(Array.from(seleccionadas));
+  };
+
+  const handleEliminarTodas = async () => {
+    if (!confirm(`¿Eliminar todas las ${clasesPendientes.length} clases pendientes?`)) return;
+    setProcesando('eliminar');
+    await eliminarMutation.mutateAsync(clasesPendientes.map(c => c.id));
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
