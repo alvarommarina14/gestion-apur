@@ -420,7 +420,7 @@ export default function Layout({ children, currentPageName }) {
       </aside>
       
       {/* Main content */}
-      <div className="lg:pl-64">
+      <div className="lg:pl-64 bg-slate-50 dark:bg-slate-950">
         {/* Top bar */}
         <header 
           className="sticky top-0 z-30 h-14 lg:h-16 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800 flex items-center px-3 lg:px-6"
