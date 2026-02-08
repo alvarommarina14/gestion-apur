@@ -56,6 +56,8 @@ import Configuracion from './pages/Configuracion';
 import Dashboard from './pages/Dashboard';
 import DashboardOcupacion from './pages/DashboardOcupacion';
 import Empleados from './pages/Empleados';
+import GestionAccesoUnificada from './pages/GestionAccesoUnificada';
+import GestionPermisosUsuarios from './pages/GestionPermisosUsuarios';
 import GestionRoles from './pages/GestionRoles';
 import Pagos from './pages/Pagos';
 import PendienteAprobacion from './pages/PendienteAprobacion';
@@ -68,8 +70,7 @@ import RecordatoriosCanchaEmpleado from './pages/RecordatoriosCanchaEmpleado';
 import Recuperos from './pages/Recuperos';
 import Reportes from './pages/Reportes';
 import SeleccionRol from './pages/SeleccionRol';
-import GestionPermisosUsuarios from './pages/GestionPermisosUsuarios';
-import GestionAccesoUnificada from './pages/GestionAccesoUnificada';
+import Tareas from './pages/Tareas';
 import __Layout from './Layout.jsx';
 
 
@@ -83,6 +84,8 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "DashboardOcupacion": DashboardOcupacion,
     "Empleados": Empleados,
+    "GestionAccesoUnificada": GestionAccesoUnificada,
+    "GestionPermisosUsuarios": GestionPermisosUsuarios,
     "GestionRoles": GestionRoles,
     "Pagos": Pagos,
     "PendienteAprobacion": PendienteAprobacion,
@@ -95,8 +98,7 @@ export const PAGES = {
     "Recuperos": Recuperos,
     "Reportes": Reportes,
     "SeleccionRol": SeleccionRol,
-    "GestionPermisosUsuarios": GestionPermisosUsuarios,
-    "GestionAccesoUnificada": GestionAccesoUnificada,
+    "Tareas": Tareas,
 }
 
 export const pagesConfig = {
