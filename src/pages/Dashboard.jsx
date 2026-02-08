@@ -644,7 +644,7 @@ export default function Dashboard() {
         recupero={nuevaClaseModal.recupero}
       />
       
-      {user?.rol === 'profesor' ? (
+      {profesorSeleccionado ? (
         <EditarClaseModal 
           open={cancelarModal.open}
           onOpenChange={(open) => setCancelarModal({ ...cancelarModal, open })}
