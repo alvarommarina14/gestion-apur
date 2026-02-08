@@ -85,8 +85,14 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente, turno
       // Obtener todos los recordatorios
       const todosRecordatorios = await base44.entities.RecordatorioCancha.list();
 
+      // Agrupar por GCal event ID para eliminar series recurrentes
+      const gcalEventIds = new Set();
+      
       // Eliminar recordatorios asociados con delay
       for (const turno of turnosCliente) {
+        if (turno.gcal_event_id) {
+          gcalEventIds.add(turno.gcal_event_id);
+        }
         const recordatorios = todosRecordatorios.filter(r => r.turno_cancha_id === turno.id);
         for (const rec of recordatorios) {
           await base44.entities.RecordatorioCancha.delete(rec.id);
@@ -100,11 +106,17 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente, turno
         await new Promise(resolve => setTimeout(resolve, 30));
       }
 
-      // Intentar eliminar de Google Calendar
-      try {
-        await base44.functions.invoke('limpiarGoogleCalendar');
-      } catch (err) {
-        console.warn('Error limpiando Google Calendar:', err);
+      // Eliminar eventos de Google Calendar (incluyendo series recurrentes)
+      for (const eventId of gcalEventIds) {
+        try {
+          await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
+            turno_id: 'gc_' + eventId,
+            action: 'delete',
+            recurringEventId: eventId
+          });
+        } catch (err) {
+          console.warn('Error limpiando evento de Google Calendar:', err);
+        }
       }
 
       return turnosCliente.length;
