@@ -130,26 +130,69 @@ export default function EditarClaseModal({ open, onOpenChange, clase }) {
           new Date(c.fecha).getDay() === new Date(clase.fecha).getDay()
         );
 
-        for (const claseRel of clasesRelacionadas) {
-          // Eliminar de Google Calendar primero
-          try {
-            await base44.functions.invoke('sincronizarClaseGoogleCalendar', { 
-              clase_id: claseRel.id, 
-              action: 'delete' 
-            });
-          } catch (err) {
-            console.error('Error eliminando de Google Calendar:', err);
-          }
+        // Usar Promise.all para paralelizar eliminaciones
+        await Promise.all(
+          clasesRelacionadas.map(async (claseRel) => {
+            try {
+              // Eliminar de Google Calendar
+              try {
+                await base44.functions.invoke('sincronizarClaseGoogleCalendar', { 
+                  clase_id: claseRel.id, 
+                  action: 'delete' 
+                });
+              } catch (err) {
+                console.error('Error eliminando clase de Google Calendar:', err);
+              }
 
-          // Eliminar TurnoCancha asociado si existe
+              // Eliminar TurnoCancha asociado si existe
+              try {
+                const turnosRelacionados = await base44.entities.TurnoCancha.filter({ 
+                  fecha: claseRel.fecha,
+                  hora_inicio: claseRel.hora_inicio,
+                  tipo_turno: 'clase'
+                });
+                
+                for (const turno of turnosRelacionados) {
+                  try {
+                    await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
+                      turno_id: turno.id, 
+                      action: 'delete' 
+                    });
+                  } catch (err) {
+                    console.error('Error eliminando turno de Google Calendar:', err);
+                  }
+                  await base44.entities.TurnoCancha.delete(turno.id);
+                }
+              } catch (err) {
+                console.error('Error eliminando turnos:', err);
+              }
+
+              // Eliminar la clase
+              await base44.entities.Clase.delete(claseRel.id);
+            } catch (err) {
+              console.error('Error en cadena de eliminación:', err);
+            }
+          })
+        );
+      } else {
+        // Eliminar solo esta clase
+        try {
+          await base44.functions.invoke('sincronizarClaseGoogleCalendar', { 
+            clase_id: clase.id, 
+            action: 'delete' 
+          });
+        } catch (err) {
+          console.error('Error eliminando de Google Calendar:', err);
+        }
+
+        try {
           const turnosRelacionados = await base44.entities.TurnoCancha.filter({ 
-            fecha: claseRel.fecha,
-            hora_inicio: claseRel.hora_inicio,
+            fecha: clase.fecha,
+            hora_inicio: clase.hora_inicio,
             tipo_turno: 'clase'
           });
           
           for (const turno of turnosRelacionados) {
-            // Eliminar turno de Google Calendar
             try {
               await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
                 turno_id: turno.id, 
@@ -160,39 +203,8 @@ export default function EditarClaseModal({ open, onOpenChange, clase }) {
             }
             await base44.entities.TurnoCancha.delete(turno.id);
           }
-
-          await base44.entities.Clase.delete(claseRel.id);
-        }
-      } else {
-        // Eliminar solo esta clase
-        // Eliminar de Google Calendar primero
-        try {
-          await base44.functions.invoke('sincronizarClaseGoogleCalendar', { 
-            clase_id: clase.id, 
-            action: 'delete' 
-          });
         } catch (err) {
-          console.error('Error eliminando de Google Calendar:', err);
-        }
-
-        // Eliminar TurnoCancha asociado si existe
-        const turnosRelacionados = await base44.entities.TurnoCancha.filter({ 
-          fecha: clase.fecha,
-          hora_inicio: clase.hora_inicio,
-          tipo_turno: 'clase'
-        });
-        
-        for (const turno of turnosRelacionados) {
-          // Eliminar turno de Google Calendar
-          try {
-            await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
-              turno_id: turno.id, 
-              action: 'delete' 
-            });
-          } catch (err) {
-            console.error('Error eliminando turno de Google Calendar:', err);
-          }
-          await base44.entities.TurnoCancha.delete(turno.id);
+          console.error('Error eliminando turnos:', err);
         }
 
         await base44.entities.Clase.delete(clase.id);
@@ -208,6 +220,7 @@ export default function EditarClaseModal({ open, onOpenChange, clase }) {
       }, 1500);
     } catch (error) {
       console.error('Error eliminando clase:', error);
+      alert('Error al eliminar: ' + error.message);
     } finally {
       setLoading(false);
     }
