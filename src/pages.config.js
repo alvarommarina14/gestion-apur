@@ -52,7 +52,6 @@ import AgendaEmpleados from './pages/AgendaEmpleados';
 import Alumnos from './pages/Alumnos';
 import AprobacionClases from './pages/AprobacionClases';
 import AprobacionUsuarios from './pages/AprobacionUsuarios';
-import CalendarioClases from './pages/CalendarioClases';
 import Clientes from './pages/Clientes';
 import Configuracion from './pages/Configuracion';
 import Dashboard from './pages/Dashboard';
@@ -79,7 +78,6 @@ export const PAGES = {
     "Alumnos": Alumnos,
     "AprobacionClases": AprobacionClases,
     "AprobacionUsuarios": AprobacionUsuarios,
-    "CalendarioClases": CalendarioClases,
     "Clientes": Clientes,
     "Configuracion": Configuracion,
     "Dashboard": Dashboard,
