@@ -196,14 +196,14 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
                 <div>
                   <p className="font-semibold text-rose-900">
                     {deleteMode === 'este-dia'
-                      ? '¿Cancelar esta clase?'
-                      : '¿Cancelar todas las clases futuras?'}
+                      ? `¿Cancelar ${isClase ? 'esta clase' : 'este turno'}?`
+                      : `¿Cancelar ${isClase ? 'todas las clases' : 'todos los turnos'} futuros?`}
                   </p>
                   <p className="text-sm text-rose-700 mt-1">
                     {deleteMode === 'este-dia'
-                      ? 'Se cancelará solo la clase del ' +
+                      ? `Se cancelará solo ${isClase ? 'la clase' : 'el turno'} del ` +
                         format(new Date(turno.fecha), 'd MMM', { locale: es })
-                      : `Se cancelarán todas las clases desde el ${format(
+                      : `Se cancelarán ${isClase ? 'todas las clases' : 'todos los turnos'} desde el ${format(
                           new Date(turno.fecha),
                           'd MMM',
                           { locale: es }
