@@ -238,9 +238,16 @@ export default function AprobacionClases() {
         ) : (
           <div className="grid gap-4">
             {clasesPendientes.map((clase) => (
-              <Card key={clase.id} className="overflow-hidden">
+              <Card key={clase.id} className={cn("overflow-hidden", seleccionadas.has(clase.id) && "ring-2 ring-emerald-500 bg-emerald-50")}>
                 <CardContent className="p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div className="flex gap-4 mb-4">
+                    <Checkbox
+                      checked={seleccionadas.has(clase.id)}
+                      onCheckedChange={() => toggleSeleccion(clase.id)}
+                      className="mt-1 cursor-pointer"
+                    />
+                    <div className="flex-1">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     {/* Información básica */}
                     <div>
                       <p className="text-xs font-semibold text-slate-500 uppercase mb-2">Fecha y Hora</p>
