@@ -220,9 +220,12 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
         })
           .catch(err => console.error('Error sincronizando clase con Google Calendar:', err));
       } else {
-        // Sincronizar turno de alquiler con Google Calendar (sin bloquear)
-        base44.functions.invoke('sincronizarTurnoGoogleCalendar', { turno_id: turnoCreado.id })
-          .catch(err => console.error('Error sincronizando turno con Google Calendar:', err));
+        // Sincronizar turno de alquiler con Google Calendar
+          try {
+            await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { turno_id: turnoCreado.id });
+          } catch (err) {
+            console.error('Error sincronizando turno con Google Calendar:', err);
+          }
       }
       
       const diaSemana = format(parseISO(data.fecha), 'EEEE', { locale: es });
