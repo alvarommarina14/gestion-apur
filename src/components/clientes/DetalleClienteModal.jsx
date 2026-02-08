@@ -192,12 +192,12 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente, turno
                     <Edit className="w-4 h-4 mr-2" />
                     Editar
                   </Button>
-                  {turnosCliente.length > 0 && (
+                  {turnosCliente.length > 0 && cliente.tipo_cliente === 'abono' && (
                     <Button 
                       variant="outline" 
                       size="sm" 
                       onClick={() => {
-                        if (confirm(`¿Borrar TODAS las ${turnosCliente.length} reservas de ${cliente.nombre} en la app y Google Calendar? No se puede deshacer.`)) {
+                        if (confirm(`¿Borrar TODAS las ${turnosCliente.length} reservas (incluyendo recurrencias) de ${cliente.nombre} en la app y Google Calendar? No se puede deshacer.`)) {
                           deleteAllTurnosMutation.mutate(cliente.nombre);
                         }
                       }}
