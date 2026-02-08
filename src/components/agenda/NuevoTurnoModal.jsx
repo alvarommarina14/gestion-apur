@@ -214,14 +214,11 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
         };
         const claseCreada = await base44.entities.Clase.create(claseData);
         
-        // Sincronizar clase con Google Calendar
-        try {
-          await base44.functions.invoke('sincronizarClaseGoogleCalendar', { 
-            clase_id: claseCreada.id,
-          });
-        } catch (err) {
-          console.error('Error sincronizando clase con Google Calendar:', err);
-        }
+        // Sincronizar clase con Google Calendar (sin bloquear)
+        base44.functions.invoke('sincronizarClaseGoogleCalendar', { 
+          clase_id: claseCreada.id,
+        })
+          .catch(err => console.error('Error sincronizando clase con Google Calendar:', err));
       } else {
         // Sincronizar turno de alquiler con Google Calendar (sin bloquear)
         base44.functions.invoke('sincronizarTurnoGoogleCalendar', { turno_id: turnoCreado.id })
