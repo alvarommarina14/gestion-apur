@@ -165,14 +165,20 @@ export default function ClasesConAlumnos({ profesorSeleccionado, onRegistrarPago
                                 <Button
                                   size="sm"
                                   onClick={() => {
-                                    onRegistrarPago({ ...alumno, clase });
+                                    onRegistrarPago({ ...alumno, clase, turnoId: clase.id });
                                     setAlumnoSeleccionado(null);
                                     setClaseSeleccionada(null);
                                   }}
-                                  className="bg-emerald-600 hover:bg-emerald-700 gap-1"
+                                  disabled={clase.pagado}
+                                  className={cn(
+                                    "gap-1",
+                                    clase.pagado 
+                                      ? "bg-emerald-100 text-emerald-700 cursor-not-allowed"
+                                      : "bg-emerald-600 hover:bg-emerald-700"
+                                  )}
                                 >
                                   <DollarSign className="w-3 h-3" />
-                                  Cobrar
+                                  {clase.pagado ? 'Pagado' : 'Cobrar'}
                                 </Button>
                               )}
                             </div>
