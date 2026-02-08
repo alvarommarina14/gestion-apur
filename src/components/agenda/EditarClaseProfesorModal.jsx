@@ -17,27 +17,44 @@ import { es } from 'date-fns/locale';
 
 export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) {
   const queryClient = useQueryClient();
-  const [deleteMode, setDeleteMode] = useState(null); // null, 'este-dia', 'todas'
+  const [deleteMode, setDeleteMode] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [user, setUser] = React.useState(null);
+
+  React.useEffect(() => {
+    if (open) {
+      base44.auth.me().then(setUser).catch(console.error);
+    }
+  }, [open]);
+
+  // Determinar si es una clase o un turno
+  const isClase = turno?.alumnos_ids?.length > 0 || turno?.alumnos_nombres?.length > 0;
+  const isRecurrente = isClase ? turno?.es_recurrente : turno?.repeticion_semanal;
 
   const handleEliminarEsteDia = async () => {
     if (!turno) return;
     setIsDeleting(true);
 
     try {
-      // Cambiar estado de la clase a cancelada
-      await base44.entities.Clase.update(turno.id, {
-        estado: 'cancelada_anticipada',
-        cancelado_por: 'profesor',
-      });
+      if (isClase) {
+        // Eliminar clase
+        await base44.entities.Clase.update(turno.id, {
+          estado: 'cancelada_anticipada',
+          cancelado_por: 'profesor',
+        });
+      } else {
+        // Eliminar solo este turno (crear uno nuevo con estado cancelado o eliminar)
+        await base44.entities.TurnoCancha.update(turno.id, {
+          estado: 'cancelado',
+        });
+      }
 
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['clases'] });
-      
       onOpenChange(false);
     } catch (error) {
-      console.error('Error al cancelar clase:', error);
-      alert('Error al cancelar la clase');
+      console.error('Error al cancelar:', error);
+      alert('Error al cancelar');
     } finally {
       setIsDeleting(false);
       setDeleteMode(null);
@@ -49,33 +66,51 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
     setIsDeleting(true);
 
     try {
-      // Obtener todas las clases recurrentes
-      const clases = await base44.entities.Clase.filter({
-        serie_recurrente_id: turno.serie_recurrente_id,
-      });
+      if (isClase) {
+        // Obtener todas las clases recurrentes
+        const clases = await base44.entities.Clase.filter({
+          serie_recurrente_id: turno.serie_recurrente_id,
+        });
 
-      // Cancelar todas desde esta fecha en adelante
-      const clasesAActualizar = clases.filter(
-        c => new Date(c.fecha) >= new Date(turno.fecha)
-      );
+        const clasesAActualizar = clases.filter(
+          c => new Date(c.fecha) >= new Date(turno.fecha)
+        );
 
-      // Actualizar todas las clases
-      await Promise.all(
-        clasesAActualizar.map(clase =>
-          base44.entities.Clase.update(clase.id, {
-            estado: 'cancelada_anticipada',
-            cancelado_por: 'profesor',
-          })
-        )
-      );
+        await Promise.all(
+          clasesAActualizar.map(clase =>
+            base44.entities.Clase.update(clase.id, {
+              estado: 'cancelada_anticipada',
+              cancelado_por: 'profesor',
+            })
+          )
+        );
+      } else {
+        // Obtener todos los turnos recurrentes
+        const turnos = await base44.entities.TurnoCancha.filter({
+          cliente: turno.cliente,
+          cancha: turno.cancha,
+          repeticion_semanal: true,
+        });
+
+        const turnosAActualizar = turnos.filter(
+          t => new Date(t.fecha) >= new Date(turno.fecha) && t.hora_inicio === turno.hora_inicio
+        );
+
+        await Promise.all(
+          turnosAActualizar.map(t =>
+            base44.entities.TurnoCancha.update(t.id, {
+              estado: 'cancelado',
+            })
+          )
+        );
+      }
 
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['clases'] });
-      
       onOpenChange(false);
     } catch (error) {
-      console.error('Error al cancelar clases recurrentes:', error);
-      alert('Error al cancelar las clases');
+      console.error('Error al cancelar:', error);
+      alert('Error al cancelar');
     } finally {
       setIsDeleting(false);
       setDeleteMode(null);
