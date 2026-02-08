@@ -119,9 +119,10 @@ Deno.serve(async (req) => {
 
     const resultado = {
       total: eventos.length,
+      recurrentesSemanal: totalRecurrentes,
       eliminados: eliminados,
       errores: errores,
-      mensaje: `Se eliminaron ${eliminados} eventos del calendario`
+      mensaje: `Se encontraron ${totalRecurrentes} eventos recurrentes semanales y se eliminaron ${eliminados}`
     };
 
     console.log('🎉 Operación completada:', resultado);
