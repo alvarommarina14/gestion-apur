@@ -101,6 +101,51 @@ export default function RecordatoriosPage() {
           />
         </div>
         
+        {/* Recordatorios por profesor */}
+        {recordatoriosPorProfesor.length > 0 && (
+          <Card>
+            <CardHeader className="pb-3 border-b">
+              <CardTitle className="text-lg">Recordatorios por profesor</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4">
+              <div className="space-y-3">
+                {recordatoriosPorProfesor.map((grupo) => {
+                  const profesor = recordatorios.find(r => {
+                    const alumno = alumnos.find(a => a.id === r.alumno_id);
+                    return alumno?.profesor_id === grupo.profesor_id;
+                  });
+                  const alumno = profesor ? alumnos.find(a => a.id === profesor.alumno_id) : null;
+                  const profesorData = alumno ? { id: grupo.profesor_id, nombre: alumno.profesor_nombre } : null;
+                  
+                  return (
+                    <div key={grupo.profesor_id} className="p-4 rounded-lg border bg-white hover:shadow-sm transition-shadow flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-slate-800">{profesorData?.nombre || 'Profesor desconocido'}</p>
+                        <p className="text-sm text-slate-500">
+                          {grupo.recordatorios.length} recordatorio{grupo.recordatorios.length !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => {
+                          if (confirm(`¿Eliminar todos los ${grupo.recordatorios.length} recordatorios de este profesor?`)) {
+                            deleteMutation.mutate(grupo.profesor_id);
+                          }
+                        }}
+                        disabled={deleteMutation.isPending}
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        {deleteMutation.isPending ? 'Eliminando...' : 'Eliminar todo'}
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
         {/* Recordatorios pendientes */}
          <RecordatoriosPendientes compact={false} />
       </div>
