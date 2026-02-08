@@ -17,6 +17,7 @@ import {
 import VistaCalendarioCancha from '@/components/agenda/VistaCalendarioCancha';
 import CalendarioCompleto from '@/components/agenda/CalendarioCompleto';
 import NuevoTurnoModal from '@/components/agenda/NuevoTurnoModal';
+import EditarClaseProfesorModal from '@/components/agenda/EditarClaseProfesorModal';
 import { cn } from '@/lib/utils';
 
 export default function Agenda() {
