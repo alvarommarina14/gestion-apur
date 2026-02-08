@@ -598,180 +598,265 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Fecha</Label>
-          <Input
-            type="date"
-            value={formData.fecha}
-            onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
-            required
-          />
+      {turno && formData.tipo_turno === 'clase' ? (
+        // Vista simplificada para editar turno de clase existente
+        <div className="space-y-4">
+          <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 space-y-3">
+            <h3 className="font-semibold text-slate-900">Información del Turno</h3>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-slate-600">Fecha</p>
+                <p className="font-medium text-slate-900">{format(parseISO(formData.fecha), "d 'de' MMMM", { locale: es })}</p>
+              </div>
+              <div>
+                <p className="text-slate-600">Hora</p>
+                <p className="font-medium text-slate-900">{formData.hora_inicio} - {calcularHoraFin(formData.hora_inicio, formData.duracion)}</p>
+              </div>
+              <div>
+                <p className="text-slate-600">Cancha</p>
+                <p className="font-medium text-slate-900">{formData.cancha}</p>
+              </div>
+              <div>
+                <p className="text-slate-600">Duración</p>
+                <p className="font-medium text-slate-900">{formData.duracion} min</p>
+              </div>
+              <div className="col-span-2">
+                <p className="text-slate-600">Cliente</p>
+                <p className="font-medium text-slate-900">{formData.cliente}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+            <p className="text-sm font-medium text-slate-700 mb-3">Opciones de eliminación:</p>
+            <div className="flex flex-col gap-2">
+              {tieneRepeticionSemanal && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    if (confirm('¿Eliminar solo este turno de hoy?')) {
+                      deleteMutation.mutate({ id: turno.id, eliminarSerie: false });
+                    }
+                  }}
+                  className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 w-full justify-start"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Eliminar solo para hoy
+                </Button>
+              )}
+              {tieneRepeticionSemanal && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    if (confirm('¿Eliminar TODA la serie de turnos recurrentes (hasta 52 semanas)?')) {
+                      deleteMutation.mutate({ id: turno.id, eliminarSerie: true });
+                    }
+                  }}
+                  className="text-rose-700 hover:text-rose-800 hover:bg-rose-50 border-rose-300 w-full justify-start"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Eliminar toda la serie semanal
+                </Button>
+              )}
+              {!tieneRepeticionSemanal && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    if (confirm('¿Eliminar este turno?')) {
+                      deleteMutation.mutate({ id: turno.id, eliminarSerie: false });
+                    }
+                  }}
+                  className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 w-full justify-start"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Eliminar turno
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
-        <div className="space-y-2">
-           <Label>Cancha</Label>
+      ) : (
+        // Formulario completo para crear o editar turnos de alquiler
+        <>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Fecha</Label>
+              <Input
+                type="date"
+                value={formData.fecha}
+                onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+               <Label>Cancha</Label>
+                <Select
+                  value={formData.cancha}
+                  onValueChange={(v) => setFormData({ ...formData, cancha: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Cancha 1</SelectItem>
+                    <SelectItem value="2">Cancha 2</SelectItem>
+                    <SelectItem value="3">Cancha 3</SelectItem>
+                    <SelectItem value="4">Cancha 4</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label>Hora inicio</Label>
+              <Select
+                value={formData.hora_inicio}
+                onValueChange={(v) => setFormData({ ...formData, hora_inicio: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="max-h-60">
+                  {Array.from({ length: 28 }, (_, i) => {
+                    const h = Math.floor(i / 2) + 8;
+                    const m = i % 2 === 0 ? '00' : '30';
+                    if (h > 21 || (h === 21 && m === '30')) return null;
+                    return `${h.toString().padStart(2, '0')}:${m}`;
+                  }).filter(Boolean).map(hora => (
+                    <SelectItem key={hora} value={hora}>{hora}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Duración</Label>
+              <Select
+                value={formData.duracion.toString()}
+                onValueChange={(v) => setFormData({ ...formData, duracion: Number(v) })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="60">60 min</SelectItem>
+                  <SelectItem value="90">90 min</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Hora fin</Label>
+              <Input
+                value={calcularHoraFin(formData.hora_inicio, formData.duracion)}
+                disabled
+                className="bg-slate-50"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Cliente / Nombre</Label>
             <Select
-              value={formData.cancha}
-              onValueChange={(v) => setFormData({ ...formData, cancha: v })}
+              value={formData.cliente}
+              onValueChange={(v) => setFormData({ ...formData, cliente: v })}
             >
               <SelectTrigger>
-                <SelectValue />
+                <SelectValue placeholder="Seleccionar cliente o ingresar nombre" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="1">Cancha 1</SelectItem>
-                <SelectItem value="2">Cancha 2</SelectItem>
-                <SelectItem value="3">Cancha 3</SelectItem>
-                <SelectItem value="4">Cancha 4</SelectItem>
+                {clientes.length > 0 && (
+                  <>
+                    {clientes.map(cliente => (
+                      <SelectItem key={cliente.id} value={cliente.nombre}>
+                        {cliente.nombre}
+                      </SelectItem>
+                    ))}
+                  </>
+                )}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-slate-500 mt-1">O ingresa un nombre nuevo manualmente</p>
+            <Input
+              value={formData.cliente}
+              onChange={(e) => setFormData({ ...formData, cliente: e.target.value })}
+              placeholder="Nombre del cliente"
+              required
+              className="mt-2"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Modalidad de Alquiler *</Label>
+            <Select
+              value={formData.modalidad_alquiler}
+              onValueChange={(v) => setFormData({ ...formData, modalidad_alquiler: v })}
+            >
+              <SelectTrigger className={!formData.modalidad_alquiler ? 'border-rose-300' : ''}>
+                <SelectValue placeholder="Seleccionar modalidad" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="abono">Abono</SelectItem>
+                <SelectItem value="suelto">Suelto</SelectItem>
               </SelectContent>
             </Select>
           </div>
-      </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <Label>Hora inicio</Label>
-          <Select
-            value={formData.hora_inicio}
-            onValueChange={(v) => setFormData({ ...formData, hora_inicio: v })}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="max-h-60">
-              {Array.from({ length: 28 }, (_, i) => {
-                const h = Math.floor(i / 2) + 8;
-                const m = i % 2 === 0 ? '00' : '30';
-                if (h > 21 || (h === 21 && m === '30')) return null;
-                return `${h.toString().padStart(2, '0')}:${m}`;
-              }).filter(Boolean).map(hora => (
-                <SelectItem key={hora} value={hora}>{hora}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label>Duración</Label>
-          <Select
-            value={formData.duracion.toString()}
-            onValueChange={(v) => setFormData({ ...formData, duracion: Number(v) })}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="60">60 min</SelectItem>
-              <SelectItem value="90">90 min</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label>Hora fin</Label>
-          <Input
-            value={calcularHoraFin(formData.hora_inicio, formData.duracion)}
-            disabled
-            className="bg-slate-50"
-          />
-        </div>
-      </div>
+          <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+            <div>
+              <Label className="font-medium text-slate-800">Pagado</Label>
+              <p className="text-xs text-slate-500 mt-0.5">Marcar si el turno ya está pago</p>
+            </div>
+            <Switch
+              checked={formData.pagado}
+              onCheckedChange={(checked) => setFormData({ ...formData, pagado: checked })}
+            />
+          </div>
 
-      <div className="space-y-2">
-        <Label>Cliente / Nombre</Label>
-        <Select
-          value={formData.cliente}
-          onValueChange={(v) => setFormData({ ...formData, cliente: v })}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Seleccionar cliente o ingresar nombre" />
-          </SelectTrigger>
-          <SelectContent>
-            {clientes.length > 0 && (
-              <>
-                {clientes.map(cliente => (
-                  <SelectItem key={cliente.id} value={cliente.nombre}>
-                    {cliente.nombre}
-                  </SelectItem>
-                ))}
-              </>
-            )}
-          </SelectContent>
-        </Select>
-        <p className="text-xs text-slate-500 mt-1">O ingresa un nombre nuevo manualmente</p>
-        <Input
-          value={formData.cliente}
-          onChange={(e) => setFormData({ ...formData, cliente: e.target.value })}
-          placeholder="Nombre del cliente"
-          required
-          className="mt-2"
-        />
-      </div>
+          {!formData.pagado && (
+            <div className="space-y-2">
+              <Label>Monto</Label>
+              <Input
+                type="number"
+                value={formData.monto}
+                onChange={(e) => setFormData({ ...formData, monto: e.target.value })}
+                placeholder="0"
+                required
+              />
+            </div>
+          )}
 
-      <div className="space-y-2">
-        <Label>Modalidad de Alquiler *</Label>
-        <Select
-          value={formData.modalidad_alquiler}
-          onValueChange={(v) => setFormData({ ...formData, modalidad_alquiler: v })}
-        >
-          <SelectTrigger className={!formData.modalidad_alquiler ? 'border-rose-300' : ''}>
-            <SelectValue placeholder="Seleccionar modalidad" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="abono">Abono</SelectItem>
-            <SelectItem value="suelto">Suelto</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+          <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div>
+              <Label className="font-medium text-slate-800">Repetición semanal</Label>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Se creará automáticamente el mismo turno cada semana
+              </p>
+            </div>
+            <Switch
+              checked={formData.repeticion_semanal}
+              onCheckedChange={(checked) =>
+                setFormData({ ...formData, repeticion_semanal: checked })
+              }
+            />
+          </div>
 
-      <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
-        <div>
-          <Label className="font-medium text-slate-800">Pagado</Label>
-          <p className="text-xs text-slate-500 mt-0.5">Marcar si el turno ya está pago</p>
-        </div>
-        <Switch
-          checked={formData.pagado}
-          onCheckedChange={(checked) => setFormData({ ...formData, pagado: checked })}
-        />
-      </div>
-
-      {!formData.pagado && (
-        <div className="space-y-2">
-          <Label>Monto</Label>
-          <Input
-            type="number"
-            value={formData.monto}
-            onChange={(e) => setFormData({ ...formData, monto: e.target.value })}
-            placeholder="0"
-            required
-          />
-        </div>
+          <div className="space-y-2">
+            <Label>Notas (opcional)</Label>
+            <Textarea
+              value={formData.notas}
+              onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
+              placeholder="Observaciones..."
+              rows={2}
+            />
+          </div>
+        </>
       )}
 
-      <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
-        <div>
-          <Label className="font-medium text-slate-800">Repetición semanal</Label>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Se creará automáticamente el mismo turno cada semana
-          </p>
-        </div>
-        <Switch
-          checked={formData.repeticion_semanal}
-          onCheckedChange={(checked) =>
-            setFormData({ ...formData, repeticion_semanal: checked })
-          }
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label>Notas (opcional)</Label>
-        <Textarea
-          value={formData.notas}
-          onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
-          placeholder="Observaciones..."
-          rows={2}
-        />
-      </div>
-
       <DialogFooter className="flex-col sm:flex-row gap-2">
-        {turno && tieneRepeticionSemanal && (
+        {turno && !formData.tipo_turno === 'clase' && tieneRepeticionSemanal && (
           <div className="w-full sm:mr-auto flex flex-col gap-2">
             <Button
               type="button"
@@ -801,7 +886,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
             </Button>
           </div>
         )}
-        {turno && !tieneRepeticionSemanal && (
+        {turno && !formData.tipo_turno === 'clase' && !tieneRepeticionSemanal && (
           <Button
             type="button"
             variant="outline"
@@ -819,13 +904,15 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
           Cancelar
         </Button>
-        <Button
-          type="submit"
-          disabled={createMutation.isPending || updateMutation.isPending}
-          className={isProfesor && !turno ? "bg-blue-600 hover:bg-blue-700" : "bg-emerald-600 hover:bg-emerald-700"}
-        >
-          {turno ? 'Actualizar' : (isProfesor ? 'Solicitar turno' : 'Crear turno')}
-        </Button>
+        {!(turno && formData.tipo_turno === 'clase') && (
+          <Button
+            type="submit"
+            disabled={createMutation.isPending || updateMutation.isPending}
+            className={isProfesor && !turno ? "bg-blue-600 hover:bg-blue-700" : "bg-emerald-600 hover:bg-emerald-700"}
+          >
+            {turno ? 'Actualizar' : (isProfesor ? 'Solicitar turno' : 'Crear turno')}
+          </Button>
+        )}
       </DialogFooter>
     </>
   );
