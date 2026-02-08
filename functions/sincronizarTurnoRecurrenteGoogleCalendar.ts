@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
     }
 
     const CALENDAR_ID = 'primary';
-    const accessToken = await base44.connectors.getAccessToken('googlecalendar');
+    const accessToken = await base44.asServiceRole.connectors.getAccessToken('googlecalendar');
 
     // Calcular hora de fin
     if (!turnoInicial.hora_fin) {

@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
     const CALENDAR_ID = 'primary';
     
     // Obtener access token de Google Calendar
-    const accessToken = await base44.connectors.getAccessToken('googlecalendar');
+    const accessToken = await base44.asServiceRole.connectors.getAccessToken('googlecalendar');
 
     // Si la acción es eliminar
     if (action === 'delete') {
