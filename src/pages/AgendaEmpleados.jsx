@@ -24,15 +24,13 @@ export default function AgendaEmpleados() {
     queryFn: () => base44.auth.me(),
   });
 
-  const empleado = user;
-
   const { data: allTurnos = [], isLoading: loadingTurnos } = useQuery({
     queryKey: ['turnos-empleado', today],
     queryFn: () => base44.entities.TurnoCancha.filter({ 
       fecha: today,
       estado: 'activo',
     }),
-    enabled: !!empleado?.id,
+    enabled: !!user,
   });
 
   const { data: allClases = [], isLoading: loadingClases } = useQuery({
@@ -41,7 +39,7 @@ export default function AgendaEmpleados() {
       fecha: today,
       estado: 'programada',
     }),
-    enabled: !!empleado?.id,
+    enabled: !!user,
   });
 
   const isLoading = loadingTurnos || loadingClases;
