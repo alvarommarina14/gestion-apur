@@ -48,6 +48,8 @@ import RegistrarPagoModal from '@/components/modals/RegistrarPagoModal';
 import DetalleAlumnoModal from '@/components/modals/DetalleAlumnoModal';
 import EnviarRecordatorioBtn from '@/components/recordatorios/EnviarRecordatorioBtn';
 import ReporteAlumnoModal from '@/components/alumnos/ReporteAlumnoModal';
+import ListaEsperaPanel from '@/components/alumnos/ListaEsperaPanel';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 
 export default function Alumnos() {
