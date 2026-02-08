@@ -108,6 +108,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
     
     try {
       const alumnosSeleccionados = alumnosActivos.filter(a => formData.alumnos_ids.includes(a.id));
+      const alumnosNombres = alumnosSeleccionados.map(a => a.nombre);
       
       // Si es recurrente, llamar función backend para crear 52 clases en paralelo
       if (formData.repeticion_semanal) {
@@ -118,15 +119,18 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
           tipo: formData.tipo,
           cancha: formData.cancha,
           alumnos_ids: formData.alumnos_ids,
-          alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
+          alumnos_nombres: alumnosNombres,
           precio: formData.precio,
           pagado: formData.pagado,
           notas: formData.notas,
           es_recupero: formData.es_recupero,
           clase_original_id: formData.clase_original_id,
+          sincronizar_calendar: user?.rol === 'admin',
         });
       } else {
         // Crear una sola clase sin repetición
+        const horaFin = calcularHoraFin(formData.hora_inicio, formData.duracion);
+        
         const claseData = {
           fecha: format(formData.fecha, 'yyyy-MM-dd'),
           hora_inicio: formData.hora_inicio,
@@ -135,7 +139,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
           sede: 'Sistema',
           cancha: formData.cancha || '',
           alumnos_ids: formData.alumnos_ids,
-          alumnos_nombres: alumnosSeleccionados.map(a => a.nombre),
+          alumnos_nombres: alumnosNombres,
           precio: formData.precio ? Number(formData.precio) : null,
           estado: 'programada',
           es_recupero: formData.es_recupero,
@@ -148,7 +152,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
 
         const claseCreada = await base44.entities.Clase.create(claseData);
 
-        // Si es admin, crear TurnoCancha
+        // Si es admin, crear TurnoCancha y sincronizar calendar
         if (user?.rol === 'admin') {
           const empleados = await base44.entities.User.list();
           const empleadosIds = empleados.map(e => e.id);
@@ -162,7 +166,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
               hora_fin: horaFin,
               duracion: Number(formData.duracion),
               cancha: formData.cancha || '',
-              cliente: alumnosNombres || 'Clase',
+              cliente: alumnosNombres.join(', ') || 'Clase',
               tipo_turno: 'clase',
               monto: formData.precio ? Number(formData.precio) : 0,
               pagado: formData.pagado,
@@ -170,7 +174,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
               empleados_asignados_emails: empleadosEmails,
               empleados_asignados_nombres: empleadosNombres,
               estado: 'activo',
-              notas: formData.notas || `Clase - ${alumnosNombres}`,
+              notas: formData.notas || `Clase - ${alumnosNombres.join(', ')}`,
             });
           } catch (err) {
             console.error('Error creando TurnoCancha:', err);
