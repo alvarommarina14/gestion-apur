@@ -21,7 +21,7 @@ for (let h = 8; h <= 21; h++) {
 
 const CANCHAS = ['1', '2', '3', '4'];
 
-export default function VistaCalendarioCancha({ turnos = [], recordatorios = [], selectedDate, selectedCancha, fecha, isAdmin, onTurnoClick, isLoading }) {
+export default function VistaCalendarioCancha({ turnos = [], recordatorios = [], selectedDate, selectedCancha, fecha, isAdmin, onTurnoClick, onEditarClase, isLoading }) {
   const [profesorTurnos, setProfesorTurnos] = useState(new Set());
   
   const { data: user } = useQuery({
