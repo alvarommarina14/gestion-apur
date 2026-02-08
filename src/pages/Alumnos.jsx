@@ -116,6 +116,15 @@ export default function Alumnos() {
             Nuevo alumno
           </Button>
         </header>
+
+        {/* Tabs */}
+        <Tabs defaultValue="alumnos" className="w-full">
+          <TabsList>
+            <TabsTrigger value="alumnos">Alumnos</TabsTrigger>
+            <TabsTrigger value="lista-espera">Lista de Espera</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="alumnos" className="space-y-4">
         
         {/* Filters */}
         <Card className="shadow-sm">
