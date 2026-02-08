@@ -453,12 +453,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
          }
        });
 
-       // Solo admins pueden editar
-       if (isProfesor) {
-         setError('Los profesores no pueden editar turnos. Solo pueden crear o eliminar.');
-         return;
-       }
-       updateMutation.mutate({ id: turno.id, data, cambios });
+         updateMutation.mutate({ id: turno.id, data, cambios });
        } else {
        // Si es repetición semanal, crear turnos para 52 semanas
        if (data.repeticion_semanal) {
@@ -778,24 +773,13 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
           Cancelar
         </Button>
-        {!isProfesor && (
-          <Button
-            type="submit"
-            disabled={createMutation.isPending || updateMutation.isPending}
-            className="bg-emerald-600 hover:bg-emerald-700"
-          >
-            {turno ? 'Actualizar' : 'Crear turno'}
-          </Button>
-        )}
-        {isProfesor && !turno && (
-          <Button
-            type="submit"
-            disabled={createMutation.isPending || updateMutation.isPending}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            Solicitar turno (pendiente aprobación)
-          </Button>
-        )}
+        <Button
+          type="submit"
+          disabled={createMutation.isPending || updateMutation.isPending}
+          className={isProfesor && !turno ? "bg-blue-600 hover:bg-blue-700" : "bg-emerald-600 hover:bg-emerald-700"}
+        >
+          {turno ? 'Actualizar' : (isProfesor ? 'Solicitar turno' : 'Crear turno')}
+        </Button>
       </DialogFooter>
     </>
   );
