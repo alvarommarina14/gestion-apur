@@ -21,15 +21,14 @@ export default function AprobacionClases() {
       const clases = await base44.entities.Clase.filter({
         estado_aprobacion: 'pendiente'
       });
-      return clases;
-    },
-  });
-
-  const { data: profesores = {} } = useQuery({
-    queryKey: ['profesores-map'],
-    queryFn: async () => {
-      const profs = await base44.entities.Profesor.list();
-      return profs.reduce((acc, p) => ({ ...acc, [p.id]: p.nombre }), {});
+      // Enriquecer con datos de profesores
+      const profesoresMap = await base44.entities.Profesor.list();
+      const profesorPorId = profesoresMap.reduce((acc, p) => ({ ...acc, [p.id]: p }), {});
+      
+      return clases.map(clase => ({
+        ...clase,
+        profesor_nombre: profesorPorId[clase.profesor_id]?.nombre || 'Desconocido'
+      }));
     },
   });
 
