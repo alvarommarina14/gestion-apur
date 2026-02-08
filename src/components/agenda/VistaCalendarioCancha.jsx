@@ -1,5 +1,7 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { format } from 'date-fns';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, XCircle, Clock, User, DollarSign, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -13,6 +15,21 @@ for (let h = 8; h <= 21; h++) {
 const CANCHAS = ['1', '2', '3', '4'];
 
 export default function VistaCalendarioCancha({ turnos = [], recordatorios = [], selectedDate, selectedCancha, fecha, isAdmin, onTurnoClick, isLoading }) {
+  const [profesorTurnos, setProfesorTurnos] = useState(new Set());
+  
+  const { data: user } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  useEffect(() => {
+    if (user?.profesor_id) {
+      const turnosProfsor = turnos
+        .filter(t => t.tipo_turno === 'clase' && t.profesor_id === user.profesor_id)
+        .map(t => t.id);
+      setProfesorTurnos(new Set(turnosProfsor));
+    }
+  }, [turnos, user?.profesor_id]);
   const turnosPorCanchaHora = useMemo(() => {
     const map = {};
     CANCHAS.forEach(cancha => {
@@ -189,26 +206,30 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
                         }
 
                         // Si es un turno real
-                        const filas = calcularFilas(turno);
-                        
-                        return (
-                          <td
-                            key={cancha}
-                            rowSpan={filas}
-                            className={cn(
-                              'p-2 border-r border-slate-200 align-top',
-                              isAdmin && 'cursor-pointer hover:bg-slate-100'
-                            )}
-                            onClick={() => turno.tipo === 'turno' && onTurnoClick?.(turno)}
-                          >
-                            <div
-                              className={cn(
-                                'h-full rounded-lg border-2 p-3 transition-all',
-                                turno.pagado
-                                  ? 'bg-emerald-50 border-emerald-400'
-                                  : 'bg-rose-50 border-rose-400'
-                              )}
-                            >
+                         const filas = calcularFilas(turno);
+                         const esDelProfesor = profesorTurnos.has(turno.id);
+
+                         return (
+                           <td
+                             key={cancha}
+                             rowSpan={filas}
+                             className={cn(
+                               'p-2 border-r border-slate-200 align-top',
+                               isAdmin && 'cursor-pointer hover:bg-slate-100'
+                             )}
+                             onClick={() => turno.tipo === 'turno' && onTurnoClick?.(turno)}
+                           >
+                             <div
+                               className={cn(
+                                 'h-full rounded-lg border-2 p-3 transition-all',
+                                 esDelProfesor && (turno.pagado
+                                   ? 'bg-blue-100 border-blue-600 ring-2 ring-blue-300'
+                                   : 'bg-blue-50 border-blue-500 ring-2 ring-blue-200'),
+                                 !esDelProfesor && (turno.pagado
+                                   ? 'bg-emerald-50 border-emerald-400'
+                                   : 'bg-rose-50 border-rose-400')
+                               )}
+                             >
                               {/* Header con estado de pago */}
                               <div className="flex items-center justify-between mb-2">
                                 <span className={cn(
