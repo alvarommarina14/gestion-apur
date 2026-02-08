@@ -250,6 +250,10 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente, turno
             </div>
           </TabsContent>
 
+          <TabsContent value="cobros" className="flex-1 overflow-y-auto px-1">
+            <SeccionCobros cliente={cliente} />
+          </TabsContent>
+
           <TabsContent value="historial" className="flex-1 overflow-y-auto px-1">
             {turnosCliente.length === 0 ? (
               <div className="py-12 text-center text-slate-500">
