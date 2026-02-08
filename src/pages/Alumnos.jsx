@@ -340,6 +340,5 @@ export default function Alumnos() {
         alumno={reporteModal.alumno}
       />
     </div>
-    </div>
   );
 }
