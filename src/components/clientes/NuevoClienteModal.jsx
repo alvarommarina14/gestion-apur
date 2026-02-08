@@ -29,7 +29,7 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
     telefono: '',
     email: '',
     clasificacion: 'ocasional',
-    tipo_cliente: 'clase',
+    tipo_cliente: 'alquiler',
     notas: '',
   });
 
@@ -40,7 +40,7 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
         telefono: '',
         email: '',
         clasificacion: 'ocasional',
-        tipo_cliente: 'clase',
+        tipo_cliente: 'alquiler',
         notas: '',
       });
       setSuccess(false);
@@ -139,19 +139,9 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
             </div>
             <div className="space-y-2">
               <Label>Tipo</Label>
-              <Select
-                value={formData.tipo_cliente}
-                onValueChange={(v) => setFormData({ ...formData, tipo_cliente: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="alquiler">Alquiler Cancha</SelectItem>
-                  <SelectItem value="clase">Clase</SelectItem>
-                  <SelectItem value="abono">Abono</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="h-9 px-3 py-2 rounded-md border border-input bg-background flex items-center text-sm">
+                Alquiler Cancha
+              </div>
             </div>
           </div>
 
