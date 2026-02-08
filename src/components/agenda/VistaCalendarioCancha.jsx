@@ -3,7 +3,14 @@ import { format } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, XCircle, Clock, User, DollarSign, Bell } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, User, DollarSign, Bell, MoreVertical } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
 const HORARIOS = [];
