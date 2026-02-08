@@ -153,15 +153,16 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
             t.tipo_turno === 'clase'
           );
 
-          // Eliminar cada turno
+          // Eliminar cada turno de Google Calendar y BD
           for (const t of turnosDeClase) {
-            try {
-              await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
-                turno_id: t.id, 
-                action: 'delete' 
-              });
-            } catch (err) {
-              console.error('Error eliminando turno de GCal:', err);
+            if (t.gcal_event_id) {
+              try {
+                await base44.functions.invoke('borrarEventosGoogleCalendar', { 
+                  event_id: t.gcal_event_id 
+                });
+              } catch (err) {
+                console.error('Error eliminando turno de GCal:', err);
+              }
             }
             try {
               await base44.entities.TurnoCancha.delete(t.id);
