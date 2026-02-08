@@ -127,9 +127,9 @@ export default function AgendaEmpleados() {
           <p className="text-slate-500 text-xs sm:text-sm">
             {format(new Date(), "EEEE d 'de' MMMM, yyyy", { locale: es })}
           </p>
-          {empleado && (
+          {user && (
             <p className="text-emerald-600 text-sm font-medium mt-1">
-              👤 {empleado.full_name}
+              👤 {user.full_name}
             </p>
           )}
         </header>
