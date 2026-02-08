@@ -163,9 +163,9 @@ export default function Tareas() {
         <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
         {/* Header */}
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Tareas</h1>
-            <p className="text-slate-500 text-sm">
+         <div>
+           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">Tareas</h1>
+           <p className="text-slate-500 dark:text-slate-400 text-sm">
               {user?.role === 'admin' ? 'Crear y administrar tareas de los empleados' : 'Tus tareas asignadas'}
             </p>
           </div>
