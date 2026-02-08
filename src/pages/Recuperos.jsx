@@ -12,7 +12,9 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
-  User
+  User,
+  Edit,
+  Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,7 +36,20 @@ export default function Recuperos() {
   const [search, setSearch] = useState('');
   const [filterEstado, setFilterEstado] = useState('todos');
   const [nuevaClaseModal, setNuevaClaseModal] = useState({ open: false, recupero: null });
+  const [editModal, setEditModal] = useState({ open: false, recupero: null });
+  const [editForm, setEditForm] = useState({});
+  const [user, setUser] = useState(null);
   
+  // Fetch user
+  const { data: userData } = useQuery({
+    queryKey: ['user'],
+    queryFn: async () => {
+      const u = await base44.auth.me();
+      setUser(u);
+      return u;
+    },
+  });
+
   const { data: recuperos = [], isLoading } = useQuery({
     queryKey: ['recuperos'],
     queryFn: () => base44.entities.Recupero.list('-created_date'),
@@ -84,6 +99,36 @@ export default function Recuperos() {
       fecha: new Date().toISOString(),
     });
     
+    queryClient.invalidateQueries({ queryKey: ['recuperos'] });
+    queryClient.invalidateQueries({ queryKey: ['alumnos'] });
+  };
+
+  const handleEditRecupero = (recupero) => {
+    setEditForm({
+      motivo: recupero.motivo,
+      notas: recupero.notas || '',
+    });
+    setEditModal({ open: true, recupero });
+  };
+
+  const handleSaveEdit = async () => {
+    await base44.entities.Recupero.update(editModal.recupero.id, editForm);
+    queryClient.invalidateQueries({ queryKey: ['recuperos'] });
+    setEditModal({ open: false, recupero: null });
+  };
+
+  const handleDeleteRecupero = async (recupero) => {
+    if (!confirm(`¿Eliminar el recupero de ${recupero.alumno_nombre}?`)) return;
+    
+    // Revertir clases a recuperar
+    const alumnos = await base44.entities.Alumno.filter({ id: recupero.alumno_id });
+    if (alumnos.length > 0) {
+      await base44.entities.Alumno.update(recupero.alumno_id, {
+        clases_a_recuperar: (alumnos[0].clases_a_recuperar || 0) + 1,
+      });
+    }
+    
+    await base44.entities.Recupero.delete(recupero.id);
     queryClient.invalidateQueries({ queryKey: ['recuperos'] });
     queryClient.invalidateQueries({ queryKey: ['alumnos'] });
   };
@@ -227,25 +272,44 @@ export default function Recuperos() {
                         </div>
                       </div>
                       
-                      {recupero.estado === 'pendiente' && (
+                      {(user?.rol === 'admin' || user?.rol === 'profesor') && (
                         <div className="flex items-center gap-2">
                           <Button
                             size="sm"
                             variant="outline"
-                            className="text-rose-600 border-rose-200 hover:bg-rose-50"
-                            onClick={() => handleMarcarPerdido(recupero)}
+                            onClick={() => handleEditRecupero(recupero)}
                           >
-                            <XCircle className="w-4 h-4 mr-1" />
-                            Perdido
+                            <Edit className="w-4 h-4" />
                           </Button>
                           <Button
                             size="sm"
-                            className="bg-emerald-600 hover:bg-emerald-700"
-                            onClick={() => setNuevaClaseModal({ open: true, recupero })}
+                            variant="outline"
+                            className="text-rose-600 border-rose-200 hover:bg-rose-50"
+                            onClick={() => handleDeleteRecupero(recupero)}
                           >
-                            <Calendar className="w-4 h-4 mr-1" />
-                            Programar
+                            <Trash2 className="w-4 h-4" />
                           </Button>
+                          {recupero.estado === 'pendiente' && (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-rose-600 border-rose-200 hover:bg-rose-50"
+                                onClick={() => handleMarcarPerdido(recupero)}
+                              >
+                                <XCircle className="w-4 h-4 mr-1" />
+                                Perdido
+                              </Button>
+                              <Button
+                                size="sm"
+                                className="bg-emerald-600 hover:bg-emerald-700"
+                                onClick={() => setNuevaClaseModal({ open: true, recupero })}
+                              >
+                                <Calendar className="w-4 h-4 mr-1" />
+                                Programar
+                              </Button>
+                            </>
+                          )}
                         </div>
                       )}
                     </div>
@@ -263,6 +327,62 @@ export default function Recuperos() {
         </div>
       </div>
       
+      {/* Modal editar recupero */}
+      {editModal.recupero && (
+        <div className={cn(
+          'fixed inset-0 z-50 flex items-center justify-center',
+          editModal.open ? 'visible' : 'invisible'
+        )}>
+          <div 
+            className={cn(
+              'absolute inset-0 bg-black/50 transition-opacity duration-200',
+              editModal.open ? 'opacity-100' : 'opacity-0'
+            )}
+            onClick={() => setEditModal({ open: false, recupero: null })}
+          />
+          <Card className={cn(
+            'relative w-full max-w-md mx-4 transition-all duration-200',
+            editModal.open ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+          )}>
+            <CardHeader>
+              <CardTitle>Editar Recupero</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Motivo</label>
+                <Select value={editForm.motivo} onValueChange={(v) => setEditForm({...editForm, motivo: v})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cancelacion_alumno">Cancelación alumno</SelectItem>
+                    <SelectItem value="cancelacion_profesor">Cancelación profesor</SelectItem>
+                    <SelectItem value="clima">Clima</SelectItem>
+                    <SelectItem value="otro">Otro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Notas</label>
+                <Input
+                  value={editForm.notas}
+                  onChange={(e) => setEditForm({...editForm, notas: e.target.value})}
+                  placeholder="Notas..."
+                />
+              </div>
+              <div className="flex gap-2 justify-end pt-4">
+                <Button variant="outline" onClick={() => setEditModal({ open: false, recupero: null })}>
+                  Cancelar
+                </Button>
+                <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={handleSaveEdit}>
+                  Guardar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Modal */}
       <NuevaClaseModal 
         open={nuevaClaseModal.open}
