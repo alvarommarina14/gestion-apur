@@ -683,6 +683,7 @@ export default function Dashboard() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </PullToRefresh>
   );
 }
