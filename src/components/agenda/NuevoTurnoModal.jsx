@@ -457,6 +457,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
      const solapados = validarSolapamiento(dataConEmpleados);
      if (solapados.length > 0) {
        setError(`Ya existe un turno en Cancha ${dataConEmpleados.cancha} a las ${solapados[0].hora_inicio}`);
+       setIsSubmitting(false);
        return;
      }
 
