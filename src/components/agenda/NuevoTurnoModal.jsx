@@ -302,7 +302,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
         const recordatorioBase = recordatorios[0];
         
         if (recordatorioBase && recordatorioBase.repeticion_semanal) {
-          // Buscar todos los turnos con las mismas características (cliente, cancha, hora, día de la semana)
+          // Buscar todos los turnos con las mismas características
           const todosTurnos = await base44.entities.TurnoCancha.list();
           const turnosRelacionados = todosTurnos.filter(t => 
             t.cliente === turnoData.cliente &&
@@ -313,73 +313,50 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
 
           // Eliminar todos los turnos relacionados
           for (const turnoRel of turnosRelacionados) {
-            // Eliminar de Google Calendar
+            // Eliminar recordatorios primero
+            const recsRel = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: turnoRel.id });
+            for (const rec of recsRel) {
+              await base44.entities.RecordatorioCancha.delete(rec.id);
+            }
+
+            // Eliminar turno de la BD
+            await base44.entities.TurnoCancha.delete(turnoRel.id);
+            
+            // Intentar eliminar de Google Calendar (sin bloquear si falla)
             try {
               await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
                 turno_id: turnoRel.id, 
                 action: 'delete' 
               });
             } catch (err) {
-              console.error('Error eliminando de Google Calendar:', err);
+              console.log('Turno ya eliminado de Calendar o no existía');
             }
-
-            // Eliminar recordatorios
-            const recsRel = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: turnoRel.id });
-            for (const rec of recsRel) {
-              await base44.entities.RecordatorioCancha.delete(rec.id);
-            }
-
-            // Log de auditoría
-            await base44.entities.LogAuditoria.create({
-              entidad: 'TurnoCancha',
-              entidad_id: turnoRel.id,
-              entidad_nombre: `${turnoRel.cliente} - Cancha ${turnoRel.cancha}`,
-              accion: 'eliminar',
-              motivo: 'Turno eliminado desde Agenda (serie completa)',
-              fecha: new Date().toISOString(),
-            });
-
-            // Eliminar turno
-            await base44.entities.TurnoCancha.delete(turnoRel.id);
           }
         }
       } else {
         // Eliminar solo este turno
-        // Eliminar de Google Calendar primero (antes de borrar de la BD)
-        try {
-          await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
-            turno_id: id, 
-            action: 'delete' 
-          });
-        } catch (err) {
-          console.error('Error eliminando de Google Calendar:', err);
-          // Continuar con la eliminación aunque falle Calendar
-        }
-
-        if (turnoData) {
-          await base44.entities.LogAuditoria.create({
-            entidad: 'TurnoCancha',
-            entidad_id: id,
-            entidad_nombre: `${turnoData.cliente} - Cancha ${turnoData.cancha}`,
-            accion: 'eliminar',
-            motivo: 'Turno eliminado desde Agenda',
-            fecha: new Date().toISOString(),
-          });
-        }
-
         const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: id });
         for (const rec of recordatorios) {
           await base44.entities.RecordatorioCancha.delete(rec.id);
         }
 
         await base44.entities.TurnoCancha.delete(id);
+        
+        // Intentar eliminar de Google Calendar (sin bloquear si falla)
+        try {
+          await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
+            turno_id: id, 
+            action: 'delete' 
+          });
+        } catch (err) {
+          console.log('Turno ya eliminado de Calendar o no existía');
+        }
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha-push'] });
-      queryClient.invalidateQueries({ queryKey: ['auditoria'] });
       onOpenChange(false);
     },
   });
