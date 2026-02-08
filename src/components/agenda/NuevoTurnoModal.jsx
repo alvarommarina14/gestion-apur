@@ -617,15 +617,6 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
         </Select>
       </div>
 
-      <div className="space-y-2">
-        <Label>Profesor (opcional)</Label>
-        <Input
-          value={formData.profesor}
-          onChange={(e) => setFormData({ ...formData, profesor: e.target.value })}
-          placeholder="Nombre del profesor"
-        />
-      </div>
-
       <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
         <div>
           <Label className="font-medium text-slate-800">Pagado</Label>
