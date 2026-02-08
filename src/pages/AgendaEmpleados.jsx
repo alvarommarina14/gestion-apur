@@ -19,27 +19,27 @@ export default function AgendaEmpleados() {
   const [modalTurnoOpen, setModalTurnoOpen] = useState(false);
   const [modalClaseOpen, setModalClaseOpen] = useState(false);
 
-  const { data: user } = useQuery({
+  const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ['me'],
     queryFn: () => base44.auth.me(),
   });
 
   const { data: allTurnos = [], isLoading: loadingTurnos } = useQuery({
-    queryKey: ['turnos-empleado', today],
-    queryFn: () => base44.entities.TurnoCancha.filter({ 
-      fecha: today,
-      estado: 'activo',
-    }),
-    enabled: !!user,
+    queryKey: ['turnos-empleado', today, user?.id],
+    queryFn: async () => {
+      const turnos = await base44.entities.TurnoCancha.list();
+      return turnos.filter(t => t.fecha === today && t.estado === 'activo');
+    },
+    enabled: !!user?.id,
   });
 
   const { data: allClases = [], isLoading: loadingClases } = useQuery({
-    queryKey: ['clases-empleado', today],
-    queryFn: () => base44.entities.Clase.filter({ 
-      fecha: today,
-      estado: 'programada',
-    }),
-    enabled: !!user,
+    queryKey: ['clases-empleado', today, user?.id],
+    queryFn: async () => {
+      const clases = await base44.entities.Clase.list();
+      return clases.filter(c => c.fecha === today && c.estado === 'programada');
+    },
+    enabled: !!user?.id,
   });
 
   const isLoading = loadingTurnos || loadingClases;
