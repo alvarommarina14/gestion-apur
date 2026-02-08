@@ -172,17 +172,17 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
                 onClick={() => setDeleteMode('este-dia')}
               >
                 <Trash2 className="w-4 h-4 mr-2" />
-                Cancelar solo esta clase
+                Cancelar solo {isClase ? 'esta clase' : 'este turno'}
               </Button>
 
-              {turno.es_recurrente && (
+              {isRecurrente && (
                 <Button
                   variant="outline"
                   className="w-full justify-start text-rose-600 hover:bg-rose-50 hover:text-rose-700"
                   onClick={() => setDeleteMode('todas')}
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
-                  Cancelar esta y todas las futuras
+                  Cancelar {isClase ? 'esta y todas las futuras' : 'este y todos los futuros'}
                 </Button>
               )}
             </div>
