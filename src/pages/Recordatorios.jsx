@@ -101,6 +101,30 @@ export default function RecordatoriosPage() {
           />
         </div>
         
+        {/* Recordatorios Enviados - Limpiar rápido */}
+        {stats.enviados > 0 && (
+          <Card className="border-amber-200 bg-amber-50">
+            <CardContent className="pt-6 flex items-center justify-between">
+              <div>
+                <p className="font-medium text-slate-800">Limpiar recordatorios enviados</p>
+                <p className="text-sm text-slate-500">{stats.enviados} recordatorio{stats.enviados !== 1 ? 's' : ''} para eliminar</p>
+              </div>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (confirm(`¿Eliminar los ${stats.enviados} recordatorios enviados?`)) {
+                    deleteMutation.mutate('enviados');
+                  }
+                }}
+                disabled={deleteMutation.isPending}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                {deleteMutation.isPending ? 'Eliminando...' : 'Eliminar enviados'}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+        
         {/* Recordatorios por profesor */}
         {recordatoriosPorProfesor.length > 0 && (
           <Card>
