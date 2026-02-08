@@ -92,6 +92,8 @@ export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null, pr
     setLoading(true);
     
     try {
+      const user = await base44.auth.me();
+      
       const data = {
         nombre: formData.nombre,
         whatsapp: formData.whatsapp,
@@ -130,8 +132,11 @@ export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null, pr
         data.estado_mes_actual = 'pendiente';
         data.total_clases_asistidas = 0;
         
+        // Usar profesor_id pasado o del usuario actual si es profesor
         if (profesorId) {
           data.profesor_id = profesorId;
+        } else if (user?.rol === 'profesor' && user?.profesor_id) {
+          data.profesor_id = user.profesor_id;
         }
         
         await base44.entities.Alumno.create(data);
