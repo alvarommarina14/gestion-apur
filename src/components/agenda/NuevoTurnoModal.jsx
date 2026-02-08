@@ -286,12 +286,9 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
       };
       await base44.entities.TurnoCancha.update(id, turnoData);
       
-      // Sincronizar con Google Calendar
-      try {
-        await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { turno_id: id });
-      } catch (err) {
-        console.error('Error sincronizando con Google Calendar:', err);
-      }
+      // Sincronizar con Google Calendar (sin bloquear)
+      base44.functions.invoke('sincronizarTurnoGoogleCalendar', { turno_id: id })
+        .catch(err => console.error('Error sincronizando con Google Calendar:', err));
       
       const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: id });
       if (recordatorios.length > 0) {
