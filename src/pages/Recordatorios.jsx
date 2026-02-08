@@ -1,46 +1,13 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { format, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale';
-import {
-  Bell,
-  Search,
-  Filter,
-  MessageCircle,
-  CheckCircle,
-  Clock,
-  XCircle,
-  Send
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Bell, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import StatusBadge from '@/components/ui/StatusBadge';
 import MetricCard from '@/components/ui/MetricCard';
 import RecordatoriosPendientes from '@/components/recordatorios/RecordatoriosPendientes';
 
 export default function RecordatoriosPage() {
-  const [search, setSearch] = useState('');
-  const [filterEstado, setFilterEstado] = useState('todos');
-  const [filterTipo, setFilterTipo] = useState('todos');
-  
-  const { data: recordatorios = [], isLoading } = useQuery({
+  const { data: recordatorios = [] } = useQuery({
     queryKey: ['recordatorios'],
     queryFn: () => base44.entities.Recordatorio.list('-created_date'),
   });
@@ -52,37 +19,6 @@ export default function RecordatoriosPage() {
     cancelados: recordatorios.filter(r => r.estado === 'cancelado').length,
     total: recordatorios.length,
   }), [recordatorios]);
-  
-  // Filtered
-  const recordatoriosFiltrados = useMemo(() => {
-    return recordatorios.filter(r => {
-      const matchSearch = r.alumno_nombre?.toLowerCase().includes(search.toLowerCase());
-      const matchEstado = filterEstado === 'todos' || r.estado === filterEstado;
-      const matchTipo = filterTipo === 'todos' || r.tipo === filterTipo;
-      return matchSearch && matchEstado && matchTipo;
-    });
-  }, [recordatorios, search, filterEstado, filterTipo]);
-  
-  const formatMoney = (amount) => {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
-      minimumFractionDigits: 0,
-    }).format(amount || 0);
-  };
-  
-  const tipoLabels = {
-    pre_cobro: 'Pre-cobro',
-    moroso: 'Moroso',
-    manual: 'Manual',
-  };
-  
-  const estadoLabels = {
-    pendiente: 'Pendiente',
-    enviado: 'Enviado',
-    cancelado: 'Cancelado',
-    fallido: 'Fallido',
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
