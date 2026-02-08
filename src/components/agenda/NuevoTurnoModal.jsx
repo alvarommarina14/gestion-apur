@@ -398,15 +398,20 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
           );
 
           // Eliminar recordatorios
-          for (const rec of recordatoriosRelacionados) {
-            await base44.entities.RecordatorioCancha.delete(rec.id);
-          }
+           for (const rec of recordatoriosRelacionados) {
+             await base44.entities.RecordatorioCancha.delete(rec.id);
+             console.log(`✅ Recordatorio ${rec.id} eliminado`);
+           }
 
-          // Eliminar turnos
-          for (const turno of turnosRelacionados) {
-            await base44.entities.TurnoCancha.delete(turno.id);
+           // Eliminar turnos
+           for (const turno of turnosRelacionados) {
+             await base44.entities.TurnoCancha.delete(turno.id);
+             console.log(`✅ Turno ${turno.id} eliminado`);
+           }
+           console.log(`✅ Serie completa eliminada: ${recordatoriosRelacionados.length} recordatorios y ${turnosRelacionados.length} turnos`);
+          } else {
+          console.log('❌ No es recurrente o no hay recordatorio. No se eliminó la serie');
           }
-        }
       } else {
         // Eliminar solo este turno
         const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: id });
