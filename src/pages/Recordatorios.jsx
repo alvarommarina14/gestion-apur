@@ -46,11 +46,19 @@ export default function RecordatoriosPage() {
   }), [recordatorios]);
 
   const deleteMutation = useMutation({
-    mutationFn: async (profesorId) => {
-      const recordatoriosAEliminar = recordatorios.filter(rec => {
-        const alumno = alumnos.find(a => a.id === rec.alumno_id);
-        return alumno?.profesor_id === profesorId;
-      });
+    mutationFn: async (target) => {
+      let recordatoriosAEliminar;
+      
+      if (target === 'enviados') {
+        // Eliminar todos los enviados
+        recordatoriosAEliminar = recordatorios.filter(rec => rec.estado === 'enviado');
+      } else {
+        // Eliminar todos de un profesor
+        recordatoriosAEliminar = recordatorios.filter(rec => {
+          const alumno = alumnos.find(a => a.id === rec.alumno_id);
+          return alumno?.profesor_id === target;
+        });
+      }
       
       await Promise.all(
         recordatoriosAEliminar.map(rec => base44.entities.Recordatorio.delete(rec.id))
