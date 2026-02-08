@@ -447,9 +447,10 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
      };
 
      if (dataConEmpleados.tipo_turno === 'alquiler' && !dataConEmpleados.modalidad_alquiler) {
-       setError('Debes seleccionar la modalidad del alquiler (Abono o Suelto)');
-       return;
-     }
+          setError('Debes seleccionar la modalidad del alquiler (Abono o Suelto)');
+          setIsSubmitting(false);
+          return;
+        }
 
      const horaFin = calcularHoraFin(dataConEmpleados.hora_inicio, dataConEmpleados.duracion);
 
