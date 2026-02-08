@@ -72,13 +72,41 @@ Deno.serve(async (req) => {
     console.log(`✅ IDs válidos en BD: ${validEventIds.size}`);
 
     // 4. Identificar eventos a eliminar
+    const now = new Date();
+    
     const eventsToDelete = allEvents.filter(event => {
-      // Si no tiene extended properties con clase_id o turno_id, y no está en validEventIds
-      const hasValidId = validEventIds.has(event.id);
-      const hasClaseId = event.extendedProperties?.private?.clase_id;
-      const hasTurnoId = event.extendedProperties?.private?.turno_id;
+      // Si está en validEventIds, es válido
+      if (validEventIds.has(event.id)) {
+        return false;
+      }
 
-      return !hasValidId && !hasClaseId && !hasTurnoId;
+      // Si tiene extended properties con clase_id o turno_id válidos, es válido
+      const claseId = event.extendedProperties?.private?.clase_id;
+      const turnoId = event.extendedProperties?.private?.turno_id;
+      
+      if (claseId) {
+        const claseExiste = clases.some(c => c.id === claseId);
+        if (claseExiste) return false;
+      }
+      
+      if (turnoId) {
+        const turnoExiste = turnos.some(t => t.id === turnoId);
+        if (turnoExiste) return false;
+      }
+
+      // Si el evento no tiene fecha de inicio o es muy antiguo, eliminar
+      if (!event.start?.dateTime) {
+        return true;
+      }
+
+      const eventDate = new Date(event.start.dateTime);
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      
+      if (eventDate < thirtyDaysAgo) {
+        return true;
+      }
+
+      return true; // Por defecto, si no coincide con nada, eliminar
     });
 
     console.log(`🗑️  Eventos para eliminar: ${eventsToDelete.length}`);
