@@ -37,7 +37,8 @@ import {
   UserCheck,
   UserPlus,
   CheckCircle,
-  Clock
+  Clock,
+  Trash2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
