@@ -119,7 +119,7 @@ export default function Agenda() {
         </header>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-3 gap-3 sm:gap-4">
           <Card className="shadow-sm">
             <CardContent className="pt-4 sm:pt-6 pb-4">
               <div className="text-center">
