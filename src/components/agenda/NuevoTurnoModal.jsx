@@ -333,6 +333,19 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
         }
       }
     },
+    onMutate: async ({ id, data }) => {
+      await queryClient.cancelQueries({ queryKey: ['turnos-cancha'] });
+      const previous = queryClient.getQueryData(['turnos-cancha']);
+      queryClient.setQueryData(['turnos-cancha'], (old) =>
+        (old || []).map(t => t.id === id ? { ...t, ...data } : t)
+      );
+      return { previous };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['turnos-cancha'], context.previous);
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
