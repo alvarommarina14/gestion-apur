@@ -5,7 +5,7 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
-    if (!user || user.role !== 'admin') {
+    if (!user) {
       return Response.json({ error: 'No autorizado' }, { status: 403 });
     }
 
@@ -42,42 +42,33 @@ Deno.serve(async (req) => {
       );
 
       if (!deleteResponse.ok && deleteResponse.status !== 404) {
-        const error = await deleteResponse.text();
-        console.error('Error eliminando de Google Calendar:', error);
+        console.error('Error eliminando turno de Google Calendar');
       }
 
       return Response.json({ success: true, deleted: true });
     }
 
-    // Obtener todos los empleados activos para agregarlos como invitados
-    const empleados = await base44.asServiceRole.entities.Empleado.filter({ activo: true });
-    
+    // Calcular hora de fin
+    if (!turno.hora_fin) {
+      const [h, m] = turno.hora_inicio.split(':').map(Number);
+      const totalMinutos = h * 60 + m + turno.duracion;
+      const horasFin = Math.floor(totalMinutos / 60);
+      const minutosFin = totalMinutos % 60;
+      turno.hora_fin = `${horasFin.toString().padStart(2, '0')}:${minutosFin.toString().padStart(2, '0')}`;
+    }
+
     // Preparar evento para Google Calendar
-    // Construir fecha/hora con offset de zona horaria de Argentina (-03:00)
     const startDateTime = `${turno.fecha}T${turno.hora_inicio}:00-03:00`;
     const endDateTime = `${turno.fecha}T${turno.hora_fin}:00-03:00`;
 
-    // Notificación 10 minutos antes del INICIO del turno
-    const minutosParaNotificar = 10;
-
-    // Filtrar empleados que tengan email_gmail válido
-    const attendees = empleados
-      .filter(emp => emp.email_gmail && emp.email_gmail.trim() !== '')
-      .map(emp => ({
-        email: emp.email_gmail,
-      }));
-
     const evento = {
-      summary: `🎾 Cancha ${turno.cancha} - ${turno.cliente}`,
+      summary: `🏆 Turno de Cancha ${turno.cancha} - ${turno.cliente}`,
       description: `
-Tipo: ${turno.tipo_turno}
-${turno.profesor ? `Profesor: ${turno.profesor}` : ''}
-${turno.modalidad_alquiler ? `Modalidad: ${turno.modalidad_alquiler}` : ''}
+Cliente: ${turno.cliente}
+Cancha: ${turno.cancha}
+Tipo: ${turno.tipo_turno === 'clase' ? 'Clase' : 'Alquiler'}
 Monto: $${turno.monto}
-${turno.pagado ? '✅ Pagado' : '⏳ Pendiente de pago'}
 ${turno.notas ? `Notas: ${turno.notas}` : ''}
-
-🔔 Recordatorio: 10 minutos antes del inicio
       `.trim(),
       start: {
         dateTime: startDateTime,
@@ -88,11 +79,10 @@ ${turno.notas ? `Notas: ${turno.notas}` : ''}
         timeZone: 'America/Argentina/Buenos_Aires',
       },
       location: `Cancha ${turno.cancha}`,
-      ...(attendees.length > 0 && { attendees }),
       reminders: {
         useDefault: false,
         overrides: [
-          { method: 'popup', minutes: 10 },
+          { method: 'popup', minutes: 15 },
         ],
       },
       extendedProperties: {
@@ -100,15 +90,12 @@ ${turno.notas ? `Notas: ${turno.notas}` : ''}
           turno_id: turno_id,
         },
       },
-      guestsCanModify: false,
-      guestsCanInviteOthers: false,
-      guestsCanSeeOtherGuests: true,
     };
 
     let response;
     let eventIdToUse = turno.gcal_event_id;
 
-    // Buscar si ya existe un evento para este turno_id (evitar duplicados)
+    // Buscar si ya existe un evento para este turno
     if (!eventIdToUse) {
       const searchResponse = await fetch(
         `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?privateExtendedProperty=turno_id=${turno_id}`,
@@ -122,21 +109,7 @@ ${turno.notas ? `Notas: ${turno.notas}` : ''}
       if (searchResponse.ok) {
         const searchData = await searchResponse.json();
         if (searchData.items && searchData.items.length > 0) {
-          // Ya existe un evento para este turno, usar su ID
           eventIdToUse = searchData.items[0].id;
-          
-          // Eliminar eventos duplicados si hay más de uno
-          for (let i = 1; i < searchData.items.length; i++) {
-            await fetch(
-              `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events/${searchData.items[i].id}`,
-              {
-                method: 'DELETE',
-                headers: {
-                  'Authorization': `Bearer ${accessToken}`,
-                },
-              }
-            );
-          }
         }
       }
     }
@@ -170,17 +143,8 @@ ${turno.notas ? `Notas: ${turno.notas}` : ''}
     }
 
     if (!response.ok) {
-      const error = await response.text();
-      console.error('Error de Google Calendar:', error);
-      
-      // Marcar como error
-      await base44.asServiceRole.entities.TurnoCancha.update(turno.id, {
-        make_sync_status: 'error',
-        make_error_msg: error,
-        make_last_sync_at: new Date().toISOString(),
-      });
-
-      return Response.json({ error: 'Error al sincronizar con Google Calendar', details: error }, { status: 500 });
+      console.error('Error de Google Calendar:', response.status);
+      return Response.json({ error: 'Error al sincronizar con Google Calendar' }, { status: 500 });
     }
 
     const eventoCreado = await response.json();
@@ -189,14 +153,11 @@ ${turno.notas ? `Notas: ${turno.notas}` : ''}
     await base44.asServiceRole.entities.TurnoCancha.update(turno.id, {
       gcal_event_id: eventoCreado.id,
       make_sync_status: 'sincronizado',
-      make_last_sync_at: new Date().toISOString(),
-      make_error_msg: null,
     });
 
     return Response.json({
       success: true,
       event_id: eventoCreado.id,
-      event_link: eventoCreado.htmlLink,
     });
 
   } catch (error) {
