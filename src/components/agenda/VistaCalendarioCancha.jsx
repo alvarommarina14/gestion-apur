@@ -238,29 +238,48 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
                                )}
                              >
                               {/* Header con estado de pago */}
-                              <div className="flex items-center justify-between mb-2">
-                                <span className={cn(
-                                  'px-2 py-1 rounded-md text-xs font-bold flex items-center gap-1',
-                                  turno.pagado
-                                    ? 'bg-emerald-100 text-emerald-700'
-                                    : 'bg-rose-100 text-rose-700'
-                                )}>
-                                  {turno.pagado ? (
-                                    <>
-                                      <CheckCircle className="w-3 h-3" />
-                                      PAGADO
-                                    </>
-                                  ) : (
-                                    <>
-                                      <XCircle className="w-3 h-3" />
-                                      PENDIENTE
-                                    </>
-                                  )}
-                                </span>
-                                <span className="text-xs font-semibold text-slate-500">
-                                  {turno.duracion} min
-                                </span>
-                              </div>
+                               <div className="flex items-center justify-between mb-2">
+                                 <span className={cn(
+                                   'px-2 py-1 rounded-md text-xs font-bold flex items-center gap-1',
+                                   turno.pagado
+                                     ? 'bg-emerald-100 text-emerald-700'
+                                     : 'bg-rose-100 text-rose-700'
+                                 )}>
+                                   {turno.pagado ? (
+                                     <>
+                                       <CheckCircle className="w-3 h-3" />
+                                       PAGADO
+                                     </>
+                                   ) : (
+                                     <>
+                                       <XCircle className="w-3 h-3" />
+                                       PENDIENTE
+                                     </>
+                                   )}
+                                 </span>
+                                 <div className="flex items-center gap-2">
+                                   <span className="text-xs font-semibold text-slate-500">
+                                     {turno.duracion} min
+                                   </span>
+                                   {isAdmin && turno.tipo_turno === 'clase' && (
+                                     <DropdownMenu>
+                                       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                         <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
+                                           <MoreVertical className="w-3 h-3" />
+                                         </Button>
+                                       </DropdownMenuTrigger>
+                                       <DropdownMenuContent align="end">
+                                         <DropdownMenuItem onClick={(e) => {
+                                           e.stopPropagation();
+                                           onEditarClase?.(turno);
+                                         }}>
+                                           Editar/Cancelar
+                                         </DropdownMenuItem>
+                                       </DropdownMenuContent>
+                                     </DropdownMenu>
+                                   )}
+                                 </div>
+                               </div>
 
                               {/* Contenido principal */}
                               <div className="space-y-2">
