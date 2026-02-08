@@ -454,17 +454,25 @@ export default function Layout({ children, currentPageName }) {
         
         {/* Page content */}
         <main className="pb-20 lg:pb-0">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentPageName}
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              transition={{ duration: 0.3 }}
-            >
-              {children}
-            </motion.div>
-          </AnimatePresence>
+          {/* Desktop: Use animation transition (existing behavior) */}
+          <div className="hidden lg:block">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentPageName}
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ duration: 0.3 }}
+              >
+                {children}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Mobile: Keep pages mounted, toggle visibility via CSS */}
+          <div className="block lg:hidden">
+            {children}
+          </div>
         </main>
       </div>
       
