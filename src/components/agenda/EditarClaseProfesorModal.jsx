@@ -155,16 +155,21 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
           })
         );
       } else {
-        // Obtener todos los turnos recurrentes
-        const turnos = await base44.entities.TurnoCancha.filter({
-          cliente: turno.cliente,
-          cancha: turno.cancha,
-          repeticion_semanal: true,
-        });
+        // Obtener todos los turnos (sin filtrar por repeticion_semanal en el filter inicial)
+        const todosTurnos = await base44.entities.TurnoCancha.list('-fecha', 500);
 
-        const turnosAActualizar = turnos.filter(
-          t => new Date(t.fecha) >= new Date(turno.fecha) && t.hora_inicio === turno.hora_inicio
-        );
+        // Filtrar con criterios más estrictos
+        const turnosAActualizar = todosTurnos.filter(t => {
+          const mismaCancha = t.cancha === turno.cancha;
+          const mismaHora = t.hora_inicio === turno.hora_inicio;
+          const mismoCliente = t.cliente === turno.cliente;
+          const esRecurrente = t.repeticion_semanal === true;
+          const esFuturo = new Date(t.fecha) >= new Date(turno.fecha);
+          const mismoProfesor = t.profesor === turno.profesor;
+          const mismoDiaSemana = new Date(t.fecha).getDay() === new Date(turno.fecha).getDay();
+
+          return mismaCancha && mismaHora && mismoCliente && esRecurrente && esFuturo && mismoProfesor && mismoDiaSemana;
+        });
 
         await Promise.all(
           turnosAActualizar.map(async t => {
