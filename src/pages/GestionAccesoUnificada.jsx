@@ -477,7 +477,7 @@ export default function GestionAccesoUnificada() {
 
       {/* Modal editar empleado */}
       <Dialog open={!!editEmpleado} onOpenChange={() => setEditEmpleado(null)}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Editar: {editEmpleado?.full_name}</DialogTitle>
           </DialogHeader>
@@ -505,6 +505,37 @@ export default function GestionAccesoUnificada() {
                   setEditFormData({ ...editFormData, recibir_notificaciones_cancha: checked })
                 }
               />
+            </div>
+
+            {/* Permisos por secciones específicas */}
+            <div className="border-t pt-4">
+              <Label className="font-semibold mb-3 block">Acceso a secciones</Label>
+              <div className="space-y-3">
+                {[
+                  { id: 'tareas', nombre: 'Tareas', icon: '✅' },
+                  { id: 'agenda_canchas', nombre: 'Agenda de Canchas', icon: '📅' },
+                  { id: 'recordatorios_cancha', nombre: 'Recordatorios', icon: '🔔' },
+                  { id: 'reportes', nombre: 'Reportes', icon: '📊' },
+                ].map(seccion => (
+                  <div key={seccion.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-slate-50">
+                    <Switch
+                      checked={seccionesEmpleado[seccion.id]?.ver || false}
+                      onCheckedChange={(checked) => {
+                        setSeccionesEmpleado({
+                          ...seccionesEmpleado,
+                          [seccion.id]: {
+                            ...(seccionesEmpleado[seccion.id] || {}),
+                            ver: checked,
+                          },
+                        });
+                      }}
+                    />
+                    <Label className="flex-1 cursor-pointer m-0">
+                      {seccion.icon} {seccion.nombre}
+                    </Label>
+                  </div>
+                ))}
+              </div>
             </div>
           </form>
           <DialogFooter>
