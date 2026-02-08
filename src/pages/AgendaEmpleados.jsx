@@ -42,7 +42,7 @@ export default function AgendaEmpleados() {
     enabled: !!user?.id,
   });
 
-  const isLoading = loadingTurnos || loadingClases;
+  const isLoading = userLoading || loadingTurnos || loadingClases;
 
   const turnos = useMemo(() => {
     if (!user?.id) return [];
