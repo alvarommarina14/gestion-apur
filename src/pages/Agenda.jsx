@@ -60,6 +60,8 @@ export default function Agenda() {
   });
 
   const isAdmin = user?.role === 'admin';
+  const isProfesor = user?.role === 'profesor';
+  const canEdit = isAdmin || isProfesor;
 
   const turnosFiltrados = useMemo(() => {
     let filtered = [...turnos];
@@ -107,7 +109,7 @@ export default function Agenda() {
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Agenda de Canchas</h1>
             <p className="text-slate-500 text-sm">Sistema de reservas del club</p>
           </div>
-          {isAdmin && (
+          {canEdit && (
             <Button
               onClick={() => setTurnoModal({ open: true, turno: null })}
               className="bg-emerald-600 hover:bg-emerald-700 h-11 lg:h-10 text-base lg:text-sm active:scale-95 touch-manipulation w-full sm:w-auto"
@@ -233,14 +235,14 @@ export default function Agenda() {
             selectedCancha={selectedCancha}
             fecha={selectedDate}
             isAdmin={isAdmin}
-            onTurnoClick={(turno) => isAdmin && setTurnoModal({ open: true, turno })}
+            onTurnoClick={(turno) => canEdit && setTurnoModal({ open: true, turno })}
             isLoading={isLoading}
           />
         )}
       </div>
 
       {/* Modal */}
-      {isAdmin && (
+      {canEdit && (
         <NuevoTurnoModal
           open={turnoModal.open}
           onOpenChange={(open) => setTurnoModal({ ...turnoModal, open })}
