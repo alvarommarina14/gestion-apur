@@ -737,11 +737,33 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
       </div>
 
       <DialogFooter className="flex-col sm:flex-row gap-2">
-        {turno && (
+        {turno && tieneRepeticionSemanal && (
+          <div className="w-full sm:mr-auto flex flex-col gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleDeleteSolo}
+              className="text-rose-600 hover:text-rose-700 w-full sm:w-auto"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Eliminar solo este turno
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleDeleteSerie}
+              className="text-rose-700 hover:text-rose-800 border-rose-300 w-full sm:w-auto"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Eliminar toda la serie
+            </Button>
+          </div>
+        )}
+        {turno && !tieneRepeticionSemanal && (
           <Button
             type="button"
             variant="outline"
-            onClick={handleDelete}
+            onClick={handleDeleteSolo}
             className="text-rose-600 hover:text-rose-700 sm:mr-auto"
           >
             <Trash2 className="w-4 h-4 mr-2" />
