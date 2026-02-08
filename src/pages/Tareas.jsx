@@ -20,6 +20,12 @@ export default function Tareas() {
   const queryClient = useQueryClient();
   const [modal, setModal] = useState({ open: false, tarea: null });
   const [filtroEstado, setFiltroEstado] = useState('pendiente');
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleRefresh = async () => {
+    queryClient.invalidateQueries({ queryKey: ['tareas'] });
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  };
   const [formData, setFormData] = useState({
     titulo: '',
     descripcion: '',
