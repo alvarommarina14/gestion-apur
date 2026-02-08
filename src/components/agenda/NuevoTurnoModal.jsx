@@ -36,7 +36,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
   const [claseData, setClaseData] = useState(null);
 
   const { data: turnosExistentes = [] } = useQuery({
-    queryKey: ['turnos-cancha'],
+    queryKey: ['turnos-cancha', turno?.fecha || fecha ? format(turno?.fecha ? new Date(turno.fecha) : fecha || new Date(), 'yyyy-MM-dd') : ''],
     queryFn: () => base44.entities.TurnoCancha.list(),
     enabled: open,
   });
