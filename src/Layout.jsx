@@ -422,17 +422,31 @@ export default function Layout({ children, currentPageName }) {
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 h-14 lg:h-16 bg-white/80 backdrop-blur-sm border-b border-slate-200 flex items-center px-3 lg:px-6">
+        <header 
+          className="sticky top-0 z-30 h-14 lg:h-16 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800 flex items-center px-3 lg:px-6"
+          style={{ paddingTop: 'env(safe-area-inset-top)' }}
+        >
+          {isNestedRoute && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="mr-2 h-10 w-10 active:scale-95 user-select-none"
+              onClick={handleGoBack}
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+          )}
+          
           <Button 
             variant="ghost" 
             size="icon"
-            className="lg:hidden mr-2 h-10 w-10 active:scale-95"
+            className="lg:hidden mr-2 h-10 w-10 active:scale-95 user-select-none"
             onClick={() => setSidebarOpen(true)}
           >
             <Menu className="w-6 h-6" />
           </Button>
 
-          <h1 className="text-base lg:text-lg font-semibold text-slate-800 truncate">
+          <h1 className="text-base lg:text-lg font-semibold text-slate-800 dark:text-slate-100 truncate">
             {[...navigationGestionClases, ...navigationProfesor, ...navigationAgenda, ...navigationClientes, ...navigationConfiguracion]
               .find(n => n.href === currentPageName)?.name || currentPageName}
           </h1>
