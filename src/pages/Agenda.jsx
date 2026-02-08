@@ -248,6 +248,7 @@ export default function Agenda() {
           onOpenChange={(open) => setTurnoModal({ ...turnoModal, open })}
           turno={turnoModal.turno}
           fecha={selectedDate}
+          isProfesor={isProfesor}
         />
       )}
     </div>

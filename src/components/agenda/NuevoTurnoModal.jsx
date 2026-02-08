@@ -29,7 +29,7 @@ import { Calendar, CheckCircle, AlertTriangle, Trash2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import FormularioClaseAdmin from '@/components/agenda/FormularioClaseAdmin';
 
-export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
+export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isProfesor = false }) {
   const queryClient = useQueryClient();
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
@@ -453,8 +453,13 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
          }
        });
 
+       // Solo admins pueden editar
+       if (isProfesor) {
+         setError('Los profesores no pueden editar turnos. Solo pueden crear o eliminar.');
+         return;
+       }
        updateMutation.mutate({ id: turno.id, data, cambios });
-     } else {
+       } else {
        // Si es repetición semanal, crear turnos para 52 semanas
        if (data.repeticion_semanal) {
          const crearTurnosSecuencial = async () => {
@@ -773,13 +778,24 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
           Cancelar
         </Button>
-        <Button
-          type="submit"
-          disabled={createMutation.isPending || updateMutation.isPending}
-          className="bg-emerald-600 hover:bg-emerald-700"
-        >
-          {turno ? 'Actualizar' : 'Crear turno'}
-        </Button>
+        {!isProfesor && (
+          <Button
+            type="submit"
+            disabled={createMutation.isPending || updateMutation.isPending}
+            className="bg-emerald-600 hover:bg-emerald-700"
+          >
+            {turno ? 'Actualizar' : 'Crear turno'}
+          </Button>
+        )}
+        {isProfesor && !turno && (
+          <Button
+            type="submit"
+            disabled={createMutation.isPending || updateMutation.isPending}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            Solicitar turno (pendiente aprobación)
+          </Button>
+        )}
       </DialogFooter>
     </>
   );
