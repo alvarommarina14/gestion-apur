@@ -233,6 +233,8 @@ export default function GestionAccesoUnificada() {
       activo: usuario.activo !== false,
       recibir_notificaciones_cancha: usuario.recibir_notificaciones_cancha !== false,
     });
+    const permisoActual = permisos.usuarioPermisos?.find(p => p.usuario_id === usuario.id);
+    setSeccionesEmpleado(permisoActual?.secciones_acceso || {});
   };
 
   const handleSaveEmpleado = async () => {
