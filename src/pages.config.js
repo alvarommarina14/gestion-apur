@@ -69,6 +69,7 @@ import Recuperos from './pages/Recuperos';
 import Reportes from './pages/Reportes';
 import SeleccionRol from './pages/SeleccionRol';
 import GestionPermisosUsuarios from './pages/GestionPermisosUsuarios';
+import GestionAccesoUnificada from './pages/GestionAccesoUnificada';
 import __Layout from './Layout.jsx';
 
 
@@ -95,6 +96,7 @@ export const PAGES = {
     "Reportes": Reportes,
     "SeleccionRol": SeleccionRol,
     "GestionPermisosUsuarios": GestionPermisosUsuarios,
+    "GestionAccesoUnificada": GestionAccesoUnificada,
 }
 
 export const pagesConfig = {
