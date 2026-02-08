@@ -453,10 +453,13 @@ export default function Layout({ children, currentPageName }) {
         </header>
         
         {/* Page content */}
-        <main>
+        <main className="pb-20 lg:pb-0">
           {children}
         </main>
       </div>
+      
+      {/* Bottom Tab Navigation - Mobile only */}
+      <BottomTabNavigation currentPageName={currentPageName} userRole={user?.rol} />
     </div>
   );
 }
