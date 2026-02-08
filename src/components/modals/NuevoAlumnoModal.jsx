@@ -150,10 +150,28 @@ export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null, pr
         }
         
         if (idProfesor) {
-          data.profesor_id = idProfesor;
-        }
-        
-        await base44.entities.Alumno.create(data);
+           data.profesor_id = idProfesor;
+         }
+
+         const alumnoCreado = await base44.entities.Alumno.create(data);
+
+         // Sincronizar alumno con gestión de clientes
+         try {
+           const profesor = idProfesor ? await base44.entities.Profesor.read(idProfesor) : null;
+           await base44.entities.Cliente.create({
+             nombre: data.nombre,
+             telefono: data.whatsapp || '',
+             email: '',
+             clasificacion: 'recurrente',
+             tipo_cliente: 'clase',
+             notas: `Alumno sincronizado - Profesor: ${profesor?.nombre || 'Sin asignar'}`,
+             activo: true,
+           });
+         } catch (err) {
+           console.log('Error sincronizando alumno con clientes:', err);
+         }
+
+         return alumnoCreado;
       }
       
       setSuccess(true);
