@@ -1,3 +1,4 @@
+css
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -35,12 +36,23 @@
     @apply bg-background text-foreground;
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
+    overscroll-behavior: none;
   }
   
   /* Optimizaciones para móvil */
-  button, a {
+  button, a, [role="button"], [role="tab"], [role="menuitem"], svg {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+  
+  /* Permitir selección de texto en contenido */
+  p, span, h1, h2, h3, h4, h5, h6, li, td, th, label {
+    user-select: text;
+    -webkit-user-select: text;
   }
   
   /* Scroll suave en móvil */
