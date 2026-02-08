@@ -280,7 +280,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
             campo_modificado: cambio.campo,
             valor_anterior: String(cambio.anterior || ''),
             valor_nuevo: String(cambio.nuevo || ''),
-            motivo: cambioNotificacion ? 'Turno editado - tiempo de notificación modificado' : 'Turno editado desde Agenda',
+            motivo: 'Turno editado desde Agenda',
             fecha: new Date().toISOString(),
           });
         }
