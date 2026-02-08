@@ -246,89 +246,90 @@ export default function AprobacionClases() {
                       onCheckedChange={() => toggleSeleccion(clase.id)}
                       className="mt-1 cursor-pointer"
                     />
-                    <div className="flex-1">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    {/* Información básica */}
-                    <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase mb-2">Fecha y Hora</p>
-                      <p className="text-lg font-semibold text-slate-900">
-                        {format(new Date(clase.fecha), "d 'de' MMMM", { locale: es })}
-                      </p>
-                      <p className="text-sm text-slate-600">{clase.hora_inicio}</p>
-                    </div>
+                    <div className="flex-1 space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Información básica */}
+                        <div>
+                          <p className="text-xs font-semibold text-slate-500 uppercase mb-2">Fecha y Hora</p>
+                          <p className="text-lg font-semibold text-slate-900">
+                            {format(new Date(clase.fecha), "d 'de' MMMM", { locale: es })}
+                          </p>
+                          <p className="text-sm text-slate-600">{clase.hora_inicio}</p>
+                        </div>
 
-                    {/* Sede y Cancha */}
-                    <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase mb-2">Ubicación</p>
-                      <p className="text-sm font-medium text-slate-900">{clase.sede}</p>
-                      {clase.cancha && (
-                        <p className="text-sm text-slate-600">Cancha: {clase.cancha}</p>
-                      )}
-                    </div>
+                        {/* Sede y Cancha */}
+                        <div>
+                          <p className="text-xs font-semibold text-slate-500 uppercase mb-2">Ubicación</p>
+                          <p className="text-sm font-medium text-slate-900">{clase.sede}</p>
+                          {clase.cancha && (
+                            <p className="text-sm text-slate-600">Cancha: {clase.cancha}</p>
+                          )}
+                        </div>
 
-                    {/* Profesor */}
-                    <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase mb-2">Profesor</p>
-                      <p className="text-sm font-medium text-slate-900">
-                        {profesores[clase.profesor_id] || 'Desconocido'}
-                      </p>
-                    </div>
-                    </div>
+                        {/* Profesor */}
+                        <div>
+                          <p className="text-xs font-semibold text-slate-500 uppercase mb-2">Profesor</p>
+                          <p className="text-sm font-medium text-slate-900">
+                            {profesores[clase.profesor_id] || 'Desconocido'}
+                          </p>
+                        </div>
+                      </div>
 
-                    {/* Alumnos */}
-                    <div className="mb-4">
-                    <p className="text-xs font-semibold text-slate-500 uppercase mb-2">Alumnos</p>
-                    <div className="flex flex-wrap gap-2">
-                      {clase.alumnos_ids?.map((alumnoId) => (
-                        <Badge key={alumnoId} variant="outline">
-                          {alumnos[alumnoId] || 'Alumno'}
-                        </Badge>
-                      ))}
-                    </div>
-                    </div>
+                      {/* Alumnos */}
+                      <div>
+                        <p className="text-xs font-semibold text-slate-500 uppercase mb-2">Alumnos</p>
+                        <div className="flex flex-wrap gap-2">
+                          {clase.alumnos_ids?.map((alumnoId) => (
+                            <Badge key={alumnoId} variant="outline">
+                              {alumnos[alumnoId] || 'Alumno'}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
 
-                    {/* Tipo y Duración */}
-                    <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b">
-                    <div>
-                      <p className="text-xs text-slate-500">Tipo</p>
-                      <p className="text-sm font-medium text-slate-900">
-                        {clase.tipo === 'individual' ? 'Individual' : 'Grupal'}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500">Duración</p>
-                      <p className="text-sm font-medium text-slate-900">{clase.duracion} min</p>
-                    </div>
-                    </div>
+                      {/* Tipo y Duración */}
+                      <div className="grid grid-cols-2 gap-4 pb-4 border-b">
+                        <div>
+                          <p className="text-xs text-slate-500">Tipo</p>
+                          <p className="text-sm font-medium text-slate-900">
+                            {clase.tipo === 'individual' ? 'Individual' : 'Grupal'}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-500">Duración</p>
+                          <p className="text-sm font-medium text-slate-900">{clase.duracion} min</p>
+                        </div>
+                      </div>
 
-                    {/* Acciones */}
-                    <div className="flex gap-3">
-                    <Button
-                      onClick={() => {
-                        setProcesando(clase.id);
-                        aprobarMutation.mutate(clase.id);
-                      }}
-                      disabled={procesando === clase.id}
-                      className="flex-1 bg-emerald-600 hover:bg-emerald-700"
-                    >
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      {procesando === clase.id ? 'Aprobando...' : 'Aprobar'}
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        setProcesando(clase.id);
-                        rechazarMutation.mutate(clase.id);
-                      }}
-                      disabled={procesando === clase.id}
-                      variant="destructive"
-                      className="flex-1"
-                    >
-                      <XCircle className="w-4 h-4 mr-2" />
-                      {procesando === clase.id ? 'Rechazando...' : 'Rechazar'}
-                    </Button>
+                      {/* Acciones */}
+                      <div className="flex gap-3">
+                        <Button
+                          onClick={() => {
+                            setProcesando(clase.id);
+                            aprobarMutation.mutate(clase.id);
+                          }}
+                          disabled={procesando === clase.id}
+                          className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                        >
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          {procesando === clase.id ? 'Aprobando...' : 'Aprobar'}
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            setProcesando(clase.id);
+                            rechazarMutation.mutate(clase.id);
+                          }}
+                          disabled={procesando === clase.id}
+                          variant="destructive"
+                          className="flex-1"
+                        >
+                          <XCircle className="w-4 h-4 mr-2" />
+                          {procesando === clase.id ? 'Rechazando...' : 'Rechazar'}
+                        </Button>
+                      </div>
                     </div>
-                    </div>
-                    </CardContent>
+                  </div>
+                </CardContent>
               </Card>
             ))}
           </div>
