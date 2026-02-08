@@ -1,10 +1,12 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Clock, MapPin, Users, User, ChevronRight } from 'lucide-react';
+import { Clock, MapPin, Users, User, ChevronRight, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { cn } from '@/lib/utils';
+import { createPageUrl } from '@/utils';
+import { Link } from 'react-router-dom';
 
 export default function TodayAgenda({ clases = [], onClaseClick, onRegistrarAsistencia }) {
   const now = new Date();
@@ -27,12 +29,18 @@ export default function TodayAgenda({ clases = [], onClaseClick, onRegistrarAsis
       <div className="text-center py-12 text-slate-500">
         <Clock className="w-10 h-10 mx-auto mb-3 opacity-40" />
         <p className="font-medium">No hay clases programadas para hoy</p>
+        <Link to={createPageUrl('Agenda')} className="mt-3 inline-block">
+          <Button variant="outline" size="sm" className="text-slate-500">
+            <Eye className="w-4 h-4 mr-1" />
+            Ver agenda completa
+          </Button>
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {clases.map((clase) => {
         const timeStatus = getTimeStatus(clase.hora_inicio);
         const needsAttendance = timeStatus === 'past' && !clase.asistencia_registrada && clase.estado === 'programada';
@@ -98,6 +106,11 @@ export default function TodayAgenda({ clases = [], onClaseClick, onRegistrarAsis
                     Registrar asistencia
                   </Button>
                 )}
+                <Link to={createPageUrl('Agenda')} onClick={(e) => e.stopPropagation()}>
+                  <Button size="sm" variant="ghost" className="text-slate-400 hover:text-slate-600">
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                </Link>
                 <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-slate-600 transition-colors" />
               </div>
             </div>
