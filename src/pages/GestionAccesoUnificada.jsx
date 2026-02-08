@@ -75,6 +75,7 @@ export default function GestionAccesoUnificada() {
   const [localPermisos, setLocalPermisos] = useState({});
   const [editEmpleado, setEditEmpleado] = useState(null);
   const [editFormData, setEditFormData] = useState({});
+  const [seccionesEmpleado, setSeccionesEmpleado] = useState({});
 
   // Datos
   const { data: usuarios = [] } = useQuery({
