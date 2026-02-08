@@ -23,8 +23,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Turno no encontrado' }, { status: 404 });
     }
 
-    // ID del calendario (usar el email del usuario autenticado)
-    const CALENDAR_ID = user.email || 'primary';
+    // ID del calendario (usar el calendario principal del usuario)
+    const CALENDAR_ID = 'primary';
     
     // Obtener access token de Google Calendar
     const accessToken = await base44.asServiceRole.connectors.getAccessToken('googlecalendar');
