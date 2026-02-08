@@ -554,13 +554,16 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
 
              await base44.entities.RecordatorioCancha.bulkCreate(recordatorios);
 
-             // Sincronizar con Google Calendar en background (no bloquear)
-             turnosCreados.forEach(turno => {
-               base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
-                 turno_id: turno.id, 
-                 action: 'create' 
-               }).catch(err => console.log('Error Calendar:', err));
-             });
+             // Sincronizar primer turno con recurrencia en Google Calendar
+             if (turnosCreados.length > 0) {
+               try {
+                 await base44.functions.invoke('sincronizarTurnoRecurrenteGoogleCalendar', { 
+                   turno_id: turnosCreados[0].id
+                 });
+               } catch (err) {
+                 console.error('Error sincronizando recurrencia con Google Calendar:', err);
+               }
+             }
 
              // Invalidar queries y cerrar inmediatamente
              queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
