@@ -31,6 +31,7 @@ import {
 import QuickStats, { ClassStats } from '@/components/dashboard/QuickStats';
 import TodayAgenda from '@/components/dashboard/TodayAgenda';
 import CobrarHoyList from '@/components/dashboard/CobrarHoyList';
+import ClasesConAlumnos from '@/components/dashboard/ClasesConAlumnos';
 import AlertCard from '@/components/ui/AlertCard';
 import RegistrarPagoModal from '@/components/modals/RegistrarPagoModal';
 import RegistrarAsistenciaModal from '@/components/modals/RegistrarAsistenciaModal';
