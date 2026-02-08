@@ -397,7 +397,6 @@ export default function Tareas() {
         </Dialog>
       )}
        </div>
-       </div>
       </PullToRefresh>
       );
       }
