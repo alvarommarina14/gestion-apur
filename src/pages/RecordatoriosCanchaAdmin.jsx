@@ -7,6 +7,7 @@ import { Plus, ChevronLeft, ChevronRight, Calendar, Filter, Edit, Trash2, CheckC
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Checkbox } from '@/components/ui/checkbox';
 import NuevoRecordatorioCanchaModal from '@/components/recordatorios-cancha/NuevoRecordatorioCanchaModal';
 import { cn } from '@/lib/utils';
 
@@ -15,6 +16,7 @@ export default function RecordatoriosCanchaAdmin() {
   const [vista, setVista] = useState('semana');
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [nuevoModal, setNuevoModal] = useState({ open: false, recordatorio: null });
+  const [seleccionados, setSeleccionados] = useState([]);
 
   const { data: recordatorios = [], isLoading } = useQuery({
     queryKey: ['recordatorios-cancha'],
@@ -30,6 +32,16 @@ export default function RecordatoriosCanchaAdmin() {
     mutationFn: (id) => base44.entities.RecordatorioCancha.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+    },
+  });
+
+  const eliminarMultiplesMutation = useMutation({
+    mutationFn: async (ids) => {
+      await Promise.all(ids.map(id => base44.entities.RecordatorioCancha.delete(id)));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+      setSeleccionados([]);
     },
   });
 
@@ -88,6 +100,28 @@ export default function RecordatoriosCanchaAdmin() {
     }
   };
 
+  const handleEliminarSeleccionados = () => {
+    if (seleccionados.length === 0) return;
+    
+    if (confirm(`¿Eliminar ${seleccionados.length} recordatorio${seleccionados.length > 1 ? 's' : ''}?`)) {
+      eliminarMultiplesMutation.mutate(seleccionados);
+    }
+  };
+
+  const toggleSeleccion = (id) => {
+    setSeleccionados(prev => 
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSeleccionarTodos = () => {
+    if (seleccionados.length === recordatoriosFiltrados.length) {
+      setSeleccionados([]);
+    } else {
+      setSeleccionados(recordatoriosFiltrados.map(r => r.id));
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
@@ -135,14 +169,60 @@ export default function RecordatoriosCanchaAdmin() {
           </Card>
         </div>
 
+        {/* Acciones de selección múltiple */}
+        {seleccionados.length > 0 && (
+          <Card className="shadow-md border-emerald-200 bg-emerald-50">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between gap-4">
+                <p className="text-sm font-medium text-slate-700">
+                  {seleccionados.length} recordatorio{seleccionados.length > 1 ? 's' : ''} seleccionado{seleccionados.length > 1 ? 's' : ''}
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSeleccionados([])}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleEliminarSeleccionados}
+                    disabled={eliminarMultiplesMutation.isPending}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Eliminar seleccionados
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Vista selector y navegación */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <Tabs value={vista} onValueChange={setVista}>
-            <TabsList>
-              <TabsTrigger value="semana">Semana</TabsTrigger>
-              <TabsTrigger value="todos">Todos</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div className="flex items-center gap-4">
+            <Tabs value={vista} onValueChange={setVista}>
+              <TabsList>
+                <TabsTrigger value="semana">Semana</TabsTrigger>
+                <TabsTrigger value="todos">Todos</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            {recordatoriosFiltrados.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={toggleSeleccionarTodos}
+              >
+                <Checkbox 
+                  checked={seleccionados.length === recordatoriosFiltrados.length && recordatoriosFiltrados.length > 0}
+                  className="mr-2"
+                />
+                {seleccionados.length === recordatoriosFiltrados.length ? 'Deseleccionar todos' : 'Seleccionar todos'}
+              </Button>
+            )}
+          </div>
 
           {vista === 'semana' && (
             <div className="flex items-center gap-3">
@@ -209,10 +289,17 @@ export default function RecordatoriosCanchaAdmin() {
                               'p-2 rounded-lg border text-xs space-y-1',
                               rec.estado === 'hecho'
                                 ? 'bg-emerald-50 border-emerald-200'
-                                : 'bg-white border-slate-200'
+                                : 'bg-white border-slate-200',
+                              seleccionados.includes(rec.id) && 'ring-2 ring-emerald-500'
                             )}
                           >
-                            <div className="font-semibold text-slate-800">{rec.hora}</div>
+                            <div className="flex items-center gap-2">
+                              <Checkbox
+                                checked={seleccionados.includes(rec.id)}
+                                onCheckedChange={() => toggleSeleccion(rec.id)}
+                              />
+                              <div className="font-semibold text-slate-800">{rec.hora}</div>
+                            </div>
                             <div className="text-slate-600">Cancha {rec.cancha}</div>
                             <div className="text-slate-500">{rec.profesor}</div>
                             {rec.turno && (
@@ -282,9 +369,21 @@ export default function RecordatoriosCanchaAdmin() {
             <CardContent className="p-0">
               <div className="divide-y">
                 {recordatoriosFiltrados.map((rec) => (
-                  <div key={rec.id} className="p-4 hover:bg-slate-50 transition-colors">
+                  <div 
+                    key={rec.id} 
+                    className={cn(
+                      "p-4 hover:bg-slate-50 transition-colors",
+                      seleccionados.includes(rec.id) && "bg-emerald-50"
+                    )}
+                  >
                     <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 space-y-1">
+                      <div className="flex items-start gap-3 flex-1">
+                        <Checkbox
+                          checked={seleccionados.includes(rec.id)}
+                          onCheckedChange={() => toggleSeleccion(rec.id)}
+                          className="mt-1"
+                        />
+                        <div className="flex-1 space-y-1">
                         <div className="flex items-center gap-3">
                           <span className="font-semibold text-slate-800">
                             {format(parseISO(rec.fecha), "d 'de' MMM", { locale: es })} - {rec.hora}
@@ -332,6 +431,7 @@ export default function RecordatoriosCanchaAdmin() {
                             {format(parseISO(rec.hora_confirmacion), "d/MM/yyyy 'a las' HH:mm")}
                           </div>
                         )}
+                        </div>
                       </div>
                       <div className="flex gap-2">
                         <Button
