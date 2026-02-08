@@ -64,6 +64,15 @@ export default function Layout({ children, currentPageName }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = React.useState(null);
   const [profesorSeleccionado, setProfesorSeleccionado] = React.useState(null);
+  const location = useLocation();
+  
+  // Detectar si es una ruta anidada (para mostrar back button)
+  const isNestedRoute = location.pathname.includes('?') || 
+    ['DetalleAlumno', 'DetalleClase', 'DetalleCliente'].some(page => currentPageName.includes(page));
+  
+  const handleGoBack = () => {
+    window.history.back();
+  };
 
   React.useEffect(() => {
     const checkUser = async () => {
