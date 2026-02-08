@@ -147,19 +147,19 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
                 <span className="font-semibold">{turno.hora_inicio}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-600">Tipo:</span>
-                <span className="font-semibold">{turno.tipo}</span>
-              </div>
-              {turno.es_recurrente && (
-                <div className="flex justify-between pt-2 border-t">
-                  <span className="text-slate-600">Recurrencia:</span>
-                  <span className="font-semibold text-blue-600">
-                    {turno.recurrencia_tipo === 'semanal'
-                      ? 'Semanal'
-                      : 'Quincenal'}
-                  </span>
-                </div>
-              )}
+                 <span className="text-slate-600">{isClase ? 'Tipo de clase' : 'Tipo'}:</span>
+                 <span className="font-semibold">{isClase ? turno.tipo : turno.tipo_turno}</span>
+               </div>
+               {isRecurrente && (
+                 <div className="flex justify-between pt-2 border-t">
+                   <span className="text-slate-600">Recurrencia:</span>
+                   <span className="font-semibold text-blue-600">
+                     {isClase 
+                       ? (turno.recurrencia_tipo === 'semanal' ? 'Semanal' : 'Quincenal')
+                       : 'Semanal'}
+                   </span>
+                 </div>
+               )}
             </CardContent>
           </Card>
 
