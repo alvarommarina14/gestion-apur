@@ -357,7 +357,9 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
 
   const deleteMutation = useMutation({
     mutationFn: async ({ id, eliminarSerie }) => {
-      const turnoData = turnosExistentes.find(t => t.id === id);
+      // Obtener todos los turnos, no solo los del día
+      const todosTurnos = await base44.entities.TurnoCancha.list();
+      const turnoData = todosTurnos.find(t => t.id === id);
 
       if (eliminarSerie) {
         // Eliminar toda la serie recurrente
