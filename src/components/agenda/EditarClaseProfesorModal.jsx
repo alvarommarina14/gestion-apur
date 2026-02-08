@@ -199,13 +199,14 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
         console.log(`🗑️ Eliminando ${turnosAActualizar.length} turnos recurrentes...`);
 
         for (const t of turnosAActualizar) {
-          try {
-            await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
-              turno_id: t.id, 
-              action: 'delete' 
-            });
-          } catch (err) {
-            console.error('Error eliminando turno de GCal:', err);
+          if (t.gcal_event_id) {
+            try {
+              await base44.functions.invoke('borrarEventosGoogleCalendar', { 
+                event_id: t.gcal_event_id 
+              });
+            } catch (err) {
+              console.error('Error eliminando turno de GCal:', err);
+            }
           }
           try {
             await base44.entities.TurnoCancha.delete(t.id);
