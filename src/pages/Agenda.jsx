@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { format, addDays, subDays, startOfWeek, addWeeks, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Plus, ChevronLeft, ChevronRight, Calendar, Filter } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, Calendar, Filter, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
