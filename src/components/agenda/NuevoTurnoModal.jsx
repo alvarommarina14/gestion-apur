@@ -673,12 +673,12 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
       </div>
 
       <div className="space-y-2">
-        <Label>Modalidad de Alquiler</Label>
+        <Label>Modalidad de Alquiler *</Label>
         <Select
           value={formData.modalidad_alquiler}
           onValueChange={(v) => setFormData({ ...formData, modalidad_alquiler: v })}
         >
-          <SelectTrigger>
+          <SelectTrigger className={!formData.modalidad_alquiler ? 'border-rose-300' : ''}>
             <SelectValue placeholder="Seleccionar modalidad" />
           </SelectTrigger>
           <SelectContent>
