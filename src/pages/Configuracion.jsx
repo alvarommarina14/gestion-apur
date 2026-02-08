@@ -226,17 +226,103 @@ export default function Configuracion() {
           )}
         </div>
 
-      </div>
-      
-      {/* Modal edición */}
-      <ConfiguracionModal 
+        {/* Danger Zone */}
+        <Card className="border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900">
+         <CardHeader>
+           <CardTitle className="text-red-700 dark:text-red-400 flex items-center gap-2">
+             <AlertTriangle className="w-5 h-5" />
+             Zona de Peligro
+           </CardTitle>
+         </CardHeader>
+         <CardContent>
+           <p className="text-sm text-red-600 dark:text-red-300 mb-4">
+             Esta acción es irreversible. Se eliminará tu cuenta y todos tus datos.
+           </p>
+           <Button
+             variant="outline"
+             onClick={() => setDeleteModal({ open: true, confirm: false })}
+             className="border-red-300 text-red-700 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
+           >
+             <Trash className="w-4 h-4 mr-2" />
+             Eliminar mi cuenta
+           </Button>
+         </CardContent>
+        </Card>
+
+        </div>
+
+        {/* Modal edición */}
+        <ConfiguracionModal 
         open={editModal.open}
         onOpenChange={(open) => setEditModal({ ...editModal, open })}
         config={editModal.config}
-      />
-    </div>
-  );
-}
+        />
+
+        {/* Modal eliminar cuenta */}
+        <Dialog open={deleteModal.open} onOpenChange={(open) => setDeleteModal({ ...deleteModal, open })}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-red-700 dark:text-red-400">
+              ¿Eliminar tu cuenta?
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              Esta acción eliminará permanentemente tu cuenta y todos los datos asociados. No podrá ser revertida.
+            </p>
+            {!deleteModal.confirm ? (
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                  Escribe tu email para confirmar:
+                </p>
+                <Input
+                  type="email"
+                  placeholder="Tu email"
+                  disabled
+                  value={user?.email || ''}
+                  className="bg-slate-100 dark:bg-slate-800"
+                />
+                <Button
+                  onClick={() => setDeleteModal({ open: true, confirm: true })}
+                  variant="destructive"
+                  className="w-full"
+                >
+                  Confirmar eliminación
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3 p-4 bg-red-50 dark:bg-red-950/30 rounded-lg border border-red-200 dark:border-red-900">
+                <p className="text-sm font-semibold text-red-700 dark:text-red-400">
+                  ⚠️ Última confirmación requerida
+                </p>
+                <p className="text-sm text-red-600 dark:text-red-300">
+                  Todos tus datos serán eliminados permanentemente.
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => setDeleteModal({ open: true, confirm: false })}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    onClick={() => deleteAccountMutation.mutate()}
+                    variant="destructive"
+                    disabled={deleteAccountMutation.isPending}
+                    className="flex-1"
+                  >
+                    {deleteAccountMutation.isPending ? 'Eliminando...' : 'Eliminar'}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+        </Dialog>
+        </div>
+        );
+        }
 
 function ConfiguracionModal({ open, onOpenChange, config }) {
   const queryClient = useQueryClient();
