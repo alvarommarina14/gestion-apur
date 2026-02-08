@@ -31,19 +31,22 @@ export default function EnviarRecordatorioBtn({ alumno, variant = "outline", siz
   const [mensaje, setMensaje] = useState('');
   
   React.useEffect(() => {
-    if (open && configManual) {
-      const mensajePersonalizado = configManual.mensaje_template
-        .replace(/\{nombre\}/g, alumno?.nombre?.split(' ')[0] || 'Alumno')
-        .replace(/\{monto\}/g, new Intl.NumberFormat('es-AR', {
-          style: 'currency',
-          currency: 'ARS',
-          minimumFractionDigits: 0,
-        }).format(alumno?.precio_mensual || 0))
-        .replace(/\{mes\}/g, format(new Date(), 'MMMM', { locale: es }));
+    if (open) {
+      const nombre = alumno?.nombre?.split(' ')[0] || 'Alumno';
+      const monto = new Intl.NumberFormat('es-AR', {
+        style: 'currency',
+        currency: 'ARS',
+        minimumFractionDigits: 0,
+      }).format(alumno?.precio_mensual || 0);
       
-      setMensaje(mensajePersonalizado);
+      // Mensaje dinámico según estado
+      if (alumno.estado === 'moroso') {
+        setMensaje(`¡Hola ${nombre}! 👋\n\nVemos que tienes una deuda pendiente de ${monto}. Te pedimos que regularices tu situación lo antes posible.\n\n¡Gracias!`);
+      } else {
+        setMensaje(`¡Hola ${nombre}! 👋\n\nTe recordamos que la cuota de ${monto} vence pronto. Por favor, realiza el pago.\n\n¡Gracias!`);
+      }
     }
-  }, [open, configManual, alumno]);
+  }, [open, alumno]);
   
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Recordatorio.create(data),
@@ -54,10 +57,12 @@ export default function EnviarRecordatorioBtn({ alumno, variant = "outline", siz
   
   const handleEnviar = async () => {
     // Crear recordatorio
+    const tipo = alumno.estado === 'moroso' ? 'moroso' : 'pre_cobro';
+    
     await createMutation.mutateAsync({
       alumno_id: alumno.id,
       alumno_nombre: alumno.nombre,
-      tipo: 'manual',
+      tipo: tipo,
       fecha_programada: format(new Date(), 'yyyy-MM-dd'),
       estado: 'enviado',
       fecha_enviado: new Date().toISOString(),
