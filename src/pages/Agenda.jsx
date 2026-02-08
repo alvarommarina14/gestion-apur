@@ -28,6 +28,7 @@ export default function Agenda() {
   const [turnoModal, setTurnoModal] = useState({ open: false, turno: null });
   const [claseModal, setClaseModal] = useState({ open: false, turno: null });
   const [showCalendario, setShowCalendario] = useState(false);
+  const [limpiadoLoading, setLimpiadoLoading] = useState(false);
 
   const { data: user } = useQuery({
     queryKey: ['me'],
