@@ -96,6 +96,38 @@ Deno.serve(async (req) => {
       ? `Alumnos: ${clase.alumnos_nombres.join(', ')}`
       : 'Sin alumnos asignados';
 
+    // Construir RRULE si es recurrente
+    let recurrencia = null;
+    if (clase.es_recurrente && clase.dias_semana && clase.dias_semana.length > 0) {
+      const daysMap = {
+        'lunes': 'MO',
+        'martes': 'TU',
+        'miércoles': 'WE',
+        'miercoles': 'WE',
+        'jueves': 'TH',
+        'viernes': 'FR',
+        'sábado': 'SA',
+        'sabado': 'SA',
+        'domingo': 'SU',
+      };
+      
+      const byDay = clase.dias_semana
+        .map(dia => daysMap[dia.toLowerCase()])
+        .filter(Boolean);
+      
+      if (byDay.length > 0) {
+        const freq = clase.recurrencia_tipo === 'quincenal' ? 'WEEKLY' : 'WEEKLY';
+        const interval = clase.recurrencia_tipo === 'quincenal' ? 2 : 1;
+        const until = clase.recurrencia_hasta ? clase.recurrencia_hasta.replace(/-/g, '') : null;
+        
+        let rrule = `FREQ=${freq};INTERVAL=${interval};BYDAY=${byDay.join(',')}`;
+        if (until) {
+          rrule += `;UNTIL=${until}`;
+        }
+        recurrencia = [rrule];
+      }
+    }
+
     const evento = {
       summary: `📚 ${clase.tipo === 'individual' ? 'Clase Individual' : 'Clase Grupal'} - ${profesorNombre}`,
       description: `
@@ -115,6 +147,7 @@ ${clase.notas ? `Notas: ${clase.notas}` : ''}
         dateTime: endDateTime,
         timeZone: 'America/Argentina/Buenos_Aires',
       },
+      ...(recurrencia && { recurrence: recurrencia }),
       ...(clase.cancha && { location: `Cancha ${clase.cancha}` }),
       reminders: {
         useDefault: false,
