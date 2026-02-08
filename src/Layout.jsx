@@ -49,6 +49,7 @@ const navigationConfiguracion = [
   { name: 'Acceso Unificado', href: 'GestionAccesoUnificada', icon: Shield },
   { name: 'Aprobación Usuarios', href: 'AprobacionUsuarios', icon: Shield },
   { name: 'Aprobación de Clases', href: 'AprobacionClases', icon: Calendar },
+  { name: 'Permisos de Empleados', href: 'GestionPermisosEmpleados', icon: Shield },
   { name: 'Configuración', href: 'Configuracion', icon: Settings },
 ];
 
