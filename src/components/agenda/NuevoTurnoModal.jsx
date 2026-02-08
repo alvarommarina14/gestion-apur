@@ -884,7 +884,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
       )}
 
       <DialogFooter className="flex-col sm:flex-row gap-2">
-        {turno && !formData.tipo_turno === 'clase' && tieneRepeticionSemanal && (
+        {turno && formData.tipo_turno !== 'clase' && tieneRepeticionSemanal && (
           <div className="w-full sm:mr-auto flex flex-col gap-2">
             <Button
               type="button"
@@ -897,7 +897,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
               className="text-rose-600 hover:text-rose-700 w-full sm:w-auto"
             >
               <Trash2 className="w-4 h-4 mr-2" />
-              Eliminar solo este turno
+              Eliminar solo para hoy
             </Button>
             <Button
               type="button"
@@ -914,12 +914,12 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
             </Button>
           </div>
         )}
-        {turno && !formData.tipo_turno === 'clase' && !tieneRepeticionSemanal && (
+        {turno && formData.tipo_turno !== 'clase' && !tieneRepeticionSemanal && (
           <Button
             type="button"
             variant="outline"
             onClick={() => {
-              if (confirm('¿Eliminar solo este turno?')) {
+              if (confirm('¿Eliminar este turno?')) {
                 deleteMutation.mutate({ id: turno.id, eliminarSerie: false });
               }
             }}
