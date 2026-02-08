@@ -742,7 +742,11 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
             <Button
               type="button"
               variant="outline"
-              onClick={handleDeleteSolo}
+              onClick={() => {
+                if (confirm('¿Eliminar solo este turno?')) {
+                  deleteMutation.mutate({ id: turno.id, eliminarSerie: false });
+                }
+              }}
               className="text-rose-600 hover:text-rose-700 w-full sm:w-auto"
             >
               <Trash2 className="w-4 h-4 mr-2" />
@@ -751,7 +755,11 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
             <Button
               type="button"
               variant="outline"
-              onClick={handleDeleteSerie}
+              onClick={() => {
+                if (confirm('¿Eliminar TODA la serie de turnos recurrentes (hasta 52 semanas)?')) {
+                  deleteMutation.mutate({ id: turno.id, eliminarSerie: true });
+                }
+              }}
               className="text-rose-700 hover:text-rose-800 border-rose-300 w-full sm:w-auto"
             >
               <Trash2 className="w-4 h-4 mr-2" />
@@ -763,7 +771,11 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
           <Button
             type="button"
             variant="outline"
-            onClick={handleDeleteSolo}
+            onClick={() => {
+              if (confirm('¿Eliminar solo este turno?')) {
+                deleteMutation.mutate({ id: turno.id, eliminarSerie: false });
+              }
+            }}
             className="text-rose-600 hover:text-rose-700 sm:mr-auto"
           >
             <Trash2 className="w-4 h-4 mr-2" />
