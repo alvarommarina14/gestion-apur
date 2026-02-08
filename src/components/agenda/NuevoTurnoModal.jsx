@@ -408,14 +408,14 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
        // Si es repetición semanal, crear turnos para 52 semanas
        if (data.repeticion_semanal) {
          const crearTurnosSecuencial = async () => {
-           for (let i = 0; i < 52; i++) {
-             const fechaTurno = addWeeks(parseISO(data.fecha), i);
-             const turnoData = {
-               ...data,
-               fecha: format(fechaTurno, 'yyyy-MM-dd'),
-             };
+           try {
+             for (let i = 0; i < 52; i++) {
+               const fechaTurno = addWeeks(parseISO(data.fecha), i);
+               const turnoData = {
+                 ...data,
+                 fecha: format(fechaTurno, 'yyyy-MM-dd'),
+               };
 
-             try {
                const empleadosSeleccionados = empleados.filter(e => turnoData.empleados_asignados_ids.includes(e.id));
                const turnoDataCompleto = {
                  ...turnoData,
@@ -434,7 +434,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
                  console.error('Error sincronizando con Google Calendar:', err);
                }
 
-               const diaSemana = format(parseISO(turnoData.fecha), 'EEEE', { locale: es });
+               const diaSemana = format(fechaTurno, 'EEEE', { locale: es });
 
                await base44.entities.RecordatorioCancha.create({
                  turno_cancha_id: turnoCreado.id,
@@ -449,7 +449,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
                  pagado: turnoData.pagado,
                  repeticion_semanal: true,
                  dia_semana: diaSemana,
-                 notas: turnoData.notas || `Sincronizado con turno de ${turnoData.cliente}`,
+                 notas: turnoData.notas || `Alquiler de ${turnoData.cliente}`,
                });
 
                await base44.entities.LogAuditoria.create({
@@ -460,21 +460,20 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
                  motivo: 'Turno creado desde Agenda (repetición semanal)',
                  fecha: new Date().toISOString(),
                });
-             } catch (err) {
-               console.error(`Error creando turno de la semana ${i + 1}:`, err);
-               setError(`Error creando turno de la semana ${i + 1}`);
-               return;
              }
-           }
 
-           // Invalidar queries y mostrar éxito
-           queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
-           queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
-           setSuccess(true);
-           setTimeout(() => {
-             setSuccess(false);
-             onOpenChange(false);
-           }, 1500);
+             // Invalidar queries y mostrar éxito
+             queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+             queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+             setSuccess(true);
+             setTimeout(() => {
+               setSuccess(false);
+               onOpenChange(false);
+             }, 1500);
+           } catch (err) {
+             console.error('Error creando turnos semanales:', err);
+             setError(`Error creando turnos: ${err.message}`);
+           }
          };
 
          crearTurnosSecuencial();
