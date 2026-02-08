@@ -242,6 +242,24 @@ export default function GestionAccesoUnificada() {
       id: editEmpleado.id,
       data: editFormData,
     });
+    
+    // Guardar permisos por secciones del empleado
+    const permisoActual = permisos.usuarioPermisos?.find(p => p.usuario_id === editEmpleado.id);
+    const permisoData = {
+      usuario_id: editEmpleado.id,
+      usuario_email: editEmpleado.email,
+      usuario_nombre: editEmpleado.full_name,
+      usuario_rol: editEmpleado.rol,
+      secciones_acceso: seccionesEmpleado,
+      activo: true,
+    };
+    
+    if (permisoActual) {
+      await base44.entities.PermisoUsuario.update(permisoActual.id, permisoData);
+    } else {
+      await base44.entities.PermisoUsuario.create(permisoData);
+    }
+    queryClient.invalidateQueries({ queryKey: ['permisos_todos'] });
   };
 
   return (
