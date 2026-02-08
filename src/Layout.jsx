@@ -22,6 +22,9 @@ import { Button } from '@/components/ui/button';
 import NotificationPermissionModal from '@/components/NotificationPermissionModal';
 import NotificationManager from '@/components/NotificationManager';
 import PushNotificationManager from '@/components/PushNotificationManager';
+import BottomTabNavigation from '@/components/BottomTabNavigation';
+import { ArrowLeft } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 
 const navigationGestionClases = [
   { name: 'Profesores', href: 'Profesores', icon: Users },
