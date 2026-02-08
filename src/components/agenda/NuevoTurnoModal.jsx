@@ -311,29 +311,31 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
             format(parseISO(t.fecha), 'EEEE', { locale: es }) === format(parseISO(turnoData.fecha), 'EEEE', { locale: es })
           );
 
+          // Eliminar de Calendar PRIMERO (en paralelo)
+          await Promise.all(
+            turnosRelacionados.map(turno => 
+              base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
+                turno_id: turno.id, 
+                action: 'delete' 
+              }).catch(() => {})
+            )
+          );
+
           // Obtener todos los recordatorios relacionados
           const todosRecordatorios = await base44.entities.RecordatorioCancha.list();
           const recordatoriosRelacionados = todosRecordatorios.filter(r => 
             turnosRelacionados.some(t => t.id === r.turno_cancha_id)
           );
 
-          // Eliminar recordatorios en batch
+          // Eliminar recordatorios
           for (const rec of recordatoriosRelacionados) {
             await base44.entities.RecordatorioCancha.delete(rec.id);
           }
 
-          // Eliminar turnos en batch
+          // Eliminar turnos
           for (const turno of turnosRelacionados) {
             await base44.entities.TurnoCancha.delete(turno.id);
           }
-
-          // Sincronizar Calendar en background (no esperar)
-          turnosRelacionados.forEach(turno => {
-            base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
-              turno_id: turno.id, 
-              action: 'delete' 
-            }).catch(() => {});
-          });
         }
       } else {
         // Eliminar solo este turno
