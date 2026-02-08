@@ -311,27 +311,29 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
             format(parseISO(t.fecha), 'EEEE', { locale: es }) === format(parseISO(turnoData.fecha), 'EEEE', { locale: es })
           );
 
-          // Eliminar todos los turnos relacionados
-          for (const turnoRel of turnosRelacionados) {
-            // Eliminar recordatorios primero
-            const recsRel = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: turnoRel.id });
-            for (const rec of recsRel) {
-              await base44.entities.RecordatorioCancha.delete(rec.id);
-            }
+          // Obtener todos los recordatorios relacionados
+          const todosRecordatorios = await base44.entities.RecordatorioCancha.list();
+          const recordatoriosRelacionados = todosRecordatorios.filter(r => 
+            turnosRelacionados.some(t => t.id === r.turno_cancha_id)
+          );
 
-            // Eliminar turno de la BD
-            await base44.entities.TurnoCancha.delete(turnoRel.id);
-            
-            // Intentar eliminar de Google Calendar (sin bloquear si falla)
-            try {
-              await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
-                turno_id: turnoRel.id, 
-                action: 'delete' 
-              });
-            } catch (err) {
-              console.log('Turno ya eliminado de Calendar o no existía');
-            }
+          // Eliminar recordatorios en batch
+          for (const rec of recordatoriosRelacionados) {
+            await base44.entities.RecordatorioCancha.delete(rec.id);
           }
+
+          // Eliminar turnos en batch
+          for (const turno of turnosRelacionados) {
+            await base44.entities.TurnoCancha.delete(turno.id);
+          }
+
+          // Sincronizar Calendar en background (no esperar)
+          turnosRelacionados.forEach(turno => {
+            base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
+              turno_id: turno.id, 
+              action: 'delete' 
+            }).catch(() => {});
+          });
         }
       } else {
         // Eliminar solo este turno
