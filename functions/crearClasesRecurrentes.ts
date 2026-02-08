@@ -102,6 +102,15 @@ Deno.serve(async (req) => {
           })
         )
       );
+    } else {
+      // Si es profesor, también sincronizar con Google Calendar (sin crear TurnoCancha)
+      await Promise.all(
+        clases.map((clase) =>
+          base44.functions.invoke('sincronizarClaseGoogleCalendar', { clase_id: clase.id }).catch(err => {
+            console.error('Error sincronizando clase:', err);
+          })
+        )
+      );
     }
 
     return Response.json({ success: true, clases_creadas: clases.length });
