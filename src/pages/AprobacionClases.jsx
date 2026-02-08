@@ -287,7 +287,7 @@ export default function AprobacionClases() {
                         <div>
                           <p className="text-xs font-semibold text-slate-500 uppercase mb-2">Profesor</p>
                           <p className="text-sm font-medium text-slate-900">
-                            {profesores[clase.profesor_id] || 'Desconocido'}
+                            {clase.profesor_nombre || 'Desconocido'}
                           </p>
                         </div>
                       </div>
