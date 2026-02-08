@@ -225,7 +225,7 @@ export default function Agenda() {
               setSelectedDate(fecha);
               setTurnoModal({ open: true, turno: null });
             }}
-            onTurnoClick={(turno) => isAdmin && setTurnoModal({ open: true, turno })}
+            onTurnoClick={(turno) => canEdit && setTurnoModal({ open: true, turno })}
           />
         ) : (
           <VistaCalendarioCancha
