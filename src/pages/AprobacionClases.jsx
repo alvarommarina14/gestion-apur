@@ -164,8 +164,10 @@ export default function AprobacionClases() {
     if (!confirm(`¿Aprobar ${seleccionadas.size} clase${seleccionadas.size !== 1 ? 's' : ''}?`)) return;
     setProcesando('aprobar-masivo');
     const clasesParaAprobar = Array.from(seleccionadas);
-    for (const claseId of clasesParaAprobar) {
-      await aprobarMutation.mutateAsync(claseId);
+    try {
+      await Promise.all(clasesParaAprobar.map(claseId => aprobarMutation.mutateAsync(claseId)));
+    } catch (error) {
+      console.error('Error aprobando clases:', error);
     }
   };
 
