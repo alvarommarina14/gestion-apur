@@ -567,14 +567,16 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
              queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
              queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
              queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha-push'] });
+             setIsSubmitting(false);
              onOpenChange(false);
-           } catch (err) {
+             } catch (err) {
              console.error('Error creando turnos semanales:', err);
              setError(`Error creando turnos: ${err.message}`);
-           }
-         };
+             setIsSubmitting(false);
+             }
+             };
 
-         crearTurnosBatch();
+             crearTurnosBatch();
          } else {
          createMutation.mutate(data);
          setIsSubmitting(false);
