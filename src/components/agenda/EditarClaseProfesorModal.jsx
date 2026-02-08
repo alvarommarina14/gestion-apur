@@ -100,28 +100,36 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
 
     try {
       if (isClase) {
-        // Obtener todas las clases de la serie recurrente (desde esta fecha en adelante)
-        const todasClases = await base44.entities.Clase.list();
+        // Obtener todas las clases
+        const todasClases = await base44.entities.Clase.list('-fecha', 1000);
         
-        // Si tiene serie_recurrente_id, usar eso; si no, buscar por patrones coincidentes
-        let clasesAActualizar;
+        // Determinar criterios de búsqueda
+        let clasesAActualizar = [];
+        
         if (turno.serie_recurrente_id) {
+          // Si tiene serie_recurrente_id, usar SOLO eso
           clasesAActualizar = todasClases.filter(c => 
             c.serie_recurrente_id === turno.serie_recurrente_id &&
             new Date(c.fecha) >= new Date(turno.fecha)
           );
         } else {
-          // Fallback: buscar por mismo día de semana, hora y alumnos
-          clasesAActualizar = todasClases.filter(c =>
-            c.alumnos_ids && turno.alumnos_ids &&
-            JSON.stringify(c.alumnos_ids.sort()) === JSON.stringify(turno.alumnos_ids.sort()) &&
-            c.hora_inicio === turno.hora_inicio &&
-            new Date(c.fecha).getDay() === new Date(turno.fecha).getDay() &&
-            new Date(c.fecha) >= new Date(turno.fecha)
-          );
+          // Fallback: buscar clases recurrentes con mismos parámetros
+          clasesAActualizar = todasClases.filter(c => {
+            const mismoDiaSemana = new Date(c.fecha).getDay() === new Date(turno.fecha).getDay();
+            const mismaHora = c.hora_inicio === turno.hora_inicio;
+            const mismosAlumnos = c.alumnos_ids && turno.alumnos_ids && 
+              c.alumnos_ids.length === turno.alumnos_ids.length &&
+              c.alumnos_ids.every(id => turno.alumnos_ids.includes(id));
+            const esFuturo = new Date(c.fecha) >= new Date(turno.fecha);
+            const esRecurrente = c.es_recurrente || c.recurrencia_tipo;
+
+            return mismoDiaSemana && mismaHora && mismosAlumnos && esFuturo && esRecurrente;
+          });
         }
 
-        // Eliminar de Google Calendar (todas a la vez) y luego de base de datos
+        console.log(`🗑️ Eliminando ${clasesAActualizar.length} clases recurrentes...`);
+
+        // Primero, eliminar de Google Calendar
         try {
           await base44.functions.invoke('eliminarClasesRecurrentesGoogleCalendar', {
             clase_id: turno.id,
@@ -131,52 +139,63 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
             fecha_desde: turno.fecha
           });
         } catch (err) {
-          console.error('Error eliminando clases recurrentes de Google Calendar:', err);
-          // Continuar aunque falle
+          console.error('Error eliminando de Google Calendar:', err);
         }
 
-        // Eliminar de base de datos
+        // Luego, eliminar de la base de datos (clases y turnos asociados)
         await Promise.all(
           clasesAActualizar.map(async clase => {
-            // Eliminar TurnoCancha asociado
+            // Buscar TurnoCancha asociados CON MÁS CRITERIOS
             const turnosAsociados = await base44.entities.TurnoCancha.filter({
               fecha: clase.fecha,
               hora_inicio: clase.hora_inicio,
               tipo_turno: 'clase'
             });
+
+            // Filtrar más estrictamente
+            const turnosAEliminar = turnosAsociados.filter(t => {
+              const mismoDiaSemana = new Date(t.fecha).getDay() === new Date(clase.fecha).getDay();
+              const mismaHora = t.hora_inicio === clase.hora_inicio;
+              return mismoDiaSemana && mismaHora;
+            });
             
-            for (const t of turnosAsociados) {
+            // Eliminar turnos
+            for (const t of turnosAEliminar) {
               try {
                 await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
                   turno_id: t.id, 
                   action: 'delete' 
                 });
               } catch (err) {
-                console.error('Error eliminando turno de Google Calendar:', err);
+                console.error('Error eliminando turno:', err);
               }
               await base44.entities.TurnoCancha.delete(t.id);
             }
 
+            // Eliminar clase
             await base44.entities.Clase.delete(clase.id);
           })
         );
       } else {
-        // Obtener todos los turnos (sin filtrar por repeticion_semanal en el filter inicial)
-        const todosTurnos = await base44.entities.TurnoCancha.list('-fecha', 500);
+        // Obtener todos los turnos
+        const todosTurnos = await base44.entities.TurnoCancha.list('-fecha', 1000);
 
-        // Filtrar con criterios más estrictos
+        // Filtrar con máximo rigor
         const turnosAActualizar = todosTurnos.filter(t => {
           const mismaCancha = t.cancha === turno.cancha;
           const mismaHora = t.hora_inicio === turno.hora_inicio;
           const mismoCliente = t.cliente === turno.cliente;
+          const mismoProfesor = t.profesor === turno.profesor;
           const esRecurrente = t.repeticion_semanal === true;
           const esFuturo = new Date(t.fecha) >= new Date(turno.fecha);
-          const mismoProfesor = t.profesor === turno.profesor;
           const mismoDiaSemana = new Date(t.fecha).getDay() === new Date(turno.fecha).getDay();
 
-          return mismaCancha && mismaHora && mismoCliente && esRecurrente && esFuturo && mismoProfesor && mismoDiaSemana;
+          return mismaCancha && mismaHora && mismoCliente && mismoProfesor && esRecurrente && esFuturo && mismoDiaSemana;
         });
 
+        console.log(`🗑️ Eliminando ${turnosAActualizar.length} turnos recurrentes...`);
+
+        // Eliminar todos
         await Promise.all(
           turnosAActualizar.map(async t => {
             try {
@@ -185,7 +204,7 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
                 action: 'delete' 
               });
             } catch (err) {
-              console.error('Error eliminando turno de Google Calendar:', err);
+              console.error('Error eliminando turno:', err);
             }
             await base44.entities.TurnoCancha.delete(t.id);
           })
@@ -196,8 +215,8 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
       queryClient.invalidateQueries({ queryKey: ['clases'] });
       onOpenChange(false);
     } catch (error) {
-      console.error('Error al cancelar:', error);
-      alert('Error al cancelar');
+      console.error('Error al eliminar:', error);
+      alert('Error al eliminar');
     } finally {
       setIsDeleting(false);
       setDeleteMode(null);
