@@ -236,8 +236,9 @@ export default function Agenda() {
             selectedDate={selectedDate}
             selectedCancha={selectedCancha}
             fecha={selectedDate}
-            isAdmin={canEdit}
+            isAdmin={isAdmin}
             onTurnoClick={(turno) => canEdit && setTurnoModal({ open: true, turno })}
+            onEditarClase={(turno) => isAdmin && setClaseModal({ open: true, turno })}
             isLoading={isLoading}
           />
         )}
