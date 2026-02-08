@@ -132,11 +132,25 @@ export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null, pr
         data.estado_mes_actual = 'pendiente';
         data.total_clases_asistidas = 0;
         
-        // Usar profesor_id pasado o del usuario actual si es profesor
-        if (profesorId) {
-          data.profesor_id = profesorId;
-        } else if (user?.rol === 'profesor' && user?.profesor_id) {
-          data.profesor_id = user.profesor_id;
+        // Buscar profesor_id en orden: prop > localStorage > user
+        let idProfesor = profesorId;
+        if (!idProfesor) {
+          const profesorGuardado = localStorage.getItem('profesor_seleccionado');
+          if (profesorGuardado) {
+            try {
+              const profesorObj = JSON.parse(profesorGuardado);
+              idProfesor = profesorObj.id;
+            } catch (e) {
+              console.error('Error parsing profesor', e);
+            }
+          }
+        }
+        if (!idProfesor && user?.rol === 'profesor' && user?.profesor_id) {
+          idProfesor = user.profesor_id;
+        }
+        
+        if (idProfesor) {
+          data.profesor_id = idProfesor;
         }
         
         await base44.entities.Alumno.create(data);
