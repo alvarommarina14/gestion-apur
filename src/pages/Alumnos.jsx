@@ -335,11 +335,11 @@ export default function Alumnos() {
       />
       
       <ReporteAlumnoModal 
-         open={reporteModal.open}
-         onOpenChange={(open) => setReporteModal({ ...reporteModal, open })}
-         alumno={reporteModal.alumno}
-       />
-      </div>
-      </div>
-      );
-      }
+        open={reporteModal.open}
+        onOpenChange={(open) => setReporteModal({ ...reporteModal, open })}
+        alumno={reporteModal.alumno}
+      />
+    </div>
+    </div>
+  );
+}
