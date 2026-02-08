@@ -113,7 +113,7 @@ export default function ClientesPage() {
              <CardContent className="pt-6">
                <div className="text-center">
                  <p className="text-2xl font-bold text-emerald-600">{stats.recurrentes}</p>
-                 <p className="text-sm text-slate-500 mt-1">Recurrentes</p>
+                 <p className="text-sm text-slate-500 mt-1">Abonos Cancha</p>
                </div>
              </CardContent>
            </Card>
