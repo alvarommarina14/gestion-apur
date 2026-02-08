@@ -575,11 +575,12 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
          };
 
          crearTurnosBatch();
-       } else {
+         } else {
          createMutation.mutate(data);
-       }
-     }
-   };
+         setIsSubmitting(false);
+         }
+         }
+         };
 
   const [tieneRepeticionSemanal, setTieneRepeticionSemanal] = useState(false);
 
