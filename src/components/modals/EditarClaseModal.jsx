@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { CheckCircle, CalendarIcon, Trash2 } from 'lucide-react';
+import { CheckCircle, CalendarIcon, Trash2, AlertTriangle } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 
@@ -362,24 +362,26 @@ export default function EditarClaseModal({ open, onOpenChange, clase }) {
               type="button"
               variant="outline"
               onClick={() => {
-                if (confirm('¿Eliminar solo esta clase?')) {
+                if (confirm('¿Eliminar solo esta clase? La clase se eliminará de Google Calendar.')) {
                   handleDelete(false);
                 }
               }}
-              className="text-rose-600 hover:text-rose-700 w-full sm:w-auto"
+              className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 w-full sm:w-auto"
             >
-              Eliminar esta clase
+              <Trash2 className="w-4 h-4 mr-2" />
+              Eliminar solo este día
             </Button>
             <Button
               type="button"
               variant="outline"
               onClick={() => {
-                if (confirm('¿Eliminar TODA la serie de clases recurrentes del mismo día y horario?')) {
+                if (confirm('¿Eliminar TODA la serie de clases recurrentes (mismo día y horario de todas las semanas)? Se eliminarán todas de Google Calendar.')) {
                   handleDelete(true);
                 }
               }}
-              className="text-rose-700 hover:text-rose-800 border-rose-300 w-full sm:w-auto"
+              className="text-rose-700 hover:text-rose-800 hover:bg-rose-50 border-rose-300 w-full sm:w-auto"
             >
+              <Trash2 className="w-4 h-4 mr-2" />
               Eliminar toda la serie
             </Button>
           </div>
