@@ -244,7 +244,7 @@ export default function Agenda() {
         )}
       </div>
 
-      {/* Modal */}
+      {/* Modales */}
       {canEdit && (
         <NuevoTurnoModal
           open={turnoModal.open}
@@ -252,6 +252,14 @@ export default function Agenda() {
           turno={turnoModal.turno}
           fecha={selectedDate}
           isProfesor={isProfesor}
+        />
+      )}
+
+      {isAdmin && (
+        <EditarClaseProfesorModal
+          open={claseModal.open}
+          onOpenChange={(open) => setClaseModal({ ...claseModal, open })}
+          turno={claseModal.turno}
         />
       )}
     </div>
