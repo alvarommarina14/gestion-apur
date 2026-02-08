@@ -145,35 +145,29 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
         // Luego, eliminar de la base de datos (clases y turnos asociados)
         await Promise.all(
           clasesAActualizar.map(async clase => {
-            // Buscar TurnoCancha asociados CON MÁS CRITERIOS
-            const turnosAsociados = await base44.entities.TurnoCancha.filter({
-              fecha: clase.fecha,
-              hora_inicio: clase.hora_inicio,
-              tipo_turno: 'clase'
-            });
-
-            // Filtrar más estrictamente
-            const turnosAEliminar = turnosAsociados.filter(t => {
-              const mismoDiaSemana = new Date(t.fecha).getDay() === new Date(clase.fecha).getDay();
-              const mismaHora = t.hora_inicio === clase.hora_inicio;
-              return mismoDiaSemana && mismaHora;
-            });
-            
-            // Eliminar turnos
-            for (const t of turnosAEliminar) {
+            // Si la clase tiene turno_cancha_id, usarlo directamente
+            if (clase.turno_cancha_id) {
               try {
                 await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
-                  turno_id: t.id, 
+                  turno_id: clase.turno_cancha_id, 
                   action: 'delete' 
                 });
               } catch (err) {
-                console.error('Error eliminando turno:', err);
+                console.error('Error eliminando turno de Google Calendar:', err);
               }
-              await base44.entities.TurnoCancha.delete(t.id);
+              try {
+                await base44.entities.TurnoCancha.delete(clase.turno_cancha_id);
+              } catch (err) {
+                console.error('Error eliminando TurnoCancha:', err);
+              }
             }
 
             // Eliminar clase
-            await base44.entities.Clase.delete(clase.id);
+            try {
+              await base44.entities.Clase.delete(clase.id);
+            } catch (err) {
+              console.error('Error eliminando clase:', err);
+            }
           })
         );
       } else {
