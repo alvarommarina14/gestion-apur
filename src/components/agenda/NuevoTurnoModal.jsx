@@ -259,6 +259,18 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
       
       return turnoCreado;
     },
+    onMutate: async (data) => {
+      await queryClient.cancelQueries({ queryKey: ['turnos-cancha'] });
+      const previous = queryClient.getQueryData(['turnos-cancha']);
+      const optimisticTurno = { ...data, id: `temp-${Date.now()}`, created_date: new Date().toISOString() };
+      queryClient.setQueryData(['turnos-cancha'], (old) => [...(old || []), optimisticTurno]);
+      return { previous };
+    },
+    onError: (err, newData, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['turnos-cancha'], context.previous);
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
