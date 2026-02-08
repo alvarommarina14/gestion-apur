@@ -533,41 +533,29 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
      }
    };
 
-  const handleDelete = async () => {
-    // Verificar si el turno tiene repetición semanal
-    const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: turno.id });
-    const tieneRepeticion = recordatorios.length > 0 && recordatorios[0].repeticion_semanal;
+  const [tieneRepeticionSemanal, setTieneRepeticionSemanal] = useState(false);
 
-    if (tieneRepeticion) {
-      // Opción 1: Eliminar solo este turno
-      const eliminarSoloEste = confirm(
-        '⚠️ Este turno forma parte de una serie semanal\n\n' +
-        '¿Querés eliminar SOLO este turno?\n\n' +
-        'Presioná "Aceptar" para eliminar solo este\n' +
-        'Presioná "Cancelar" para ver más opciones'
-      );
-      
-      if (eliminarSoloEste) {
-        // Eliminar solo este turno
-        deleteMutation.mutate({ id: turno.id, eliminarSerie: false });
+  useEffect(() => {
+    const verificarRepeticion = async () => {
+      if (turno && open) {
+        const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: turno.id });
+        setTieneRepeticionSemanal(recordatorios.length > 0 && recordatorios[0].repeticion_semanal);
       } else {
-        // Opción 2: Eliminar toda la serie
-        const eliminarTodos = confirm(
-          '¿Querés eliminar TODA la serie de turnos?\n\n' +
-          'Se eliminarán todos los turnos recurrentes (hasta 52 semanas)\n\n' +
-          'Presioná "Aceptar" para eliminar toda la serie\n' +
-          'Presioná "Cancelar" para no eliminar nada'
-        );
-        
-        if (eliminarTodos) {
-          deleteMutation.mutate({ id: turno.id, eliminarSerie: true });
-        }
+        setTieneRepeticionSemanal(false);
       }
-    } else {
-      // Turno sin repetición, confirmación simple
-      if (confirm('¿Eliminar este turno?')) {
-        deleteMutation.mutate({ id: turno.id, eliminarSerie: false });
-      }
+    };
+    verificarRepeticion();
+  }, [turno, open]);
+
+  const handleDeleteSolo = () => {
+    if (confirm('¿Eliminar solo este turno?')) {
+      deleteMutation.mutate({ id: turno.id, eliminarSerie: false });
+    }
+  };
+
+  const handleDeleteSerie = () => {
+    if (confirm('¿Eliminar TODA la serie de turnos recurrentes (hasta 52 semanas)?')) {
+      deleteMutation.mutate({ id: turno.id, eliminarSerie: true });
     }
   };
 
