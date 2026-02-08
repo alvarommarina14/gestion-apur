@@ -92,10 +92,23 @@ export default function CancelarClaseModal({ open, onOpenChange, clase }) {
       alert('Solo administradores pueden cancelar clases');
       return;
     }
+
+    // Confirmar antes de proceder
+    const mensajeConfirmacion = motivo === 'reprogramar' 
+      ? '¿Confirmar reprogramación de esta clase?'
+      : selectedOption?.generaRecupero 
+        ? '¿Confirmar cancelación? Se generarán recuperos para los alumnos.'
+        : '¿Confirmar cancelación? Esta clase NO generará recupero y se considerará perdida.';
+    
+    if (!confirm(mensajeConfirmacion)) {
+      return;
+    }
     
     setLoading(true);
     
     try {
+      let nuevoEstado = '';
+
       // Si es reprogramación, crear nueva clase y marcar la actual como reprogramada
       if (motivo === 'reprogramar') {
         // Crear la nueva clase
@@ -122,9 +135,11 @@ export default function CancelarClaseModal({ open, onOpenChange, clase }) {
           clase_reprogramada_id: nuevaClase.id,
           motivo_cancelacion: notas || 'Clase reprogramada',
         });
+
+        nuevoEstado = 'reprogramada';
       } else {
         // Determinar el nuevo estado de la clase
-        let nuevoEstado = 'cancelada_anticipada';
+        nuevoEstado = 'cancelada_anticipada';
         if (motivo === 'cancelacion_alumno_tarde') {
           nuevoEstado = 'cancelada_tarde';
         } else if (motivo === 'clima') {
@@ -165,6 +180,23 @@ export default function CancelarClaseModal({ open, onOpenChange, clase }) {
         }
       }
       
+      // Actualizar KPIs del mes
+      const mesClave = clase.fecha.substring(0, 7); // "YYYY-MM"
+      const configuracionMes = await base44.entities.ConfiguracionMes.filter({ mes: mesClave });
+      
+      if (configuracionMes.length > 0) {
+        const config = configuracionMes[0];
+        const updates = {};
+
+        if (nuevoEstado === 'cancelada_anticipada' || nuevoEstado === 'cancelada_tarde' || nuevoEstado === 'suspendida') {
+          updates.total_clases_canceladas = (config.total_clases_canceladas || 0) + 1;
+        }
+
+        if (Object.keys(updates).length > 0) {
+          await base44.entities.ConfiguracionMes.update(config.id, updates);
+        }
+      }
+
       // Log de auditoría
       await base44.entities.LogAuditoria.create({
         entidad: 'Clase',
@@ -312,13 +344,12 @@ export default function CancelarClaseModal({ open, onOpenChange, clase }) {
           )}
           
           <div className="space-y-2">
-            <Label>Notas {motivo !== 'reprogramar' && '(obligatorio)'}</Label>
+            <Label>Notas (opcional)</Label>
             <Textarea
               value={notas}
               onChange={(e) => setNotas(e.target.value)}
               placeholder="Detalle del motivo..."
               rows={2}
-              required={motivo !== 'reprogramar'}
             />
           </div>
           
@@ -341,7 +372,6 @@ export default function CancelarClaseModal({ open, onOpenChange, clase }) {
             disabled={
               loading || 
               !motivo || 
-              (motivo !== 'reprogramar' && !notas) ||
               (motivo === 'reprogramar' && (!nuevaFecha || !nuevaHora))
             }
             variant={motivo === 'reprogramar' ? 'default' : 'destructive'}
