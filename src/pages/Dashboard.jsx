@@ -360,8 +360,9 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <PullToRefresh onRefresh={handleRefresh}>
+      <div key={refreshKey} className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         {/* Header */}
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
