@@ -37,16 +37,48 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
 
     try {
       if (isClase) {
-        // Eliminar clase
-        await base44.entities.Clase.update(turno.id, {
-          estado: 'cancelada_anticipada',
-          cancelado_por: 'profesor',
+        // Eliminar de Google Calendar primero
+        try {
+          await base44.functions.invoke('sincronizarClaseGoogleCalendar', { 
+            clase_id: turno.id, 
+            action: 'delete' 
+          });
+        } catch (err) {
+          console.error('Error eliminando de Google Calendar:', err);
+        }
+
+        // Eliminar TurnoCancha asociado
+        const turnosAsociados = await base44.entities.TurnoCancha.filter({
+          fecha: turno.fecha,
+          hora_inicio: turno.hora_inicio,
+          tipo_turno: 'clase'
         });
+        
+        for (const t of turnosAsociados) {
+          try {
+            await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
+              turno_id: t.id, 
+              action: 'delete' 
+            });
+          } catch (err) {
+            console.error('Error eliminando turno de Google Calendar:', err);
+          }
+          await base44.entities.TurnoCancha.delete(t.id);
+        }
+
+        // Eliminar la clase
+        await base44.entities.Clase.delete(turno.id);
       } else {
-        // Eliminar solo este turno (crear uno nuevo con estado cancelado o eliminar)
-        await base44.entities.TurnoCancha.update(turno.id, {
-          estado: 'cancelado',
-        });
+        // Eliminar solo este turno
+        try {
+          await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
+            turno_id: turno.id, 
+            action: 'delete' 
+          });
+        } catch (err) {
+          console.error('Error eliminando turno de Google Calendar:', err);
+        }
+        await base44.entities.TurnoCancha.delete(turno.id);
       }
 
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
