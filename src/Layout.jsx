@@ -1,21 +1,22 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
-        LayoutDashboard, 
-        Users, 
-        Calendar, 
-        DollarSign, 
-        RefreshCw,
-        FileText,
-        Menu,
-        X,
-        ChevronRight,
-        Settings,
-        LogOut,
-        Shield,
-        CheckCircle
-      } from 'lucide-react';
+              LayoutDashboard, 
+              Users, 
+              Calendar, 
+              DollarSign, 
+              RefreshCw,
+              FileText,
+              Menu,
+              X,
+              ChevronRight,
+              Settings,
+              LogOut,
+              Shield,
+              CheckCircle
+            } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -24,7 +25,6 @@ import NotificationManager from '@/components/NotificationManager';
 import PushNotificationManager from '@/components/PushNotificationManager';
 import BottomTabNavigation from '@/components/BottomTabNavigation';
 import { ArrowLeft } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
 
 const navigationGestionClases = [
   { name: 'Profesores', href: 'Profesores', icon: Users },
