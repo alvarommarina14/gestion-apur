@@ -540,16 +540,25 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
 
     if (tieneRepeticion) {
       // Preguntar si quiere eliminar toda la serie o solo este turno
-      const eliminarTodos = confirm(
-        'Este turno forma parte de una serie recurrente.\n\n' +
-        '¿Querés eliminar TODOS los turnos de esta serie (52 semanas)?\n\n' +
-        'Presioná "Aceptar" para eliminar todos.\n' +
-        'Presioná "Cancelar" para eliminar solo este turno.'
+      const respuesta = confirm(
+        '⚠️ Este turno tiene repetición semanal\n\n' +
+        'Presioná "Aceptar" para eliminar SOLO este turno\n' +
+        'Presioná "Cancelar" si querés eliminar TODA la serie'
       );
       
-      if (eliminarTodos === null) return; // Usuario cerró el diálogo sin elegir
-      
-      deleteMutation.mutate({ id: turno.id, eliminarSerie: eliminarTodos });
+      if (respuesta) {
+        // Usuario presionó "Aceptar" → eliminar solo este turno
+        deleteMutation.mutate({ id: turno.id, eliminarSerie: false });
+      } else {
+        // Usuario presionó "Cancelar" → preguntar si realmente quiere eliminar toda la serie
+        const confirmarSerie = confirm(
+          '¿Estás seguro que querés eliminar TODOS los turnos de esta serie (52 semanas)?'
+        );
+        
+        if (confirmarSerie) {
+          deleteMutation.mutate({ id: turno.id, eliminarSerie: true });
+        }
+      }
     } else {
       // Turno sin repetición, confirmación simple
       if (confirm('¿Eliminar este turno?')) {
