@@ -23,7 +23,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
 
-export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null }) {
+export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null, profesorId = null }) {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -129,6 +129,10 @@ export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null }) 
         data.deuda_total = 0;
         data.estado_mes_actual = 'pendiente';
         data.total_clases_asistidas = 0;
+        
+        if (profesorId) {
+          data.profesor_id = profesorId;
+        }
         
         await base44.entities.Alumno.create(data);
       }
