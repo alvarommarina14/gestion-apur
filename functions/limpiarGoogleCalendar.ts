@@ -33,8 +33,9 @@ Deno.serve(async (req) => {
       });
 
       if (!response.ok) {
-        console.error('Error listing events:', response.status);
-        return Response.json({ error: 'Error listing calendar events' }, { status: 500 });
+        const errorText = await response.text();
+        console.error('Error listing events:', response.status, errorText);
+        return Response.json({ error: 'Error listing calendar events', details: errorText }, { status: 500 });
       }
 
       const data = await response.json();
