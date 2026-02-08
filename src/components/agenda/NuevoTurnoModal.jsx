@@ -539,23 +539,27 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha }) {
     const tieneRepeticion = recordatorios.length > 0 && recordatorios[0].repeticion_semanal;
 
     if (tieneRepeticion) {
-      // Preguntar si quiere eliminar toda la serie o solo este turno
-      const respuesta = confirm(
-        '⚠️ Este turno tiene repetición semanal\n\n' +
-        'Presioná "Aceptar" para eliminar SOLO este turno\n' +
-        'Presioná "Cancelar" si querés eliminar TODA la serie'
+      // Opción 1: Eliminar solo este turno
+      const eliminarSoloEste = confirm(
+        '⚠️ Este turno forma parte de una serie semanal\n\n' +
+        '¿Querés eliminar SOLO este turno?\n\n' +
+        'Presioná "Aceptar" para eliminar solo este\n' +
+        'Presioná "Cancelar" para ver más opciones'
       );
       
-      if (respuesta) {
-        // Usuario presionó "Aceptar" → eliminar solo este turno
+      if (eliminarSoloEste) {
+        // Eliminar solo este turno
         deleteMutation.mutate({ id: turno.id, eliminarSerie: false });
       } else {
-        // Usuario presionó "Cancelar" → preguntar si realmente quiere eliminar toda la serie
-        const confirmarSerie = confirm(
-          '¿Estás seguro que querés eliminar TODOS los turnos de esta serie (52 semanas)?'
+        // Opción 2: Eliminar toda la serie
+        const eliminarTodos = confirm(
+          '¿Querés eliminar TODA la serie de turnos?\n\n' +
+          'Se eliminarán todos los turnos recurrentes (hasta 52 semanas)\n\n' +
+          'Presioná "Aceptar" para eliminar toda la serie\n' +
+          'Presioná "Cancelar" para no eliminar nada'
         );
         
-        if (confirmarSerie) {
+        if (eliminarTodos) {
           deleteMutation.mutate({ id: turno.id, eliminarSerie: true });
         }
       }
