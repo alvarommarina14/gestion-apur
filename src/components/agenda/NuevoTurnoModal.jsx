@@ -59,6 +59,12 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
     enabled: open,
   });
 
+  const { data: clientes = [] } = useQuery({
+    queryKey: ['clientes-list'],
+    queryFn: () => base44.entities.Cliente.list(),
+    enabled: open,
+  });
+
   const [formData, setFormData] = useState({
     fecha: format(fecha || new Date(), 'yyyy-MM-dd'),
     hora_inicio: '09:00',
@@ -670,11 +676,32 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
 
       <div className="space-y-2">
         <Label>Cliente / Nombre</Label>
+        <Select
+          value={formData.cliente}
+          onValueChange={(v) => setFormData({ ...formData, cliente: v })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Seleccionar cliente o ingresar nombre" />
+          </SelectTrigger>
+          <SelectContent>
+            {clientes.length > 0 && (
+              <>
+                {clientes.map(cliente => (
+                  <SelectItem key={cliente.id} value={cliente.nombre}>
+                    {cliente.nombre}
+                  </SelectItem>
+                ))}
+              </>
+            )}
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-slate-500 mt-1">O ingresa un nombre nuevo manualmente</p>
         <Input
           value={formData.cliente}
           onChange={(e) => setFormData({ ...formData, cliente: e.target.value })}
           placeholder="Nombre del cliente"
           required
+          className="mt-2"
         />
       </div>
 
