@@ -28,6 +28,7 @@ Deno.serve(async (req) => {
     
     // Obtener access token de Google Calendar
     const accessToken = await base44.asServiceRole.connectors.getAccessToken('googlecalendar');
+    console.log('✅ Access token obtenido, Calendar ID:', CALENDAR_ID);
 
     // Si la acción es eliminar
     if (action === 'delete' && clase.gcal_event_id) {
@@ -172,7 +173,9 @@ ${clase.notas ? `Notas: ${clase.notas}` : ''}
 
     if (!response.ok) {
       const error = await response.text();
-      console.error('Error de Google Calendar:', error);
+      console.error('❌ Error de Google Calendar:', error);
+      console.error('Status:', response.status);
+      console.error('Evento enviado:', JSON.stringify(evento));
       
       // Marcar como error
       await base44.asServiceRole.entities.Clase.update(clase.id, {
@@ -184,6 +187,7 @@ ${clase.notas ? `Notas: ${clase.notas}` : ''}
     }
 
     const eventoCreado = await response.json();
+    console.log('✅ Evento creado en Google Calendar:', eventoCreado.id);
 
     // Actualizar clase con ID del evento
     await base44.asServiceRole.entities.Clase.update(clase.id, {
@@ -191,6 +195,7 @@ ${clase.notas ? `Notas: ${clase.notas}` : ''}
       gcal_sync_status: 'sincronizado',
       gcal_error_msg: null,
     });
+    console.log('✅ Clase actualizada con event_id:', eventoCreado.id);
 
     return Response.json({
       success: true,
