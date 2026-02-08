@@ -136,10 +136,26 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente, turno
             <div className="flex items-center justify-between">
               <h3 className="font-medium text-slate-900">Datos del cliente</h3>
               {!editando ? (
-                <Button variant="outline" size="sm" onClick={() => setEditando(true)}>
-                  <Edit className="w-4 h-4 mr-2" />
-                  Editar
-                </Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setEditando(true)}>
+                    <Edit className="w-4 h-4 mr-2" />
+                    Editar
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => {
+                      if (confirm(`¿Eliminar el cliente "${cliente.nombre}"? Esta acción no se puede deshacer.`)) {
+                        deleteMutation.mutate(cliente.id);
+                      }
+                    }}
+                    className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200"
+                    disabled={deleteMutation.isPending}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Eliminar
+                  </Button>
+                </div>
               ) : (
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={() => setEditando(false)}>
