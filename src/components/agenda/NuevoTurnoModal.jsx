@@ -364,7 +364,10 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
         const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: id });
         const recordatorioBase = recordatorios[0];
 
+        console.log('🗑️ Eliminando serie. Recordatorio encontrado:', recordatorioBase);
+
         if (recordatorioBase && recordatorioBase.repeticion_semanal) {
+          console.log('✅ Es recurrente, eliminando serie completa...');
           // Buscar todos los turnos con las mismas características
           const todosTurnos = await base44.entities.TurnoCancha.list();
           const turnosRelacionados = todosTurnos.filter(t => 
@@ -374,6 +377,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
             format(parseISO(t.fecha), 'EEEE', { locale: es }) === format(parseISO(turnoData.fecha), 'EEEE', { locale: es }) &&
             new Date(t.fecha) >= new Date(turnoData.fecha)
           );
+          console.log(`🗑️ Turnos relacionados encontrados: ${turnosRelacionados.length}`);
 
           // Eliminar de Google Calendar - eliminar toda la serie recurrente
           const primerTurnoConGcal = turnosRelacionados.find(t => t.gcal_event_id);
