@@ -26,6 +26,7 @@ export default function Agenda() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedCancha, setSelectedCancha] = useState('todas');
   const [turnoModal, setTurnoModal] = useState({ open: false, turno: null });
+  const [claseModal, setClaseModal] = useState({ open: false, turno: null });
   const [showCalendario, setShowCalendario] = useState(false);
 
   const { data: user } = useQuery({
