@@ -136,14 +136,7 @@ export default function Agenda() {
               </div>
             </CardContent>
           </Card>
-          <Card className="shadow-sm border-rose-200 bg-rose-50/30">
-            <CardContent className="pt-4 sm:pt-6 pb-4">
-              <div className="text-center">
-                <p className="text-xl sm:text-2xl font-bold text-rose-600">{stats.pendientes}</p>
-                <p className="text-xs sm:text-sm text-slate-500 mt-1">Pendientes</p>
-              </div>
-            </CardContent>
-          </Card>
+
           <Card className="shadow-sm border-blue-200 bg-blue-50/30">
             <CardContent className="pt-4 sm:pt-6 pb-4">
               <div className="text-center">
