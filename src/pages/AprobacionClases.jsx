@@ -161,6 +161,15 @@ export default function AprobacionClases() {
     await eliminarMutation.mutateAsync(clasesPendientes.map(c => c.id));
   };
 
+  const handleAprobarSeleccionadas = async () => {
+    if (!confirm(`¿Aprobar ${seleccionadas.size} clase${seleccionadas.size !== 1 ? 's' : ''}?`)) return;
+    setProcesando('aprobar-masivo');
+    const clasesParaAprobar = Array.from(seleccionadas);
+    for (const claseId of clasesParaAprobar) {
+      await aprobarMutation.mutateAsync(claseId);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
