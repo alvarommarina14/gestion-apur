@@ -30,19 +30,43 @@ Deno.serve(async (req) => {
     const accessToken = await base44.asServiceRole.connectors.getAccessToken('googlecalendar');
 
     // Si la acción es eliminar
-    if (action === 'delete' && turno.gcal_event_id) {
-      const deleteResponse = await fetch(
-        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events/${turno.gcal_event_id}`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-          },
-        }
-      );
+    if (action === 'delete') {
+      let eventIdToDelete = turno.gcal_event_id;
 
-      if (!deleteResponse.ok && deleteResponse.status !== 404) {
-        console.error('Error eliminando turno de Google Calendar');
+      // Si no tiene event_id, buscar por turno_id en propiedades extendidas
+      if (!eventIdToDelete) {
+        const searchResponse = await fetch(
+          `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?privateExtendedProperty=turno_id=${turno_id}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        if (searchResponse.ok) {
+          const searchData = await searchResponse.json();
+          if (searchData.items && searchData.items.length > 0) {
+            eventIdToDelete = searchData.items[0].id;
+          }
+        }
+      }
+
+      // Eliminar evento si lo encontramos
+      if (eventIdToDelete) {
+        const deleteResponse = await fetch(
+          `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events/${eventIdToDelete}`,
+          {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        if (!deleteResponse.ok && deleteResponse.status !== 404) {
+          console.error('Error eliminando turno de Google Calendar:', deleteResponse.status);
+        }
       }
 
       return Response.json({ success: true, deleted: true });
