@@ -27,6 +27,9 @@ import StatusBadge from '@/components/ui/StatusBadge';
 import { cn } from '@/lib/utils';
 
 export default function DetalleAlumnoModal({ open, onOpenChange, alumno }) {
+  const queryClient = useQueryClient();
+  const [deletingClases, setDeletingClases] = useState(false);
+
   const { data: pagos = [] } = useQuery({
     queryKey: ['pagos', alumno?.id],
     queryFn: () => base44.entities.Pago.filter({ alumno_id: alumno?.id }, '-fecha'),
@@ -49,6 +52,65 @@ export default function DetalleAlumnoModal({ open, onOpenChange, alumno }) {
     queryKey: ['logs', alumno?.id],
     queryFn: () => base44.entities.LogAuditoria.filter({ entidad_id: alumno?.id }, '-fecha'),
     enabled: !!alumno?.id,
+  });
+
+  const { data: clases = [] } = useQuery({
+    queryKey: ['clases-alumno', alumno?.id],
+    queryFn: async () => {
+      const todas = await base44.entities.Clase.list();
+      return todas.filter(c => c.alumnos_ids?.includes(alumno?.id));
+    },
+    enabled: !!alumno?.id,
+  });
+
+  const deleteAllClasesMutation = useMutation({
+    mutationFn: async () => {
+      setDeletingClases(true);
+      try {
+        for (const clase of clases) {
+          try {
+            await base44.functions.invoke('sincronizarClaseGoogleCalendar', { 
+              clase_id: clase.id, 
+              action: 'delete' 
+            });
+          } catch (err) {
+            console.error('Error eliminando de Google Calendar:', err);
+          }
+
+          try {
+            const turnosRelacionados = await base44.entities.TurnoCancha.filter({ 
+              fecha: clase.fecha,
+              hora_inicio: clase.hora_inicio,
+              tipo_turno: 'clase'
+            });
+            
+            for (const turno of turnosRelacionados) {
+              try {
+                await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
+                  turno_id: turno.id, 
+                  action: 'delete' 
+                });
+              } catch (err) {
+                console.error('Error eliminando turno de Google Calendar:', err);
+              }
+              await base44.entities.TurnoCancha.delete(turno.id);
+            }
+          } catch (err) {
+            console.error('Error eliminando turnos:', err);
+          }
+
+          await base44.entities.Clase.delete(clase.id);
+          await new Promise(resolve => setTimeout(resolve, 30));
+        }
+      } finally {
+        setDeletingClases(false);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clases-alumno'] });
+      queryClient.invalidateQueries({ queryKey: ['clases'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+    },
   });
   
   const formatMoney = (amount) => {
