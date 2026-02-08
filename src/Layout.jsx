@@ -33,6 +33,10 @@ const navigationAgenda = [
   { name: 'Mis Recordatorios', href: 'RecordatoriosCanchaEmpleado', icon: Calendar, empleadoOnly: true },
 ];
 
+const navigationEmpleados = [
+  { name: 'Tareas', href: 'Tareas', icon: CheckCircle },
+];
+
 const navigationProfesor = [
   { name: 'Dashboard', href: 'Dashboard', icon: LayoutDashboard },
   { name: 'Alumnos', href: 'Alumnos', icon: Users },
