@@ -126,63 +126,59 @@ export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null, pr
         
         await base44.entities.Alumno.update(alumno.id, data);
       } else {
-        data.fecha_inicio = format(new Date(), 'yyyy-MM-dd');
-        data.clases_a_recuperar = 0;
-        data.deuda_total = 0;
-        data.estado_mes_actual = 'pendiente';
-        data.total_clases_asistidas = 0;
-        
-        // Buscar profesor_id en orden: prop > localStorage > user
-        let idProfesor = profesorId;
-        if (!idProfesor) {
-          const profesorGuardado = localStorage.getItem('profesor_seleccionado');
-          if (profesorGuardado) {
-            try {
-              const profesorObj = JSON.parse(profesorGuardado);
-              idProfesor = profesorObj.id;
-            } catch (e) {
-              console.error('Error parsing profesor', e);
-            }
+      data.fecha_inicio = format(new Date(), 'yyyy-MM-dd');
+      data.clases_a_recuperar = 0;
+      data.deuda_total = 0;
+      data.estado_mes_actual = 'pendiente';
+      data.total_clases_asistidas = 0;
+
+      // Buscar profesor_id en orden: prop > localStorage > user
+      let idProfesor = profesorId;
+      if (!idProfesor) {
+        const profesorGuardado = localStorage.getItem('profesor_seleccionado');
+        if (profesorGuardado) {
+          try {
+            const profesorObj = JSON.parse(profesorGuardado);
+            idProfesor = profesorObj.id;
+          } catch (e) {
+            console.error('Error parsing profesor', e);
           }
         }
-        if (!idProfesor && user?.rol === 'profesor' && user?.profesor_id) {
-          idProfesor = user.profesor_id;
-        }
-        
-        if (idProfesor) {
-           data.profesor_id = idProfesor;
-         }
+      }
+      if (!idProfesor && user?.rol === 'profesor' && user?.profesor_id) {
+        idProfesor = user.profesor_id;
+      }
 
-         const alumnoCreado = await base44.entities.Alumno.create(data);
-
-         // Sincronizar alumno con gestión de clientes
+      if (idProfesor) {
+         data.profesor_id = idProfesor;
+         // Agregar nombre del profesor
          try {
-           let profesorNombre = 'Sin asignar';
-           if (idProfesor) {
-             try {
-               const profesor = await base44.entities.Profesor.read(idProfesor);
-               if (profesor?.nombre) {
-                 profesorNombre = profesor.nombre;
-               }
-             } catch (err) {
-               console.log('Error obteniendo profesor:', err);
-             }
+           const profesor = await base44.entities.Profesor.read(idProfesor);
+           if (profesor?.nombre) {
+             data.profesor_nombre = profesor.nombre;
            }
-
-           await base44.entities.Cliente.create({
-             nombre: data.nombre,
-             telefono: data.whatsapp || '',
-             email: '',
-             clasificacion: 'recurrente',
-             tipo_cliente: 'clase',
-             notas: `Alumno sincronizado - Profesor: ${profesorNombre}`,
-             activo: true,
-           });
          } catch (err) {
-           console.log('Error sincronizando alumno con clientes:', err);
+           console.log('Error obteniendo profesor:', err);
          }
+       }
 
-         return alumnoCreado;
+        const alumnoCreado = await base44.entities.Alumno.create(data);
+
+        // Sincronizar alumno con gestión de clientes
+        try {
+          const profesorNombre = data.profesor_nombre || 'Sin asignar';
+          await base44.entities.Cliente.create({
+            nombre: data.nombre,
+            telefono: data.whatsapp || '',
+            email: '',
+            clasificacion: 'recurrente',
+            tipo_cliente: 'clase',
+            notas: `Alumno sincronizado - Profesor: ${profesorNombre}`,
+            activo: true,
+          });
+        } catch (err) {
+          console.log('Error sincronizando alumno con clientes:', err);
+        }
       }
       
       setSuccess(true);
