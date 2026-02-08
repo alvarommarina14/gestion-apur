@@ -67,22 +67,60 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
 
     try {
       if (isClase) {
-        // Obtener todas las clases recurrentes
-        const clases = await base44.entities.Clase.filter({
-          serie_recurrente_id: turno.serie_recurrente_id,
-        });
+        // Obtener todas las clases de la serie recurrente (desde esta fecha en adelante)
+        const todasClases = await base44.entities.Clase.list();
+        
+        // Si tiene serie_recurrente_id, usar eso; si no, buscar por patrones coincidentes
+        let clasesAActualizar;
+        if (turno.serie_recurrente_id) {
+          clasesAActualizar = todasClases.filter(c => 
+            c.serie_recurrente_id === turno.serie_recurrente_id &&
+            new Date(c.fecha) >= new Date(turno.fecha)
+          );
+        } else {
+          // Fallback: buscar por mismo día de semana, hora y alumnos
+          clasesAActualizar = todasClases.filter(c =>
+            c.alumnos_ids && turno.alumnos_ids &&
+            JSON.stringify(c.alumnos_ids.sort()) === JSON.stringify(turno.alumnos_ids.sort()) &&
+            c.hora_inicio === turno.hora_inicio &&
+            new Date(c.fecha).getDay() === new Date(turno.fecha).getDay() &&
+            new Date(c.fecha) >= new Date(turno.fecha)
+          );
+        }
 
-        const clasesAActualizar = clases.filter(
-          c => new Date(c.fecha) >= new Date(turno.fecha)
-        );
-
+        // Eliminar de Google Calendar y base de datos
         await Promise.all(
-          clasesAActualizar.map(clase =>
-            base44.entities.Clase.update(clase.id, {
-              estado: 'cancelada_anticipada',
-              cancelado_por: 'profesor',
-            })
-          )
+          clasesAActualizar.map(async clase => {
+            try {
+              await base44.functions.invoke('sincronizarClaseGoogleCalendar', { 
+                clase_id: clase.id, 
+                action: 'delete' 
+              });
+            } catch (err) {
+              console.error('Error eliminando de Google Calendar:', err);
+            }
+            
+            // Eliminar TurnoCancha asociado
+            const turnosAsociados = await base44.entities.TurnoCancha.filter({
+              fecha: clase.fecha,
+              hora_inicio: clase.hora_inicio,
+              tipo_turno: 'clase'
+            });
+            
+            for (const t of turnosAsociados) {
+              try {
+                await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
+                  turno_id: t.id, 
+                  action: 'delete' 
+                });
+              } catch (err) {
+                console.error('Error eliminando turno de Google Calendar:', err);
+              }
+              await base44.entities.TurnoCancha.delete(t.id);
+            }
+
+            await base44.entities.Clase.delete(clase.id);
+          })
         );
       } else {
         // Obtener todos los turnos recurrentes
@@ -97,11 +135,17 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
         );
 
         await Promise.all(
-          turnosAActualizar.map(t =>
-            base44.entities.TurnoCancha.update(t.id, {
-              estado: 'cancelado',
-            })
-          )
+          turnosAActualizar.map(async t => {
+            try {
+              await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
+                turno_id: t.id, 
+                action: 'delete' 
+              });
+            } catch (err) {
+              console.error('Error eliminando turno de Google Calendar:', err);
+            }
+            await base44.entities.TurnoCancha.delete(t.id);
+          })
         );
       }
 
