@@ -866,51 +866,38 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
       )}
 
       <DialogFooter className="flex-col sm:flex-row gap-2">
-        {turno && formData.tipo_turno !== 'clase' && tieneRepeticionSemanal && (
-          <div className="w-full sm:mr-auto flex flex-col gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                if (confirm('¿Eliminar solo este turno?')) {
-                  deleteMutation.mutate({ id: turno.id, eliminarSerie: false });
-                }
-              }}
-              className="text-rose-600 hover:text-rose-700 w-full sm:w-auto"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Eliminar solo para hoy
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                if (confirm('¿Eliminar TODA la serie de turnos recurrentes (hasta 52 semanas)?')) {
-                  deleteMutation.mutate({ id: turno.id, eliminarSerie: true });
-                }
-              }}
-              className="text-rose-700 hover:text-rose-800 border-rose-300 w-full sm:w-auto"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Eliminar toda la serie
-            </Button>
-          </div>
-        )}
-        {turno && formData.tipo_turno !== 'clase' && !tieneRepeticionSemanal && (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              if (confirm('¿Eliminar este turno?')) {
-                deleteMutation.mutate({ id: turno.id, eliminarSerie: false });
-              }
-            }}
-            className="text-rose-600 hover:text-rose-700 sm:mr-auto"
-          >
-            <Trash2 className="w-4 h-4 mr-2" />
-            Eliminar
-          </Button>
-        )}
+         {turno && formData.tipo_turno !== 'clase' && (
+           <div className="w-full sm:mr-auto flex flex-col gap-2">
+             <Button
+               type="button"
+               variant="outline"
+               onClick={() => {
+                 if (confirm('¿Eliminar SOLO este turno?')) {
+                   deleteMutation.mutate({ id: turno.id, eliminarSerie: false });
+                 }
+               }}
+               className="text-rose-600 hover:text-rose-700 w-full sm:w-auto"
+             >
+               <Trash2 className="w-4 h-4 mr-2" />
+               Este turno solamente
+             </Button>
+             {tieneRepeticionSemanal && (
+               <Button
+                 type="button"
+                 variant="outline"
+                 onClick={() => {
+                   if (confirm('¿Eliminar TODA la serie recurrente (hasta 52 semanas)?')) {
+                     deleteMutation.mutate({ id: turno.id, eliminarSerie: true });
+                   }
+                 }}
+                 className="text-rose-700 hover:text-rose-800 border-rose-300 w-full sm:w-auto"
+               >
+                 <Trash2 className="w-4 h-4 mr-2" />
+                 Toda la recurrencia
+               </Button>
+             )}
+           </div>
+         )}
         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
           Cancelar
         </Button>
