@@ -382,14 +382,12 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
         await base44.entities.TurnoCancha.delete(id);
       }
     },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
-      await queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
-      await queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha-push'] });
-      await queryClient.invalidateQueries({ queryKey: ['auditoria'] });
-      setTimeout(() => {
-        onOpenChange(false);
-      }, 100);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha-push'] });
+      queryClient.invalidateQueries({ queryKey: ['auditoria'] });
+      onOpenChange(false);
     },
   });
 
