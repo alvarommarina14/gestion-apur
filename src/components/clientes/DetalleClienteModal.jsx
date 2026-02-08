@@ -76,57 +76,6 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente, turno
     },
   });
 
-  const deleteAllTurnosMutation = useMutation({
-    mutationFn: async (clienteNombre) => {
-      // Obtener todos los turnos del cliente
-      const todosTurnos = await base44.entities.TurnoCancha.list();
-      const turnosCliente = todosTurnos.filter(t => t.cliente === clienteNombre);
-
-      // Obtener todos los recordatorios
-      const todosRecordatorios = await base44.entities.RecordatorioCancha.list();
-
-      // Agrupar por GCal event ID para eliminar series recurrentes
-      const gcalEventIds = new Set();
-      
-      // Eliminar recordatorios asociados con delay
-      for (const turno of turnosCliente) {
-        if (turno.gcal_event_id) {
-          gcalEventIds.add(turno.gcal_event_id);
-        }
-        const recordatorios = todosRecordatorios.filter(r => r.turno_cancha_id === turno.id);
-        for (const rec of recordatorios) {
-          await base44.entities.RecordatorioCancha.delete(rec.id);
-          await new Promise(resolve => setTimeout(resolve, 30));
-        }
-      }
-
-      // Eliminar turnos con delay
-      for (const turno of turnosCliente) {
-        await base44.entities.TurnoCancha.delete(turno.id);
-        await new Promise(resolve => setTimeout(resolve, 30));
-      }
-
-      // Eliminar eventos de Google Calendar (incluyendo series recurrentes)
-      for (const eventId of gcalEventIds) {
-        try {
-          await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
-            turno_id: 'gc_' + eventId,
-            action: 'delete',
-            recurringEventId: eventId
-          });
-        } catch (err) {
-          console.warn('Error limpiando evento de Google Calendar:', err);
-        }
-      }
-
-      return turnosCliente.length;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clientes'] });
-      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
-    },
-  });
-
   const turnosCliente = useMemo(() => {
     if (!cliente) return [];
     return turnos
@@ -192,22 +141,6 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente, turno
                     <Edit className="w-4 h-4 mr-2" />
                     Editar
                   </Button>
-                  {turnosCliente.length > 0 && cliente.tipo_cliente === 'abono' && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => {
-                        if (confirm(`¿Borrar TODAS las ${turnosCliente.length} reservas (incluyendo recurrencias) de ${cliente.nombre} en la app y Google Calendar? No se puede deshacer.`)) {
-                          deleteAllTurnosMutation.mutate(cliente.nombre);
-                        }
-                      }}
-                      className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 border-orange-200"
-                      disabled={deleteAllTurnosMutation.isPending}
-                    >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      {deleteAllTurnosMutation.isPending ? 'Borrando...' : 'Borrar todas las reservas'}
-                    </Button>
-                  )}
                   <Button 
                     variant="outline" 
                     size="sm" 
@@ -220,7 +153,7 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente, turno
                     disabled={deleteMutation.isPending}
                   >
                     <Trash2 className="w-4 h-4 mr-2" />
-                    Eliminar cliente
+                    Eliminar
                   </Button>
                 </div>
               ) : (

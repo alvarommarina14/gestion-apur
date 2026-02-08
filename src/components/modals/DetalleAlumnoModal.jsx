@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -20,16 +20,12 @@ import {
   MapPin,
   RefreshCw,
   FileText,
-  TrendingUp,
-  Trash2
+  TrendingUp
 } from 'lucide-react';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { cn } from '@/lib/utils';
 
 export default function DetalleAlumnoModal({ open, onOpenChange, alumno }) {
-  const queryClient = useQueryClient();
-  const [deletingClases, setDeletingClases] = useState(false);
-
   const { data: pagos = [] } = useQuery({
     queryKey: ['pagos', alumno?.id],
     queryFn: () => base44.entities.Pago.filter({ alumno_id: alumno?.id }, '-fecha'),
@@ -52,65 +48,6 @@ export default function DetalleAlumnoModal({ open, onOpenChange, alumno }) {
     queryKey: ['logs', alumno?.id],
     queryFn: () => base44.entities.LogAuditoria.filter({ entidad_id: alumno?.id }, '-fecha'),
     enabled: !!alumno?.id,
-  });
-
-  const { data: clases = [] } = useQuery({
-    queryKey: ['clases-alumno', alumno?.id],
-    queryFn: async () => {
-      const todas = await base44.entities.Clase.list();
-      return todas.filter(c => c.alumnos_ids?.includes(alumno?.id));
-    },
-    enabled: !!alumno?.id,
-  });
-
-  const deleteAllClasesMutation = useMutation({
-    mutationFn: async () => {
-      setDeletingClases(true);
-      try {
-        for (const clase of clases) {
-          try {
-            await base44.functions.invoke('sincronizarClaseGoogleCalendar', { 
-              clase_id: clase.id, 
-              action: 'delete' 
-            });
-          } catch (err) {
-            console.error('Error eliminando de Google Calendar:', err);
-          }
-
-          try {
-            const turnosRelacionados = await base44.entities.TurnoCancha.filter({ 
-              fecha: clase.fecha,
-              hora_inicio: clase.hora_inicio,
-              tipo_turno: 'clase'
-            });
-            
-            for (const turno of turnosRelacionados) {
-              try {
-                await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
-                  turno_id: turno.id, 
-                  action: 'delete' 
-                });
-              } catch (err) {
-                console.error('Error eliminando turno de Google Calendar:', err);
-              }
-              await base44.entities.TurnoCancha.delete(turno.id);
-            }
-          } catch (err) {
-            console.error('Error eliminando turnos:', err);
-          }
-
-          await base44.entities.Clase.delete(clase.id);
-          await new Promise(resolve => setTimeout(resolve, 30));
-        }
-      } finally {
-        setDeletingClases(false);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clases-alumno'] });
-      queryClient.invalidateQueries({ queryKey: ['clases'] });
-      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
-    },
   });
   
   const formatMoney = (amount) => {
@@ -310,26 +247,7 @@ export default function DetalleAlumnoModal({ open, onOpenChange, alumno }) {
             <p className="text-sm text-slate-700">{alumno.observaciones}</p>
           </div>
         )}
-
-        {/* Borrar clases */}
-        {clases.length > 0 && (
-          <div className="mt-4 pt-4 border-t">
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                if (confirm(`¿Borrar TODAS las ${clases.length} clases de ${alumno.nombre} en la app y Google Calendar? No se puede deshacer.`)) {
-                  deleteAllClasesMutation.mutate();
-                }
-              }}
-              className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 border-orange-200 w-full"
-              disabled={deletingClases}
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              {deletingClases ? 'Borrando clases...' : `Borrar todas las ${clases.length} clases`}
-            </Button>
-          </div>
-        )}
-        </DialogContent>
-        </Dialog>
-        );
-        }
+      </DialogContent>
+    </Dialog>
+  );
+}
