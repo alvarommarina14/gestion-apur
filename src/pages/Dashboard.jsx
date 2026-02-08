@@ -35,6 +35,7 @@ import AlertCard from '@/components/ui/AlertCard';
 import RegistrarPagoModal from '@/components/modals/RegistrarPagoModal';
 import RegistrarAsistenciaModal from '@/components/modals/RegistrarAsistenciaModal';
 import NuevaClaseModal from '@/components/modals/NuevaClaseModal';
+import NuevoAlumnoModal from '@/components/modals/NuevoAlumnoModal';
 import CancelarClaseModal from '@/components/modals/CancelarClaseModal';
 import EditarClaseModal from '@/components/modals/EditarClaseModal';
 import RecordatoriosPendientes from '@/components/recordatorios/RecordatoriosPendientes';
@@ -46,6 +47,7 @@ export default function Dashboard() {
   const [pagoModal, setPagoModal] = useState({ open: false, alumno: null });
   const [asistenciaModal, setAsistenciaModal] = useState({ open: false, clase: null });
   const [nuevaClaseModal, setNuevaClaseModal] = useState({ open: false, recupero: null });
+  const [nuevoAlumnoModal, setNuevoAlumnoModal] = useState({ open: false, alumno: null });
   const [cancelarModal, setCancelarModal] = useState({ open: false, clase: null });
   const [morososModal, setMorososModal] = useState(false);
   const [profesorSeleccionado, setProfesorSeleccionado] = useState(null);
@@ -555,15 +557,15 @@ export default function Dashboard() {
                 <div className="text-center py-8 text-slate-500">
                   <Users className="w-10 h-10 mx-auto mb-2 opacity-40" />
                   <p className="text-sm">No hay alumnos asignados</p>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="mt-3"
-                    onClick={() => window.location.href = createPageUrl('Alumnos')}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Agregar alumno
-                  </Button>
+                   <Button 
+                     variant="outline" 
+                     size="sm" 
+                     className="mt-3"
+                     onClick={() => setNuevoAlumnoModal({ open: true, alumno: null })}
+                   >
+                     <Plus className="w-4 h-4 mr-2" />
+                     Agregar alumno
+                   </Button>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -636,6 +638,13 @@ export default function Dashboard() {
         open={asistenciaModal.open}
         onOpenChange={(open) => setAsistenciaModal({ ...asistenciaModal, open })}
         clase={asistenciaModal.clase}
+      />
+      
+      <NuevoAlumnoModal 
+        open={nuevoAlumnoModal.open}
+        onOpenChange={(open) => setNuevoAlumnoModal({ ...nuevoAlumnoModal, open })}
+        alumno={nuevoAlumnoModal.alumno}
+        profesorId={profesorSeleccionado?.id}
       />
       
       <NuevaClaseModal 
