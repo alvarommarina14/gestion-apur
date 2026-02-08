@@ -53,6 +53,13 @@ export default function Dashboard() {
   const [cancelarModal, setCancelarModal] = useState({ open: false, clase: null });
   const [morososModal, setMorososModal] = useState(false);
   const [profesorSeleccionado, setProfesorSeleccionado] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleRefresh = async () => {
+    // Forzar recarga de queries
+    setRefreshKey(prev => prev + 1);
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Simular delay
+  };
   
   const today = new Date();
   const todayStr = format(today, 'yyyy-MM-dd');
