@@ -65,7 +65,7 @@ export default function AgendaEmpleados() {
     return [...turnosEmpleado, ...clasesFormato].sort((a, b) => 
       a.hora_inicio.localeCompare(b.hora_inicio)
     );
-  }, [allTurnos, allClases, empleado?.id]);
+  }, [allTurnos, allClases, user?.id]);
 
   const calcularHoraFin = (horaInicio, duracion) => {
     const [h, m] = horaInicio.split(':').map(Number);
