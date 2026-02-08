@@ -26,13 +26,6 @@ const menuOptions = [
     color: 'emerald'
   },
   {
-    title: 'Calendario',
-    description: 'Vista calendario de clases',
-    icon: Calendar,
-    href: 'CalendarioClases',
-    color: 'blue'
-  },
-  {
     title: 'Alumnos',
     description: 'Gestión de alumnos y pagos',
     icon: Users,
