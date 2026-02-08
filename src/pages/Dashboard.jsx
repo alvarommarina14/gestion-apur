@@ -36,6 +36,7 @@ import RegistrarPagoModal from '@/components/modals/RegistrarPagoModal';
 import RegistrarAsistenciaModal from '@/components/modals/RegistrarAsistenciaModal';
 import NuevaClaseModal from '@/components/modals/NuevaClaseModal';
 import CancelarClaseModal from '@/components/modals/CancelarClaseModal';
+import EditarClaseModal from '@/components/modals/EditarClaseModal';
 import RecordatoriosPendientes from '@/components/recordatorios/RecordatoriosPendientes';
 import { createPageUrl } from '@/utils';
 import { Link } from 'react-router-dom';
