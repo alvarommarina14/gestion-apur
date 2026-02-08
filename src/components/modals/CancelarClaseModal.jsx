@@ -152,6 +152,16 @@ export default function CancelarClaseModal({ open, onOpenChange, clase }) {
           motivo_cancelacion: notas || selectedOption?.label,
           cancelado_por: motivo.includes('alumno') ? 'alumno' : motivo === 'clima' ? 'clima' : 'profesor',
         });
+
+        // Si la clase está cancelada, también eliminarla de Google Calendar
+        try {
+          await base44.functions.invoke('sincronizarClaseGoogleCalendar', { 
+            clase_id: clase.id, 
+            action: 'delete' 
+          });
+        } catch (err) {
+          console.error('Error eliminando de Google Calendar:', err);
+        }
       }
       
       // Si genera recupero y no es reprogramación, crear recuperos para cada alumno
