@@ -444,7 +444,9 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
 
   const handleSubmit = (e) => {
      e.preventDefault();
+     if (isSubmitting) return; // Prevenir múltiples envíos
      setError(null);
+     setIsSubmitting(true);
 
      // Asignar automáticamente a todos los empleados
      const todosLosEmpleadosIds = empleados.map(e => e.id);
