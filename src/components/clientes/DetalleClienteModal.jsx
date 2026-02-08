@@ -76,6 +76,45 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente, turno
     },
   });
 
+  const deleteAllTurnosMutation = useMutation({
+    mutationFn: async (clienteNombre) => {
+      // Obtener todos los turnos del cliente
+      const todosTurnos = await base44.entities.TurnoCancha.list();
+      const turnosCliente = todosTurnos.filter(t => t.cliente === clienteNombre);
+
+      // Obtener todos los recordatorios
+      const todosRecordatorios = await base44.entities.RecordatorioCancha.list();
+
+      // Eliminar recordatorios asociados con delay
+      for (const turno of turnosCliente) {
+        const recordatorios = todosRecordatorios.filter(r => r.turno_cancha_id === turno.id);
+        for (const rec of recordatorios) {
+          await base44.entities.RecordatorioCancha.delete(rec.id);
+          await new Promise(resolve => setTimeout(resolve, 30));
+        }
+      }
+
+      // Eliminar turnos con delay
+      for (const turno of turnosCliente) {
+        await base44.entities.TurnoCancha.delete(turno.id);
+        await new Promise(resolve => setTimeout(resolve, 30));
+      }
+
+      // Intentar eliminar de Google Calendar
+      try {
+        await base44.functions.invoke('limpiarGoogleCalendar');
+      } catch (err) {
+        console.warn('Error limpiando Google Calendar:', err);
+      }
+
+      return turnosCliente.length;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clientes'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+    },
+  });
+
   const turnosCliente = useMemo(() => {
     if (!cliente) return [];
     return turnos
