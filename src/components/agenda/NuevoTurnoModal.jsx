@@ -539,14 +539,20 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
   useEffect(() => {
     const verificarRepeticion = async () => {
       if (turno && open) {
-        const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: turno.id });
-        setTieneRepeticionSemanal(recordatorios.length > 0 && recordatorios[0].repeticion_semanal);
+        try {
+          const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: turno.id });
+          const tieneRepeticion = recordatorios.length > 0 && recordatorios[0].repeticion_semanal;
+          setTieneRepeticionSemanal(tieneRepeticion);
+        } catch (error) {
+          console.error('Error verificando repetición:', error);
+          setTieneRepeticionSemanal(false);
+        }
       } else {
         setTieneRepeticionSemanal(false);
       }
     };
     verificarRepeticion();
-  }, [turno, open]);
+  }, [turno?.id, open]);
 
   const handleDeleteSolo = () => {
     if (confirm('¿Eliminar solo este turno?')) {
