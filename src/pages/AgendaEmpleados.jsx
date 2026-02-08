@@ -45,11 +45,11 @@ export default function AgendaEmpleados() {
   const isLoading = loadingTurnos || loadingClases;
 
   const turnos = useMemo(() => {
-    if (!empleado?.id) return [];
+    if (!user?.id) return [];
     
     // Turnos asignados al empleado
     const turnosEmpleado = allTurnos.filter(t => 
-      t.empleados_asignados_ids && t.empleados_asignados_ids.includes(empleado.id)
+      t.empleados_asignados_ids && t.empleados_asignados_ids.includes(user.id)
     );
 
     // Clases convertidas a formato de turno para mostrar
