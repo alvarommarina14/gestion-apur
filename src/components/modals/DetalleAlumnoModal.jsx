@@ -310,7 +310,26 @@ export default function DetalleAlumnoModal({ open, onOpenChange, alumno }) {
             <p className="text-sm text-slate-700">{alumno.observaciones}</p>
           </div>
         )}
-      </DialogContent>
-    </Dialog>
-  );
-}
+
+        {/* Borrar clases */}
+        {clases.length > 0 && (
+          <div className="mt-4 pt-4 border-t">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                if (confirm(`¿Borrar TODAS las ${clases.length} clases de ${alumno.nombre} en la app y Google Calendar? No se puede deshacer.`)) {
+                  deleteAllClasesMutation.mutate();
+                }
+              }}
+              className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 border-orange-200 w-full"
+              disabled={deletingClases}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              {deletingClases ? 'Borrando clases...' : `Borrar todas las ${clases.length} clases`}
+            </Button>
+          </div>
+        )}
+        </DialogContent>
+        </Dialog>
+        );
+        }
