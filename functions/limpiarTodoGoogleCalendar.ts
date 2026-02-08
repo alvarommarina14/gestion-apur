@@ -77,33 +77,45 @@ Deno.serve(async (req) => {
 
     let eliminados = 0;
     let errores = 0;
+    let totalRecurrentes = 0;
 
-    // Eliminar cada evento
+    // Eliminar solo eventos con recurrencia semanal
     for (const evento of eventos) {
       try {
-        const deleteResponse = await fetch(
-          `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${evento.id}`,
-          {
-            method: 'DELETE',
-            headers: {
-              'Authorization': `Bearer ${accessToken}`,
-              'Content-Type': 'application/json'
+        // Verificar si tiene recurrencia semanal
+        const tieneRecurrenciaSemanal = evento.recurrence && 
+          evento.recurrence.some(rule => rule.includes('FREQ=WEEKLY'));
+        
+        if (tieneRecurrenciaSemanal) {
+          totalRecurrentes++;
+          console.log(`🔄 Evento recurrente encontrado: ${evento.summary} (${evento.id})`);
+          
+          const deleteResponse = await fetch(
+            `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${evento.id}`,
+            {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+              }
             }
-          }
-        );
+          );
 
-        if (deleteResponse.ok) {
-          console.log(`✅ Evento eliminado: ${evento.summary} (${evento.id})`);
-          eliminados++;
-        } else {
-          console.warn(`⚠️ Error eliminando evento ${evento.id}: ${deleteResponse.status}`);
-          errores++;
+          if (deleteResponse.ok) {
+            console.log(`✅ Evento recurrente eliminado: ${evento.summary} (${evento.id})`);
+            eliminados++;
+          } else {
+            console.warn(`⚠️ Error eliminando evento ${evento.id}: ${deleteResponse.status}`);
+            errores++;
+          }
         }
       } catch (err) {
         console.error(`❌ Error procesando evento:`, err.message);
         errores++;
       }
     }
+    
+    console.log(`📊 Total de eventos recurrentes encontrados: ${totalRecurrentes}`);
 
     const resultado = {
       total: eventos.length,
