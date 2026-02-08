@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { CheckCircle, CalendarIcon } from 'lucide-react';
+import { CheckCircle, CalendarIcon, Trash2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 
@@ -95,6 +95,7 @@ export default function EditarClaseModal({ open, onOpenChange, clase }) {
 
       setSuccess(true);
       queryClient.invalidateQueries({ queryKey: ['clases'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
       
       setTimeout(() => {
         setSuccess(false);
@@ -102,6 +103,73 @@ export default function EditarClaseModal({ open, onOpenChange, clase }) {
       }, 1500);
     } catch (error) {
       console.error('Error editando clase:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (eliminarSerie = false) => {
+    if (!clase) return;
+
+    // Solo admin puede eliminar clases de otros profesores
+    if (user?.rol !== 'admin' && clase.profesor_id !== user?.id) {
+      alert('No tienes permiso para eliminar esta clase');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      if (eliminarSerie) {
+        // Eliminar toda la serie recurrente
+        const todasClases = await base44.entities.Clase.list();
+        const clasesRelacionadas = todasClases.filter(c => 
+          c.alumnos_ids && clase.alumnos_ids &&
+          JSON.stringify(c.alumnos_ids.sort()) === JSON.stringify(clase.alumnos_ids.sort()) &&
+          c.hora_inicio === clase.hora_inicio &&
+          c.duracion === clase.duracion &&
+          new Date(c.fecha).getDay() === new Date(clase.fecha).getDay()
+        );
+
+        for (const claseRel of clasesRelacionadas) {
+          // Eliminar TurnoCancha asociado si existe
+          const turnosRelacionados = await base44.entities.TurnoCancha.filter({ 
+            fecha: claseRel.fecha,
+            hora_inicio: claseRel.hora_inicio,
+            tipo_turno: 'clase'
+          });
+          
+          for (const turno of turnosRelacionados) {
+            await base44.entities.TurnoCancha.delete(turno.id);
+          }
+
+          await base44.entities.Clase.delete(claseRel.id);
+        }
+      } else {
+        // Eliminar solo esta clase
+        // Eliminar TurnoCancha asociado si existe
+        const turnosRelacionados = await base44.entities.TurnoCancha.filter({ 
+          fecha: clase.fecha,
+          hora_inicio: clase.hora_inicio,
+          tipo_turno: 'clase'
+        });
+        
+        for (const turno of turnosRelacionados) {
+          await base44.entities.TurnoCancha.delete(turno.id);
+        }
+
+        await base44.entities.Clase.delete(clase.id);
+      }
+
+      setSuccess(true);
+      queryClient.invalidateQueries({ queryKey: ['clases'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+      
+      setTimeout(() => {
+        setSuccess(false);
+        onOpenChange(false);
+      }, 1500);
+    } catch (error) {
+      console.error('Error eliminando clase:', error);
     } finally {
       setLoading(false);
     }
@@ -250,7 +318,33 @@ export default function EditarClaseModal({ open, onOpenChange, clase }) {
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="flex-col sm:flex-row gap-2">
+          <div className="w-full sm:mr-auto flex flex-col gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                if (confirm('¿Eliminar solo esta clase?')) {
+                  handleDelete(false);
+                }
+              }}
+              className="text-rose-600 hover:text-rose-700 w-full sm:w-auto"
+            >
+              Eliminar esta clase
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                if (confirm('¿Eliminar TODA la serie de clases recurrentes del mismo día y horario?')) {
+                  handleDelete(true);
+                }
+              }}
+              className="text-rose-700 hover:text-rose-800 border-rose-300 w-full sm:w-auto"
+            >
+              Eliminar toda la serie
+            </Button>
+          </div>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>

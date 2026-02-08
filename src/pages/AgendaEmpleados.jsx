@@ -1,16 +1,23 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Clock, MapPin, User, DollarSign, Calendar, CheckCircle } from 'lucide-react';
+import { Clock, MapPin, User, DollarSign, Calendar, CheckCircle, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import NuevoTurnoModal from '@/components/agenda/NuevoTurnoModal';
+import EditarClaseModal from '@/components/modals/EditarClaseModal';
 
 export default function AgendaEmpleados() {
   const today = format(new Date(), 'yyyy-MM-dd');
   const now = new Date();
+  const [turnoSeleccionado, setTurnoSeleccionado] = useState(null);
+  const [claseSeleccionada, setClaseSeleccionada] = useState(null);
+  const [modalTurnoOpen, setModalTurnoOpen] = useState(false);
+  const [modalClaseOpen, setModalClaseOpen] = useState(false);
 
   const { data: user } = useQuery({
     queryKey: ['me'],
@@ -230,7 +237,19 @@ export default function AgendaEmpleados() {
             ) : (
               <div className="divide-y">
                 {proximosTurnos.map((turno) => (
-                  <div key={turno.id} className="p-4 hover:bg-slate-50 transition-colors">
+                  <div 
+                    key={turno.id} 
+                    className="p-4 hover:bg-slate-50 transition-colors cursor-pointer"
+                    onClick={() => {
+                      if (turno.es_clase) {
+                        setClaseSeleccionada(turno);
+                        setModalClaseOpen(true);
+                      } else {
+                        setTurnoSeleccionado(turno);
+                        setModalTurnoOpen(true);
+                      }
+                    }}
+                  >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 space-y-2">
                         <div className="flex items-center gap-3">
@@ -296,11 +315,28 @@ export default function AgendaEmpleados() {
         <Card className="shadow-sm bg-blue-50 border-blue-200">
           <CardContent className="py-4">
             <p className="text-sm text-blue-900">
-              💡 <span className="font-medium">Tip:</span> Recibirás notificaciones automáticas antes del inicio de cada turno
+              💡 <span className="font-medium">Tip:</span> Recibirás notificaciones automáticas antes del inicio de cada turno. Toca un turno para ver más detalles.
             </p>
           </CardContent>
         </Card>
       </div>
+
+      {/* Modales */}
+      {modalTurnoOpen && turnoSeleccionado && (
+        <NuevoTurnoModal
+          open={modalTurnoOpen}
+          onOpenChange={setModalTurnoOpen}
+          turno={turnoSeleccionado}
+        />
+      )}
+      
+      {modalClaseOpen && claseSeleccionada && (
+        <EditarClaseModal
+          open={modalClaseOpen}
+          onOpenChange={setModalClaseOpen}
+          clase={claseSeleccionada}
+        />
+      )}
     </div>
   );
 }
