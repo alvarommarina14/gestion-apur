@@ -107,13 +107,11 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
         let clasesAActualizar = [];
         
         if (turno.serie_recurrente_id) {
-          // Si tiene serie_recurrente_id, usar SOLO eso
           clasesAActualizar = todasClases.filter(c => 
             c.serie_recurrente_id === turno.serie_recurrente_id &&
             new Date(c.fecha) >= new Date(turno.fecha)
           );
         } else {
-          // Fallback: buscar clases recurrentes con mismos parámetros
           clasesAActualizar = todasClases.filter(c => {
             const mismoDiaSemana = new Date(c.fecha).getDay() === new Date(turno.fecha).getDay();
             const mismaHora = c.hora_inicio === turno.hora_inicio;
@@ -129,7 +127,7 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
 
         console.log(`🗑️ Eliminando ${clasesAActualizar.length} clases recurrentes...`);
 
-        // Primero, eliminar de Google Calendar
+        // Eliminar de Google Calendar
         try {
           await base44.functions.invoke('eliminarClasesRecurrentesGoogleCalendar', {
             clase_id: turno.id,
@@ -142,39 +140,48 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
           console.error('Error eliminando de Google Calendar:', err);
         }
 
-        // Luego, eliminar de la base de datos (clases y turnos asociados)
-        await Promise.all(
-          clasesAActualizar.map(async clase => {
-            // Si la clase tiene turno_cancha_id, usarlo directamente
-            if (clase.turno_cancha_id) {
-              try {
-                await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
-                  turno_id: clase.turno_cancha_id, 
-                  action: 'delete' 
-                });
-              } catch (err) {
-                console.error('Error eliminando turno de Google Calendar:', err);
-              }
-              try {
-                await base44.entities.TurnoCancha.delete(clase.turno_cancha_id);
-              } catch (err) {
-                console.error('Error eliminando TurnoCancha:', err);
-              }
-            }
-
-            // Eliminar clase
-            try {
-              await base44.entities.Clase.delete(clase.id);
-            } catch (err) {
-              console.error('Error eliminando clase:', err);
-            }
-          })
-        );
-      } else {
-        // Obtener todos los turnos
+        // Obtener TODOS los turnos para buscar asociados
         const todosTurnos = await base44.entities.TurnoCancha.list('-fecha', 1000);
 
-        // Filtrar con máximo rigor
+        // Eliminar clases y sus turnos asociados
+        for (const clase of clasesAActualizar) {
+          // Buscar turnos asociados a esta clase específica
+          const turnosDeClase = todosTurnos.filter(t =>
+            t.fecha === clase.fecha &&
+            t.hora_inicio === clase.hora_inicio &&
+            t.tipo_turno === 'clase'
+          );
+
+          // Eliminar cada turno
+          for (const t of turnosDeClase) {
+            try {
+              await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
+                turno_id: t.id, 
+                action: 'delete' 
+              });
+            } catch (err) {
+              console.error('Error eliminando turno de GCal:', err);
+            }
+            try {
+              await base44.entities.TurnoCancha.delete(t.id);
+              console.log(`✅ Turno ${t.id} eliminado`);
+            } catch (err) {
+              console.error('Error eliminando TurnoCancha:', err);
+            }
+          }
+
+          // Eliminar clase
+          try {
+            await base44.entities.Clase.delete(clase.id);
+            console.log(`✅ Clase ${clase.id} eliminada`);
+          } catch (err) {
+            console.error('Error eliminando clase:', err);
+          }
+        }
+      } else {
+        // Para turnos sin clase asociada
+        const todosTurnos = await base44.entities.TurnoCancha.list('-fecha', 1000);
+
         const turnosAActualizar = todosTurnos.filter(t => {
           const mismaCancha = t.cancha === turno.cancha;
           const mismaHora = t.hora_inicio === turno.hora_inicio;
@@ -189,24 +196,27 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
 
         console.log(`🗑️ Eliminando ${turnosAActualizar.length} turnos recurrentes...`);
 
-        // Eliminar todos
-        await Promise.all(
-          turnosAActualizar.map(async t => {
-            try {
-              await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
-                turno_id: t.id, 
-                action: 'delete' 
-              });
-            } catch (err) {
-              console.error('Error eliminando turno:', err);
-            }
+        for (const t of turnosAActualizar) {
+          try {
+            await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
+              turno_id: t.id, 
+              action: 'delete' 
+            });
+          } catch (err) {
+            console.error('Error eliminando turno de GCal:', err);
+          }
+          try {
             await base44.entities.TurnoCancha.delete(t.id);
-          })
-        );
+            console.log(`✅ Turno ${t.id} eliminado`);
+          } catch (err) {
+            console.error('Error eliminando TurnoCancha:', err);
+          }
+        }
       }
 
-      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
-      queryClient.invalidateQueries({ queryKey: ['clases'] });
+      // Invalidar queries para refrescar la UI
+      await queryClient.refetchQueries({ queryKey: ['turnos-cancha'] });
+      await queryClient.refetchQueries({ queryKey: ['clases'] });
       onOpenChange(false);
     } catch (error) {
       console.error('Error al eliminar:', error);
