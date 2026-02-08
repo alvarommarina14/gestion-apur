@@ -76,11 +76,19 @@ export default function ClasesConAlumnos({ profesorSeleccionado, onRegistrarPago
               return (
                 <div
                   key={clase.id}
-                  className="border rounded-lg overflow-hidden bg-white hover:shadow-md transition-shadow"
+                  className={cn(
+                    "border rounded-lg overflow-hidden bg-white hover:shadow-md transition-shadow",
+                    clase.pagado ? "border-emerald-300 bg-emerald-50/30" : "border-rose-300 bg-rose-50/30"
+                  )}
                 >
                   {/* Header de clase */}
                   <div
-                    className="p-3 bg-gradient-to-r from-emerald-50 to-emerald-100/50 border-b cursor-pointer hover:from-emerald-100"
+                    className={cn(
+                      "p-3 bg-gradient-to-r border-b cursor-pointer transition-colors",
+                      clase.pagado
+                        ? "from-emerald-50 to-emerald-100/50 hover:from-emerald-100"
+                        : "from-rose-50 to-rose-100/50 hover:from-rose-100"
+                    )}
                     onClick={() => setClaseSeleccionada(claseSeleccionada?.id === clase.id ? null : clase)}
                   >
                     <div className="flex items-center justify-between">
@@ -90,16 +98,27 @@ export default function ClasesConAlumnos({ profesorSeleccionado, onRegistrarPago
                         </div>
                         <div className="flex-1">
                           <p className="font-medium text-slate-900 text-sm">
-                            {clase.tipo === 'grupal' ? 'Clase Grupal' : 'Clase Individual'}
+                            Clase - Cancha {clase.cancha}
                           </p>
                           <p className="text-xs text-slate-500">
-                            Cancha {clase.cancha} • ${(clase.precio || 0).toLocaleString('es-AR')}
+                            ${(clase.monto || 0).toLocaleString('es-AR')}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
+                        {clase.pagado ? (
+                          <Badge className="bg-emerald-100 text-emerald-700 flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3" />
+                            Pagado
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-rose-100 text-rose-700 flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            Pendiente
+                          </Badge>
+                        )}
                         <Badge variant="outline" className="bg-white">
-                          {alumnosClase.length} {alumnosClase.length === 1 ? 'alumno' : 'alumnos'}
+                          {alumnosClase.length}
                         </Badge>
                         <ChevronRight
                           className={cn(
