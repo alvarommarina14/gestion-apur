@@ -18,7 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { User, CheckCircle } from 'lucide-react';
+import { User, CheckCircle, Check } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -39,7 +40,20 @@ export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null }) 
     sede_preferida: '',
     horario_preferido: '',
     dia_preferido: '',
+    tipo_asistencia: 'un_dia',
+    dias_semana: [],
   });
+
+  const diasDispoonibles = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+  const diasLabels = {
+    lunes: 'Lunes',
+    martes: 'Martes',
+    miercoles: 'Miércoles',
+    jueves: 'Jueves',
+    viernes: 'Viernes',
+    sabado: 'Sábado',
+    domingo: 'Domingo',
+  };
 
   useEffect(() => {
     if (alumno) {
@@ -53,6 +67,8 @@ export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null }) 
         sede_preferida: alumno.sede_preferida || '',
         horario_preferido: alumno.horario_preferido || '',
         dia_preferido: alumno.dia_preferido || '',
+        tipo_asistencia: alumno.tipo_asistencia || 'un_dia',
+        dias_semana: alumno.dias_semana || [],
       });
     } else {
       setFormData({
@@ -65,6 +81,8 @@ export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null }) 
         sede_preferida: '',
         horario_preferido: '',
         dia_preferido: '',
+        tipo_asistencia: 'un_dia',
+        dias_semana: [],
       });
     }
   }, [alumno, open]);
@@ -83,7 +101,9 @@ export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null }) 
         clases_por_mes: Number(formData.clases_por_mes),
         sede_preferida: formData.sede_preferida,
         horario_preferido: formData.horario_preferido,
-        dia_preferido: formData.dia_preferido,
+        dia_preferido: formData.tipo_asistencia === 'un_dia' ? formData.dia_preferido : '',
+        tipo_asistencia: formData.tipo_asistencia,
+        dias_semana: formData.tipo_asistencia === 'varios_dias' ? formData.dias_semana : [],
       };
       
       if (isEditing) {
@@ -227,7 +247,7 @@ export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null }) 
             </div>
           </div>
           
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Sede preferida</Label>
               <Input
@@ -237,6 +257,42 @@ export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null }) 
               />
             </div>
             
+            <div className="space-y-2">
+              <Label>Horario</Label>
+              <Input
+                type="time"
+                value={formData.horario_preferido}
+                onChange={(e) => setFormData({ ...formData, horario_preferido: e.target.value })}
+              />
+            </div>
+          </div>
+
+          {/* Tipo de asistencia */}
+          <div className="space-y-2">
+            <Label>Tipo de asistencia</Label>
+            <Select
+              value={formData.tipo_asistencia}
+              onValueChange={(v) => {
+                setFormData({ 
+                  ...formData, 
+                  tipo_asistencia: v,
+                  dias_semana: v === 'un_dia' ? [] : formData.dias_semana,
+                  dia_preferido: v === 'un_dia' ? formData.dia_preferido : ''
+                });
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="un_dia">Un día a la semana</SelectItem>
+                <SelectItem value="varios_dias">Varios días a la semana</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Si es un día */}
+          {formData.tipo_asistencia === 'un_dia' && (
             <div className="space-y-2">
               <Label>Día preferido</Label>
               <Select
@@ -257,16 +313,37 @@ export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null }) 
                 </SelectContent>
               </Select>
             </div>
-            
-            <div className="space-y-2">
-              <Label>Horario</Label>
-              <Input
-                type="time"
-                value={formData.horario_preferido}
-                onChange={(e) => setFormData({ ...formData, horario_preferido: e.target.value })}
-              />
+          )}
+
+          {/* Si son varios días */}
+          {formData.tipo_asistencia === 'varios_dias' && (
+            <div className="space-y-3">
+              <Label>Selecciona los días</Label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {diasDispoonibles.map(dia => (
+                  <label key={dia} className="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-slate-50 transition">
+                    <Checkbox
+                      checked={formData.dias_semana.includes(dia)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setFormData({
+                            ...formData,
+                            dias_semana: [...formData.dias_semana, dia]
+                          });
+                        } else {
+                          setFormData({
+                            ...formData,
+                            dias_semana: formData.dias_semana.filter(d => d !== dia)
+                          });
+                        }
+                      }}
+                    />
+                    <span className="text-sm font-medium text-slate-700">{diasLabels[dia]}</span>
+                  </label>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
           
           <div className="space-y-2">
             <Label>Observaciones</Label>
