@@ -21,9 +21,10 @@ import { base44 } from '@/api/base44Client';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import NotificationPermissionModal from '@/components/NotificationPermissionModal';
-import NotificationManager from '@/components/NotificationManager';
-import PushNotificationManager from '@/components/PushNotificationManager';
-import BottomTabNavigation from '@/components/BottomTabNavigation';
+      import NotificationManager from '@/components/NotificationManager';
+      import PushNotificationManager from '@/components/PushNotificationManager';
+      import BottomTabNavigation from '@/components/BottomTabNavigation';
+      import { lazy, Suspense } from 'react';
 
 const navigationGestionClases = [
   { name: 'Profesores', href: 'Profesores', icon: Users },
