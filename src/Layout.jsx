@@ -24,7 +24,6 @@ import NotificationPermissionModal from '@/components/NotificationPermissionModa
 import NotificationManager from '@/components/NotificationManager';
 import PushNotificationManager from '@/components/PushNotificationManager';
 import BottomTabNavigation from '@/components/BottomTabNavigation';
-import { ArrowLeft } from 'lucide-react'; // Already imported above with other lucide icons
 
 const navigationGestionClases = [
   { name: 'Profesores', href: 'Profesores', icon: Users },
