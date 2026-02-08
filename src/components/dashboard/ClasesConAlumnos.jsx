@@ -23,15 +23,15 @@ export default function ClasesConAlumnos({ profesorSeleccionado, onRegistrarPago
     queryFn: () => base44.entities.Alumno.list(),
   });
 
-  // Agrupar clases por día de esta semana y próxima
+  // Agrupar turnos de clase por día de esta semana y próxima
   const clasesAgrupadas = useMemo(() => {
     const hoy = new Date();
-    const inicioSemana = startOfWeek(hoy, { weekStartsOn: 1 });
-    const finSemana = endOfWeek(hoy, { weekStartsOn: 1 });
 
-    // Tomar próximas 10 días
-    const clasesProximos = clases.filter(c => {
-      const fecha = parseISO(c.fecha);
+    // Filtrar solo clases del profesor, próximos 10 días
+    const clasesProximos = turnos.filter(t => {
+      if (t.tipo_turno !== 'clase') return false;
+      if (profesorSeleccionado && t.profesor !== profesorSeleccionado.nombre) return false;
+      const fecha = parseISO(t.fecha);
       return fecha >= hoy && fecha <= addDays(hoy, 9);
     });
 
@@ -48,7 +48,7 @@ export default function ClasesConAlumnos({ profesorSeleccionado, onRegistrarPago
       fecha,
       clases: agrupadas[fecha].sort((a, b) => (a.hora_inicio || '').localeCompare(b.hora_inicio || ''))
     }));
-  }, [clases]);
+  }, [turnos, profesorSeleccionado]);
 
   const obtenerAlumno = (id) => alumnos.find(a => a.id === id);
 
