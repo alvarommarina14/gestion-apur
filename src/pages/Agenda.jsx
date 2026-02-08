@@ -122,21 +122,34 @@ export default function Agenda() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
         {/* Header */}
-        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">Agenda de Canchas</h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">Sistema de reservas del club</p>
-          </div>
-          {canEdit && (
-            <Button
-              onClick={() => setTurnoModal({ open: true, turno: null })}
-              className="bg-emerald-600 hover:bg-emerald-700 h-11 lg:h-10 text-base lg:text-sm active:scale-95 touch-manipulation w-full sm:w-auto"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Nuevo turno
-            </Button>
-          )}
-        </header>
+         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+           <div>
+             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">Agenda de Canchas</h1>
+             <p className="text-slate-500 dark:text-slate-400 text-sm">Sistema de reservas del club</p>
+           </div>
+           <div className="flex items-center gap-2 flex-wrap">
+             {isAdmin && (
+               <Button
+                 variant="outline"
+                 onClick={handleLimpiarGoogleCalendar}
+                 disabled={limpiadoLoading}
+                 className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 h-11 lg:h-10 text-base lg:text-sm active:scale-95 touch-manipulation"
+               >
+                 <Trash2 className="w-5 h-5 mr-2" />
+                 Limpiar GCal
+               </Button>
+             )}
+             {canEdit && (
+               <Button
+                 onClick={() => setTurnoModal({ open: true, turno: null })}
+                 className="bg-emerald-600 hover:bg-emerald-700 h-11 lg:h-10 text-base lg:text-sm active:scale-95 touch-manipulation w-full sm:w-auto"
+               >
+                 <Plus className="w-5 h-5 mr-2" />
+                 Nuevo turno
+               </Button>
+             )}
+           </div>
+         </header>
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3 sm:gap-4">
