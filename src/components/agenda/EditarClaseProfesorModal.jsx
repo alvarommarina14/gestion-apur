@@ -196,16 +196,19 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
 
         console.log(`🗑️ Eliminando ${turnosAActualizar.length} turnos recurrentes...`);
 
-        for (const t of turnosAActualizar) {
-          if (t.gcal_event_id) {
-            try {
-              await base44.functions.invoke('borrarEventosGoogleCalendar', { 
-                event_id: t.gcal_event_id 
-              });
-            } catch (err) {
-              console.error('Error eliminando turno de GCal:', err);
-            }
+        // Eliminar de Google Calendar - eliminar toda la serie recurrente
+        const primerTurnoConGcal = turnosAActualizar.find(t => t.gcal_event_id);
+        if (primerTurnoConGcal?.gcal_event_id) {
+          try {
+            await base44.functions.invoke('sincronizarSerieRecurrenteGoogleCalendar', {
+              recurringEventId: primerTurnoConGcal.gcal_event_id
+            });
+          } catch (err) {
+            console.error('Error eliminando serie recurrente de Google Calendar:', err);
           }
+        }
+
+        for (const t of turnosAActualizar) {
           try {
             await base44.entities.TurnoCancha.delete(t.id);
             console.log(`✅ Turno ${t.id} eliminado`);
