@@ -40,6 +40,7 @@ import NuevoAlumnoModal from '@/components/modals/NuevoAlumnoModal';
 import CancelarClaseModal from '@/components/modals/CancelarClaseModal';
 import EditarClaseModal from '@/components/modals/EditarClaseModal';
 import RecordatoriosPendientes from '@/components/recordatorios/RecordatoriosPendientes';
+import PullToRefresh from '@/components/PullToRefresh';
 import { createPageUrl } from '@/utils';
 import { Link } from 'react-router-dom';
 
