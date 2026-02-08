@@ -69,11 +69,10 @@ export default function ClientesPage() {
     const total = clientes.length;
     const recurrentes = clientes.filter(c => c.clasificacion === 'recurrente').length;
     const clases = clientes.filter(c => c.tipo_cliente === 'clase').length;
-    const abonos = clientes.filter(c => c.tipo_cliente === 'abono').length;
     const totalIngresos = clientes.reduce((sum, c) => sum + (c.total_gastado || 0), 0);
     const promedioGasto = total > 0 ? (totalIngresos / total).toFixed(0) : 0;
 
-    return { total, recurrentes, clases, abonos, totalIngresos, promedioGasto };
+    return { total, recurrentes, clases, totalIngresos, promedioGasto };
   }, [clientes]);
 
   const clasificacionConfig = {
