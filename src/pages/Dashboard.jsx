@@ -507,7 +507,7 @@ export default function Dashboard() {
                 <CardTitle className="text-lg">Resumen del mes</CardTitle>
               </CardHeader>
               <CardContent className="pt-4">
-                <ClassStats stats={stats} />
+                <ClassStats stats={stats} isProfesor={!!profesorSeleccionado} />
               </CardContent>
             </Card>
           </div>
@@ -628,8 +628,8 @@ export default function Dashboard() {
           </Card>
         )}
         
-        {/* Recordatorios Pendientes */}
-        <RecordatoriosPendientes compact={false} />
+        {/* Recordatorios Pendientes - Solo para admin */}
+        {!profesorSeleccionado && <RecordatoriosPendientes compact={false} />}
       </div>
       
       {/* Modals */}

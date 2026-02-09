@@ -65,7 +65,29 @@ export default function QuickStats({ stats }) {
   );
 }
 
-export function ClassStats({ stats }) {
+export function ClassStats({ stats, isProfesor = false }) {
+  // Para profesores solo mostrar Realizadas y Canceladas
+  if (isProfesor) {
+    return (
+      <div className="grid grid-cols-2 gap-4">
+        <MetricCard
+          title="Realizadas"
+          value={stats.realizadas || 0}
+          icon={CalendarCheck}
+          variant="success"
+        />
+        
+        <MetricCard
+          title="Canceladas"
+          value={stats.canceladas || 0}
+          icon={XCircle}
+          variant="warning"
+        />
+      </div>
+    );
+  }
+
+  // Para admin mostrar todas las métricas
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       <MetricCard
