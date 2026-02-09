@@ -963,46 +963,29 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
       <DialogFooter className="flex-col sm:flex-row gap-2">
          {turno && (
            <div className="w-full sm:mr-auto flex flex-col gap-2">
-             {formData.tipo_turno !== 'clase' && (
-               <>
-                 <Button
-                   type="button"
-                   variant="outline"
-                   onClick={() => {
-                     if (confirm('¿Eliminar SOLO este turno?')) {
-                       deleteMutation.mutate({ id: turno.id, eliminarSerie: false });
-                     }
-                   }}
-                   className="text-rose-600 hover:text-rose-700 w-full sm:w-auto"
-                 >
-                   <Trash2 className="w-4 h-4 mr-2" />
-                   Este turno solamente
-                 </Button>
-                 {tieneRepeticionSemanal && (
-                   <Button
-                     type="button"
-                     variant="outline"
-                     onClick={() => {
-                       if (confirm('¿Eliminar TODA la serie recurrente (hasta 52 semanas)?')) {
-                         deleteMutation.mutate({ id: turno.id, eliminarSerie: true });
-                       }
-                     }}
-                     className="text-rose-700 hover:text-rose-800 border-rose-300 w-full sm:w-auto"
-                   >
-                     <Trash2 className="w-4 h-4 mr-2" />
-                     Toda la recurrencia
-                   </Button>
-                 )}
-               </>
+             {tieneRepeticionSemanal && (
+               <Button
+                 type="button"
+                 variant="outline"
+                 onClick={() => {
+                   if (confirm('¿Eliminar TODA la serie recurrente (hasta 52 semanas)?')) {
+                     deleteMutation.mutate({ id: turno.id, eliminarSerie: true });
+                   }
+                 }}
+                 className="text-rose-700 hover:text-rose-800 border-rose-300 w-full sm:w-auto"
+               >
+                 <Trash2 className="w-4 h-4 mr-2" />
+                 Toda la recurrencia
+               </Button>
              )}
              <Button
                type="button"
                variant="outline"
                onClick={() => setShowCancelModal(true)}
-               className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 border-amber-200 w-full sm:w-auto"
+               className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 w-full sm:w-auto"
              >
                <Zap className="w-4 h-4 mr-2" />
-               Cancelar cancha
+               Cancelar cancha / Eliminar turno
              </Button>
            </div>
          )}
