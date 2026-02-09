@@ -25,9 +25,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Calendar, CheckCircle, AlertTriangle, Trash2, X } from 'lucide-react';
+import { Calendar, CheckCircle, AlertTriangle, Trash2, X, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import FormularioClaseAdmin from '@/components/agenda/FormularioClaseAdmin';
+import CancelarCanchaModal from '@/components/agenda/CancelarCanchaModal';
 
 export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isProfesor = false }) {
   const queryClient = useQueryClient();
@@ -35,6 +36,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
   const [error, setError] = useState(null);
   const [claseData, setClaseData] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   const { data: turnosExistentes = [] } = useQuery({
     queryKey: ['turnos-cancha', turno?.fecha || fecha ? format(turno?.fecha ? new Date(turno.fecha) : fecha || new Date(), 'yyyy-MM-dd') : ''],
@@ -959,36 +961,49 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
       )}
 
       <DialogFooter className="flex-col sm:flex-row gap-2">
-         {turno && formData.tipo_turno !== 'clase' && (
+         {turno && (
            <div className="w-full sm:mr-auto flex flex-col gap-2">
+             {formData.tipo_turno !== 'clase' && (
+               <>
+                 <Button
+                   type="button"
+                   variant="outline"
+                   onClick={() => {
+                     if (confirm('¿Eliminar SOLO este turno?')) {
+                       deleteMutation.mutate({ id: turno.id, eliminarSerie: false });
+                     }
+                   }}
+                   className="text-rose-600 hover:text-rose-700 w-full sm:w-auto"
+                 >
+                   <Trash2 className="w-4 h-4 mr-2" />
+                   Este turno solamente
+                 </Button>
+                 {tieneRepeticionSemanal && (
+                   <Button
+                     type="button"
+                     variant="outline"
+                     onClick={() => {
+                       if (confirm('¿Eliminar TODA la serie recurrente (hasta 52 semanas)?')) {
+                         deleteMutation.mutate({ id: turno.id, eliminarSerie: true });
+                       }
+                     }}
+                     className="text-rose-700 hover:text-rose-800 border-rose-300 w-full sm:w-auto"
+                   >
+                     <Trash2 className="w-4 h-4 mr-2" />
+                     Toda la recurrencia
+                   </Button>
+                 )}
+               </>
+             )}
              <Button
                type="button"
                variant="outline"
-               onClick={() => {
-                 if (confirm('¿Eliminar SOLO este turno?')) {
-                   deleteMutation.mutate({ id: turno.id, eliminarSerie: false });
-                 }
-               }}
-               className="text-rose-600 hover:text-rose-700 w-full sm:w-auto"
+               onClick={() => setShowCancelModal(true)}
+               className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 border-amber-200 w-full sm:w-auto"
              >
-               <Trash2 className="w-4 h-4 mr-2" />
-               Este turno solamente
+               <Zap className="w-4 h-4 mr-2" />
+               Cancelar cancha
              </Button>
-             {tieneRepeticionSemanal && (
-               <Button
-                 type="button"
-                 variant="outline"
-                 onClick={() => {
-                   if (confirm('¿Eliminar TODA la serie recurrente (hasta 52 semanas)?')) {
-                     deleteMutation.mutate({ id: turno.id, eliminarSerie: true });
-                   }
-                 }}
-                 className="text-rose-700 hover:text-rose-800 border-rose-300 w-full sm:w-auto"
-               >
-                 <Trash2 className="w-4 h-4 mr-2" />
-                 Toda la recurrencia
-               </Button>
-             )}
            </div>
          )}
         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
@@ -1008,38 +1023,52 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
   );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-emerald-600" />
-            {turno ? 'Editar turno' : 'Nuevo turno'}
-          </DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-emerald-600" />
+              {turno ? 'Editar turno' : 'Nuevo turno'}
+            </DialogTitle>
+          </DialogHeader>
 
-        {turno ? (
-          <Tabs defaultValue="datos" className="flex-1 flex flex-col overflow-hidden">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="datos">Datos</TabsTrigger>
-              <TabsTrigger value="historial">Historial</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="datos" className="flex-1 overflow-y-auto mt-4">
-              <form onSubmit={handleSubmit} className="space-y-4 px-1">
-                {formContent}
-              </form>
-            </TabsContent>
-            
-            <TabsContent value="historial" className="flex-1 overflow-y-auto mt-4">
-              <HistorialAuditoria entidadId={turno?.id} entidad="TurnoCancha" />
-            </TabsContent>
-          </Tabs>
-        ) : (
-          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto space-y-4 px-1">
-            {formContent}
-          </form>
-        )}
-      </DialogContent>
-    </Dialog>
+          {turno ? (
+            <Tabs defaultValue="datos" className="flex-1 flex flex-col overflow-hidden">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="datos">Datos</TabsTrigger>
+                <TabsTrigger value="historial">Historial</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="datos" className="flex-1 overflow-y-auto mt-4">
+                <form onSubmit={handleSubmit} className="space-y-4 px-1">
+                  {formContent}
+                </form>
+              </TabsContent>
+              
+              <TabsContent value="historial" className="flex-1 overflow-y-auto mt-4">
+                <HistorialAuditoria entidadId={turno?.id} entidad="TurnoCancha" />
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto space-y-4 px-1">
+              {formContent}
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {turno && (
+        <CancelarCanchaModal
+          open={showCancelModal}
+          onOpenChange={setShowCancelModal}
+          turno={turno}
+          onSuccess={() => {
+            setShowCancelModal(false);
+            queryClient.invalidateQueries({ queryKey: ['cancelaciones-cancha'] });
+          }}
+        />
+      )}
+    </>
   );
 }
