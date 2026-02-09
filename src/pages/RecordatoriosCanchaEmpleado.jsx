@@ -145,9 +145,20 @@ export default function RecordatoriosCanchaEmpleado() {
         <header>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Recordatorios de Cancha</h1>
           <p className="text-slate-500 text-xs sm:text-sm">
-            {format(new Date(), "EEEE d 'de' MMMM, yyyy", { locale: es })}
+            {format(parseISO(selectedDate), "EEEE d 'de' MMMM, yyyy", { locale: es })}
           </p>
         </header>
+
+        {/* Selector de fecha */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-slate-700">Seleccionar fecha</Label>
+          <Input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="max-w-xs"
+          />
+        </div>
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-2 sm:gap-4">
