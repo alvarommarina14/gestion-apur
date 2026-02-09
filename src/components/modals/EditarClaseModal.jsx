@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { CheckCircle, CalendarIcon, Trash2, AlertTriangle, Zap } from 'lucide-react';
+import { CheckCircle, CalendarIcon, Trash2, AlertTriangle } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import CancelarCanchaModal from '@/components/agenda/CancelarCanchaModal';
@@ -423,17 +423,7 @@ export default function EditarClaseModal({ open, onOpenChange, clase }) {
                <Trash2 className="w-4 h-4 mr-2" />
                Eliminar toda la serie
              </Button>
-             {turnoAsociado && (
-               <Button
-                 type="button"
-                 variant="outline"
-                 onClick={() => setShowCancelModal(true)}
-                 className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 border-amber-200 w-full sm:w-auto"
-               >
-                 <Zap className="w-4 h-4 mr-2" />
-                 Cancelar cancha
-               </Button>
-             )}
+
            </div>
            <Button variant="outline" onClick={() => onOpenChange(false)}>
              Cancelar
