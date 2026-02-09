@@ -43,11 +43,21 @@ import {
 import { cn } from '@/lib/utils';
 import SeccionCobros from './SeccionCobros';
 import { registrarCambioCliente, registrarEliminacion } from '@/components/utils/auditLog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 export default function DetalleClienteModal({ open, onOpenChange, cliente, turnos = [] }) {
   const queryClient = useQueryClient();
   const [editando, setEditando] = useState(false);
   const [formData, setFormData] = useState({});
+  const [pagoAEliminar, setPagoAEliminar] = useState(null);
 
   // Fetch pagos y cobros del cliente
   const { data: cobrosClientes = [] } = useQuery({
@@ -135,6 +145,14 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente, turno
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
       onOpenChange(false);
+    },
+  });
+
+  const deletePagoMutation = useMutation({
+    mutationFn: (pagoId) => base44.entities.Pago.delete(pagoId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pagos-alumnos', cliente?.id] });
+      setPagoAEliminar(null);
     },
   });
 
@@ -382,15 +400,25 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente, turno
                               Mes: {format(parseISO(pago.mes_correspondiente + '-01'), "MMMM yyyy", { locale: es })}
                             </p>
                           </div>
-                          <div className="text-right">
-                            <div className="font-semibold text-emerald-600">
-                              ${(pago.monto || 0).toLocaleString('es-AR')}
+                          <div className="text-right flex items-start gap-2">
+                            <div>
+                              <div className="font-semibold text-emerald-600">
+                                ${(pago.monto || 0).toLocaleString('es-AR')}
+                              </div>
+                              {pago.fuera_de_termino && (
+                                <Badge variant="outline" className="text-xs text-amber-600 border-amber-300 mt-1">
+                                  Fuera de término
+                                </Badge>
+                              )}
                             </div>
-                            {pago.fuera_de_termino && (
-                              <Badge variant="outline" className="text-xs text-amber-600 border-amber-300 mt-1">
-                                Fuera de término
-                              </Badge>
-                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setPagoAEliminar(pago)}
+                              className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 h-8 w-8 p-0"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
                         </div>
                       </CardContent>
