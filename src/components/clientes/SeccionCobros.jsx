@@ -84,7 +84,7 @@ export default function SeccionCobros({ cliente }) {
           cobros.map(cobro => (
             <Card key={cobro.id} className="shadow-sm hover:shadow-md transition-all">
               <CardContent className="p-4">
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <p className="font-medium text-slate-900">
@@ -110,6 +110,18 @@ export default function SeccionCobros({ cliente }) {
                       </p>
                     )}
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      if (confirm('¿Eliminar este cobro?')) {
+                        deleteCbroMutation.mutate(cobro.id);
+                      }
+                    }}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
               </CardContent>
             </Card>
