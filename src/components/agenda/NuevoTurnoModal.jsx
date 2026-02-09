@@ -66,6 +66,12 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
     enabled: open,
   });
 
+  const { data: bloqueos = [] } = useQuery({
+    queryKey: ['disponibilidad-canchas'],
+    queryFn: () => base44.entities.DisponibilidadCancha.filter({ estado: 'activo' }),
+    enabled: open,
+  });
+
   const [formData, setFormData] = useState({
     fecha: format(fecha || new Date(), 'yyyy-MM-dd'),
     hora_inicio: '09:00',
@@ -161,12 +167,47 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
     return format(fin, 'HH:mm');
   };
 
-  const validarSolapamiento = (data) => {
+  const validarDisponibilidad = (data) => {
     const horaFin = calcularHoraFin(data.hora_inicio, data.duracion);
+    const fechaTurno = parseISO(data.fecha);
     
+    // Validar bloqueos
+    const bloqueosConflicto = bloqueos.filter(b => {
+      // Verificar si afecta esta cancha
+      if (b.cancha !== 'todas' && b.cancha !== data.cancha) return false;
+      
+      // Verificar si la fecha está en el rango
+      const fechaInicio = parseISO(b.fecha_inicio);
+      const fechaFin = parseISO(b.fecha_fin);
+      
+      if (fechaTurno < fechaInicio || fechaTurno > fechaFin) return false;
+      
+      // Si es todo el día, hay conflicto
+      if (b.todo_el_dia) return true;
+      
+      // Verificar conflicto de horario
+      if (b.hora_inicio && b.hora_fin) {
+        if (data.hora_inicio >= b.hora_inicio && data.hora_inicio < b.hora_fin) return true;
+        if (horaFin > b.hora_inicio && horaFin <= b.hora_fin) return true;
+        if (data.hora_inicio <= b.hora_inicio && horaFin >= b.hora_fin) return true;
+      }
+      
+      return false;
+    });
+    
+    if (bloqueosConflicto.length > 0) {
+      const bloqueo = bloqueosConflicto[0];
+      return {
+        error: `Cancha ${data.cancha === bloqueo.cancha ? data.cancha : 'bloqueada'} no disponible: ${bloqueo.descripcion || bloqueo.motivo}`,
+        tipo: 'bloqueo'
+      };
+    }
+    
+    // Validar solapamiento con otros turnos
     const solapados = turnosExistentes.filter(t => {
       if (turno && t.id === turno.id) return false;
       if (t.fecha !== data.fecha || t.cancha !== data.cancha) return false;
+      if (t.estado === 'cancelado') return false;
       
       const tFin = t.hora_fin;
       if (data.hora_inicio >= t.hora_inicio && data.hora_inicio < tFin) return true;
@@ -176,7 +217,14 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
       return false;
     });
     
-    return solapados;
+    if (solapados.length > 0) {
+      return {
+        error: `Ya existe un turno en Cancha ${data.cancha} a las ${solapados[0].hora_inicio}`,
+        tipo: 'solapamiento'
+      };
+    }
+    
+    return null;
   };
 
   const createMutation = useMutation({
@@ -457,9 +505,9 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
 
      const horaFin = calcularHoraFin(dataConEmpleados.hora_inicio, dataConEmpleados.duracion);
 
-     const solapados = validarSolapamiento(dataConEmpleados);
-     if (solapados.length > 0) {
-       setError(`Ya existe un turno en Cancha ${dataConEmpleados.cancha} a las ${solapados[0].hora_inicio}`);
+     const validacion = validarDisponibilidad(dataConEmpleados);
+     if (validacion) {
+       setError(validacion.error);
        setIsSubmitting(false);
        return;
      }
