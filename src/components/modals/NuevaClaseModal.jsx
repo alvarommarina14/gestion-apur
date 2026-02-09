@@ -96,12 +96,25 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
   };
 
   const handleAlumnoToggle = (alumnoId) => {
-    setFormData(prev => ({
-      ...prev,
-      alumnos_ids: prev.alumnos_ids.includes(alumnoId)
-        ? prev.alumnos_ids.filter(id => id !== alumnoId)
-        : [...prev.alumnos_ids, alumnoId]
-    }));
+    setFormData(prev => {
+      const isSelected = prev.alumnos_ids.includes(alumnoId);
+      
+      if (formData.tipo === 'individual') {
+        // Individual: solo puede haber 1 alumno
+        return {
+          ...prev,
+          alumnos_ids: isSelected ? [] : [alumnoId]
+        };
+      } else {
+        // Grupal: puede haber múltiples
+        return {
+          ...prev,
+          alumnos_ids: isSelected
+            ? prev.alumnos_ids.filter(id => id !== alumnoId)
+            : [...prev.alumnos_ids, alumnoId]
+        };
+      }
+    });
   };
 
   const handleSubmit = async (e) => {
