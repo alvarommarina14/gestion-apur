@@ -54,9 +54,9 @@ export default function CancelarCanchaModal({ open, onOpenChange, turno }) {
         fecha: turno.fecha,
         hora_inicio: turno.hora_inicio,
         monto: turno.monto || 0,
-        motivo_cancelacion: esMenosDe24Horas ? 'menos_24h' : motivo,
+        motivo_cancelacion: tiempoAviso === 'menos_24h' ? 'menos_24h' : motivo,
         detalles: detalles || null,
-        estado_recupero: esMenosDe24Horas ? 'descontado' : 'pendiente',
+        estado_recupero: tiempoAviso === 'menos_24h' ? 'descontado' : 'pendiente',
       });
 
       // Actualizar estado del turno
@@ -72,6 +72,9 @@ export default function CancelarCanchaModal({ open, onOpenChange, turno }) {
       setMotivo('');
       setDetalles('');
     },
+    onError: (error) => {
+      console.error('Error al cancelar cancha:', error);
+    }
   });
 
   const handleSubmit = async () => {
