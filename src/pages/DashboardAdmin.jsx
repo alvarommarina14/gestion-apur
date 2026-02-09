@@ -41,8 +41,6 @@ const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sáb
 export default function DashboardAdmin() {
   const [mesSeleccionado, setMesSeleccionado] = useState(new Date());
   const mesStr = format(mesSeleccionado, 'yyyy-MM');
-  const [morososExpanded, setMorososExpanded] = useState(false);
-  const [cobroModal, setCobroModal] = useState({ open: false, cobro: null, cliente: null });
 
   const { data: user } = useQuery({
     queryKey: ['me'],
