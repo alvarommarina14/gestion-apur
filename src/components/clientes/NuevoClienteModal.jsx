@@ -69,22 +69,22 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
       await registrarCreacion('Cliente', newCliente.id, data.nombre);
 
       // Si es alumno, crear también en la entidad Alumno
-      if (data.es_alumno && data.profesor_id) {
-        await base44.entities.Alumno.create({
-          profesor_id: data.profesor_id,
-          profesor_nombre: data.profesor_nombre,
-          nombre: data.nombre,
-          whatsapp: data.telefono,
-          observaciones: data.notas,
-          estado: 'activo',
-          precio_mensual: 0,
-          clases_por_mes: 0,
-          clases_a_recuperar: 0,
-          deuda_total: 0,
-          total_clases_asistidas: 0,
-        });
-        await registrarCreacion('Alumno', newCliente.id, data.nombre);
-      }
+       if (data.es_alumno && data.profesor_id) {
+         await base44.entities.Alumno.create({
+           profesor_id: data.profesor_id,
+           profesor_nombre: data.profesor_nombre,
+           nombre: data.nombre,
+           whatsapp: data.telefono,
+           observaciones: data.notas,
+           estado: 'activo',
+           precio_mensual: data.precio || 0,
+           clases_por_mes: 0,
+           clases_a_recuperar: 0,
+           deuda_total: 0,
+           total_clases_asistidas: 0,
+         });
+         await registrarCreacion('Alumno', newCliente.id, data.nombre);
+       }
 
       return newCliente;
     },
