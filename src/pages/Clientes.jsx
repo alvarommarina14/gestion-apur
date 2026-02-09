@@ -77,6 +77,7 @@ export default function ClientesPage() {
 
   const clasificacionConfig = {
     nuevo: { icon: UserPlus, color: 'bg-blue-100 text-blue-700', label: 'Nuevo' },
+    ocasional: { icon: UserPlus, color: 'bg-blue-100 text-blue-700', label: 'Ocasional' },
     recurrente: { icon: UserCheck, color: 'bg-emerald-100 text-emerald-700', label: 'Recurrente' },
   };
 
@@ -176,9 +177,9 @@ export default function ClientesPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {clientesFiltrados.map((cliente) => {
-              const config = clasificacionConfig[cliente.clasificacion];
-              const Icon = config.icon;
-              const turnosCliente = turnos.filter(t => t.cliente === cliente.nombre);
+               const config = clasificacionConfig[cliente.clasificacion] || clasificacionConfig.nuevo;
+               const Icon = config?.icon || UserPlus;
+               const turnosCliente = turnos.filter(t => t.cliente === cliente.nombre);
 
               return (
                 <Card 
