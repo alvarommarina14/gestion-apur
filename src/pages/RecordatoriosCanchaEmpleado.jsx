@@ -281,25 +281,12 @@ export default function RecordatoriosCanchaEmpleado() {
                             {format(parseISO(item.hora_confirmacion), 'HH:mm')}
                           </div>
                         )}
-                      </div>
-
-                      {item.estado === 'pendiente' && item.tipo === 'recordatorio' && (
-                        <Button
-                          onClick={() => marcarHechoMutation.mutate(item.data)}
-                          disabled={marcarHechoMutation.isPending}
-                          className="bg-emerald-600 hover:bg-emerald-700 shrink-0 h-11 px-5 text-base active:scale-95 touch-manipulation"
-                        >
-                          <CheckCircle className="w-5 h-5 mr-2" />
-                          HECHO
-                        </Button>
-                      )}
-
-                      {item.estado === 'hecho' && (
-                        <div className="flex items-center gap-2 text-emerald-600 shrink-0">
-                          <CheckCircle className="w-5 h-5" />
-                          <span className="text-sm font-medium">Completado</span>
                         </div>
-                      )}
+
+                        <div className="flex items-center gap-2 text-slate-400 shrink-0">
+                        <Eye className="w-5 h-5" />
+                        <span className="text-sm font-medium">Ver</span>
+                        </div>
                     </div>
                   </div>
                 ))}
