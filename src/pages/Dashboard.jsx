@@ -61,7 +61,7 @@ export default function Dashboard() {
     queryFn: () => base44.auth.me(),
   });
   
-  const isEmpleado = user?.role !== 'admin' && user?.role !== 'profesor';
+  const isEmpleado = user?.rol !== 'admin' && user?.rol !== 'profesor';
 
   const handleRefresh = async () => {
     // Forzar recarga de queries
