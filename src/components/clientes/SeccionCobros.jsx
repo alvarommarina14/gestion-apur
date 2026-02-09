@@ -46,10 +46,10 @@ export default function SeccionCobros({ cliente }) {
   });
 
   const stats = useMemo(() => {
-    const pendientes = cobros.filter(c => c.estado === 'pendiente').reduce((sum, c) => sum + (c.monto || 0), 0);
-    const morosos = cobros.filter(c => c.estado === 'moroso').reduce((sum, c) => sum + (c.monto || 0), 0);
+    const pendientes = cobros.filter(c => getEstadoDinamico(c) === 'pendiente').reduce((sum, c) => sum + (c.monto || 0), 0);
+    const morosos = cobros.filter(c => getEstadoDinamico(c) === 'moroso').reduce((sum, c) => sum + (c.monto || 0), 0);
     const pagados = cobros.filter(c => c.estado === 'pagado').reduce((sum, c) => sum + (c.monto || 0), 0);
-    
+
     return { pendientes, morosos, pagados };
   }, [cobros]);
 
