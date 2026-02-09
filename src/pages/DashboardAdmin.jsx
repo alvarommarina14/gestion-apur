@@ -436,11 +436,13 @@ export default function DashboardAdmin() {
                   </div>
                 </CardContent>
               </Card>
-            </div>
-          </TabsContent>
+              </div>
+              </div>
+              )}
 
-          {/* SECCIÓN OCULTA - Cobros anterior */}
-          <div className="hidden">
+              {/* SECCIÓN OCULTA - Cobros anterior */}
+              {false && (
+              <div>
             {/* Stats Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="shadow-sm border-rose-200 bg-rose-50/30">
