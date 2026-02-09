@@ -24,7 +24,7 @@ export default function Finanzas() {
   const [mesSeleccionado, setMesSeleccionado] = useState(new Date());
   const [busqueda, setBusqueda] = useState('');
   const [filtroEstado, setFiltroEstado] = useState('todos');
-  const [sinronizando, setSincronizando] = useState(false);
+  const [sincronizando, setSincronizando] = useState(false);
 
   const mesStr = format(mesSeleccionado, 'yyyy-MM');
   const queryClient = useQueryClient();
