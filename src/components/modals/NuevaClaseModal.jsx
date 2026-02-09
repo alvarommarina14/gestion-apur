@@ -40,6 +40,11 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
     queryFn: () => base44.entities.Alumno.list(),
   });
   
+  const { data: profesores = [] } = useQuery({
+    queryKey: ['profesores'],
+    queryFn: () => base44.entities.Profesor.list(),
+  });
+  
   const alumnosActivos = alumnos.filter(a => a.estado !== 'pausado');
   
   const { data: user } = useQuery({
@@ -54,6 +59,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
     tipo: 'individual',
     sede: '',
     cancha: '',
+    profesor_id: '',
     alumnos_ids: recupero ? [recupero.alumno_id] : [],
     precio: '',
     pagado: false,
