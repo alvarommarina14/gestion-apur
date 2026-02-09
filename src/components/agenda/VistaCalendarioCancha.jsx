@@ -24,6 +24,17 @@ const CANCHAS = ['1', '2', '3', '4'];
 
 export default function VistaCalendarioCancha({ turnos = [], recordatorios = [], bloqueos = [], selectedDate, selectedCancha, fecha, isAdmin, onTurnoClick, onEditarClase, onCancelarCancha, isLoading }) {
   const [profesorTurnos, setProfesorTurnos] = useState(new Set());
+  const [actualizandoId, setActualizandoId] = useState(null);
+  const queryClient = useQueryClient();
+  const { mutate: updatePago } = useMutation({
+    mutationFn: async ({ turnoId, pagado }) => {
+      return await base44.entities.TurnoCancha.update(turnoId, { pagado });
+    },
+    onSuccess: () => {
+      setActualizandoId(null);
+      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+    }
+  });
   
   const { data: user } = useQuery({
     queryKey: ['me'],
