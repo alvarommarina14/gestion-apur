@@ -32,7 +32,6 @@ import ReportesIngresos from '@/components/reportes/ReportesIngresos';
 import ReporteOcupacion from '@/components/reportes/ReporteOcupacion';
 import ReporteProfesores from '@/components/reportes/ReporteProfesores';
 import ReporteCobros from '@/components/reportes/ReporteCobros';
-import ReporteClientesValiosos from '@/components/reportes/ReporteClientesValiosos';
 
 const HORARIOS = [];
 for (let h = 8; h <= 21; h++) {
@@ -361,13 +360,12 @@ export default function DashboardAdmin() {
         </Card>
 
         <Tabs defaultValue="resumen" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-7">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="resumen" className="text-xs lg:text-sm">Resumen</TabsTrigger>
             <TabsTrigger value="ocupacion" className="text-xs lg:text-sm">Ocupación</TabsTrigger>
             <TabsTrigger value="ingresos" className="text-xs lg:text-sm">Ingresos</TabsTrigger>
             <TabsTrigger value="profesores" className="text-xs lg:text-sm">Profesores</TabsTrigger>
             <TabsTrigger value="cobros" className="text-xs lg:text-sm">Cobros</TabsTrigger>
-            <TabsTrigger value="clientes" className="text-xs lg:text-sm">Clientes</TabsTrigger>
           </TabsList>
 
           {/* TAB RESUMEN (Dashboard actual simplificado) */}
@@ -480,14 +478,6 @@ export default function DashboardAdmin() {
               turnos={turnos} 
               pagos={pagos} 
               cobrosClientes={cobrosClientes} 
-            />
-          </TabsContent>
-
-          {/* TAB CLIENTES */}
-          <TabsContent value="clientes">
-            <ReporteClientesValiosos 
-              clientes={clientes} 
-              turnos={turnos} 
             />
           </TabsContent>
 
