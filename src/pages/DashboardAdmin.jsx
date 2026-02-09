@@ -27,7 +27,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import RegistrarCobroModal from '@/components/dashboard-admin/RegistrarCobroModal';
 import ReporteOcupacion from '@/components/reportes/ReporteOcupacion';
 
 const HORARIOS = [];
