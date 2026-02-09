@@ -25,18 +25,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Calendar, CheckCircle, AlertTriangle, Trash2, X, Zap } from 'lucide-react';
+import { Calendar, CheckCircle, AlertTriangle, Trash2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import FormularioClaseAdmin from '@/components/agenda/FormularioClaseAdmin';
-import CancelarCanchaModal from '@/components/agenda/CancelarCanchaModal';
 
 export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isProfesor = false }) {
   const queryClient = useQueryClient();
   const [success, setSuccess] = useState(false);
-  const [error, setError] = useState(null);
-  const [claseData, setClaseData] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showCancelModal, setShowCancelModal] = useState(false);
+   const [error, setError] = useState(null);
+   const [claseData, setClaseData] = useState(null);
+   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: turnosExistentes = [] } = useQuery({
     queryKey: ['turnos-cancha', turno?.fecha || fecha ? format(turno?.fecha ? new Date(turno.fecha) : fecha || new Date(), 'yyyy-MM-dd') : ''],
@@ -978,15 +976,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
                  Toda la recurrencia
                </Button>
              )}
-             <Button
-               type="button"
-               variant="outline"
-               onClick={() => setShowCancelModal(true)}
-               className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 w-full sm:w-auto"
-             >
-               <Zap className="w-4 h-4 mr-2" />
-               Cancelar cancha / Eliminar turno
-             </Button>
+
            </div>
          )}
         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
@@ -1041,19 +1031,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
         </DialogContent>
       </Dialog>
 
-      {turno && (
-        <CancelarCanchaModal
-          open={showCancelModal}
-          onOpenChange={setShowCancelModal}
-          turno={turno}
-          onSuccess={() => {
-            setShowCancelModal(false);
-            queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
-            queryClient.invalidateQueries({ queryKey: ['cancelaciones-cancha'] });
-            onOpenChange(false);
-          }}
-        />
-      )}
+
     </>
   );
 }
