@@ -98,194 +98,94 @@ export default function RecordatoriosCanchaAdmin() {
           </Card>
         </div>
 
-        {/* Acciones de selección múltiple */}
-        {seleccionados.length > 0 && (
-          <Card className="shadow-md border-emerald-200 bg-emerald-50">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between gap-4">
-                <p className="text-sm font-medium text-slate-700">
-                  {seleccionados.length} recordatorio{seleccionados.length > 1 ? 's' : ''} seleccionado{seleccionados.length > 1 ? 's' : ''}
-                </p>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setSeleccionados([])}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={handleEliminarSeleccionados}
-                    disabled={eliminarMultiplesMutation.isPending}
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Eliminar seleccionados
-                  </Button>
-                </div>
-              </div>
+        {/* Lista de recordatorios del día */}
+        {recordatoriosFiltrados.length === 0 ? (
+          <Card className="shadow-sm">
+            <CardContent className="pt-12 text-center pb-12">
+              <Calendar className="w-12 h-12 mx-auto mb-3 opacity-40" />
+              <p className="text-slate-500">No hay recordatorios para esta fecha</p>
             </CardContent>
           </Card>
-        )}
-
-        {/* Vista selector y navegación */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <Tabs value={vista} onValueChange={setVista}>
-              <TabsList>
-                <TabsTrigger value="semana">Semana</TabsTrigger>
-                <TabsTrigger value="todos">Todos</TabsTrigger>
-              </TabsList>
-            </Tabs>
-            {recordatoriosFiltrados.length > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={toggleSeleccionarTodos}
-              >
-                <Checkbox 
-                  checked={seleccionados.length === recordatoriosFiltrados.length && recordatoriosFiltrados.length > 0}
-                  className="mr-2"
-                />
-                {seleccionados.length === recordatoriosFiltrados.length ? 'Deseleccionar todos' : 'Seleccionar todos'}
-              </Button>
-            )}
-          </div>
-
-          {vista === 'semana' && (
-            <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))}
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              <span className="text-sm font-medium text-slate-700 min-w-[200px] text-center">
-                {format(weekStart, "d 'de' MMM", { locale: es })} -{' '}
-                {format(weekEnd, "d 'de' MMM yyyy", { locale: es })}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))}
-              >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentWeek(new Date())}
-              >
-                Hoy
-              </Button>
-            </div>
-          )}
-        </div>
-
-        {/* Vista semanal */}
-        {vista === 'semana' && (
-          <div className="grid lg:grid-cols-7 gap-4">
-            {Object.entries(recordatoriosPorDia).map(([fecha, recs]) => {
-              const dia = parseISO(fecha);
-              const esHoy = format(new Date(), 'yyyy-MM-dd') === fecha;
-              
-              return (
-                <Card key={fecha} className={cn(
-                  'shadow-sm',
-                  esHoy && 'ring-2 ring-emerald-500'
-                )}>
-                  <CardHeader className="pb-3 border-b">
-                    <CardTitle className="text-sm text-center">
-                      <div className="font-semibold text-slate-900">
-                        {format(dia, 'EEEE', { locale: es })}
-                      </div>
-                      <div className="text-xs text-slate-500 mt-0.5">
-                        {format(dia, "d 'de' MMM", { locale: es })}
-                      </div>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-3">
-                    {recs.length === 0 ? (
-                      <p className="text-xs text-slate-400 text-center py-4">Sin recordatorios</p>
-                    ) : (
-                      <div className="space-y-2">
-                        {recs.map((rec) => (
-                          <div
-                            key={rec.id}
-                            className={cn(
-                              'p-2 rounded-lg border text-xs space-y-1',
-                              rec.estado === 'hecho'
-                                ? 'bg-emerald-50 border-emerald-200'
-                                : 'bg-white border-slate-200',
-                              seleccionados.includes(rec.id) && 'ring-2 ring-emerald-500'
-                            )}
-                          >
-                            <div className="flex items-center gap-2">
-                              <Checkbox
-                                checked={seleccionados.includes(rec.id)}
-                                onCheckedChange={() => toggleSeleccion(rec.id)}
-                              />
-                              <div className="font-semibold text-slate-800">{rec.hora}</div>
-                            </div>
-                            <div className="text-slate-600">Cancha {rec.cancha}</div>
-                            <div className="text-slate-500">{rec.profesor}</div>
-                            {rec.turno && (
-                              <>
-                                <span className={cn(
-                                  "inline-block px-1.5 py-0.5 text-[10px] font-medium rounded",
-                                  rec.turno.tipo_turno === 'clase' 
-                                    ? "bg-blue-100 text-blue-700" 
-                                    : "bg-purple-100 text-purple-700"
-                                )}>
-                                  {rec.turno.tipo_turno === 'clase' ? 'Clase' : 'Alquiler'}
-                                </span>
-                                {rec.turno.cliente && (
-                                  <div className="text-[10px] text-slate-600">👤 {rec.turno.cliente}</div>
-                                )}
-                              </>
-                            )}
-                            <div className="flex items-center gap-1 font-semibold text-emerald-600">
-                              {formatMoney(rec.monto)}
-                              {rec.turno?.pagado && <CheckCircle className="w-3 h-3" />}
-                            </div>
-                            {rec.repeticion_semanal && (
-                              <span className="inline-block px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-medium rounded">
-                                Semanal
-                              </span>
-                            )}
-                            {rec.estado === 'hecho' && (
-                              <div className="text-[10px] text-emerald-600 pt-1">
-                                ✓ {rec.hecho_por_nombre}
-                              </div>
-                            )}
-                            <div className="flex gap-1 pt-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 px-2 text-xs"
-                                onClick={() => setNuevoModal({ open: true, recordatorio: rec })}
-                              >
-                                <Edit className="w-3 h-3" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 px-2 text-xs text-rose-600 hover:text-rose-700"
-                                onClick={() => handleEliminar(rec.id)}
-                              >
-                                <Trash2 className="w-3 h-3" />
-                              </Button>
-                            </div>
+        ) : (
+          <div className="space-y-4">
+            {recordatoriosFiltrados.map((rec) => (
+              <Card key={rec.id} className="shadow-sm hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className="space-y-3">
+                    {/* Encabezado */}
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <div className="text-2xl font-bold text-slate-900 min-w-[60px]">
+                          {rec.hora}
+                        </div>
+                        <div>
+                          <div className="font-semibold text-slate-900">
+                            Cancha {rec.cancha}
                           </div>
-                        ))}
+                          <div className="text-sm text-slate-500 mt-0.5">
+                            {format(parseISO(rec.fecha), "EEEE, d 'de' MMMM", { locale: es })}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className={cn(
+                          'inline-block px-3 py-1 rounded-full text-sm font-semibold',
+                          rec.turno?.tipo_turno === 'clase'
+                            ? 'bg-blue-100 text-blue-700'
+                            : 'bg-purple-100 text-purple-700'
+                        )}>
+                          {rec.turno?.tipo_turno === 'clase' ? '📚 Clase' : '🎾 Alquiler'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Información del turno */}
+                    <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+                      <div>
+                        <p className="text-xs text-slate-500 uppercase font-semibold">Cliente / De quién</p>
+                        <p className="text-sm font-medium text-slate-900 mt-1">{rec.turno?.cliente || rec.cliente || 'N/A'}</p>
+                      </div>
+                      {rec.turno?.tipo_turno === 'clase' && (
+                        <div>
+                          <p className="text-xs text-slate-500 uppercase font-semibold">Profesor</p>
+                          <p className="text-sm font-medium text-slate-900 mt-1">{rec.turno?.profesor || 'No asignado'}</p>
+                        </div>
+                      )}
+                      {rec.turno?.tipo_turno === 'clase' && rec.turno?.alumnos_nombres && (
+                        <div className="col-span-2">
+                          <p className="text-xs text-slate-500 uppercase font-semibold flex items-center gap-1">
+                            <Users className="w-3 h-3" /> Alumnos
+                          </p>
+                          <div className="text-sm font-medium text-slate-900 mt-1">
+                            {Array.isArray(rec.turno.alumnos_nombres) 
+                              ? rec.turno.alumnos_nombres.join(', ')
+                              : rec.turno.alumnos_nombres}
+                          </div>
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-xs text-slate-500 uppercase font-semibold">Modalidad</p>
+                        <p className="text-sm font-medium text-slate-900 mt-1 capitalize">
+                          {rec.turno?.modalidad_alquiler || rec.turno?.tipo_turno || 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-500 uppercase font-semibold">Precio</p>
+                        <p className="text-sm font-bold text-emerald-600 mt-1">{formatMoney(rec.monto)}</p>
+                      </div>
+                    </div>
+
+                    {/* Notas */}
+                    {rec.notas && (
+                      <div className="pt-2 border-t border-slate-100">
+                        <p className="text-xs text-slate-500 uppercase font-semibold">Notas</p>
+                        <p className="text-sm text-slate-700 mt-1 bg-slate-50 p-2 rounded">{rec.notas}</p>
                       </div>
                     )}
-                  </CardContent>
-                </Card>
-              );
-            })}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         )}
 
