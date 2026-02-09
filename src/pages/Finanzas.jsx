@@ -77,9 +77,6 @@ export default function Finanzas() {
 
   // Métricas de Alumnos
   const metricasAlumnos = useMemo(() => {
-    const inicio = startOfMonth(mesSeleccionado);
-    const fin = endOfMonth(mesSeleccionado);
-
     const alumnosMes = alumnos.map(a => {
       const pagosAlumno = pagos.filter(p =>
         p.alumno_id === a.id &&
