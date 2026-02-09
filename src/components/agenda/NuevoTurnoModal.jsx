@@ -567,7 +567,11 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
          }
        });
 
-         updateMutation.mutate({ id: turno.id, data, cambios });
+         updateMutation.mutate({ id: turno.id, data, cambios }, {
+           onSettled: () => {
+             setIsSubmitting(false);
+           }
+         });
          } else {
        // Si es repetición semanal, crear turnos para 52 semanas (batch optimizado)
        if (data.repeticion_semanal) {
@@ -642,7 +646,11 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
            }
          })();
        } else {
-         createMutation.mutate(data);
+         createMutation.mutate(data, {
+           onSettled: () => {
+             setIsSubmitting(false);
+           }
+         });
        }
      }
    };
