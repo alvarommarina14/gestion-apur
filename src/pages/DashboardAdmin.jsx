@@ -353,6 +353,14 @@ export default function DashboardAdmin() {
             >
               Siguiente →
             </button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setLimpiezaModalOpen(true)}
+              className="gap-2"
+            >
+              🗑️ Limpiar Datos
+            </Button>
           </div>
         </header>
 
