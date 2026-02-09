@@ -81,7 +81,7 @@ export default function GestionAccesoUnificada() {
   const [localPermisos, setLocalPermisos] = useState({});
   const [editEmpleado, setEditEmpleado] = useState(null);
   const [editFormData, setEditFormData] = useState({});
-  const [seccionesEmpleado, setSeccionesEmpleado] = useState({});
+  const [seccionesEmpleado, setSeccionesEmpleado] = useState([]);
   const [procesandoClase, setProcesandoClase] = useState(null);
   const [clasesSeleccionadas, setClasesSeleccionadas] = useState(new Set());
 
@@ -937,14 +937,16 @@ export default function GestionAccesoUnificada() {
                   { id: 'recordatorios_cancha_empleado', nombre: 'Mis Recordatorios', icon: '🔔' },
                   { id: 'reportes', nombre: 'Reportes', icon: '📊' },
                 ].map(seccion => {
-                  const seccionData = seccionesEmpleado.find(s => s.seccion === seccion.id) || { seccion: seccion.id, ver: false };
+                  const seccionesArray = Array.isArray(seccionesEmpleado) ? seccionesEmpleado : [];
+                  const seccionData = seccionesArray.find(s => s.seccion === seccion.id) || { seccion: seccion.id, ver: false };
                   
                   return (
                     <div key={seccion.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-slate-50">
                       <Switch
                         checked={seccionData.ver || false}
                         onCheckedChange={(checked) => {
-                          const nuevasSecciones = seccionesEmpleado.filter(s => s.seccion !== seccion.id);
+                          const seccionesArray = Array.isArray(seccionesEmpleado) ? seccionesEmpleado : [];
+                          const nuevasSecciones = seccionesArray.filter(s => s.seccion !== seccion.id);
                           nuevasSecciones.push({
                             seccion: seccion.id,
                             ver: checked,
