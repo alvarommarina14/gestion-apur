@@ -330,8 +330,9 @@ export default function Agenda() {
              open={cancelarModal.open}
              onOpenChange={(open) => setCancelarModal({ ...cancelarModal, open })}
              turno={cancelarModal.turno}
+             fechaSeleccionada={fechaStr}
              onSuccess={() => {
-               queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+               queryClient.refetchQueries({ queryKey: ['turnos-cancha', fechaStr] });
              }}
            />
         </>
