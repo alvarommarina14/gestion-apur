@@ -977,7 +977,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
                  Toda la recurrencia
                </Button>
              )}
-             <BotonesCancelacion turno={turno} />
+             <BotonesCancelacion turno={turno} onModalClose={() => onOpenChange(false)} />
            </div>
          )}
         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
