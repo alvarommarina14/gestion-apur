@@ -20,7 +20,7 @@ import { AlertTriangle } from 'lucide-react';
 import { format, parseISO, differenceInHours } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-export default function CancelarCanchaModal({ open, onOpenChange, turno, onSuccess }) {
+export default function CancelarCanchaModal({ open, onOpenChange, turno, onSuccess, fechaSeleccionada }) {
    const queryClient = useQueryClient();
    const [motivoMas24h, setMotivoMas24h] = useState('');
    const [mostrarSelectMotivo, setMostrarSelectMotivo] = useState(false);
