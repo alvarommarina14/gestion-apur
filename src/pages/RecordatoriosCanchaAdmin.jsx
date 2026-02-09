@@ -13,6 +13,14 @@ import RegistrarCobroModal from '@/components/recordatorios-cancha/RegistrarCobr
 export default function RecordatoriosCanchaAdmin() {
    const [fechaSeleccionada, setFechaSeleccionada] = useState(format(new Date(), 'yyyy-MM-dd'));
    const [cobroModal, setCobroModal] = useState({ open: false, recordatorio: null, cliente: null });
+   const queryClient = useQueryClient();
+
+   const eliminarRecordatorioMutation = useMutation({
+      mutationFn: (recordatorioId) => base44.entities.RecordatorioCancha.delete(recordatorioId),
+      onSuccess: () => {
+         queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+      },
+   });
 
    const { data: recordatorios = [] } = useQuery({
      queryKey: ['recordatorios-cancha'],
