@@ -100,7 +100,9 @@ export default function SeccionCobros({ cliente }) {
             </CardContent>
           </Card>
         ) : (
-          cobros.map(cobro => (
+          cobros.map(cobro => {
+            const estadoDinamico = getEstadoDinamico(cobro);
+            return (
             <Card key={cobro.id} className="shadow-sm hover:shadow-md transition-all">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
@@ -109,42 +111,50 @@ export default function SeccionCobros({ cliente }) {
                       <p className="font-medium text-slate-900">
                         {cobro.tipo_cobro === 'abono_mensual' ? 'Abono' : 'Cancha suelta'} - {cobro.mes}
                       </p>
-                      <Badge className={cn('text-xs', getEstadoColor(cobro.estado))}>
-                        {cobro.estado === 'pagado' && <CheckCircle className="w-3 h-3 mr-1" />}
-                        {cobro.estado === 'moroso' && <AlertCircle className="w-3 h-3 mr-1" />}
-                        {cobro.estado.charAt(0).toUpperCase() + cobro.estado.slice(1)}
+                      <Badge className={cn('text-xs', getEstadoColor(estadoDinamico))}>
+                        {estadoDinamico === 'pagado' && <CheckCircle className="w-3 h-3 mr-1" />}
+                        {estadoDinamico === 'moroso' && <AlertCircle className="w-3 h-3 mr-1" />}
+                        {estadoDinamico.charAt(0).toUpperCase() + estadoDinamico.slice(1)}
                       </Badge>
                     </div>
                     <p className="text-sm text-slate-600">
                       Monto: <span className="font-semibold">${(cobro.monto || 0).toLocaleString('es-AR')}</span>
                     </p>
-                    {cobro.fecha_vencimiento && (
-                      <p className="text-xs text-slate-500">
-                        Vencimiento: {format(parseISO(cobro.fecha_vencimiento), 'd MMM', { locale: es })}
-                      </p>
-                    )}
                     {cobro.fecha_pago && (
                       <p className="text-xs text-emerald-600">
                         Pagado: {format(parseISO(cobro.fecha_pago), 'd MMM yyyy', { locale: es })}
                       </p>
                     )}
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      if (confirm('¿Eliminar este cobro?')) {
-                        deleteCbroMutation.mutate(cobro.id);
-                      }
-                    }}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  <div className="flex gap-2">
+                    {estadoDinamico !== 'pagado' && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setModalPago({ open: true, cobro })}
+                        className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        if (confirm('¿Eliminar este cobro?')) {
+                          deleteCbroMutation.mutate(cobro.id);
+                        }
+                      }}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          ))
+          );
+          })
         )}
       </div>
 
