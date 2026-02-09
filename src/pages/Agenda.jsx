@@ -327,10 +327,13 @@ export default function Agenda() {
             onOpenChange={setBloqueoModal}
           />
           <CancelarCanchaModal
-            open={cancelarModal.open}
-            onOpenChange={(open) => setCancelarModal({ ...cancelarModal, open })}
-            turno={cancelarModal.turno}
-          />
+             open={cancelarModal.open}
+             onOpenChange={(open) => setCancelarModal({ ...cancelarModal, open })}
+             turno={cancelarModal.turno}
+             onSuccess={() => {
+               queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+             }}
+           />
         </>
       )}
     </div>
