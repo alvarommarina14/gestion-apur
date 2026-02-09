@@ -25,16 +25,24 @@ import { registrarCreacion } from '@/components/utils/auditLog';
 import { useQuery } from '@tanstack/react-query';
 
 export default function NuevoClienteModal({ open, onOpenChange }) {
-  const queryClient = useQueryClient();
-  const [success, setSuccess] = useState(false);
-  const [formData, setFormData] = useState({
-    nombre: '',
-    telefono: '',
-    email: '',
-    clasificacion: 'nuevo',
-    tipo_cliente: 'clase',
-    notas: '',
-  });
+   const queryClient = useQueryClient();
+   const [success, setSuccess] = useState(false);
+   const [formData, setFormData] = useState({
+     nombre: '',
+     telefono: '',
+     email: '',
+     clasificacion: 'nuevo',
+     tipo_cliente: 'clase',
+     es_alumno: false,
+     profesor_id: '',
+     profesor_nombre: '',
+     notas: '',
+   });
+
+   const { data: profesores = [] } = useQuery({
+     queryKey: ['profesores-list'],
+     queryFn: () => base44.entities.Profesor.list(),
+   });
 
   React.useEffect(() => {
     if (open) {
