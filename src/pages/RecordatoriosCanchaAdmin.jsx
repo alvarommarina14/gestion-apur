@@ -82,7 +82,7 @@ export default function RecordatoriosCanchaAdmin() {
         </header>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <Card className="shadow-sm">
             <CardContent className="pt-6">
               <div className="text-center">
@@ -104,6 +104,22 @@ export default function RecordatoriosCanchaAdmin() {
               <div className="text-center">
                 <p className="text-2xl font-bold text-emerald-600">{stats.clases}</p>
                 <p className="text-sm text-slate-500 mt-1">Clases</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm border-orange-200 bg-orange-50/30">
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <p className="text-xl font-bold text-orange-600">${stats.montoPendiente.toLocaleString('es-AR')}</p>
+                <p className="text-xs text-slate-500 mt-1">Por cobrar</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm border-emerald-300 bg-emerald-100/30">
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <p className="text-xl font-bold text-emerald-700">${stats.montoCobrado.toLocaleString('es-AR')}</p>
+                <p className="text-xs text-slate-500 mt-1">Cobrado</p>
               </div>
             </CardContent>
           </Card>
