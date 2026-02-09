@@ -197,7 +197,7 @@ export default function RecuperoCanchas() {
                                 Cancha {cancelacion.cancha}
                               </Badge>
                               <Badge variant="outline" className="text-xs">
-                                {format(parseISO(cancelacion.fecha), "d 'de' MMM", { locale: es })} {cancelacion.hora_inicio}
+                                {cancelacion.fecha ? format(parseISO(cancelacion.fecha), "d 'de' MMM", { locale: es }) : 'Sin fecha'} {cancelacion.hora_inicio}
                               </Badge>
                             </div>
                           </div>
@@ -238,7 +238,9 @@ export default function RecuperoCanchas() {
               {selectedCancelacion?.cliente} - Cancha {selectedCancelacion?.cancha}
             </DialogTitle>
             <DialogDescription>
-              {format(parseISO(selectedCancelacion?.fecha || new Date()), "d 'de' MMMM yyyy", { locale: es })}
+              {selectedCancelacion?.fecha 
+                ? format(parseISO(selectedCancelacion.fecha), "d 'de' MMMM yyyy", { locale: es })
+                : 'Sin fecha registrada'}
             </DialogDescription>
           </DialogHeader>
 
@@ -306,7 +308,7 @@ export default function RecuperoCanchas() {
                       <SelectContent>
                         {turnos.map((turno) => (
                           <SelectItem key={turno.id} value={turno.id}>
-                            {turno.cliente} - {format(parseISO(turno.fecha), 'd MMM', { locale: es })} {turno.hora_inicio}
+                            {turno.cliente} - {turno.fecha ? format(parseISO(turno.fecha), 'd MMM', { locale: es }) : 'Sin fecha'} {turno.hora_inicio}
                           </SelectItem>
                         ))}
                       </SelectContent>
