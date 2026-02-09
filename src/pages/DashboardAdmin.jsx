@@ -907,6 +907,12 @@ export default function DashboardAdmin() {
         cobro={cobroModal.cobro}
         cliente={cobroModal.cliente}
       />
+
+      {/* Modal de Limpieza de Datos */}
+      <LimpiezaDatosModal
+        open={limpiezaModalOpen}
+        onOpenChange={setLimpiezaModalOpen}
+      />
     </div>
   );
 }
