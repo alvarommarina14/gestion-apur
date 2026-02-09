@@ -12,6 +12,7 @@ import RegistrarCobroModal from '@/components/recordatorios-cancha/RegistrarCobr
 
 export default function RecordatoriosCanchaAdmin() {
    const [fechaSeleccionada, setFechaSeleccionada] = useState(format(new Date(), 'yyyy-MM-dd'));
+   const [cobroModal, setCobroModal] = useState({ open: false, recordatorio: null, cliente: null });
 
    const { data: recordatorios = [] } = useQuery({
      queryKey: ['recordatorios-cancha'],
