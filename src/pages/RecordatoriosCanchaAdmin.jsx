@@ -154,15 +154,28 @@ export default function RecordatoriosCanchaAdmin() {
                           </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <span className={cn(
-                          'inline-block px-3 py-1 rounded-full text-sm font-semibold',
-                          rec.turno?.tipo_turno === 'clase'
-                            ? 'bg-blue-100 text-blue-700'
-                            : 'bg-purple-100 text-purple-700'
-                        )}>
-                          {rec.turno?.tipo_turno === 'clase' ? '📚 Clase' : '🎾 Alquiler'}
-                        </span>
+                      <div className="flex items-center gap-2">
+                        <div className="text-right">
+                          <span className={cn(
+                            'inline-block px-3 py-1 rounded-full text-sm font-semibold',
+                            rec.turno?.tipo_turno === 'clase'
+                              ? 'bg-blue-100 text-blue-700'
+                              : 'bg-purple-100 text-purple-700'
+                          )}>
+                            {rec.turno?.tipo_turno === 'clase' ? '📚 Clase' : '🎾 Alquiler'}
+                          </span>
+                        </div>
+                        {rec.turno?.pagado ? (
+                          <div className="flex items-center gap-1 px-2 py-1 bg-emerald-100 rounded-full">
+                            <CheckCircle className="w-4 h-4 text-emerald-700" />
+                            <span className="text-xs font-semibold text-emerald-700">Pagado</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1 px-2 py-1 bg-amber-100 rounded-full">
+                            <Clock className="w-4 h-4 text-amber-700" />
+                            <span className="text-xs font-semibold text-amber-700">Pendiente</span>
+                          </div>
+                        )}
                       </div>
                     </div>
 
