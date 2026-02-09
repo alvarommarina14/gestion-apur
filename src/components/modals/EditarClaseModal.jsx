@@ -22,15 +22,26 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { CheckCircle, CalendarIcon, Trash2, AlertTriangle } from 'lucide-react';
+import { CheckCircle, CalendarIcon, Trash2, AlertTriangle, Zap } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
+import CancelarCanchaModal from '@/components/agenda/CancelarCanchaModal';
 
 export default function EditarClaseModal({ open, onOpenChange, clase }) {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState({});
+  const [showCancelModal, setShowCancelModal] = useState(false);
+
+  // Obtener turno asociado a la clase
+  const { data: turnoAsociado } = useQuery({
+    queryKey: ['turno-clase', clase?.turno_cancha_id],
+    queryFn: () => clase?.turno_cancha_id 
+      ? base44.entities.TurnoCancha.read(clase.turno_cancha_id)
+      : null,
+    enabled: !!clase?.turno_cancha_id,
+  });
 
   const { data: alumnos = [] } = useQuery({
     queryKey: ['alumnos'],
@@ -237,19 +248,33 @@ export default function EditarClaseModal({ open, onOpenChange, clase }) {
             <h3 className="text-lg font-semibold text-slate-900">Clase actualizada</h3>
             <p className="text-slate-500 mt-1">Los cambios se guardaron correctamente</p>
           </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
+          </DialogContent>
+          </Dialog>
+
+          {turnoAsociado && (
+          <CancelarCanchaModal
+          open={showCancelModal}
+          onOpenChange={setShowCancelModal}
+          turno={turnoAsociado}
+          onSuccess={() => {
+            setShowCancelModal(false);
+            queryClient.invalidateQueries({ queryKey: ['cancelaciones-cancha'] });
+          }}
+          />
+          )}
+          </>
+          );
+          }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Editar clase</DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar clase</DialogTitle>
+          </DialogHeader>
 
-        <div className="space-y-4 py-4">
+          <div className="space-y-4 py-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Fecha</Label>
@@ -370,45 +395,56 @@ export default function EditarClaseModal({ open, onOpenChange, clase }) {
         </div>
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
-          <div className="w-full sm:mr-auto flex flex-col gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                if (confirm('¿Eliminar solo esta clase? La clase se eliminará de Google Calendar.')) {
-                  handleDelete(false);
-                }
-              }}
-              className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 w-full sm:w-auto"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Eliminar solo este día
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                if (confirm('¿Eliminar TODA la serie de clases recurrentes (mismo día y horario de todas las semanas)? Se eliminarán todas de Google Calendar.')) {
-                  handleDelete(true);
-                }
-              }}
-              className="text-rose-700 hover:text-rose-800 hover:bg-rose-50 border-rose-300 w-full sm:w-auto"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Eliminar toda la serie
-            </Button>
-          </div>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={loading || !formData.alumnos_ids?.length}
-            className="bg-emerald-600 hover:bg-emerald-700"
-          >
-            {loading ? 'Guardando...' : 'Guardar cambios'}
-          </Button>
-        </DialogFooter>
+           <div className="w-full sm:mr-auto flex flex-col gap-2">
+             <Button
+               type="button"
+               variant="outline"
+               onClick={() => {
+                 if (confirm('¿Eliminar solo esta clase? La clase se eliminará de Google Calendar.')) {
+                   handleDelete(false);
+                 }
+               }}
+               className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 w-full sm:w-auto"
+             >
+               <Trash2 className="w-4 h-4 mr-2" />
+               Eliminar solo este día
+             </Button>
+             <Button
+               type="button"
+               variant="outline"
+               onClick={() => {
+                 if (confirm('¿Eliminar TODA la serie de clases recurrentes (mismo día y horario de todas las semanas)? Se eliminarán todas de Google Calendar.')) {
+                   handleDelete(true);
+                 }
+               }}
+               className="text-rose-700 hover:text-rose-800 hover:bg-rose-50 border-rose-300 w-full sm:w-auto"
+             >
+               <Trash2 className="w-4 h-4 mr-2" />
+               Eliminar toda la serie
+             </Button>
+             {turnoAsociado && (
+               <Button
+                 type="button"
+                 variant="outline"
+                 onClick={() => setShowCancelModal(true)}
+                 className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 border-amber-200 w-full sm:w-auto"
+               >
+                 <Zap className="w-4 h-4 mr-2" />
+                 Cancelar cancha
+               </Button>
+             )}
+           </div>
+           <Button variant="outline" onClick={() => onOpenChange(false)}>
+             Cancelar
+           </Button>
+           <Button
+             onClick={handleSubmit}
+             disabled={loading || !formData.alumnos_ids?.length}
+             className="bg-emerald-600 hover:bg-emerald-700"
+           >
+             {loading ? 'Guardando...' : 'Guardar cambios'}
+           </Button>
+         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
