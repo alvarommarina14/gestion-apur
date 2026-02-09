@@ -93,15 +93,20 @@ export default function Reportes() {
     queryFn: () => base44.entities.Recupero.list(),
   });
   
-  // Clases del mes
+  // Clases del mes filtradas por profesor
   const clasesMes = useMemo(() => {
-    return clases.filter(c => c.fecha?.startsWith(monthStr));
-  }, [clases, monthStr]);
+    const clasesFiltradas = clases.filter(c => c.fecha?.startsWith(monthStr));
+    if (!profesorSeleccionado) return clasesFiltradas;
+    return clasesFiltradas.filter(c => c.profesor_id === profesorSeleccionado.id);
+  }, [clases, monthStr, profesorSeleccionado]);
   
-  // Pagos del mes
+  // Pagos del mes filtrados por profesor
   const pagosMes = useMemo(() => {
-    return pagos.filter(p => p.mes_correspondiente === monthStr);
-  }, [pagos, monthStr]);
+    const pagosFiltrados = pagos.filter(p => p.mes_correspondiente === monthStr);
+    if (!profesorSeleccionado) return pagosFiltrados;
+    const alumnosIds = alumnos.map(a => a.id);
+    return pagosFiltrados.filter(p => alumnosIds.includes(p.alumno_id));
+  }, [pagos, monthStr, alumnos, profesorSeleccionado]);
   
   // Stats del mes
   const stats = useMemo(() => {
@@ -149,13 +154,17 @@ export default function Reportes() {
       .slice(0, 10);
   }, [alumnos]);
   
-  // Ingresos últimos 6 meses
+  // Ingresos últimos 6 meses filtrados por profesor
   const ingresosHistoricos = useMemo(() => {
     const data = [];
+    const alumnosIds = alumnos.map(a => a.id);
     for (let i = 5; i >= 0; i--) {
       const month = subMonths(currentMonth, i);
       const monthKey = format(month, 'yyyy-MM');
-      const monthPagos = pagos.filter(p => p.mes_correspondiente === monthKey);
+      let monthPagos = pagos.filter(p => p.mes_correspondiente === monthKey);
+      if (profesorSeleccionado) {
+        monthPagos = monthPagos.filter(p => alumnosIds.includes(p.alumno_id));
+      }
       const total = monthPagos.reduce((sum, p) => sum + (p.monto || 0), 0);
       data.push({
         mes: format(month, 'MMM', { locale: es }),
@@ -163,7 +172,7 @@ export default function Reportes() {
       });
     }
     return data;
-  }, [pagos, currentMonth]);
+  }, [pagos, currentMonth, alumnos, profesorSeleccionado]);
   
   const formatMoney = (amount) => {
     return new Intl.NumberFormat('es-AR', {
@@ -182,9 +191,13 @@ export default function Reportes() {
     setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
   };
   
-  // Reportes por profesor
+  // Reportes por profesor - solo mostrar el profesor seleccionado si existe
   const reportePorProfesor = useMemo(() => {
-    return profesores.map(profesor => {
+    const profesoresToShow = profesorSeleccionado 
+      ? profesores.filter(p => p.id === profesorSeleccionado.id)
+      : profesores;
+    
+    return profesoresToShow.map(profesor => {
       const alumnosProf = alumnosTodos.filter(a => a.profesor_id === profesor.id);
       const clasesProf = clases.filter(c => 
         alumnosProf.some(a => c.alumnos_ids?.includes(a.id))
@@ -221,11 +234,15 @@ export default function Reportes() {
         tasaRealizacion: clasesMesProf.length > 0 ? Math.round((realizadas / clasesMesProf.length) * 100) : 0,
       };
     });
-  }, [profesores, alumnosTodos, clases, pagos, recuperos, monthStr]);
+  }, [profesores, alumnosTodos, clases, pagos, recuperos, monthStr, profesorSeleccionado]);
   
-  // Reporte financiero detallado
+  // Reporte financiero detallado filtrado por profesor
   const reporteFinanciero = useMemo(() => {
-    const pagosMesDetalle = pagos.filter(p => p.mes_correspondiente === monthStr);
+    let pagosMesDetalle = pagos.filter(p => p.mes_correspondiente === monthStr);
+    if (profesorSeleccionado) {
+      const alumnosIds = alumnos.map(a => a.id);
+      pagosMesDetalle = pagosMesDetalle.filter(p => alumnosIds.includes(p.alumno_id));
+    }
     
     // Por medio de pago
     const porMedioPago = pagosMesDetalle.reduce((acc, p) => {
@@ -263,7 +280,7 @@ export default function Reportes() {
       totalPagos: pagosMesDetalle.length,
       montoTotal: pagosMesDetalle.reduce((sum, p) => sum + (p.monto || 0), 0),
     };
-  }, [pagos, alumnosTodos, monthStr]);
+  }, [pagos, alumnosTodos, monthStr, alumnos, profesorSeleccionado]);
   
   // Exportar a CSV
   const exportarCSV = (tipo) => {
