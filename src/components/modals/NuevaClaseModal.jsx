@@ -429,9 +429,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
               </p>
             ) : (
               <div className="border rounded-lg max-h-40 overflow-y-auto">
-                {alumnosActivos
-                  .filter(a => a.profesor_id === formData.profesor_id)
-                  .map((alumno) => (
+                {alumnosActivos.map((alumno) => (
                     <div
                       key={alumno.id}
                       className={cn(
