@@ -59,6 +59,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
     tipo: 'individual',
     sede: '',
     cancha: '',
+    profesor_id: '',
     alumnos_ids: recupero ? [recupero.alumno_id] : [],
     precio: '',
     pagado: false,
