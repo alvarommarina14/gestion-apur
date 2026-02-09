@@ -49,8 +49,6 @@
  */
 import Agenda from './pages/Agenda';
 import Alumnos from './pages/Alumnos';
-import AprobacionClases from './pages/AprobacionClases';
-import AprobacionUsuarios from './pages/AprobacionUsuarios';
 import Clientes from './pages/Clientes';
 import Configuracion from './pages/Configuracion';
 import Dashboard from './pages/Dashboard';
@@ -78,8 +76,6 @@ import __Layout from './Layout.jsx';
 export const PAGES = {
     "Agenda": Agenda,
     "Alumnos": Alumnos,
-    "AprobacionClases": AprobacionClases,
-    "AprobacionUsuarios": AprobacionUsuarios,
     "Clientes": Clientes,
     "Configuracion": Configuracion,
     "Dashboard": Dashboard,

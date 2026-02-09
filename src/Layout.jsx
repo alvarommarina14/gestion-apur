@@ -55,8 +55,6 @@ const navigationClientes = [
 
 const navigationConfiguracion = [
   { name: 'Gestión de Acceso', href: 'GestionAccesoUnificada', icon: Shield },
-  { name: 'Aprobación Usuarios', href: 'AprobacionUsuarios', icon: Shield },
-  { name: 'Aprobación de Clases', href: 'AprobacionClases', icon: Calendar },
   { name: 'Configuración', href: 'Configuracion', icon: Settings },
 ];
 
