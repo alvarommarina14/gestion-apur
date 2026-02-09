@@ -11,9 +11,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell 
 } from 'recharts';
 import { 
-  TrendingUp, TrendingDown, Clock, Calendar, Activity, DollarSign, 
-  CheckCircle, AlertCircle, Lightbulb, Target, MessageCircle, Mail, 
-  ChevronDown, ChevronUp, CreditCard
+  Clock, Calendar, Activity
 } from 'lucide-react';
 
 import ReporteOcupacion from '@/components/reportes/ReporteOcupacion';
