@@ -137,16 +137,7 @@ Deno.serve(async (req) => {
       },
     });
 
-    // Pie de página
-    const hoy = new Date();
-    const horaGen = new Intl.DateTimeFormat('es-AR', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    }).format(hoy);
 
-    doc.setFontSize(7);
-    doc.setTextColor(150, 150, 150);
-    doc.text(`Generado: ${horaGen} | ${user.full_name || user.email}`, 14, pageHeight - 8);
 
     // Retornar PDF
     const pdfBytes = doc.output('arraybuffer');
