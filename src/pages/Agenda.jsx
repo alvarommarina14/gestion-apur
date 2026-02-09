@@ -19,6 +19,7 @@ import CalendarioCompleto from '@/components/agenda/CalendarioCompleto';
 import NuevoTurnoModal from '@/components/agenda/NuevoTurnoModal';
 import EditarClaseProfesorModal from '@/components/agenda/EditarClaseProfesorModal';
 import NuevoBloqueoModal from '@/components/disponibilidad/NuevoBloqueoModal';
+import CancelarCanchaModal from '@/components/agenda/CancelarCanchaModal';
 import { cn } from '@/lib/utils';
 
 export default function Agenda() {
@@ -29,6 +30,7 @@ export default function Agenda() {
   const [turnoModal, setTurnoModal] = useState({ open: false, turno: null });
   const [claseModal, setClaseModal] = useState({ open: false, turno: null });
   const [bloqueoModal, setBloqueoModal] = useState(false);
+  const [cancelarModal, setCancelarModal] = useState({ open: false, turno: null });
   const [showCalendario, setShowCalendario] = useState(false);
   const [limpiadoLoading, setLimpiadoLoading] = useState(false);
 
@@ -296,6 +298,7 @@ export default function Agenda() {
             isAdmin={isAdmin}
             onTurnoClick={(turno) => canEdit && setTurnoModal({ open: true, turno })}
             onEditarClase={(turno) => isAdmin && setClaseModal({ open: true, turno })}
+            onCancelarCancha={(turno) => isAdmin && turno.modalidad_alquiler === 'abono' && setCancelarModal({ open: true, turno })}
             isLoading={isLoading}
           />
         )}
@@ -322,6 +325,11 @@ export default function Agenda() {
           <NuevoBloqueoModal
             open={bloqueoModal}
             onOpenChange={setBloqueoModal}
+          />
+          <CancelarCanchaModal
+            open={cancelarModal.open}
+            onOpenChange={(open) => setCancelarModal({ ...cancelarModal, open })}
+            turno={cancelarModal.turno}
           />
         </>
       )}
