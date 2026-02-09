@@ -118,19 +118,28 @@ export default function Recuperos() {
   };
 
   const handleDeleteRecupero = async (recupero) => {
-    if (!confirm(`¿Eliminar el recupero de ${recupero.alumno_nombre}?`)) return;
-    
-    // Revertir clases a recuperar
-    const alumnos = await base44.entities.Alumno.filter({ id: recupero.alumno_id });
-    if (alumnos.length > 0) {
-      await base44.entities.Alumno.update(recupero.alumno_id, {
-        clases_a_recuperar: (alumnos[0].clases_a_recuperar || 0) + 1,
-      });
+    if (!recupero?.id) {
+      console.error('Error: recupero sin ID', recupero);
+      return;
     }
     
-    await base44.entities.Recupero.delete(recupero.id);
-    queryClient.invalidateQueries({ queryKey: ['recuperos'] });
-    queryClient.invalidateQueries({ queryKey: ['alumnos'] });
+    if (!confirm(`¿Eliminar el recupero de ${recupero.alumno_nombre}?`)) return;
+    
+    try {
+      // Revertir clases a recuperar
+      const alumnos = await base44.entities.Alumno.filter({ id: recupero.alumno_id });
+      if (alumnos.length > 0) {
+        await base44.entities.Alumno.update(recupero.alumno_id, {
+          clases_a_recuperar: (alumnos[0].clases_a_recuperar || 0) + 1,
+        });
+      }
+      
+      await base44.entities.Recupero.delete(recupero.id);
+      queryClient.invalidateQueries({ queryKey: ['recuperos'] });
+      queryClient.invalidateQueries({ queryKey: ['alumnos'] });
+    } catch (error) {
+      console.error('Error eliminando recupero:', error);
+    }
   };
 
   return (
