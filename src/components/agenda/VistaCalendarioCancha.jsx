@@ -303,90 +303,107 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
                                 />
                               ) : (
                                 <div
-                                  className={cn(
-                                    'h-full rounded-lg border-2 p-3 transition-all',
-                                    turno.pagado
-                                      ? 'bg-emerald-50 border-emerald-400'
-                                      : 'bg-rose-50 border-rose-400'
-                                  )}
-                                >
-                                 {/* Header con estado de pago */}
-                                  <div className="flex items-center justify-between mb-2">
-                                    <span className={cn(
-                                      'px-2 py-1 rounded-md text-xs font-bold flex items-center gap-1',
-                                      turno.pagado
-                                        ? 'bg-emerald-100 text-emerald-700'
-                                        : 'bg-rose-100 text-rose-700'
-                                    )}>
-                                      {turno.pagado ? (
-                                        <>
-                                          <CheckCircle className="w-3 h-3" />
-                                          PAGADO
-                                        </>
-                                      ) : (
-                                        <>
-                                          <XCircle className="w-3 h-3" />
-                                          PENDIENTE
-                                        </>
-                                      )}
-                                    </span>
-                                    <span className="text-xs font-semibold text-slate-500">
-                                      {turno.duracion} min
-                                    </span>
-                                    {isAdmin && (
-                                      <DropdownMenu>
-                                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                                          <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
-                                            <MoreVertical className="w-3 h-3" />
-                                          </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                          {turno.tipo_turno === 'alquiler' && turno.modalidad_alquiler === 'abono' && (
-                                            <DropdownMenuItem onClick={(e) => {
-                                              e.stopPropagation();
-                                              onCancelarCancha?.(turno);
-                                            }} className="text-rose-600">
-                                              <Ban className="w-4 h-4 mr-2" />
-                                              Cancelar cancha
-                                            </DropdownMenuItem>
-                                          )}
-                                        </DropdownMenuContent>
-                                      </DropdownMenu>
-                                    )}
-                                  </div>
+                                   className={cn(
+                                     'h-full rounded-lg border-2 p-3 transition-all',
+                                     turno.pagado
+                                       ? 'bg-emerald-50 border-emerald-400'
+                                       : 'bg-rose-50 border-rose-400'
+                                   )}
+                                 >
+                                  {/* Header con estado de pago */}
+                                   <div className="flex items-center justify-between mb-2">
+                                     <button
+                                       onClick={(e) => {
+                                         e.stopPropagation();
+                                         setActualizandoId(turno.id);
+                                         updatePago({ turnoId: turno.id, pagado: !turno.pagado });
+                                       }}
+                                       disabled={actualizandoId === turno.id}
+                                       className={cn(
+                                         'px-2 py-1 rounded-md text-xs font-bold flex items-center gap-1 transition-all cursor-pointer hover:opacity-80 disabled:opacity-50',
+                                         turno.pagado
+                                           ? 'bg-emerald-100 text-emerald-700'
+                                           : 'bg-rose-100 text-rose-700'
+                                       )}
+                                     >
+                                       {turno.pagado ? (
+                                         <>
+                                           <CheckCircle className="w-3 h-3" />
+                                           PAGADO
+                                         </>
+                                       ) : (
+                                         <>
+                                           <XCircle className="w-3 h-3" />
+                                           PENDIENTE
+                                         </>
+                                       )}
+                                     </button>
+                                     <span className="text-xs font-semibold text-slate-500">
+                                       {turno.duracion} min
+                                     </span>
+                                     {isAdmin && (
+                                       <DropdownMenu>
+                                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                           <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
+                                             <MoreVertical className="w-3 h-3" />
+                                           </Button>
+                                         </DropdownMenuTrigger>
+                                         <DropdownMenuContent align="end">
+                                           {turno.tipo_turno === 'alquiler' && turno.modalidad_alquiler === 'abono' && (
+                                             <DropdownMenuItem onClick={(e) => {
+                                               e.stopPropagation();
+                                               onCancelarCancha?.(turno);
+                                             }} className="text-rose-600">
+                                               <Ban className="w-4 h-4 mr-2" />
+                                               Cancelar cancha
+                                             </DropdownMenuItem>
+                                           )}
+                                         </DropdownMenuContent>
+                                       </DropdownMenu>
+                                     )}
+                                   </div>
 
-                                 {/* Contenido principal */}
-                                  <div className="space-y-2">
-                                    <div>
-                                      <p className="font-bold text-slate-900 text-base leading-tight">
-                                        {turno.cliente}
-                                      </p>
-                                      <p className="text-sm text-slate-600 mt-0.5">
-                                        {turno.hora_inicio} - {turno.hora_fin}
-                                      </p>
-                                    </div>
+                                  {/* Contenido principal */}
+                                   <div className="space-y-2">
+                                     <div>
+                                       <p className="font-bold text-slate-900 text-base leading-tight">
+                                         {turno.cliente}
+                                       </p>
+                                       <p className="text-sm text-slate-600 mt-0.5">
+                                         {turno.hora_inicio} - {turno.hora_fin}
+                                       </p>
+                                     </div>
 
-                                    {/* Tipo de turno */}
-                                    <div className="flex items-center gap-1.5">
-                                      <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs font-semibold">
-                                        Alquiler - {turno.modalidad_alquiler === 'abono' ? 'Abono' : 'Suelto'}
-                                      </span>
-                                    </div>
+                                     {/* Tipo de turno */}
+                                     <div className="flex items-center gap-1.5">
+                                       <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs font-semibold">
+                                         Alquiler - {turno.modalidad_alquiler === 'abono' ? 'Abono' : 'Suelto'}
+                                       </span>
+                                     </div>
 
-                                    <div className="flex items-center gap-1.5">
-                                      <DollarSign className="w-4 h-4 text-slate-500" />
-                                      <span className="font-bold text-slate-900 text-base">
-                                        {formatMoney(turno.monto)}
-                                      </span>
-                                    </div>
+                                     {/* Precio y Estado de Pago */}
+                                     <div className="flex items-center gap-1.5 p-2 bg-white/50 rounded border border-slate-200">
+                                       <DollarSign className="w-4 h-4 text-slate-600" />
+                                       <span className="font-bold text-slate-900">
+                                         {formatMoney(turno.monto)}
+                                       </span>
+                                       <span className={cn(
+                                         'ml-auto px-2 py-0.5 rounded text-xs font-semibold',
+                                         turno.pagado
+                                           ? 'bg-emerald-100 text-emerald-700'
+                                           : 'bg-rose-100 text-rose-700'
+                                       )}>
+                                         {turno.pagado ? 'Pagado' : 'Deuda'}
+                                       </span>
+                                     </div>
 
-                                    {turno.notas && (
-                                      <p className="text-xs text-slate-500 italic mt-2 border-t pt-2">
-                                        {turno.notas}
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
+                                     {turno.notas && (
+                                       <p className="text-xs text-slate-500 italic mt-2 border-t pt-2">
+                                         {turno.notas}
+                                       </p>
+                                     )}
+                                   </div>
+                                 </div>
                               )}
                             </td>
                           );
