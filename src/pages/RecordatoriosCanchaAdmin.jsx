@@ -28,6 +28,11 @@ export default function RecordatoriosCanchaAdmin() {
      queryFn: () => base44.entities.Cliente.list(),
    });
 
+   const { data: alumnos = [] } = useQuery({
+     queryKey: ['alumnos-list'],
+     queryFn: () => base44.entities.Alumno.list(),
+   });
+
    const recordatoriosConTurnos = useMemo(() => {
      return recordatorios.map(rec => {
        const turno = turnos.find(t => t.id === rec.turno_cancha_id);
@@ -58,6 +63,17 @@ export default function RecordatoriosCanchaAdmin() {
       currency: 'ARS',
       minimumFractionDigits: 0,
     }).format(amount || 0);
+  };
+
+  const calcularPrecioTotal = (rec) => {
+    if (rec.turno?.tipo_turno === 'clase' && rec.turno?.alumnos_ids?.length > 0) {
+      const precioAlumnos = rec.turno.alumnos_ids.reduce((sum, alumnoId) => {
+        const alumno = alumnos.find(a => a.id === alumnoId);
+        return sum + (alumno?.precio_mensual || 0);
+      }, 0);
+      return precioAlumnos > 0 ? precioAlumnos : rec.monto;
+    }
+    return rec.monto;
   };
 
   return (
@@ -178,7 +194,7 @@ export default function RecordatoriosCanchaAdmin() {
                       </div>
                       <div>
                         <p className="text-xs text-slate-500 uppercase font-semibold">Precio</p>
-                        <p className="text-sm font-bold text-emerald-600 mt-1">{formatMoney(rec.monto)}</p>
+                        <p className="text-sm font-bold text-emerald-600 mt-1">{formatMoney(calcularPrecioTotal(rec))}</p>
                       </div>
                     </div>
 
