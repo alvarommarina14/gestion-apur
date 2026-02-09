@@ -316,28 +316,12 @@ export default function DashboardAdmin() {
               </Card>
             </div>
 
-            {/* Resumen Financiero */}
-            <Card className="shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-base">Resumen Financiero del Mes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-slate-50 rounded-lg">
-                    <p className="text-sm text-slate-600 mb-1">Ingreso Esperado</p>
-                    <p className="text-2xl font-bold text-slate-900">{formatMoney(metricasCobros.ingresoTotalEsperado)}</p>
-                  </div>
-                  <div className="text-center p-4 bg-emerald-50 rounded-lg">
-                    <p className="text-sm text-emerald-700 mb-1">Ingreso Real</p>
-                    <p className="text-2xl font-bold text-emerald-600">{formatMoney(metricasCobros.ingresoTotalReal)}</p>
-                  </div>
-                  <div className="text-center p-4 bg-rose-50 rounded-lg">
-                    <p className="text-sm text-rose-700 mb-1">Pendiente</p>
-                    <p className="text-2xl font-bold text-rose-600">
-                      {formatMoney(metricasCobros.ingresoTotalEsperado - metricasCobros.ingresoTotalReal)}
-                    </p>
-                  </div>
-                </div>
+            <Card className="shadow-sm bg-blue-50 border-blue-200">
+              <CardContent className="pt-6 text-center space-y-2">
+                <p className="text-slate-700 font-medium">Para gestionar pagos y cobros,</p>
+                <a href={require('@/utils').createPageUrl('Finanzas')} className="text-blue-600 hover:text-blue-700 font-semibold underline">
+                  ir a la página de Finanzas →
+                </a>
               </CardContent>
             </Card>
           </TabsContent>
