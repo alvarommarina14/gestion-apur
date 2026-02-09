@@ -90,7 +90,7 @@ export default function SeccionCobros({ cliente }) {
                       </Badge>
                     </div>
                     <p className="text-sm text-slate-600">
-                      Monto: <span className="font-semibold">${cobro.monto.toLocaleString('es-AR')}</span>
+                      Monto: <span className="font-semibold">${(cobro.monto || 0).toLocaleString('es-AR')}</span>
                     </p>
                     {cobro.fecha_vencimiento && (
                       <p className="text-xs text-slate-500">
