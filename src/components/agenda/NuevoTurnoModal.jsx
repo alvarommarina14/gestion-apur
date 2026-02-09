@@ -317,16 +317,18 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
       return { previous };
     },
     onError: (err, newData, context) => {
+      console.error('Error en createMutation:', err);
+      setError(err.message || 'Error al crear el turno');
       if (context?.previous) {
         queryClient.setQueryData(['turnos-cancha'], context.previous);
       }
       setIsSubmitting(false);
     },
     onSuccess: () => {
+      setIsSubmitting(false);
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha-push'] });
-      setIsSubmitting(false);
       onOpenChange(false);
     },
   });
@@ -391,11 +393,15 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
       return { previous };
     },
     onError: (err, variables, context) => {
+      console.error('Error en updateMutation:', err);
+      setError(err.message || 'Error al actualizar el turno');
       if (context?.previous) {
         queryClient.setQueryData(['turnos-cancha'], context.previous);
       }
+      setIsSubmitting(false);
     },
     onSuccess: () => {
+      setIsSubmitting(false);
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha-push'] });
