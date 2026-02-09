@@ -290,14 +290,6 @@ export default function Recuperos() {
                           >
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-rose-600 border-rose-200 hover:bg-rose-50"
-                            onClick={() => handleDeleteRecupero(recupero)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
                           {recupero.estado === 'pendiente' && (
                             <>
                               <Button
