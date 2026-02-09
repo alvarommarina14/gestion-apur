@@ -399,28 +399,20 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
             )}
           </div>
           
-          <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+          <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
             <div>
-              <Label className="font-medium text-slate-800">Pagado</Label>
-              <p className="text-xs text-slate-500 mt-0.5">Marcar si la clase ya está paga</p>
+              <Label className="font-medium text-slate-800">Repetición semanal</Label>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Se creará automáticamente cada semana
+              </p>
             </div>
             <Switch
-              checked={formData.pagado}
-              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, pagado: checked }))}
+              checked={formData.repeticion_semanal}
+              onCheckedChange={(checked) =>
+                setFormData(prev => ({ ...prev, repeticion_semanal: checked }))
+              }
             />
           </div>
-
-          {!formData.pagado && (
-            <div className="space-y-2">
-              <Label>Precio (opcional)</Label>
-              <Input
-                type="number"
-                value={formData.precio}
-                onChange={(e) => setFormData(prev => ({ ...prev, precio: e.target.value }))}
-                placeholder="Dejar vacío para usar precio mensual"
-              />
-            </div>
-          )}
 
           <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
             <div>
