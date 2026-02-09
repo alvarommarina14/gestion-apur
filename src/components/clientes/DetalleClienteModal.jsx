@@ -54,7 +54,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
-export default function DetalleClienteModal({ open, onOpenChange, cliente, turnos = [] }) {
+export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
   const queryClient = useQueryClient();
   const [editando, setEditando] = useState(false);
   const [formData, setFormData] = useState({});
@@ -157,42 +157,22 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente, turno
     },
   });
 
-  const turnosCliente = useMemo(() => {
-    if (!cliente) return [];
-    return turnos
-      .filter(t => t.cliente === cliente.nombre)
-      .sort((a, b) => b.fecha.localeCompare(a.fecha));
-  }, [cliente, turnos]);
-
   const estadisticas = useMemo(() => {
-    const total = turnosCliente.length;
-    const pagados = turnosCliente.filter(t => t.pagado).length;
-    const pendientes = total - pagados;
-    const gastado = turnosCliente.reduce((sum, t) => sum + (t.pagado ? (t.monto || 0) : 0), 0);
-    const porCobrar = turnosCliente.reduce((sum, t) => sum + (!t.pagado ? (t.monto || 0) : 0), 0);
-    const ultimo = turnosCliente[0]?.fecha;
+    // Total pagos de alumnos
+    const totalPagosAlumnos = pagosAlumnos.reduce((sum, p) => sum + (p.monto || 0), 0);
+    const cantidadPagosAlumnos = pagosAlumnos.length;
 
     // Deudas de cobros pendientes
     const deudaCobros = cobrosClientes
       .filter(c => c.estado === 'pendiente' || c.estado === 'moroso')
       .reduce((sum, c) => sum + (c.monto || 0), 0);
 
-    // Total pagos de alumnos
-    const totalPagosAlumnos = pagosAlumnos.reduce((sum, p) => sum + (p.monto || 0), 0);
-    const cantidadPagosAlumnos = pagosAlumnos.length;
-
     return { 
-      total, 
-      pagados, 
-      pendientes, 
-      gastado, 
-      porCobrar, 
-      ultimo, 
       deudaCobros,
       totalPagosAlumnos,
       cantidadPagosAlumnos
     };
-  }, [turnosCliente, cobrosClientes, pagosAlumnos]);
+  }, [cobrosClientes, pagosAlumnos]);
 
   const handleGuardar = () => {
     updateMutation.mutate({
@@ -227,12 +207,10 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente, turno
         </DialogHeader>
 
         <Tabs defaultValue="info" className="flex-1 flex flex-col overflow-hidden">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="info">Info</TabsTrigger>
             <TabsTrigger value="cobros">Cobros</TabsTrigger>
             <TabsTrigger value="pagos">Pagos</TabsTrigger>
-            <TabsTrigger value="historial">Turnos</TabsTrigger>
-            <TabsTrigger value="stats">Stats</TabsTrigger>
           </TabsList>
 
           <TabsContent value="info" className="flex-1 overflow-y-auto space-y-4 px-1">
@@ -430,184 +408,7 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente, turno
             )}
           </TabsContent>
 
-          <TabsContent value="historial" className="flex-1 overflow-y-auto px-1">
-            {turnosCliente.length === 0 ? (
-              <div className="py-12 text-center text-slate-500">
-                <Calendar className="w-12 h-12 mx-auto mb-3 opacity-40" />
-                <p>No hay turnos registrados</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {turnosCliente.map((turno) => (
-                  <Card key={turno.id} className="shadow-sm">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="font-medium text-slate-900">
-                              {format(parseISO(turno.fecha), "d 'de' MMM yyyy", { locale: es })}
-                            </span>
-                            <span className="text-sm text-slate-500">{turno.hora_inicio}</span>
-                            <Badge variant="outline" className="text-xs">
-                              Cancha {turno.cancha}
-                            </Badge>
-                          </div>
-                          <div className="text-sm text-slate-600">
-                            {turno.tipo_turno === 'clase' ? '📚 Clase' : '🎾 Alquiler'}
-                            {turno.profesor && ` - ${turno.profesor}`}
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className={cn(
-                            'font-semibold',
-                            turno.pagado ? 'text-emerald-600' : 'text-amber-600'
-                          )}>
-                            ${(turno.monto || 0).toLocaleString('es-AR')}
-                          </div>
-                          {turno.pagado ? (
-                            <Badge className="bg-emerald-100 text-emerald-700 text-xs mt-1">
-                              <CheckCircle className="w-3 h-3 mr-1" />
-                              Pagado
-                            </Badge>
-                          ) : (
-                            <Badge className="bg-amber-100 text-amber-700 text-xs mt-1">
-                              <Clock className="w-3 h-3 mr-1" />
-                              Pendiente
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </TabsContent>
 
-          <TabsContent value="stats" className="flex-1 overflow-y-auto px-1">
-            <div className="space-y-4">
-              <div>
-                <h4 className="text-sm font-medium text-slate-700 mb-3">Turnos de Cancha</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  <Card className="shadow-sm">
-                    <CardContent className="pt-6">
-                      <div className="text-center">
-                        <p className="text-2xl font-bold text-slate-900">{estadisticas.total}</p>
-                        <p className="text-xs text-slate-500 mt-1">Total Turnos</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="shadow-sm border-emerald-200 bg-emerald-50/30">
-                    <CardContent className="pt-6">
-                      <div className="text-center">
-                        <p className="text-2xl font-bold text-emerald-600">{estadisticas.pagados}</p>
-                        <p className="text-xs text-slate-500 mt-1">Pagados</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="shadow-sm border-amber-200 bg-amber-50/30">
-                    <CardContent className="pt-6">
-                      <div className="text-center">
-                        <p className="text-2xl font-bold text-amber-600">{estadisticas.pendientes}</p>
-                        <p className="text-xs text-slate-500 mt-1">Pendientes</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="shadow-sm border-purple-200 bg-purple-50/30">
-                    <CardContent className="pt-6">
-                      <div className="text-center">
-                        <p className="text-xl font-bold text-purple-600">
-                          ${estadisticas.gastado.toLocaleString('es-AR')}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-1">Total Gastado</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="text-sm font-medium text-slate-700 mb-3">Pagos de Clases</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  <Card className="shadow-sm border-emerald-200 bg-emerald-50/30">
-                    <CardContent className="pt-6">
-                      <div className="text-center">
-                        <p className="text-2xl font-bold text-emerald-600">
-                          {estadisticas.cantidadPagosAlumnos}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-1">Cantidad</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="shadow-sm border-emerald-200 bg-emerald-50/30">
-                    <CardContent className="pt-6">
-                      <div className="text-center">
-                        <p className="text-xl font-bold text-emerald-600">
-                          ${estadisticas.totalPagosAlumnos.toLocaleString('es-AR')}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-1">Total Pagado</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="text-sm font-medium text-slate-700 mb-3">Deudas</h4>
-                <div className="space-y-3">
-                  {estadisticas.porCobrar > 0 && (
-                    <Card className="shadow-sm border-rose-200 bg-rose-50">
-                      <CardContent className="pt-6">
-                        <div className="text-center">
-                          <p className="text-2xl font-bold text-rose-600">
-                            ${estadisticas.porCobrar.toLocaleString('es-AR')}
-                          </p>
-                          <p className="text-xs text-slate-600 mt-1">Turnos por cobrar</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-
-                  {estadisticas.deudaCobros > 0 && (
-                    <Card className="shadow-sm border-rose-200 bg-rose-50">
-                      <CardContent className="pt-6">
-                        <div className="text-center">
-                          <p className="text-2xl font-bold text-rose-600">
-                            ${estadisticas.deudaCobros.toLocaleString('es-AR')}
-                          </p>
-                          <p className="text-xs text-slate-600 mt-1">Cobros pendientes</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-
-                  {estadisticas.porCobrar === 0 && estadisticas.deudaCobros === 0 && (
-                    <Card className="shadow-sm border-emerald-200 bg-emerald-50">
-                      <CardContent className="pt-6">
-                        <div className="text-center">
-                          <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto mb-2" />
-                          <p className="text-sm text-emerald-700 font-medium">Sin deudas pendientes</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-              </div>
-
-              {estadisticas.ultimo && (
-                <div className="p-4 bg-slate-50 rounded-lg text-center">
-                  <p className="text-sm text-slate-500">Último turno</p>
-                  <p className="font-medium text-slate-900 mt-1">
-                    {format(parseISO(estadisticas.ultimo), "d 'de' MMMM yyyy", { locale: es })}
-                  </p>
-                </div>
-              )}
-            </div>
-          </TabsContent>
           </Tabs>
 
           {/* Alert Dialog para eliminar pago */}
