@@ -5,6 +5,19 @@ import { CheckCircle, XCircle, DollarSign, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function TarjetaClaseConPagos({ turno, isAdmin, onTurnoClick }) {
+  const { data: profesor } = useQuery({
+    queryKey: ['profesor', turno.profesor_id],
+    queryFn: async () => {
+      if (!turno.profesor_id) return null;
+      try {
+        return await base44.entities.Profesor.read(turno.profesor_id);
+      } catch (e) {
+        return null;
+      }
+    },
+    enabled: !!turno.profesor_id && !turno.profesor,
+  });
+
   const { data: alumnos = [] } = useQuery({
     queryKey: ['alumnos-pagos', turno.id],
     queryFn: async () => {
@@ -98,7 +111,7 @@ export default function TarjetaClaseConPagos({ turno, isAdmin, onTurnoClick }) {
       {/* Profesor */}
       <div className="flex items-center gap-1 text-sm text-slate-600 mb-2">
         <User className="w-3.5 h-3.5" />
-        <span>{turno.profesor || 'No asignado'}</span>
+        <span>{turno.profesor || profesor?.nombre || 'No asignado'}</span>
       </div>
 
       {/* Alumnos con estado de pago */}
