@@ -196,11 +196,11 @@ export default function Finanzas() {
         </div>
         <Button
           onClick={handleSincronizar}
-          disabled={sinronizando}
+          disabled={sincronizando}
           className="gap-2"
         >
-          <RefreshCw className={`w-4 h-4 ${sinronizando ? 'animate-spin' : ''}`} />
-          {sinronizando ? 'Sincronizando...' : 'Sincronizar'}
+          <RefreshCw className={`w-4 h-4 ${sincronizando ? 'animate-spin' : ''}`} />
+          {sincronizando ? 'Sincronizando...' : 'Sincronizar'}
         </Button>
       </header>
 
