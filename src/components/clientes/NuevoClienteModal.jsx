@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { UserPlus, CheckCircle } from 'lucide-react';
+import { registrarCreacion } from '@/components/utils/auditLog';
 
 export default function NuevoClienteModal({ open, onOpenChange }) {
   const queryClient = useQueryClient();
@@ -48,7 +49,11 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
   }, [open]);
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Cliente.create(data),
+    mutationFn: async (data) => {
+      const newCliente = await base44.entities.Cliente.create(data);
+      await registrarCreacion('Cliente', newCliente.id, data.nombre);
+      return newCliente;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
       setSuccess(true);

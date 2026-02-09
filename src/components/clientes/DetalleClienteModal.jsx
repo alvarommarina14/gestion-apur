@@ -42,6 +42,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import SeccionCobros from './SeccionCobros';
+import { registrarCambioCliente, registrarEliminacion } from '@/components/utils/auditLog';
 
 export default function DetalleClienteModal({ open, onOpenChange, cliente, turnos = [] }) {
   const queryClient = useQueryClient();
@@ -97,7 +98,29 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente, turno
   }, [cliente, open]);
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Cliente.update(id, data),
+    mutationFn: async ({ id, data }) => {
+      // Registrar cambios
+      const cambios = [];
+      for (const [campo, valorNuevo] of Object.entries(data)) {
+        const valorAnterior = cliente[campo];
+        if (valorAnterior !== valorNuevo) {
+          cambios.push({ campo, valorAnterior, valorNuevo });
+        }
+      }
+      
+      await base44.entities.Cliente.update(id, data);
+      
+      // Registrar auditoría para cada cambio
+      for (const cambio of cambios) {
+        await registrarCambioCliente(
+          id, 
+          cliente.nombre, 
+          cambio.campo, 
+          cambio.valorAnterior, 
+          cambio.valorNuevo
+        );
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
       setEditando(false);
@@ -105,7 +128,10 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente, turno
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Cliente.delete(id),
+    mutationFn: async (id) => {
+      await registrarEliminacion('Cliente', id, cliente.nombre, 'Cliente eliminado por administrador');
+      await base44.entities.Cliente.delete(id);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
       onOpenChange(false);
