@@ -18,8 +18,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Fecha requerida' }, { status: 400 });
     }
 
-    // Fetch turnos para el día
-    const turnos = await base44.asServiceRole.entities.TurnoCancha.filter({ fecha });
+    // Fetch turnos para el día (solo activos)
+    const turnos = await base44.asServiceRole.entities.TurnoCancha.filter({ fecha, estado: 'activo' });
     const filteredTurnos = selectedCancha !== 'todas' 
       ? turnos.filter(t => t.cancha === selectedCancha)
       : turnos;
