@@ -68,7 +68,11 @@ export default function Finanzas() {
 
   const handleSincronizar = async () => {
     setSincronizando(true);
-    await sincronizarMutation.mutateAsync();
+    try {
+      await sincronizarMutation.mutateAsync();
+    } catch (error) {
+      console.error('Error sincronizando:', error);
+    }
   };
 
   // Métricas de Alumnos
