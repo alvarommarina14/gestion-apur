@@ -884,64 +884,105 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Tipo</Label>
-                  <Select
-                    value={formData.tipo_clase || 'individual'}
-                    onValueChange={(v) => setFormData({ ...formData, tipo_clase: v, alumnos_ids: v === 'individual' ? [] : formData.alumnos_ids })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="individual">Individual</SelectItem>
-                      <SelectItem value="grupal">Grupal</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <Label>Tipo</Label>
+                    <Select
+                      value={formData.tipo_clase || 'individual'}
+                      onValueChange={(v) => setFormData({ ...formData, tipo_clase: v, alumnos_ids: [] })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="individual">Individual</SelectItem>
+                        <SelectItem value="grupal">Grupal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-              </div>
 
-              {(formData.tipo_clase || 'individual') === 'grupal' && formData.profesor_id && (
-                <div className="space-y-2">
-                  <Label>Alumnos del profesor (selecciona varios)</Label>
-                  <div className="border rounded-lg p-3 space-y-2 max-h-48 overflow-y-auto">
-                    {alumnos.filter(a => a.profesor_id === formData.profesor_id).map(a => (
-                      <div key={a.id} className="flex items-center gap-2">
-                        <Checkbox
-                          checked={formData.alumnos_ids?.includes(a.id)}
-                          onCheckedChange={(checked) => {
-                            const ids = formData.alumnos_ids || [];
-                            const nuevosIds = checked ? [...ids, a.id] : ids.filter(id => id !== a.id);
-
-                            // Calcular precio automáticamente
-                            const precioTotal = nuevosIds.reduce((sum, alumnoId) => {
-                              const alumno = alumnos.find(al => al.id === alumnoId);
-                              return sum + (alumno?.precio_mensual || 0);
-                            }, 0);
-
+                {formData.profesor_id && (
+                  <>
+                    {(formData.tipo_clase || 'individual') === 'individual' && (
+                      <div className="space-y-2">
+                        <Label>Alumno</Label>
+                        <Select
+                          value={formData.alumnos_ids?.[0] || ''}
+                          onValueChange={(alumnoId) => {
+                            const alumno = alumnos.find(a => a.id === alumnoId);
                             setFormData({
                               ...formData,
-                              alumnos_ids: nuevosIds,
-                              monto: precioTotal
+                              alumnos_ids: [alumnoId],
+                              monto: alumno?.precio_mensual || 0
                             });
                           }}
-                        />
-                        <label className="text-sm cursor-pointer flex-1">{a.nombre}</label>
-                        <span className="text-xs text-slate-500">$ {a.precio_mensual?.toLocaleString('es-AR')}</span>
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar alumno" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {alumnos.filter(a => a.profesor_id === formData.profesor_id).map(a => (
+                              <SelectItem key={a.id} value={a.id}>
+                                {a.nombre} - $ {a.precio_mensual?.toLocaleString('es-AR')}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {formData.alumnos_ids && formData.alumnos_ids.length > 0 && (
+                          <div className="mt-3 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+                            <p className="text-sm text-slate-700">
+                              <span className="font-medium">Precio de la clase:</span>
+                            </p>
+                            <p className="text-lg font-bold text-emerald-600">
+                              $ {formData.monto?.toLocaleString('es-AR')}
+                            </p>
+                          </div>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                  {formData.alumnos_ids && formData.alumnos_ids.length > 0 && (
-                    <div className="mt-3 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
-                      <p className="text-sm text-slate-700">
-                        <span className="font-medium">Precio total de la clase:</span>
-                      </p>
-                      <p className="text-lg font-bold text-emerald-600">
-                        $ {formData.monto?.toLocaleString('es-AR')}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
+                    )}
+
+                    {(formData.tipo_clase || 'individual') === 'grupal' && (
+                      <div className="space-y-2">
+                        <Label>Alumnos del profesor (selecciona varios)</Label>
+                        <div className="border rounded-lg p-3 space-y-2 max-h-48 overflow-y-auto">
+                          {alumnos.filter(a => a.profesor_id === formData.profesor_id).map(a => (
+                            <div key={a.id} className="flex items-center gap-2">
+                              <Checkbox
+                                checked={formData.alumnos_ids?.includes(a.id)}
+                                onCheckedChange={(checked) => {
+                                  const ids = formData.alumnos_ids || [];
+                                  const nuevosIds = checked ? [...ids, a.id] : ids.filter(id => id !== a.id);
+
+                                  const precioTotal = nuevosIds.reduce((sum, alumnoId) => {
+                                    const alumno = alumnos.find(al => al.id === alumnoId);
+                                    return sum + (alumno?.precio_mensual || 0);
+                                  }, 0);
+
+                                  setFormData({
+                                    ...formData,
+                                    alumnos_ids: nuevosIds,
+                                    monto: precioTotal
+                                  });
+                                }}
+                              />
+                              <label className="text-sm cursor-pointer flex-1">{a.nombre}</label>
+                              <span className="text-xs text-slate-500">$ {a.precio_mensual?.toLocaleString('es-AR')}</span>
+                            </div>
+                          ))}
+                        </div>
+                        {formData.alumnos_ids && formData.alumnos_ids.length > 0 && (
+                          <div className="mt-3 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+                            <p className="text-sm text-slate-700">
+                              <span className="font-medium">Precio total de la clase:</span>
+                            </p>
+                            <p className="text-lg font-bold text-emerald-600">
+                              $ {formData.monto?.toLocaleString('es-AR')}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
             </>
           )}
 
