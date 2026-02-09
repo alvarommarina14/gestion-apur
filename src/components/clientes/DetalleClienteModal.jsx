@@ -94,6 +94,18 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
     enabled: !!cliente && alumnos.length > 0,
   });
 
+  const { data: alumnoCliente } = useQuery({
+    queryKey: ['alumno-cliente', cliente?.id],
+    queryFn: async () => {
+      if (!cliente?.es_alumno || !cliente?.profesor_id) return null;
+      const alumnosEncontrados = alumnos.find(a => 
+        a.nombre.toLowerCase() === cliente.nombre.toLowerCase()
+      );
+      return alumnosEncontrados || null;
+    },
+    enabled: !!cliente?.es_alumno && alumnos.length > 0,
+  });
+
   React.useEffect(() => {
     if (cliente) {
       setFormData({
