@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { format, parseISO } from 'date-fns';
@@ -6,12 +6,14 @@ import { es } from 'date-fns/locale';
 import { CheckCircle, Clock, MapPin, User, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 
 
 export default function RecordatoriosCanchaEmpleado() {
   const queryClient = useQueryClient();
-  const today = format(new Date(), 'yyyy-MM-dd');
+  const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
   const { data: user } = useQuery({
     queryKey: ['me'],
@@ -19,14 +21,14 @@ export default function RecordatoriosCanchaEmpleado() {
   });
 
   const { data: recordatorios = [], isLoading } = useQuery({
-    queryKey: ['recordatorios-cancha', today],
-    queryFn: () => base44.entities.RecordatorioCancha.filter({ fecha: today }),
+    queryKey: ['recordatorios-cancha', selectedDate],
+    queryFn: () => base44.entities.RecordatorioCancha.filter({ fecha: selectedDate }),
     staleTime: 30000,
   });
 
   const { data: turnos = [] } = useQuery({
-    queryKey: ['turnos-cancha', today],
-    queryFn: () => base44.entities.TurnoCancha.filter({ fecha: today }),
+    queryKey: ['turnos-cancha', selectedDate],
+    queryFn: () => base44.entities.TurnoCancha.filter({ fecha: selectedDate }),
     staleTime: 30000,
   });
 
