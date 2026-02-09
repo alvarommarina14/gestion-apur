@@ -38,7 +38,8 @@ import {
   UserPlus,
   CheckCircle,
   Clock,
-  Trash2
+  Trash2,
+  AlertCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import SeccionCobros from './SeccionCobros';
@@ -204,11 +205,12 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente, turno
 
   const clasificacionConfig = {
     nuevo: { icon: UserPlus, color: 'bg-blue-100 text-blue-700', label: 'Nuevo' },
+    ocasional: { icon: UserPlus, color: 'bg-blue-100 text-blue-700', label: 'Ocasional' },
     recurrente: { icon: UserCheck, color: 'bg-emerald-100 text-emerald-700', label: 'Recurrente' },
   };
 
-  const config = clasificacionConfig[cliente.clasificacion];
-  const Icon = config.icon;
+  const config = clasificacionConfig[cliente.clasificacion] || clasificacionConfig.nuevo;
+  const Icon = config?.icon || UserPlus;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
