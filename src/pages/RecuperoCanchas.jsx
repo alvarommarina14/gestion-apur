@@ -99,11 +99,41 @@ export default function RecuperoCanchas() {
 
   const handleDescontar = async () => {
     if (!selectedCancelacion) return;
+    
+    // Crear registro en Cobros cuando se descuenta
+    await base44.entities.CobroCliente.create({
+      cliente_id: selectedCancelacion.turno_cancha_id,
+      cliente_nombre: selectedCancelacion.cliente,
+      tipo_cobro: 'cancha_suelta',
+      mes: format(parseISO(formData.fecha_recupero), 'yyyy-MM'),
+      monto: selectedCancelacion.monto || 0,
+      estado: 'descontado',
+      fecha_vencimiento: formData.fecha_recupero,
+      notas: `Descuento por cancelación de cancha - ${selectedCancelacion.detalles || 'Sin detalles'}`,
+    });
+
     await updateMutation.mutateAsync({
       id: selectedCancelacion.id,
       nuevoEstado: 'descontado',
       datos: formData,
     });
+  };
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      await base44.entities.CancelacionCancha.delete(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cancelaciones-cancha'] });
+      setSelectedCancelacion(null);
+    },
+  });
+
+  const handleEliminar = async () => {
+    if (!selectedCancelacion) return;
+    if (confirm('¿Estás seguro de que querés eliminar esta cancelación?')) {
+      await deleteMutation.mutateAsync(selectedCancelacion.id);
+    }
   };
 
   const estadoActual = selectedCancelacion ? estadoConfig[selectedCancelacion.estado_recupero] : null;
