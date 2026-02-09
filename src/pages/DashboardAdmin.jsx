@@ -28,6 +28,11 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import RegistrarCobroModal from '@/components/dashboard-admin/RegistrarCobroModal';
+import ReportesIngresos from '@/components/reportes/ReportesIngresos';
+import ReporteOcupacion from '@/components/reportes/ReporteOcupacion';
+import ReporteProfesores from '@/components/reportes/ReporteProfesores';
+import ReporteCobros from '@/components/reportes/ReporteCobros';
+import ReporteClientesValiosos from '@/components/reportes/ReporteClientesValiosos';
 
 const HORARIOS = [];
 for (let h = 8; h <= 21; h++) {
@@ -73,6 +78,16 @@ export default function DashboardAdmin() {
   const { data: clientes = [] } = useQuery({
     queryKey: ['clientes'],
     queryFn: () => base44.entities.Cliente.list('nombre', 500),
+  });
+
+  const { data: clases = [] } = useQuery({
+    queryKey: ['clases'],
+    queryFn: () => base44.entities.Clase.list('-fecha', 1000),
+  });
+
+  const { data: profesores = [] } = useQuery({
+    queryKey: ['profesores'],
+    queryFn: () => base44.entities.Profesor.list('nombre'),
   });
 
   // Filtrar turnos según período
@@ -345,14 +360,139 @@ export default function DashboardAdmin() {
           </CardContent>
         </Card>
 
-        <Tabs defaultValue="ocupacion" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="ocupacion">Ocupación & Rendimiento</TabsTrigger>
-            <TabsTrigger value="cobros">Cobros & Finanzas</TabsTrigger>
+        <Tabs defaultValue="resumen" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-7">
+            <TabsTrigger value="resumen" className="text-xs lg:text-sm">Resumen</TabsTrigger>
+            <TabsTrigger value="ocupacion" className="text-xs lg:text-sm">Ocupación</TabsTrigger>
+            <TabsTrigger value="ingresos" className="text-xs lg:text-sm">Ingresos</TabsTrigger>
+            <TabsTrigger value="profesores" className="text-xs lg:text-sm">Profesores</TabsTrigger>
+            <TabsTrigger value="cobros" className="text-xs lg:text-sm">Cobros</TabsTrigger>
+            <TabsTrigger value="clientes" className="text-xs lg:text-sm">Clientes</TabsTrigger>
           </TabsList>
 
+          {/* TAB RESUMEN (Dashboard actual simplificado) */}
+          <TabsContent value="resumen" className="space-y-6">
+            {/* KPIs principales */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card className="shadow-sm">
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-slate-500">Ocupación</p>
+                      <p className="text-3xl font-bold text-emerald-600">{metricasOcupacion.ocupacionPorcentaje}%</p>
+                    </div>
+                    <Activity className="w-10 h-10 text-emerald-200" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-sm">
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-slate-500">Turnos</p>
+                      <p className="text-3xl font-bold text-blue-600">{metricasOcupacion.totalTurnos}</p>
+                    </div>
+                    <Calendar className="w-10 h-10 text-blue-200" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-sm border-emerald-200 bg-emerald-50/30">
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-slate-600">Cobrado</p>
+                      <p className="text-2xl font-bold text-emerald-700">
+                        {formatMoney(metricasOcupacion.ingresoCobrado)}
+                      </p>
+                    </div>
+                    <CheckCircle className="w-10 h-10 text-emerald-200" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-sm border-rose-200 bg-rose-50/30">
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-slate-600">Morosos</p>
+                      <p className="text-2xl font-bold text-rose-600">{metricasCobros.cobrosMorosos}</p>
+                    </div>
+                    <AlertCircle className="w-10 h-10 text-rose-200" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Resumen Financiero */}
+            <Card className="shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-base">Resumen Financiero del Mes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center p-4 bg-slate-50 rounded-lg">
+                    <p className="text-sm text-slate-600 mb-1">Ingreso Esperado</p>
+                    <p className="text-2xl font-bold text-slate-900">{formatMoney(metricasCobros.ingresoTotalEsperado)}</p>
+                  </div>
+                  <div className="text-center p-4 bg-emerald-50 rounded-lg">
+                    <p className="text-sm text-emerald-700 mb-1">Ingreso Real</p>
+                    <p className="text-2xl font-bold text-emerald-600">{formatMoney(metricasCobros.ingresoTotalReal)}</p>
+                  </div>
+                  <div className="text-center p-4 bg-rose-50 rounded-lg">
+                    <p className="text-sm text-rose-700 mb-1">Pendiente</p>
+                    <p className="text-2xl font-bold text-rose-600">
+                      {formatMoney(metricasCobros.ingresoTotalEsperado - metricasCobros.ingresoTotalReal)}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* TAB INGRESOS */}
+          <TabsContent value="ingresos">
+            <ReportesIngresos 
+              turnos={turnos} 
+              cobrosClientes={cobrosClientes} 
+              pagos={pagos} 
+            />
+          </TabsContent>
+
           {/* TAB OCUPACIÓN */}
-          <TabsContent value="ocupacion" className="space-y-6">
+          <TabsContent value="ocupacion">
+            <ReporteOcupacion turnos={turnosFiltrados} />
+          </TabsContent>
+
+          {/* TAB PROFESORES */}
+          <TabsContent value="profesores">
+            <ReporteProfesores 
+              clases={clases} 
+              profesores={profesores} 
+              pagos={pagos} 
+            />
+          </TabsContent>
+
+          {/* TAB COBROS DETALLADO */}
+          <TabsContent value="cobros">
+            <ReporteCobros 
+              turnos={turnos} 
+              pagos={pagos} 
+              cobrosClientes={cobrosClientes} 
+            />
+          </TabsContent>
+
+          {/* TAB CLIENTES */}
+          <TabsContent value="clientes">
+            <ReporteClientesValiosos 
+              clientes={clientes} 
+              turnos={turnos} 
+            />
+          </TabsContent>
+
+          {/* TAB OCUPACIÓN ORIGINAL (eliminado, ahora está en ReporteOcupacion) */}
+          <TabsContent value="ocupacion-old" className="space-y-6 hidden">
             {/* KPIs principales */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Card className="shadow-sm">
@@ -496,8 +636,8 @@ export default function DashboardAdmin() {
             </div>
           </TabsContent>
 
-          {/* TAB COBROS */}
-          <TabsContent value="cobros" className="space-y-6">
+          {/* TAB COBROS OPERACIONES (anterior) */}
+          <TabsContent value="cobros-old" className="space-y-6 hidden">
             {/* Stats Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="shadow-sm border-rose-200 bg-rose-50/30">
