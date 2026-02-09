@@ -279,8 +279,8 @@ export default function Layout({ children, currentPageName }) {
             )}
 
             {/* Tareas - Empleados y Admin */}
-            {!cargandoPermisos && (user?.rol === 'admin' || user?.rol === 'empleado') && navigationEmpleados.some(item => user?.rol === 'admin' || tieneAcceso(item.permissionKey)) && (
-              <div className={cn(user?.rol === 'admin' && 'pt-4 mt-4 border-t border-slate-200')}>
+            {!cargandoPermisos && user?.rol !== 'profesor' && navigationEmpleados.some(item => user?.rol === 'admin' || tieneAcceso(item.permissionKey)) && (
+              <div className="pt-4 mt-4 border-t border-slate-200">
                 <p className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
                   Tareas
                 </p>

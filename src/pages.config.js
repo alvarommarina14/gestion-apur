@@ -52,10 +52,8 @@ import Alumnos from './pages/Alumnos';
 import Clientes from './pages/Clientes';
 import Configuracion from './pages/Configuracion';
 import Dashboard from './pages/Dashboard';
-import DashboardAdmin from './pages/DashboardAdmin';
 import Empleados from './pages/Empleados';
 import GestionAccesoUnificada from './pages/GestionAccesoUnificada';
-import GestionDisponibilidad from './pages/GestionDisponibilidad';
 import GestionPermisosUsuarios from './pages/GestionPermisosUsuarios';
 import GestionRoles from './pages/GestionRoles';
 import Pagos from './pages/Pagos';
@@ -70,6 +68,8 @@ import Recuperos from './pages/Recuperos';
 import Reportes from './pages/Reportes';
 import SeleccionRol from './pages/SeleccionRol';
 import Tareas from './pages/Tareas';
+import DashboardAdmin from './pages/DashboardAdmin';
+import GestionDisponibilidad from './pages/GestionDisponibilidad';
 import __Layout from './Layout.jsx';
 
 
@@ -79,10 +79,8 @@ export const PAGES = {
     "Clientes": Clientes,
     "Configuracion": Configuracion,
     "Dashboard": Dashboard,
-    "DashboardAdmin": DashboardAdmin,
     "Empleados": Empleados,
     "GestionAccesoUnificada": GestionAccesoUnificada,
-    "GestionDisponibilidad": GestionDisponibilidad,
     "GestionPermisosUsuarios": GestionPermisosUsuarios,
     "GestionRoles": GestionRoles,
     "Pagos": Pagos,
@@ -97,6 +95,8 @@ export const PAGES = {
     "Reportes": Reportes,
     "SeleccionRol": SeleccionRol,
     "Tareas": Tareas,
+    "DashboardAdmin": DashboardAdmin,
+    "GestionDisponibilidad": GestionDisponibilidad,
 }
 
 export const pagesConfig = {
