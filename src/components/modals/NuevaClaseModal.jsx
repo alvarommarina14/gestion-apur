@@ -427,6 +427,14 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
               <p className="text-xs text-slate-500 p-3 bg-slate-50 rounded-lg border border-slate-200">
                 Selecciona un profesor primero
               </p>
+            ) : loadingAlumnos ? (
+              <p className="text-xs text-slate-500 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                Cargando alumnos...
+              </p>
+            ) : alumnosActivos.length === 0 ? (
+              <p className="text-xs text-slate-500 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                Este profesor no tiene alumnos activos
+              </p>
             ) : (
               <div className="border rounded-lg max-h-40 overflow-y-auto">
                 {alumnosActivos.map((alumno) => (
