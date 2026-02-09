@@ -28,6 +28,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import RegistrarCobroModal from '@/components/dashboard-admin/RegistrarCobroModal';
+import LimpiezaDatosModal from '@/components/dashboard-admin/LimpiezaDatosModal';
 import ReportesIngresos from '@/components/reportes/ReportesIngresos';
 import ReporteOcupacion from '@/components/reportes/ReporteOcupacion';
 import ReporteProfesores from '@/components/reportes/ReporteProfesores';
