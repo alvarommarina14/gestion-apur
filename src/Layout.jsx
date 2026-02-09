@@ -33,6 +33,7 @@ const navigationGestionClases = [
 const navigationAgenda = [
   { name: 'Agenda', href: 'Agenda', icon: Calendar },
   { name: 'Dashboard Admin', href: 'DashboardAdmin', icon: LayoutDashboard, adminOnly: true },
+  { name: 'Disponibilidad', href: 'GestionDisponibilidad', icon: Shield, adminOnly: true },
   { name: 'Canchas Admin', href: 'RecordatoriosCanchaAdmin', icon: Calendar, adminOnly: true },
   { name: 'Mis Recordatorios', href: 'RecordatoriosCanchaEmpleado', icon: Calendar, empleadoOnly: true },
 ];
