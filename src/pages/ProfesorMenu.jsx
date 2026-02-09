@@ -8,13 +8,9 @@ import { Button } from '@/components/ui/button';
 import { 
   LayoutDashboard, 
   Users, 
-  Calendar, 
   DollarSign, 
-  RefreshCw,
   FileText,
-  ArrowLeft,
-  TrendingUp,
-  AlertCircle
+  ArrowLeft
 } from 'lucide-react';
 
 const menuOptions = [
@@ -38,13 +34,6 @@ const menuOptions = [
     icon: DollarSign,
     href: 'Pagos',
     color: 'amber'
-  },
-  {
-    title: 'Recordatorios',
-    description: 'Gestión de recordatorios de pago',
-    icon: RefreshCw,
-    href: 'Recordatorios',
-    color: 'rose'
   },
   {
     title: 'Reportes',
