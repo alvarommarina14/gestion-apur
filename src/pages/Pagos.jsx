@@ -13,11 +13,13 @@ import {
   ChevronRight,
   Filter,
   Download,
-  AlertTriangle
+  AlertTriangle,
+  Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Table,
   TableBody,
@@ -38,12 +40,20 @@ import RegistrarPagoModal from '@/components/modals/RegistrarPagoModal';
 import { cn } from '@/lib/utils';
 
 export default function Pagos() {
+  const queryClient = useQueryClient();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [search, setSearch] = useState('');
   const [filterMedio, setFilterMedio] = useState('todos');
   const [pagoModal, setPagoModal] = useState({ open: false, alumno: null });
   
   const monthStr = format(currentMonth, 'yyyy-MM');
+
+  const deletePagoMutation = useMutation({
+    mutationFn: (pagoId) => base44.entities.Pago.delete(pagoId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pagos'] });
+    },
+  });
   
   const { data: pagos = [], isLoading: loadingPagos } = useQuery({
     queryKey: ['pagos'],
@@ -201,6 +211,7 @@ export default function Pagos() {
                   <TableHead>Medio</TableHead>
                   <TableHead>Mes</TableHead>
                   <TableHead>Estado</TableHead>
+                  <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -248,6 +259,21 @@ export default function Pagos() {
                             En término
                           </span>
                         )}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            if (confirm(`¿Eliminar el pago de ${pago.alumno_nombre} por ${formatMoney(pago.monto)}?`)) {
+                              deletePagoMutation.mutate(pago.id);
+                            }
+                          }}
+                          disabled={deletePagoMutation.isPending}
+                          className="text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))

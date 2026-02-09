@@ -54,6 +54,7 @@ import Configuracion from './pages/Configuracion';
 import Dashboard from './pages/Dashboard';
 import DashboardAdmin from './pages/DashboardAdmin';
 import Empleados from './pages/Empleados';
+import GestionAccesoUnificada from './pages/GestionAccesoUnificada';
 import GestionDisponibilidad from './pages/GestionDisponibilidad';
 import GestionPermisosUsuarios from './pages/GestionPermisosUsuarios';
 import GestionRoles from './pages/GestionRoles';
@@ -68,7 +69,6 @@ import RecordatoriosCanchaEmpleado from './pages/RecordatoriosCanchaEmpleado';
 import Recuperos from './pages/Recuperos';
 import Reportes from './pages/Reportes';
 import SeleccionRol from './pages/SeleccionRol';
-import GestionAccesoUnificada from './pages/GestionAccesoUnificada';
 import Tareas from './pages/Tareas';
 import __Layout from './Layout.jsx';
 
@@ -81,6 +81,7 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "DashboardAdmin": DashboardAdmin,
     "Empleados": Empleados,
+    "GestionAccesoUnificada": GestionAccesoUnificada,
     "GestionDisponibilidad": GestionDisponibilidad,
     "GestionPermisosUsuarios": GestionPermisosUsuarios,
     "GestionRoles": GestionRoles,
@@ -95,7 +96,6 @@ export const PAGES = {
     "Recuperos": Recuperos,
     "Reportes": Reportes,
     "SeleccionRol": SeleccionRol,
-    "GestionAccesoUnificada": GestionAccesoUnificada,
     "Tareas": Tareas,
 }
 
