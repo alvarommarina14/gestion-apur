@@ -150,8 +150,8 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                     <SelectItem value="nuevo">Nuevo</SelectItem>
                      <SelectItem value="recurrente">Recurrente</SelectItem>
+                     <SelectItem value="suelto">Suelto</SelectItem>
                    </SelectContent>
               </Select>
             </div>
