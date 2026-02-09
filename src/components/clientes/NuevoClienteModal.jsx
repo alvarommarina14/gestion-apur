@@ -20,7 +20,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { UserPlus, CheckCircle } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { registrarCreacion } from '@/components/utils/auditLog';
+import { useQuery } from '@tanstack/react-query';
 
 export default function NuevoClienteModal({ open, onOpenChange }) {
   const queryClient = useQueryClient();
