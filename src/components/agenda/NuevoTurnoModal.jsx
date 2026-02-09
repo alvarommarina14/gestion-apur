@@ -1048,7 +1048,9 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
           turno={turno}
           onSuccess={() => {
             setShowCancelModal(false);
+            queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
             queryClient.invalidateQueries({ queryKey: ['cancelaciones-cancha'] });
+            onOpenChange(false);
           }}
         />
       )}
