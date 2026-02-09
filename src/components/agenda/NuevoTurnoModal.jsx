@@ -238,6 +238,10 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
         make_sync_status: 'pendiente',
         base44_agenda_link: `${window.location.origin}/AgendaEmpleados`,
       };
+      
+      // Cancelar mutaciones anteriores para evitar duplicados
+      await queryClient.cancelQueries({ queryKey: ['turnos-cancha'] });
+      
       const turnoCreado = await base44.entities.TurnoCancha.create(turnoData);
       
       // Si es una clase, crear también en entidad Clase y sincronizar
@@ -413,7 +417,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
 
         if (recordatorioBase && recordatorioBase.repeticion_semanal) {
           console.log('✅ Es recurrente, eliminando serie completa...');
-          // Buscar todos los turnos con las mismas características (ya tenemos todosTurnos)
+          // Buscar todos los turnos con las mismas características
           const turnosRelacionados = todosTurnos.filter(t => 
             t.cliente === turnoData.cliente &&
             t.cancha === turnoData.cancha &&
@@ -423,7 +427,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
           );
           console.log(`🗑️ Turnos relacionados encontrados: ${turnosRelacionados.length}`);
 
-          // Eliminar de Google Calendar - eliminar toda la serie recurrente
+          // Eliminar de Google Calendar primero
           const primerTurnoConGcal = turnosRelacionados.find(t => t.gcal_event_id);
           if (primerTurnoConGcal?.gcal_event_id) {
             try {
@@ -441,21 +445,16 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
             turnosRelacionados.some(t => t.id === r.turno_cancha_id)
           );
 
-          // Eliminar recordatorios
-           for (const rec of recordatoriosRelacionados) {
-             await base44.entities.RecordatorioCancha.delete(rec.id);
-             console.log(`✅ Recordatorio ${rec.id} eliminado`);
-           }
+          // Eliminar en paralelo para mayor velocidad
+          await Promise.all([
+            ...recordatoriosRelacionados.map(rec => base44.entities.RecordatorioCancha.delete(rec.id)),
+            ...turnosRelacionados.map(turno => base44.entities.TurnoCancha.delete(turno.id))
+          ]);
 
-           // Eliminar turnos
-           for (const turno of turnosRelacionados) {
-             await base44.entities.TurnoCancha.delete(turno.id);
-             console.log(`✅ Turno ${turno.id} eliminado`);
-           }
-           console.log(`✅ Serie completa eliminada: ${recordatoriosRelacionados.length} recordatorios y ${turnosRelacionados.length} turnos`);
-          } else {
+          console.log(`✅ Serie completa eliminada: ${recordatoriosRelacionados.length} recordatorios y ${turnosRelacionados.length} turnos`);
+        } else {
           console.log('❌ No es recurrente o no hay recordatorio. No se eliminó la serie');
-          }
+        }
       } else {
         // Eliminar solo este turno
         const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: id });
@@ -484,7 +483,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
     },
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
      e.preventDefault();
      if (isSubmitting) return; // Prevenir múltiples envíos
      setError(null);
@@ -517,8 +516,6 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
           hora_fin: horaFin,
           monto: dataConEmpleados.pagado ? 0 : Number(dataConEmpleados.monto),
         };
-
-     setIsSubmitting(false);
 
         if (turno) {
        const cambios = [];
@@ -554,84 +551,79 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
        });
 
          updateMutation.mutate({ id: turno.id, data, cambios });
-         setIsSubmitting(false);
          } else {
        // Si es repetición semanal, crear turnos para 52 semanas (batch optimizado)
        if (data.repeticion_semanal) {
-         const crearTurnosBatch = async () => {
-           try {
-             const empleadosSeleccionados = empleados.filter(e => data.empleados_asignados_ids.includes(e.id));
+         try {
+           const empleadosSeleccionados = empleados.filter(e => data.empleados_asignados_ids.includes(e.id));
 
-             // Preparar todos los turnos
-             const turnosACrear = [];
-             for (let i = 0; i < 52; i++) {
-               const fechaTurno = addWeeks(parseISO(data.fecha), i);
-               turnosACrear.push({
-                 ...data,
-                 fecha: format(fechaTurno, 'yyyy-MM-dd'),
-                 empleados_asignados_emails: empleadosSeleccionados.map(e => e.email),
-                 empleados_asignados_nombres: empleadosSeleccionados.map(e => e.full_name),
-                 estado: 'activo',
-                 make_sync_status: 'pendiente',
-                 base44_agenda_link: `${window.location.origin}/AgendaEmpleados`,
-               });
-             }
-
-             // Crear todos los turnos de una vez
-             const turnosCreados = await base44.entities.TurnoCancha.bulkCreate(turnosACrear);
-
-             // Crear recordatorios en batch
-             const recordatorios = turnosCreados.map((turno) => {
-               const fechaTurno = parseISO(turno.fecha);
-               return {
-                 turno_cancha_id: turno.id,
-                 fecha: turno.fecha,
-                 hora: turno.hora_inicio,
-                 cancha: turno.cancha,
-                 cliente: turno.cliente,
-                 tipo_turno: turno.tipo_turno,
-                 modalidad_alquiler: turno.modalidad_alquiler || null,
-                 profesor: turno.profesor || null,
-                 monto: turno.monto,
-                 pagado: turno.pagado,
-                 repeticion_semanal: true,
-                 dia_semana: format(fechaTurno, 'EEEE', { locale: es }),
-                 notas: turno.notas || `Alquiler de ${turno.cliente}`,
-               };
+           // Preparar todos los turnos
+           const turnosACrear = [];
+           for (let i = 0; i < 52; i++) {
+             const fechaTurno = addWeeks(parseISO(data.fecha), i);
+             turnosACrear.push({
+               ...data,
+               fecha: format(fechaTurno, 'yyyy-MM-dd'),
+               empleados_asignados_emails: empleadosSeleccionados.map(e => e.email),
+               empleados_asignados_nombres: empleadosSeleccionados.map(e => e.full_name),
+               estado: 'activo',
+               make_sync_status: 'pendiente',
+               base44_agenda_link: `${window.location.origin}/AgendaEmpleados`,
              });
+           }
 
-             await base44.entities.RecordatorioCancha.bulkCreate(recordatorios);
+           // Crear todos los turnos de una vez
+           const turnosCreados = await base44.entities.TurnoCancha.bulkCreate(turnosACrear);
 
-             // Sincronizar primer turno con recurrencia en Google Calendar
-             if (turnosCreados.length > 0) {
-               try {
-                 await base44.functions.invoke('sincronizarTurnoRecurrenteGoogleCalendar', { 
-                   turno_id: turnosCreados[0].id
-                 });
-               } catch (err) {
-                 console.error('Error sincronizando recurrencia con Google Calendar:', err);
-               }
-             }
-
-             // Invalidar queries y cerrar inmediatamente
-             queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
-             queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
-             queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha-push'] });
-             setIsSubmitting(false);
-             onOpenChange(false);
-             } catch (err) {
-             console.error('Error creando turnos semanales:', err);
-             setError(`Error creando turnos: ${err.message}`);
-             setIsSubmitting(false);
-             }
+           // Crear recordatorios en batch
+           const recordatorios = turnosCreados.map((turno) => {
+             const fechaTurno = parseISO(turno.fecha);
+             return {
+               turno_cancha_id: turno.id,
+               fecha: turno.fecha,
+               hora: turno.hora_inicio,
+               cancha: turno.cancha,
+               cliente: turno.cliente,
+               tipo_turno: turno.tipo_turno,
+               modalidad_alquiler: turno.modalidad_alquiler || null,
+               profesor: turno.profesor || null,
+               monto: turno.monto,
+               pagado: turno.pagado,
+               repeticion_semanal: true,
+               dia_semana: format(fechaTurno, 'EEEE', { locale: es }),
+               notas: turno.notas || `Alquiler de ${turno.cliente}`,
              };
+           });
 
-             crearTurnosBatch();
-         } else {
+           await base44.entities.RecordatorioCancha.bulkCreate(recordatorios);
+
+           // Sincronizar primer turno con recurrencia en Google Calendar
+           if (turnosCreados.length > 0) {
+             try {
+               await base44.functions.invoke('sincronizarTurnoRecurrenteGoogleCalendar', { 
+                 turno_id: turnosCreados[0].id
+               });
+             } catch (err) {
+               console.error('Error sincronizando recurrencia con Google Calendar:', err);
+             }
+           }
+
+           // Invalidar queries y cerrar inmediatamente
+           queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+           queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+           queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha-push'] });
+           setIsSubmitting(false);
+           onOpenChange(false);
+         } catch (err) {
+           console.error('Error creando turnos semanales:', err);
+           setError(`Error creando turnos: ${err.message}`);
+           setIsSubmitting(false);
+         }
+       } else {
          createMutation.mutate(data);
-         }
-         }
-         };
+       }
+     }
+   };
 
   const [tieneRepeticionSemanal, setTieneRepeticionSemanal] = useState(false);
 
