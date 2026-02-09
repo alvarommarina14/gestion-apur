@@ -46,7 +46,11 @@ export default function RecordatoriosCanchaAdmin() {
      const abonos = recordatoriosFiltrados.filter(r => r.turno?.modalidad_alquiler === 'abono').length;
      const clases = recordatoriosFiltrados.filter(r => r.turno?.tipo_turno === 'clase').length;
      const montoTotal = recordatoriosFiltrados.reduce((sum, r) => sum + (r.monto || 0), 0);
-     return { abonos, clases, montoTotal };
+     const montoCobrado = recordatoriosFiltrados
+       .filter(r => r.turno?.pagado)
+       .reduce((sum, r) => sum + (r.monto || 0), 0);
+     const montoPendiente = montoTotal - montoCobrado;
+     return { abonos, clases, montoTotal, montoCobrado, montoPendiente };
    }, [recordatoriosFiltrados]);
 
   const formatMoney = (amount) => {
