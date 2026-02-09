@@ -28,7 +28,6 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import RegistrarCobroModal from '@/components/dashboard-admin/RegistrarCobroModal';
-import LimpiezaDatosModal from '@/components/dashboard-admin/LimpiezaDatosModal';
 import ReportesIngresos from '@/components/reportes/ReportesIngresos';
 import ReporteOcupacion from '@/components/reportes/ReporteOcupacion';
 import ReporteProfesores from '@/components/reportes/ReporteProfesores';
@@ -47,7 +46,6 @@ export default function DashboardAdmin() {
   const mesStr = format(mesSeleccionado, 'yyyy-MM');
   const [morososExpanded, setMorososExpanded] = useState(false);
   const [cobroModal, setCobroModal] = useState({ open: false, cobro: null, cliente: null });
-  const [limpiezaModalOpen, setLimpiezaModalOpen] = useState(false);
 
   const { data: user } = useQuery({
     queryKey: ['me'],
@@ -353,14 +351,6 @@ export default function DashboardAdmin() {
             >
               Siguiente →
             </button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => setLimpiezaModalOpen(true)}
-              className="gap-2"
-            >
-              🗑️ Limpiar Datos
-            </Button>
           </div>
         </header>
 
@@ -906,12 +896,6 @@ export default function DashboardAdmin() {
         onOpenChange={(open) => setCobroModal({ ...cobroModal, open })}
         cobro={cobroModal.cobro}
         cliente={cobroModal.cliente}
-      />
-
-      {/* Modal de Limpieza de Datos */}
-      <LimpiezaDatosModal
-        open={limpiezaModalOpen}
-        onOpenChange={setLimpiezaModalOpen}
       />
     </div>
   );
