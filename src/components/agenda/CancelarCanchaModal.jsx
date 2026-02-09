@@ -75,20 +75,19 @@ export default function CancelarCanchaModal({ open, onOpenChange, turno, onSucce
       });
     },
     onSuccess: async () => {
-        // Esperar a que la BD se actualice
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        // Refetch inmediato y esperar antes de cerrar
-        await Promise.all([
-          queryClient.refetchQueries({ queryKey: ['turnos-cancha'], exact: true }),
-          queryClient.refetchQueries({ queryKey: ['recordatorios-cancha'], exact: true })
-        ]);
-
+        // Remover inmediatamente del cache local para actualizar UI
+        queryClient.setQueryData(['turnos-cancha', turno.fecha], (oldData) => 
+          oldData ? oldData.filter(t => t.id !== turno.id) : oldData
+        );
+        
         setMotivoMas24h('');
         setMostrarSelectMotivo(false);
-        await new Promise(resolve => setTimeout(resolve, 100));
         onOpenChange(false);
         onSuccess?.();
+        
+        // Refetch en background para mantener sincronizado
+        await new Promise(resolve => setTimeout(resolve, 300));
+        queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
       },
     onError: (error) => {
       console.error('Error al cancelar cancha:', error);
