@@ -148,6 +148,27 @@ export default function Agenda() {
     }
   };
 
+  const handleDescargarPDF = async () => {
+    try {
+      const { data } = await base44.functions.invoke('generarPDFAgenda', {
+        fecha: fechaStr,
+        selectedCancha,
+      });
+      
+      const blob = new Blob([data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Agenda_${fechaStr}${selectedCancha !== 'todas' ? `_Cancha${selectedCancha}` : ''}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    } catch (error) {
+      alert(`❌ Error al generar PDF: ${error.message}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
