@@ -214,32 +214,46 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
             )}
 
             {formData.es_alumno && (
-            <div className="space-y-2">
-              <Label>Profesor *</Label>
-              <Select
-                value={formData.profesor_id}
-                onValueChange={(profesorId) => {
-                  const profesor = profesores.find(p => p.id === profesorId);
-                  setFormData({
-                    ...formData,
-                    profesor_id: profesorId,
-                    profesor_nombre: profesor?.nombre || '',
-                  });
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona profesor" />
-                </SelectTrigger>
-                <SelectContent>
-                  {profesores.map(prof => (
-                    <SelectItem key={prof.id} value={prof.id}>
-                      {prof.nombre}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+             <div className="space-y-4">
+               <div className="space-y-2">
+                 <Label>Profesor *</Label>
+                 <Select
+                   value={formData.profesor_id}
+                   onValueChange={(profesorId) => {
+                     const profesor = profesores.find(p => p.id === profesorId);
+                     setFormData({
+                       ...formData,
+                       profesor_id: profesorId,
+                       profesor_nombre: profesor?.nombre || '',
+                     });
+                   }}
+                 >
+                   <SelectTrigger>
+                     <SelectValue placeholder="Selecciona profesor" />
+                   </SelectTrigger>
+                   <SelectContent>
+                     {profesores.map(prof => (
+                       <SelectItem key={prof.id} value={prof.id}>
+                         {prof.nombre}
+                       </SelectItem>
+                     ))}
+                   </SelectContent>
+                 </Select>
+               </div>
+               <div className="space-y-2">
+                 <Label>Precio mensual *</Label>
+                 <Input
+                   type="number"
+                   min="0"
+                   step="100"
+                   value={formData.precio}
+                   onChange={(e) => setFormData({ ...formData, precio: parseFloat(e.target.value) || 0 })}
+                   placeholder="Ej: 5000"
+                   required={formData.es_alumno}
+                 />
+               </div>
+             </div>
+            )}
 
           <div className="space-y-2">
             <Label>Notas</Label>
