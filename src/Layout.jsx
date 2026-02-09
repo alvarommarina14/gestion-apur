@@ -279,15 +279,12 @@ export default function Layout({ children, currentPageName }) {
             )}
 
             {/* Tareas - Empleados y Admin */}
-            {!cargandoPermisos && user?.rol !== 'profesor' && navigationEmpleados.some(item => user?.rol === 'admin' || tieneAcceso(item.permissionKey)) && (
+            {user?.rol !== 'profesor' && (
               <div className="pt-4 mt-4 border-t border-slate-200">
                 <p className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
                   Tareas
                 </p>
                 {navigationEmpleados.map((item) => {
-                  // Verificar permisos
-                  if (user?.rol !== 'admin' && !tieneAcceso(item.permissionKey)) return null;
-
                   const isActive = currentPageName === item.href;
                   const Icon = item.icon;
 
