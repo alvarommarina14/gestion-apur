@@ -606,8 +606,33 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente, turno
               )}
             </div>
           </TabsContent>
-        </Tabs>
-      </DialogContent>
-    </Dialog>
-  );
-}
+          </Tabs>
+
+          {/* Alert Dialog para eliminar pago */}
+          <AlertDialog open={!!pagoAEliminar} onOpenChange={(open) => !open && setPagoAEliminar(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-rose-600" />
+                Eliminar pago
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                ¿Estás seguro de que deseas eliminar el pago de ${(pagoAEliminar?.monto || 0).toLocaleString('es-AR')} del {pagoAEliminar?.fecha && format(parseISO(pagoAEliminar.fecha), "d 'de' MMMM", { locale: es })}? Esta acción no se puede deshacer.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="flex gap-3 justify-end">
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => pagoAEliminar && deletePagoMutation.mutate(pagoAEliminar.id)}
+                disabled={deletePagoMutation.isPending}
+                className="bg-rose-600 hover:bg-rose-700"
+              >
+                Eliminar
+              </AlertDialogAction>
+            </div>
+          </AlertDialogContent>
+          </AlertDialog>
+          </DialogContent>
+          </Dialog>
+          );
+          }
