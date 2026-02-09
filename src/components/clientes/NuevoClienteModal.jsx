@@ -29,8 +29,8 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
     nombre: '',
     telefono: '',
     email: '',
-    clasificacion: 'ocasional',
-    tipo_cliente: 'alquiler',
+    clasificacion: 'nuevo',
+    tipo_cliente: 'clase',
     notas: '',
   });
 
@@ -40,8 +40,8 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
         nombre: '',
         telefono: '',
         email: '',
-        clasificacion: 'ocasional',
-        tipo_cliente: 'alquiler',
+        clasificacion: 'nuevo',
+        tipo_cliente: 'clase',
         notas: '',
       });
       setSuccess(false);
@@ -137,17 +137,26 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                   <SelectItem value="ocasional">Ocasional</SelectItem>
-                   <SelectItem value="recurrente">Recurrente</SelectItem>
-                 </SelectContent>
+                     <SelectItem value="nuevo">Nuevo</SelectItem>
+                     <SelectItem value="recurrente">Recurrente</SelectItem>
+                   </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Tipo</Label>
-              <div className="h-9 px-3 py-2 rounded-md border border-input bg-background flex items-center text-sm">
-                Alquiler Cancha
-              </div>
-            </div>
+               <Label>Tipo</Label>
+               <Select
+                 value={formData.tipo_cliente}
+                 onValueChange={(v) => setFormData({ ...formData, tipo_cliente: v })}
+               >
+                 <SelectTrigger>
+                   <SelectValue />
+                 </SelectTrigger>
+                 <SelectContent>
+                   <SelectItem value="clase">Clase</SelectItem>
+                   <SelectItem value="abono">Abono</SelectItem>
+                 </SelectContent>
+               </Select>
+             </div>
           </div>
 
           <div className="space-y-2">
