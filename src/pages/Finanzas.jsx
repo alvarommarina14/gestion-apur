@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { format, startOfMonth, endOfMonth, parseISO, addDays } from 'date-fns';
+import { format, startOfMonth, endOfMonth, parseISO, addDays, eachDayOfInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -18,7 +18,8 @@ import { Badge } from '@/components/ui/badge';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell
 } from 'recharts';
-import { DollarSign, TrendingUp, AlertCircle, CheckCircle, Search, RefreshCw } from 'lucide-react';
+import { DollarSign, TrendingUp, AlertCircle, CheckCircle, Search, RefreshCw, Activity, Calendar, Clock } from 'lucide-react';
+import ReporteOcupacion from '@/components/reportes/ReporteOcupacion';
 
 export default function Finanzas() {
   const [mesSeleccionado, setMesSeleccionado] = useState(new Date());
@@ -52,6 +53,11 @@ export default function Finanzas() {
   const { data: cobrosClientes = [] } = useQuery({
     queryKey: ['cobros-clientes'],
     queryFn: () => base44.entities.CobroCliente.list(),
+  });
+
+  const { data: turnos = [] } = useQuery({
+    queryKey: ['turnos-cancha'],
+    queryFn: () => base44.entities.TurnoCancha.list('-fecha', 500),
   });
 
   const sincronizarMutation = useMutation({
@@ -157,6 +163,52 @@ export default function Finanzas() {
     };
   }, [clientes, cobrosClientes, mesStr]);
 
+  // Métricas de Ocupación
+  const turnosFiltrados = useMemo(() => {
+    const inicio = startOfMonth(mesSeleccionado);
+    const fin = endOfMonth(mesSeleccionado);
+    
+    return turnos.filter(t => {
+      const fecha = parseISO(t.fecha);
+      return fecha >= inicio && fecha <= fin;
+    });
+  }, [turnos, mesSeleccionado]);
+
+  const metricasOcupacion = useMemo(() => {
+    const totalTurnos = turnosFiltrados.length;
+    const diasDelMes = eachDayOfInterval({
+      start: startOfMonth(mesSeleccionado),
+      end: endOfMonth(mesSeleccionado),
+    }).length;
+
+    const franjasHorarias = 27;
+    const slotsDisponiblesPorDia = 4 * franjasHorarias;
+    const totalSlotsDisponibles = slotsDisponiblesPorDia * diasDelMes;
+
+    const slotsOcupados = turnosFiltrados.reduce((sum, t) => {
+      const franjasOcupadas = Math.ceil(t.duracion / 30);
+      return sum + franjasOcupadas;
+    }, 0);
+
+    const ocupacionPorcentaje = totalSlotsDisponibles > 0 
+      ? ((slotsOcupados / totalSlotsDisponibles) * 100).toFixed(1)
+      : 0;
+
+    const ingresoTotal = turnosFiltrados.reduce((sum, t) => sum + (t.monto || 0), 0);
+    const ingresoCobrado = turnosFiltrados.filter(t => t.pagado).reduce((sum, t) => sum + (t.monto || 0), 0);
+    const ingresoPendiente = ingresoTotal - ingresoCobrado;
+    
+    return {
+      totalTurnos,
+      ocupacionPorcentaje,
+      slotsOcupados,
+      totalSlotsDisponibles,
+      ingresoTotal,
+      ingresoCobrado,
+      ingresoPendiente,
+    };
+  }, [turnosFiltrados, mesSeleccionado]);
+
   const formatMoney = (amount) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -192,8 +244,8 @@ export default function Finanzas() {
       {/* Header */}
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Gestión de Finanzas</h1>
-          <p className="text-slate-500 text-sm">Control centralizado de pagos y cobros</p>
+          <h1 className="text-2xl font-bold text-slate-900">Panel Administrativo</h1>
+          <p className="text-slate-500 text-sm">Finanzas y ocupación de canchas</p>
         </div>
         <Button
           onClick={handleSincronizar}
@@ -229,9 +281,10 @@ export default function Finanzas() {
       </Card>
 
       <Tabs defaultValue="alumnos" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="alumnos">Alumnos</TabsTrigger>
           <TabsTrigger value="clientes">Clientes</TabsTrigger>
+          <TabsTrigger value="ocupacion">Ocupación</TabsTrigger>
         </TabsList>
 
         {/* TAB ALUMNOS */}
@@ -424,6 +477,44 @@ export default function Finanzas() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* TAB OCUPACIÓN */}
+        <TabsContent value="ocupacion" className="space-y-6">
+          {/* KPIs Ocupación */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-sm text-slate-500 mb-2">Ocupación</p>
+                <p className="text-3xl font-bold text-emerald-600">{metricasOcupacion.ocupacionPorcentaje}%</p>
+                <p className="text-xs text-slate-400 mt-1">{metricasOcupacion.slotsOcupados} / {metricasOcupacion.totalSlotsDisponibles} slots</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-sm text-slate-500 mb-2">Turnos</p>
+                <p className="text-3xl font-bold text-blue-600">{metricasOcupacion.totalTurnos}</p>
+                <p className="text-xs text-slate-400 mt-1">en el período</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-sm text-slate-600 mb-2">Cobrado</p>
+                <p className="text-2xl font-bold text-emerald-700">{formatMoney(metricasOcupacion.ingresoCobrado)}</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-sm text-slate-600 mb-2">Pendiente</p>
+                <p className="text-2xl font-bold text-blue-600">{formatMoney(metricasOcupacion.ingresoPendiente)}</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <ReporteOcupacion turnos={turnosFiltrados} />
         </TabsContent>
       </Tabs>
     </div>
