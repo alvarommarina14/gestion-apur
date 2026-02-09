@@ -54,7 +54,6 @@ import AprobacionUsuarios from './pages/AprobacionUsuarios';
 import Clientes from './pages/Clientes';
 import Configuracion from './pages/Configuracion';
 import Dashboard from './pages/Dashboard';
-import DashboardOcupacion from './pages/DashboardOcupacion';
 import Empleados from './pages/Empleados';
 import GestionAccesoUnificada from './pages/GestionAccesoUnificada';
 import GestionPermisosUsuarios from './pages/GestionPermisosUsuarios';
@@ -71,7 +70,7 @@ import Recuperos from './pages/Recuperos';
 import Reportes from './pages/Reportes';
 import SeleccionRol from './pages/SeleccionRol';
 import Tareas from './pages/Tareas';
-import DashboardCobros from './pages/DashboardCobros';
+import DashboardAdmin from './pages/DashboardAdmin';
 import __Layout from './Layout.jsx';
 
 
@@ -83,7 +82,6 @@ export const PAGES = {
     "Clientes": Clientes,
     "Configuracion": Configuracion,
     "Dashboard": Dashboard,
-    "DashboardOcupacion": DashboardOcupacion,
     "Empleados": Empleados,
     "GestionAccesoUnificada": GestionAccesoUnificada,
     "GestionPermisosUsuarios": GestionPermisosUsuarios,
@@ -100,7 +98,7 @@ export const PAGES = {
     "Reportes": Reportes,
     "SeleccionRol": SeleccionRol,
     "Tareas": Tareas,
-    "DashboardCobros": DashboardCobros,
+    "DashboardAdmin": DashboardAdmin,
 }
 
 export const pagesConfig = {
