@@ -69,25 +69,31 @@ export default function CancelarCanchaModal({ open, onOpenChange, turno, onSucce
         });
       }
 
-      // Actualizar estado del turno
+      // Actualizar estado del turno en BD
       await base44.entities.TurnoCancha.update(turno.id, {
         estado: 'cancelado',
       });
     },
     onSuccess: async () => {
-        // Remover inmediatamente del cache local para actualizar UI
-        queryClient.setQueryData(['turnos-cancha', turno.fecha], (oldData) => 
-          oldData ? oldData.filter(t => t.id !== turno.id) : oldData
-        );
+        // Remover inmediatamente de todos los caches locales
+        // Actualizar la query con la fecha específica del turno
+        queryClient.setQueryData(['turnos-cancha', turno.fecha], (oldData) => {
+          if (!oldData) return oldData;
+          return oldData.filter(t => t.id !== turno.id);
+        });
+        
+        // También actualizar cualquier otra query de turnos (para vista de calendario, etc)
+        queryClient.setQueryData(['turnos-cancha', 'mes'], (oldData) => {
+          if (!oldData) return oldData;
+          return oldData.filter(t => t.id !== turno.id);
+        });
         
         setMotivoMas24h('');
         setMostrarSelectMotivo(false);
         onOpenChange(false);
-        onSuccess?.();
         
-        // Refetch en background para mantener sincronizado
-        await new Promise(resolve => setTimeout(resolve, 300));
-        queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+        // Cerrar modal y notificar al parent
+        onSuccess?.();
       },
     onError: (error) => {
       console.error('Error al cancelar cancha:', error);
