@@ -910,16 +910,36 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
                           checked={formData.alumnos_ids?.includes(a.id)}
                           onCheckedChange={(checked) => {
                             const ids = formData.alumnos_ids || [];
+                            const nuevosIds = checked ? [...ids, a.id] : ids.filter(id => id !== a.id);
+
+                            // Calcular precio automáticamente
+                            const precioTotal = nuevosIds.reduce((sum, alumnoId) => {
+                              const alumno = alumnos.find(al => al.id === alumnoId);
+                              return sum + (alumno?.precio_mensual || 0);
+                            }, 0);
+
                             setFormData({
                               ...formData,
-                              alumnos_ids: checked ? [...ids, a.id] : ids.filter(id => id !== a.id)
+                              alumnos_ids: nuevosIds,
+                              monto: precioTotal
                             });
                           }}
                         />
                         <label className="text-sm cursor-pointer flex-1">{a.nombre}</label>
+                        <span className="text-xs text-slate-500">$ {a.precio_mensual?.toLocaleString('es-AR')}</span>
                       </div>
                     ))}
                   </div>
+                  {formData.alumnos_ids && formData.alumnos_ids.length > 0 && (
+                    <div className="mt-3 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+                      <p className="text-sm text-slate-700">
+                        <span className="font-medium">Precio total de la clase:</span>
+                      </p>
+                      <p className="text-lg font-bold text-emerald-600">
+                        $ {formData.monto?.toLocaleString('es-AR')}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </>
