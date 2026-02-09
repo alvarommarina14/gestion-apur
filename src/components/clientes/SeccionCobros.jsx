@@ -10,8 +10,6 @@ import { DollarSign, Plus, AlertCircle, CheckCircle, Trash2, Edit } from 'lucide
 import { cn } from '@/lib/utils';
 import NuevoCbroModal from './NuevoCbroModal';
 import RegistrarPagoCobroModal from './RegistrarPagoCobroModal';
-import { es } from 'date-fns/locale';
-import { parseISO } from 'date-fns';
 
 export default function SeccionCobros({ cliente }) {
    const [modalNuevoCobro, setModalNuevoCobro] = useState(false);
