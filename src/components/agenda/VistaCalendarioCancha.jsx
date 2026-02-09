@@ -79,9 +79,9 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
       }
     });
     
-    // Luego agregar turnos reales (tienen prioridad sobre bloqueos)
+    // Luego agregar turnos reales (tienen prioridad sobre bloqueos) - excluir cancelados
     turnos.forEach(turno => {
-      if (map[turno.cancha] && map[turno.cancha][turno.hora_inicio] !== undefined) {
+      if (turno.estado !== 'cancelado' && map[turno.cancha] && map[turno.cancha][turno.hora_inicio] !== undefined) {
         map[turno.cancha][turno.hora_inicio] = { ...turno, tipo: 'turno' };
       }
     });
