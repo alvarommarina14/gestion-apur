@@ -72,6 +72,7 @@ import SeleccionRol from './pages/SeleccionRol';
 import Tareas from './pages/Tareas';
 import DashboardAdmin from './pages/DashboardAdmin';
 import GestionDisponibilidad from './pages/GestionDisponibilidad';
+import ReportesGenerales from './pages/ReportesGenerales';
 import __Layout from './Layout.jsx';
 
 
@@ -101,6 +102,7 @@ export const PAGES = {
     "Tareas": Tareas,
     "DashboardAdmin": DashboardAdmin,
     "GestionDisponibilidad": GestionDisponibilidad,
+    "ReportesGenerales": ReportesGenerales,
 }
 
 export const pagesConfig = {
