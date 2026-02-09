@@ -50,7 +50,7 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
         nombre: '',
         telefono: '',
         email: '',
-        clasificacion: 'nuevo',
+        clasificacion: 'recurrente',
         tipo_cliente: 'clase',
         es_alumno: false,
         profesor_id: '',
