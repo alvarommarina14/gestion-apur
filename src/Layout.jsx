@@ -25,37 +25,56 @@ import NotificationPermissionModal from '@/components/NotificationPermissionModa
       import PushNotificationManager from '@/components/PushNotificationManager';
       import BottomTabNavigation from '@/components/BottomTabNavigation';
       import { lazy, Suspense } from 'react';
+      import { usePermissions } from '@/components/usePermissions';
+
+// Mapeo de páginas a secciones de permisos
+const PAGE_TO_PERMISSION = {
+  'Profesores': 'gestion_profesores',
+  'Agenda': 'booking_canchas',
+  'DashboardAdmin': 'dashboard_ocupacion',
+  'RecordatoriosCanchaAdmin': 'recordatorios_cancha_admin',
+  'RecordatoriosCanchaEmpleado': 'recordatorios_cancha_empleado',
+  'Tareas': 'empleados',
+  'Dashboard': 'dashboard',
+  'Alumnos': 'alumnos',
+  'Pagos': 'pagos',
+  'Recordatorios': 'recordatorios',
+  'Reportes': 'reportes',
+  'Clientes': 'gestion_clientes',
+  'GestionAccesoUnificada': 'configuracion',
+  'Configuracion': 'configuracion',
+};
 
 const navigationGestionClases = [
-  { name: 'Profesores', href: 'Profesores', icon: Users },
+  { name: 'Profesores', href: 'Profesores', icon: Users, permissionKey: 'gestion_profesores' },
 ];
 
 const navigationAgenda = [
-  { name: 'Agenda', href: 'Agenda', icon: Calendar },
-  { name: 'Dashboard Admin', href: 'DashboardAdmin', icon: LayoutDashboard, adminOnly: true },
-  { name: 'Canchas Admin', href: 'RecordatoriosCanchaAdmin', icon: Calendar, adminOnly: true },
-  { name: 'Mis Recordatorios', href: 'RecordatoriosCanchaEmpleado', icon: Calendar, empleadoOnly: true },
+  { name: 'Agenda', href: 'Agenda', icon: Calendar, permissionKey: 'booking_canchas' },
+  { name: 'Dashboard Admin', href: 'DashboardAdmin', icon: LayoutDashboard, adminOnly: true, permissionKey: 'dashboard_ocupacion' },
+  { name: 'Canchas Admin', href: 'RecordatoriosCanchaAdmin', icon: Calendar, adminOnly: true, permissionKey: 'recordatorios_cancha_admin' },
+  { name: 'Mis Recordatorios', href: 'RecordatoriosCanchaEmpleado', icon: Calendar, empleadoOnly: true, permissionKey: 'recordatorios_cancha_empleado' },
 ];
 
 const navigationEmpleados = [
-  { name: 'Tareas', href: 'Tareas', icon: CheckCircle },
+  { name: 'Tareas', href: 'Tareas', icon: CheckCircle, permissionKey: 'empleados' },
 ];
 
 const navigationProfesor = [
-  { name: 'Dashboard', href: 'Dashboard', icon: LayoutDashboard },
-  { name: 'Alumnos', href: 'Alumnos', icon: Users },
-  { name: 'Pagos', href: 'Pagos', icon: DollarSign },
-  { name: 'Recordatorios', href: 'Recordatorios', icon: RefreshCw },
-  { name: 'Reportes', href: 'Reportes', icon: FileText },
+  { name: 'Dashboard', href: 'Dashboard', icon: LayoutDashboard, permissionKey: 'dashboard' },
+  { name: 'Alumnos', href: 'Alumnos', icon: Users, permissionKey: 'alumnos' },
+  { name: 'Pagos', href: 'Pagos', icon: DollarSign, permissionKey: 'pagos' },
+  { name: 'Recordatorios', href: 'Recordatorios', icon: RefreshCw, permissionKey: 'recordatorios' },
+  { name: 'Reportes', href: 'Reportes', icon: FileText, permissionKey: 'reportes' },
 ];
 
 const navigationClientes = [
-  { name: 'Clientes', href: 'Clientes', icon: Users },
+  { name: 'Clientes', href: 'Clientes', icon: Users, permissionKey: 'gestion_clientes' },
 ];
 
 const navigationConfiguracion = [
-  { name: 'Gestión de Acceso', href: 'GestionAccesoUnificada', icon: Shield },
-  { name: 'Configuración', href: 'Configuracion', icon: Settings },
+  { name: 'Gestión de Acceso', href: 'GestionAccesoUnificada', icon: Shield, permissionKey: 'configuracion' },
+  { name: 'Configuración', href: 'Configuracion', icon: Settings, permissionKey: 'configuracion' },
 ];
 
 export default function Layout({ children, currentPageName }) {
@@ -63,6 +82,7 @@ export default function Layout({ children, currentPageName }) {
   const [user, setUser] = React.useState(null);
   const [profesorSeleccionado, setProfesorSeleccionado] = React.useState(null);
   const location = useLocation();
+  const { tieneAcceso, cargando: cargandoPermisos } = usePermissions();
   
   // Detectar si es una ruta anidada (para mostrar back button)
   const isNestedRoute = location.pathname.includes('?') || 
@@ -178,13 +198,16 @@ export default function Layout({ children, currentPageName }) {
           
           {/* Navigation */}
           <nav className="flex-1 p-4 lg:p-4 space-y-1 overflow-y-auto touch-pan-y">
-            {/* Gestión de Clases - Solo Administradores */}
-            {user?.rol === 'admin' && (
+            {/* Gestión de Clases */}
+            {!cargandoPermisos && navigationGestionClases.some(item => user?.rol === 'admin' || tieneAcceso(item.permissionKey)) && (
               <div>
                 <p className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
                   Gestión de Clases
                 </p>
                 {navigationGestionClases.map((item) => {
+                  // Verificar permisos
+                  if (user?.rol !== 'admin' && !tieneAcceso(item.permissionKey)) return null;
+
                   const isActive = currentPageName === item.href;
                   const Icon = item.icon;
 
@@ -217,12 +240,15 @@ export default function Layout({ children, currentPageName }) {
             )}
 
             {/* Menú Profesor */}
-            {user?.rol === 'profesor' && (
+            {!cargandoPermisos && user?.rol === 'profesor' && (
               <div>
                 <p className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
                   Gestión de Clases
                 </p>
                 {navigationProfesor.map((item) => {
+                  // Verificar permisos individuales
+                  if (!tieneAcceso(item.permissionKey)) return null;
+
                   const isActive = currentPageName === item.href;
                   const Icon = item.icon;
 
@@ -253,12 +279,15 @@ export default function Layout({ children, currentPageName }) {
             )}
 
             {/* Tareas - Empleados y Admin */}
-            {user?.rol !== 'profesor' && (
+            {!cargandoPermisos && user?.rol !== 'profesor' && navigationEmpleados.some(item => user?.rol === 'admin' || tieneAcceso(item.permissionKey)) && (
               <div className="pt-4 mt-4 border-t border-slate-200">
                 <p className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
                   Tareas
                 </p>
                 {navigationEmpleados.map((item) => {
+                  // Verificar permisos
+                  if (user?.rol !== 'admin' && !tieneAcceso(item.permissionKey)) return null;
+
                   const isActive = currentPageName === item.href;
                   const Icon = item.icon;
 
@@ -289,15 +318,16 @@ export default function Layout({ children, currentPageName }) {
             )}
 
             {/* Booking de Canchas - Admin y Empleados */}
-            {user?.rol !== 'profesor' && (
+            {!cargandoPermisos && user?.rol !== 'profesor' && navigationAgenda.some(item => user?.rol === 'admin' || tieneAcceso(item.permissionKey)) && (
               <div className={cn(user?.rol === 'admin' && 'pt-4 mt-4 border-t border-slate-200')}>
                 <p className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
                   Booking de Canchas
                 </p>
                 {navigationAgenda.map((item) => {
-                  // Filtrar por rol
+                  // Verificar permisos
                   if (item.adminOnly && user?.rol !== 'admin') return null;
                   if (item.empleadoOnly && user?.rol === 'admin') return null;
+                  if (user?.rol !== 'admin' && !tieneAcceso(item.permissionKey)) return null;
 
                   const isActive = currentPageName === item.href;
                   const Icon = item.icon;
@@ -328,13 +358,16 @@ export default function Layout({ children, currentPageName }) {
               </div>
             )}
 
-              {/* Gestión de Clientes - Solo Administradores */}
-              {user?.rol === 'admin' && (
+              {/* Gestión de Clientes */}
+              {!cargandoPermisos && navigationClientes.some(item => user?.rol === 'admin' || tieneAcceso(item.permissionKey)) && (
                 <div className="pt-4 mt-4 border-t border-slate-200">
                 <p className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
                   Gestión de Clientes
                 </p>
                 {navigationClientes.map((item) => {
+                  // Verificar permisos
+                  if (user?.rol !== 'admin' && !tieneAcceso(item.permissionKey)) return null;
+
                   const isActive = currentPageName === item.href;
                   const Icon = item.icon;
 
