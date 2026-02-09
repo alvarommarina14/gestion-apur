@@ -41,6 +41,7 @@ import CancelarClaseModal from '@/components/modals/CancelarClaseModal';
 import EditarClaseModal from '@/components/modals/EditarClaseModal';
 import RecordatoriosPendientes from '@/components/recordatorios/RecordatoriosPendientes';
 import PullToRefresh from '@/components/PullToRefresh';
+import CobrosDelDia from '@/components/empleados/CobrosDelDia';
 import { createPageUrl } from '@/utils';
 import { Link } from 'react-router-dom';
 
@@ -243,23 +244,16 @@ export default function Dashboard() {
   
   const isLoading = loadingAlumnos || loadingClases;
   
-  // Redirigir empleados
+  // Dashboard para empleados
   if (isEmpleado) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 flex items-center justify-center">
-        <Card className="max-w-md shadow-lg">
-          <CardContent className="pt-6 text-center">
-            <Calendar className="w-16 h-16 mx-auto mb-4 text-slate-300" />
-            <h2 className="text-xl font-bold text-slate-900 mb-2">Dashboard de Profesores</h2>
-            <p className="text-slate-600 mb-4">
-              Esta sección está disponible solo para administradores y profesores.
-            </p>
-            <p className="text-sm text-slate-500">
-              Como empleado, podés gestionar tus tareas y recordatorios desde el menú principal.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <PullToRefresh onRefresh={handleRefresh}>
+        <div key={refreshKey} className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+            <CobrosDelDia />
+          </div>
+        </div>
+      </PullToRefresh>
     );
   }
   
