@@ -361,7 +361,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
               <Label>Tipo</Label>
               <Select
                  value={formData.tipo}
-                 onValueChange={(v) => setFormData(prev => ({ ...prev, tipo: v }))}
+                 onValueChange={(v) => setFormData(prev => ({ ...prev, tipo: v, alumnos_ids: [] }))}
                >
                 <SelectTrigger>
                   <SelectValue />
@@ -391,6 +391,25 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Profesor</Label>
+            <Select
+               value={formData.profesor_id}
+               onValueChange={(v) => setFormData(prev => ({ ...prev, profesor_id: v, alumnos_ids: [] }))}
+             >
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar profesor" />
+              </SelectTrigger>
+              <SelectContent>
+                {profesores.filter(p => p.activo).map(profesor => (
+                  <SelectItem key={profesor.id} value={profesor.id}>
+                    {profesor.nombre}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
           {/* Selección de alumnos */}
