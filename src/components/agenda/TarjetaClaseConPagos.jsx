@@ -1,10 +1,12 @@
-import React, { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useMemo, useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { CheckCircle, XCircle, DollarSign, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function TarjetaClaseConPagos({ turno, isAdmin, onTurnoClick }) {
+  const queryClient = useQueryClient();
+  const [isUpdating, setIsUpdating] = useState(false);
   const { data: profesor } = useQuery({
     queryKey: ['profesor', turno.profesor_id],
     queryFn: async () => {
