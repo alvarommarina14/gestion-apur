@@ -6,12 +6,16 @@ import { es } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { DollarSign, Plus, AlertCircle, CheckCircle, Trash2 } from 'lucide-react';
+import { DollarSign, Plus, AlertCircle, CheckCircle, Trash2, Edit } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import NuevoCbroModal from './NuevoCbroModal';
+import RegistrarPagoCobroModal from './RegistrarPagoCobroModal';
+import { es } from 'date-fns/locale';
+import { parseISO } from 'date-fns';
 
 export default function SeccionCobros({ cliente }) {
    const [modalNuevoCobro, setModalNuevoCobro] = useState(false);
+   const [modalPago, setModalPago] = useState({ open: false, cobro: null });
    const queryClient = useQueryClient();
 
    const deleteCbroMutation = useMutation({
@@ -20,6 +24,21 @@ export default function SeccionCobros({ cliente }) {
        queryClient.invalidateQueries({ queryKey: ['cobros-cliente', cliente.id] });
      },
    });
+
+   const getEstadoDinamico = (cobro) => {
+     // Si ya está pagado, mantener estado pagado
+     if (cobro.estado === 'pagado') {
+       return 'pagado';
+     }
+
+     // Calcular estado basado en día del mes (5 al 15 = pendiente, después 15 = moroso)
+     const hoy = new Date();
+     const diaActual = hoy.getDate();
+     const [año, mes] = cobro.mes.split('-');
+     const fechaVencimiento = new Date(parseInt(año), parseInt(mes) - 1, 15);
+     
+     return hoy > fechaVencimiento ? 'moroso' : 'pendiente';
+   };
 
   const { data: cobros = [] } = useQuery({
     queryKey: ['cobros-cliente', cliente.id],
