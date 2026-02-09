@@ -76,15 +76,21 @@ export default function Dashboard() {
   
   // Cargar profesor seleccionado
   React.useEffect(() => {
-    const profesorGuardado = localStorage.getItem('profesor_seleccionado');
-    if (profesorGuardado) {
+    const cargarProfesor = async () => {
       try {
-        setProfesorSeleccionado(JSON.parse(profesorGuardado));
+        if (user?.profesor_id) {
+          const profesor = await base44.entities.Profesor.read(user.profesor_id);
+          setProfesorSeleccionado(profesor);
+        }
       } catch (e) {
-        console.error('Error parsing profesor seleccionado', e);
+        console.error('Error al cargar profesor:', e);
       }
+    };
+    
+    if (user?.profesor_id) {
+      cargarProfesor();
     }
-  }, []);
+  }, [user?.profesor_id]);
   
   // Queries
   const { data: alumnosTodos = [], isLoading: loadingAlumnos } = useQuery({
