@@ -6,12 +6,14 @@ import { es } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell 
 } from 'recharts';
 import { 
   TrendingUp, TrendingDown, Clock, Calendar, Activity, DollarSign, 
-  CheckCircle, AlertCircle, Lightbulb, Target 
+  CheckCircle, AlertCircle, Lightbulb, Target, MessageCircle, Mail, 
+  ChevronDown, ChevronUp, CreditCard
 } from 'lucide-react';
 import {
   Select,
@@ -20,6 +22,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import RegistrarCobroModal from '@/components/dashboard-admin/RegistrarCobroModal';
 
 const HORARIOS = [];
 for (let h = 8; h <= 21; h++) {
@@ -32,6 +40,8 @@ const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sáb
 export default function DashboardAdmin() {
   const [mesSeleccionado, setMesSeleccionado] = useState(new Date());
   const mesStr = format(mesSeleccionado, 'yyyy-MM');
+  const [morososExpanded, setMorososExpanded] = useState(false);
+  const [cobroModal, setCobroModal] = useState({ open: false, cobro: null, cliente: null });
 
   const { data: user } = useQuery({
     queryKey: ['me'],
@@ -58,6 +68,11 @@ export default function DashboardAdmin() {
   const { data: pagos = [] } = useQuery({
     queryKey: ['pagos'],
     queryFn: () => base44.entities.Pago.list('-fecha', 500),
+  });
+
+  const { data: clientes = [] } = useQuery({
+    queryKey: ['clientes'],
+    queryFn: () => base44.entities.Cliente.list('nombre', 500),
   });
 
   // Filtrar turnos según período
@@ -248,6 +263,32 @@ export default function DashboardAdmin() {
       currency: 'ARS',
       minimumFractionDigits: 0,
     }).format(amount || 0);
+  };
+
+  const enviarWhatsApp = (cobro) => {
+    const cliente = clientes.find(c => c.id === cobro.cliente_id) || 
+                    alumnos.find(a => a.id === cobro.cliente_id);
+    
+    if (!cliente) return;
+
+    const telefono = cliente.telefono || cliente.whatsapp || '';
+    const mensaje = `Hola ${cobro.cliente_nombre}, te recordamos que tenés un pago pendiente de ${formatMoney(cobro.monto)} con vencimiento el ${format(parseISO(cobro.fecha_vencimiento), "d 'de' MMMM", { locale: es })}. ¡Gracias!`;
+    
+    const url = `https://wa.me/${telefono.replace(/\D/g, '')}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+  };
+
+  const enviarEmail = (cobro) => {
+    const cliente = clientes.find(c => c.id === cobro.cliente_id) || 
+                    alumnos.find(a => a.id === cobro.cliente_id);
+    
+    if (!cliente) return;
+
+    const email = cliente.email || '';
+    const asunto = `Recordatorio de pago - ${cobro.tipo_cobro === 'abono_mensual' ? 'Abono mensual' : 'Cancha suelta'}`;
+    const cuerpo = `Hola ${cobro.cliente_nombre},\n\nTe recordamos que tenés un pago pendiente:\n\nMonto: ${formatMoney(cobro.monto)}\nVencimiento: ${format(parseISO(cobro.fecha_vencimiento), "d 'de' MMMM 'de' yyyy", { locale: es })}\n\n¡Gracias!`;
+    
+    window.location.href = `mailto:${email}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
   };
 
   if (user?.role !== 'admin') {
@@ -543,49 +584,183 @@ export default function DashboardAdmin() {
               </CardContent>
             </Card>
 
-            {/* Listas de Cobros */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {/* Morosos */}
-              {metricasCobros.listaMorosos.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">Morosos ({metricasCobros.cobrosMorosos + metricasCobros.alumnosMorosos})</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2 max-h-80 overflow-y-auto">
-                      {alumnos.filter(a => a.estado === 'moroso' || a.estado_mes_actual === 'moroso').slice(0, 5).map(alumno => (
-                        <div key={alumno.id} className="p-3 bg-rose-50 rounded-lg border border-rose-200">
-                          <p className="font-semibold text-slate-900 text-sm">{alumno.nombre}</p>
-                          <p className="text-xs text-slate-600">Deuda: {formatMoney(alumno.deuda_total)}</p>
-                        </div>
-                      ))}
+            {/* Pendientes de Pago */}
+            <Card className="shadow-sm">
+              <CardHeader className="border-b">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <DollarSign className="w-5 h-5 text-blue-600" />
+                  Pendientes de Pago
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-4">
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {metricasCobros.listaCobrosHoy.length === 0 && metricasCobros.listaCobrosProximos.length === 0 ? (
+                    <div className="text-center py-8 text-slate-500">
+                      <CheckCircle className="w-12 h-12 mx-auto mb-3 opacity-40" />
+                      <p className="text-sm">No hay cobros pendientes próximos</p>
                     </div>
-                  </CardContent>
-                </Card>
-              )}
+                  ) : (
+                    <>
+                      {[...metricasCobros.listaCobrosHoy, ...metricasCobros.listaCobrosProximos].map(cobro => {
+                        const cliente = clientes.find(c => c.id === cobro.cliente_id) || 
+                                       alumnos.find(a => a.id === cobro.cliente_id);
+                        
+                        return (
+                          <div 
+                            key={cobro.id} 
+                            className="p-4 bg-white rounded-lg border border-slate-200 hover:border-blue-300 transition-colors"
+                          >
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex-1">
+                                <p className="font-semibold text-slate-900">{cobro.cliente_nombre}</p>
+                                <p className="text-sm text-slate-600">
+                                  {cobro.tipo_cobro === 'abono_mensual' ? 'Abono mensual' : 'Cancha suelta'}
+                                </p>
+                                <p className="text-xs text-slate-500 mt-1">
+                                  Vence: {format(parseISO(cobro.fecha_vencimiento), "d 'de' MMM", { locale: es })}
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-xl font-bold text-blue-600">
+                                  {formatMoney(cobro.monto)}
+                                </p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => enviarWhatsApp(cobro)}
+                                className="flex-1 gap-2"
+                              >
+                                <MessageCircle className="w-4 h-4" />
+                                WhatsApp
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setCobroModal({ open: true, cobro, cliente });
+                                }}
+                                className="flex-1 gap-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
+                              >
+                                <CreditCard className="w-4 h-4" />
+                                Cobrar
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
 
-              {/* Vencen Hoy */}
-              {metricasCobros.listaCobrosHoy.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">Vencen Hoy ({metricasCobros.cobrosHoy})</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2 max-h-80 overflow-y-auto">
-                      {metricasCobros.listaCobrosHoy.slice(0, 5).map(cobro => (
-                        <div key={cobro.id} className="p-3 bg-amber-50 rounded-lg border border-amber-200">
-                          <p className="font-semibold text-slate-900 text-sm">{cobro.cliente_nombre}</p>
-                          <p className="text-xs text-amber-700 font-semibold">{formatMoney(cobro.monto)}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
+            {/* Morosos (Desplegable) */}
+            {metricasCobros.cobrosMorosos > 0 && (
+              <Collapsible
+                open={morososExpanded}
+                onOpenChange={setMorososExpanded}
+              >
+                <Card className="shadow-sm border-rose-200">
+                  <CollapsibleTrigger asChild>
+                    <CardHeader className="border-b cursor-pointer hover:bg-rose-50/50 transition-colors">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <AlertCircle className="w-5 h-5 text-rose-600" />
+                          Morosos - No pagaron del 5 al 15 ({metricasCobros.cobrosMorosos})
+                        </CardTitle>
+                        {morososExpanded ? (
+                          <ChevronUp className="w-5 h-5 text-slate-400" />
+                        ) : (
+                          <ChevronDown className="w-5 h-5 text-slate-400" />
+                        )}
+                      </div>
+                    </CardHeader>
+                  </CollapsibleTrigger>
+                  
+                  <CollapsibleContent>
+                    <CardContent className="pt-4">
+                      <div className="space-y-2 max-h-96 overflow-y-auto">
+                        {cobrosClientes.filter(c => c.estado === 'moroso').map(cobro => {
+                          const cliente = clientes.find(c => c.id === cobro.cliente_id) || 
+                                         alumnos.find(a => a.id === cobro.cliente_id);
+                          
+                          return (
+                            <div 
+                              key={cobro.id} 
+                              className="p-4 bg-rose-50 rounded-lg border border-rose-200"
+                            >
+                              <div className="flex items-start justify-between mb-3">
+                                <div className="flex-1">
+                                  <p className="font-semibold text-slate-900">{cobro.cliente_nombre}</p>
+                                  <p className="text-sm text-slate-600">
+                                    {cobro.tipo_cobro === 'abono_mensual' ? 'Abono mensual' : 'Cancha suelta'}
+                                  </p>
+                                  <p className="text-xs text-rose-600 mt-1 font-medium">
+                                    Venció: {format(parseISO(cobro.fecha_vencimiento), "d 'de' MMM", { locale: es })}
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-xl font-bold text-rose-600">
+                                    {formatMoney(cobro.monto)}
+                                  </p>
+                                </div>
+                              </div>
+                              
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => enviarWhatsApp(cobro)}
+                                  className="flex-1 gap-2"
+                                >
+                                  <MessageCircle className="w-4 h-4" />
+                                  WhatsApp
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => enviarEmail(cobro)}
+                                  className="flex-1 gap-2"
+                                >
+                                  <Mail className="w-4 h-4" />
+                                  Email
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setCobroModal({ open: true, cobro, cliente });
+                                  }}
+                                  className="flex-1 gap-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
+                                >
+                                  <CreditCard className="w-4 h-4" />
+                                  Cobrar
+                                </Button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </CardContent>
+                  </CollapsibleContent>
                 </Card>
-              )}
-            </div>
+              </Collapsible>
+            )}
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Modal de Registro de Cobro */}
+      <RegistrarCobroModal
+        open={cobroModal.open}
+        onOpenChange={(open) => setCobroModal({ ...cobroModal, open })}
+        cobro={cobroModal.cobro}
+        cliente={cobroModal.cliente}
+      />
     </div>
   );
 }
