@@ -118,20 +118,22 @@ export default function Recuperos() {
   };
 
   const handleDeleteRecupero = async (recupero) => {
-    if (!recupero?.id) {
-      alert('Error: No se puede eliminar este recupero (ID faltante)');
+    if (!recupero?.id || recupero.id.trim() === '') {
+      alert('Error: No se puede eliminar este recupero (ID inválido)');
       return;
     }
     
     if (!confirm(`¿Eliminar el recupero de ${recupero.alumno_nombre}?`)) return;
     
     try {
-      // Revertir clases a recuperar
-      const alumnos = await base44.entities.Alumno.filter({ id: recupero.alumno_id });
-      if (alumnos.length > 0) {
-        await base44.entities.Alumno.update(recupero.alumno_id, {
-          clases_a_recuperar: (alumnos[0].clases_a_recuperar || 0) + 1,
-        });
+      // Revertir clases a recuperar si el alumno_id es válido
+      if (recupero.alumno_id && recupero.alumno_id.trim() !== '') {
+        const alumnos = await base44.entities.Alumno.filter({ id: recupero.alumno_id });
+        if (alumnos.length > 0) {
+          await base44.entities.Alumno.update(recupero.alumno_id, {
+            clases_a_recuperar: (alumnos[0].clases_a_recuperar || 0) + 1,
+          });
+        }
       }
       
       await base44.entities.Recupero.delete(recupero.id);
@@ -140,7 +142,7 @@ export default function Recuperos() {
       alert('Recupero eliminado correctamente');
     } catch (error) {
       console.error('Error eliminando recupero:', error);
-      alert(`Error al eliminar: ${error.message}`);
+      alert(`Error: ${error.message || 'No se pudo eliminar el recupero'}`);
     }
   };
 
