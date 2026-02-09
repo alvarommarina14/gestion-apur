@@ -43,6 +43,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { 
+  registrarCambioPermisos, 
+  registrarAprobacionUsuario, 
+  registrarAprobacionClase,
+  registrarEliminacion 
+} from '@/components/utils/auditLog';
 
 const rolesConfig = {
   admin: { label: 'Administrador', color: 'bg-purple-100 text-purple-700' },
@@ -165,7 +171,11 @@ export default function GestionAccesoUnificada() {
 
   const aprobarUsuarioMutation = useMutation({
     mutationFn: async (userId) => {
+      const usuario = usuarios.find(u => u.id === userId);
       await base44.entities.User.update(userId, { estado_aprobacion: 'aprobado' });
+      if (usuario) {
+        await registrarAprobacionUsuario(usuario, true);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['usuarios_acceso'] });
@@ -174,7 +184,11 @@ export default function GestionAccesoUnificada() {
 
   const rechazarUsuarioMutation = useMutation({
     mutationFn: async (userId) => {
+      const usuario = usuarios.find(u => u.id === userId);
       await base44.entities.User.update(userId, { estado_aprobacion: 'rechazado' });
+      if (usuario) {
+        await registrarAprobacionUsuario(usuario, false);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['usuarios_acceso'] });
@@ -189,6 +203,8 @@ export default function GestionAccesoUnificada() {
       await base44.entities.Clase.update(claseId, {
         estado_aprobacion: 'aprobada'
       });
+
+      await registrarAprobacionClase(clase, true);
 
       try {
         const [h, m] = clase.hora_inicio.split(':').map(Number);
@@ -241,9 +257,16 @@ export default function GestionAccesoUnificada() {
 
   const rechazarClaseMutation = useMutation({
     mutationFn: async (claseId) => {
+      const clases = await base44.entities.Clase.filter({ id: claseId });
+      const clase = clases[0];
+      
       await base44.entities.Clase.update(claseId, {
         estado_aprobacion: 'rechazada'
       });
+
+      if (clase) {
+        await registrarAprobacionClase(clase, false);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clases-pendientes'] });
@@ -254,8 +277,22 @@ export default function GestionAccesoUnificada() {
 
   const eliminarClasesMutation = useMutation({
     mutationFn: async (clasesIds) => {
+      const clasesAEliminar = clasesPendientes.filter(c => clasesIds.includes(c.id));
+      
       await Promise.all(
         clasesIds.map(id => base44.entities.Clase.delete(id))
+      );
+
+      // Registrar eliminaciones
+      await Promise.all(
+        clasesAEliminar.map(clase => 
+          registrarEliminacion(
+            'Clase',
+            clase.id,
+            `Clase ${clase.fecha} - ${clase.hora_inicio}`,
+            'Clase eliminada por administrador desde aprobaciones'
+          )
+        )
       );
     },
     onSuccess: () => {
@@ -358,8 +395,22 @@ export default function GestionAccesoUnificada() {
         }
       });
       await updateRolMutation.mutateAsync(updates);
+      
+      // Registrar cambio de permisos de rol
+      await registrarCambioPermisos(
+        { id: selectedItem.value, full_name: `Rol: ${selectedItem.value}` },
+        { tipo: 'rol', cambios: Object.keys(localPermisos).length },
+        `Actualización de permisos del rol ${selectedItem.value}`
+      );
     } else {
       await updateUsuarioMutation.mutateAsync(localPermisos);
+      
+      // Registrar cambio de permisos de usuario
+      await registrarCambioPermisos(
+        selectedItem.value,
+        { tipo: 'usuario', secciones: localPermisos.secciones_acceso?.length || 0 },
+        `Actualización de permisos individuales`
+      );
     }
   };
 
@@ -395,6 +446,14 @@ export default function GestionAccesoUnificada() {
     } else {
       await base44.entities.PermisoUsuario.create(permisoData);
     }
+    
+    // Registrar cambios del empleado
+    await registrarCambioPermisos(
+      editEmpleado,
+      { activo: editFormData.activo, notificaciones: editFormData.recibir_notificaciones_cancha },
+      'Actualización de datos y permisos de empleado'
+    );
+    
     queryClient.invalidateQueries({ queryKey: ['permisos_todos'] });
     queryClient.invalidateQueries({ queryKey: ['permisos_usuario'] });
   };
