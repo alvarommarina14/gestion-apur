@@ -114,6 +114,16 @@ export default function TarjetaClaseConPagos({ turno, isAdmin, onTurnoClick }) {
         <span>{turno.profesor || profesor?.nombre || 'No asignado'}</span>
       </div>
 
+      {/* Precio de la clase */}
+      {turno.monto > 0 && (
+        <div className="flex items-center gap-1.5 mb-2">
+          <DollarSign className="w-4 h-4 text-slate-500" />
+          <span className="font-bold text-slate-900 text-base">
+            {formatMoney(turno.monto)}
+          </span>
+        </div>
+      )}
+
       {/* Alumnos con estado de pago */}
       {alumnosConPago.length > 0 && (
         <div className="mt-3 pt-2 border-t border-slate-300 space-y-1.5">
