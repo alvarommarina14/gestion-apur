@@ -52,6 +52,9 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
         email: '',
         clasificacion: 'nuevo',
         tipo_cliente: 'clase',
+        es_alumno: false,
+        profesor_id: '',
+        profesor_nombre: '',
         notas: '',
       });
       setSuccess(false);
