@@ -39,11 +39,6 @@ export default function ClientesPage() {
     queryFn: () => base44.entities.Cliente.list('-total_gastado'),
   });
 
-  const { data: turnos = [] } = useQuery({
-    queryKey: ['turnos-cancha-clientes'],
-    queryFn: () => base44.entities.TurnoCancha.list(),
-  });
-
   // Filtrar clientes
   const clientesFiltrados = useMemo(() => {
     let filtrados = clientes;
@@ -63,17 +58,6 @@ export default function ClientesPage() {
 
     return filtrados;
   }, [clientes, filtroClasificacion, busqueda]);
-
-  // Estadísticas
-  const stats = useMemo(() => {
-    const total = clientes.length;
-    const recurrentes = clientes.filter(c => c.clasificacion === 'recurrente').length;
-    const clases = clientes.filter(c => c.tipo_cliente === 'clase').length;
-    const totalIngresos = clientes.reduce((sum, c) => sum + (c.total_gastado || 0), 0);
-    const promedioGasto = total > 0 ? (totalIngresos / total).toFixed(0) : 0;
-
-    return { total, recurrentes, clases, totalIngresos, promedioGasto };
-  }, [clientes]);
 
   const clasificacionConfig = {
     nuevo: { icon: UserPlus, color: 'bg-blue-100 text-blue-700', label: 'Nuevo' },
@@ -98,34 +82,6 @@ export default function ClientesPage() {
             Nuevo cliente
           </Button>
         </header>
-
-        {/* Stats */}
-         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-           <Card className="shadow-sm">
-             <CardContent className="pt-6">
-               <div className="text-center">
-                 <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
-                 <p className="text-sm text-slate-500 mt-1">Total Clientes</p>
-               </div>
-             </CardContent>
-           </Card>
-           <Card className="shadow-sm border-emerald-200 bg-emerald-50/30">
-             <CardContent className="pt-6">
-               <div className="text-center">
-                 <p className="text-2xl font-bold text-emerald-600">{stats.recurrentes}</p>
-                 <p className="text-sm text-slate-500 mt-1">Abonos Cancha</p>
-               </div>
-             </CardContent>
-           </Card>
-           <Card className="shadow-sm border-purple-200 bg-purple-50/30">
-             <CardContent className="pt-6">
-               <div className="text-center">
-                 <p className="text-2xl font-bold text-purple-600">{stats.clases}</p>
-                 <p className="text-sm text-slate-500 mt-1">Clases</p>
-               </div>
-             </CardContent>
-           </Card>
-         </div>
 
         {/* Filtros */}
         <div className="flex flex-col sm:flex-row gap-4">
@@ -177,11 +133,10 @@ export default function ClientesPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {clientesFiltrados.map((cliente) => {
-               const config = clasificacionConfig[cliente.clasificacion] || clasificacionConfig.nuevo;
-               const Icon = config?.icon || UserPlus;
-               const turnosCliente = turnos.filter(t => t.cliente === cliente.nombre);
+                const config = clasificacionConfig[cliente.clasificacion] || clasificacionConfig.nuevo;
+                const Icon = config?.icon || UserPlus;
 
-              return (
+               return (
                 <Card 
                   key={cliente.id} 
                   className="shadow-sm hover:shadow-md transition-all cursor-pointer"
@@ -211,10 +166,6 @@ export default function ClientesPage() {
                           <span className="truncate">{cliente.email}</span>
                         </div>
                       )}
-                      <div className="flex items-center gap-2 text-slate-600">
-                        <Calendar className="w-4 h-4" />
-                        <span>{cliente.total_turnos || turnosCliente.length} turnos</span>
-                      </div>
                       <div className="flex items-center gap-2 text-emerald-600 font-semibold">
                         <DollarSign className="w-4 h-4" />
                         <span>${(cliente.total_gastado || 0).toLocaleString('es-AR')}</span>
@@ -236,11 +187,10 @@ export default function ClientesPage() {
       </div>
 
       <DetalleClienteModal
-        open={modalDetalle.open}
-        onOpenChange={(open) => setModalDetalle({ ...modalDetalle, open })}
-        cliente={modalDetalle.cliente}
-        turnos={turnos}
-      />
+         open={modalDetalle.open}
+         onOpenChange={(open) => setModalDetalle({ ...modalDetalle, open })}
+         cliente={modalDetalle.cliente}
+       />
 
       <NuevoClienteModal
         open={modalNuevo}
