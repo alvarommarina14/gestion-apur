@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
     
     // Filtrar clientes que son alumnos y tienen profesor
     const clientesConProfesor = clientes.filter(c => 
-      c.es_alumno && c.profesor_id && c.profesor_id.trim()
+      c.es_alumno && c.profesor_id && c.profesor_id.trim() !== ''
     );
 
     if (clientesConProfesor.length === 0) {
@@ -27,32 +27,55 @@ Deno.serve(async (req) => {
 
     // Obtener alumnos existentes
     const alumnosExistentes = await base44.asServiceRole.entities.Alumno.list();
-    const nombresAlumnos = new Set(alumnosExistentes.map(a => a.nombre.toLowerCase()));
+    const alumnosMap = new Map(alumnosExistentes.map(a => [a.nombre.toLowerCase(), a]));
 
     let sincronizados = 0;
+    const creados = [];
     const errores = [];
 
     // Crear alumnos para los clientes que no existen
     for (const cliente of clientesConProfesor) {
       try {
-        // Verificar si el alumno ya existe
-        if (!nombresAlumnos.has(cliente.nombre.toLowerCase())) {
-          await base44.asServiceRole.entities.Alumno.create({
-            profesor_id: cliente.profesor_id,
-            profesor_nombre: cliente.profesor_nombre || '',
-            nombre: cliente.nombre,
-            whatsapp: cliente.telefono || '',
-            observaciones: cliente.notas || '',
-            estado: 'activo',
-            precio_mensual: 0,
-            clases_por_mes: 0,
-            clases_a_recuperar: 0,
-            deuda_total: 0,
-            total_clases_asistidas: 0,
-          });
-          sincronizados++;
-          nombresAlumnos.add(cliente.nombre.toLowerCase());
+        const nombreLower = cliente.nombre.toLowerCase();
+        
+        // Si ya existe con mismo profesor, saltar
+        if (alumnosMap.has(nombreLower)) {
+          const alumnoExistente = alumnosMap.get(nombreLower);
+          if (alumnoExistente.profesor_id === cliente.profesor_id) {
+            continue; // Ya sincronizado
+          }
         }
+
+        // Validar que el profesor existe
+        let profesor;
+        try {
+          profesor = await base44.asServiceRole.entities.Profesor.read(cliente.profesor_id);
+        } catch (e) {
+          errores.push({
+            cliente: cliente.nombre,
+            error: `Profesor con ID ${cliente.profesor_id} no existe`
+          });
+          continue;
+        }
+
+        // Crear el alumno
+        const nuevoAlumno = await base44.asServiceRole.entities.Alumno.create({
+          profesor_id: cliente.profesor_id,
+          profesor_nombre: profesor.nombre,
+          nombre: cliente.nombre,
+          whatsapp: cliente.telefono || '',
+          observaciones: cliente.notas || '',
+          estado: 'activo',
+          precio_mensual: cliente.precio || 0,
+          clases_por_mes: 0,
+          clases_a_recuperar: 0,
+          deuda_total: 0,
+          total_clases_asistidas: 0,
+        });
+        
+        sincronizados++;
+        creados.push(cliente.nombre);
+        alumnosMap.set(nombreLower, nuevoAlumno);
       } catch (err) {
         errores.push({
           cliente: cliente.nombre,
@@ -64,8 +87,9 @@ Deno.serve(async (req) => {
     return Response.json({ 
       message: 'Sincronización completada',
       sincronizados,
+      creados,
       totalClientes: clientesConProfesor.length,
-      errores: errores.length > 0 ? errores : null
+      errores: errores.length > 0 ? errores : []
     });
 
   } catch (error) {
