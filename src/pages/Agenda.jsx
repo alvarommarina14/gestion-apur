@@ -336,7 +336,8 @@ export default function Agenda() {
              turno={cancelarModal.turno}
              fechaSeleccionada={fechaStr}
              onSuccess={() => {
-               queryClient.refetchQueries({ queryKey: ['turnos-cancha', fechaStr] });
+               // El modal ya actualiza el cache, solo invalidar para refetch async
+               queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
              }}
            />
         </>
