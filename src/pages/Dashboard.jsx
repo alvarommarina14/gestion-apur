@@ -243,6 +243,26 @@ export default function Dashboard() {
   
   const isLoading = loadingAlumnos || loadingClases;
   
+  // Redirigir empleados
+  if (isEmpleado) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 flex items-center justify-center">
+        <Card className="max-w-md shadow-lg">
+          <CardContent className="pt-6 text-center">
+            <Calendar className="w-16 h-16 mx-auto mb-4 text-slate-300" />
+            <h2 className="text-xl font-bold text-slate-900 mb-2">Dashboard de Profesores</h2>
+            <p className="text-slate-600 mb-4">
+              Esta sección está disponible solo para administradores y profesores.
+            </p>
+            <p className="text-sm text-slate-500">
+              Como empleado, podés gestionar tus tareas y recordatorios desde el menú principal.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+  
   // Exportar Dashboard a PDF
   const exportarDashboardPDF = () => {
     const doc = new jsPDF();
@@ -400,12 +420,12 @@ export default function Dashboard() {
         {/* Quick Stats */}
         {isLoading ? (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {[...Array(isEmpleado ? 2 : 4)].map((_, i) => (
+            {[...Array(4)].map((_, i) => (
               <Skeleton key={i} className="h-32 rounded-xl" />
             ))}
           </div>
         ) : (
-          <QuickStats stats={stats} hideFinancial={isEmpleado} />
+          <QuickStats stats={stats} />
         )}
         
         {/* Alertas */}
@@ -464,88 +484,86 @@ export default function Dashboard() {
             </Card>
           </div>
           
-          {/* Sidebar - Cobranza (solo Admin y Profesores) */}
-          {!isEmpleado && (
-            <div className="space-y-6">
-              <Card className="shadow-sm">
-                <CardHeader className="pb-3 border-b">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <DollarSign className="w-5 h-5 text-emerald-600" />
-                      A cobrar
-                    </CardTitle>
-                    {currentDay >= 5 && currentDay <= 15 && (
-                      <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-medium rounded">
-                        Ciclo abierto
-                      </span>
+          {/* Sidebar - Cobranza */}
+          <div className="space-y-6">
+            <Card className="shadow-sm">
+              <CardHeader className="pb-3 border-b">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <DollarSign className="w-5 h-5 text-emerald-600" />
+                    A cobrar
+                  </CardTitle>
+                  {currentDay >= 5 && currentDay <= 15 && (
+                    <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-medium rounded">
+                      Ciclo abierto
+                    </span>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="pt-4">
+                {isLoading ? (
+                  <div className="space-y-3">
+                    {[...Array(4)].map((_, i) => (
+                      <Skeleton key={i} className="h-16 rounded-lg" />
+                    ))}
+                  </div>
+                ) : (
+                  <CobrarHoyList 
+                    alumnos={alumnosACobrar}
+                    onRegistrarPago={(alumno) => setPagoModal({ open: true, alumno })}
+                  />
+                )}
+              </CardContent>
+            </Card>
+            
+            {/* Recuperos pendientes */}
+            <Card className="shadow-sm">
+              <CardHeader className="pb-3 border-b">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <RefreshCw className="w-5 h-5 text-amber-600" />
+                    Recuperos pendientes
+                  </CardTitle>
+                  <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-medium rounded">
+                    {stats.aRecuperar}
+                  </span>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-4">
+                {recuperos.filter(r => r.estado === 'pendiente').length === 0 ? (
+                  <div className="text-center py-8 text-slate-500">
+                    <RefreshCw className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                    <p className="text-sm">No hay recuperos pendientes</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {recuperos
+                      .filter(r => r.estado === 'pendiente')
+                      .slice(0, 5)
+                      .map((recupero) => (
+                        <div 
+                          key={recupero.id}
+                          className="p-3 rounded-lg border border-amber-200 bg-amber-50/50 cursor-pointer hover:bg-amber-50 transition-colors"
+                          onClick={() => setNuevaClaseModal({ open: true, recupero })}
+                        >
+                          <p className="font-medium text-slate-800 text-sm">{recupero.alumno_nombre}</p>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            Clase del {recupero.fecha_original && format(parseISO(recupero.fecha_original), "d 'de' MMM", { locale: es })}
+                          </p>
+                        </div>
+                      ))}
+                    {recuperos.filter(r => r.estado === 'pendiente').length > 5 && (
+                      <Link to={createPageUrl('Recuperos')}>
+                        <Button variant="ghost" size="sm" className="w-full text-amber-600">
+                          Ver todos ({recuperos.filter(r => r.estado === 'pendiente').length})
+                        </Button>
+                      </Link>
                     )}
                   </div>
-                </CardHeader>
-                <CardContent className="pt-4">
-                  {isLoading ? (
-                    <div className="space-y-3">
-                      {[...Array(4)].map((_, i) => (
-                        <Skeleton key={i} className="h-16 rounded-lg" />
-                      ))}
-                    </div>
-                  ) : (
-                    <CobrarHoyList 
-                      alumnos={alumnosACobrar}
-                      onRegistrarPago={(alumno) => setPagoModal({ open: true, alumno })}
-                    />
-                  )}
-                </CardContent>
-              </Card>
-            
-              {/* Recuperos pendientes */}
-              <Card className="shadow-sm">
-                <CardHeader className="pb-3 border-b">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <RefreshCw className="w-5 h-5 text-amber-600" />
-                      Recuperos pendientes
-                    </CardTitle>
-                    <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-medium rounded">
-                      {stats.aRecuperar}
-                    </span>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-4">
-                  {recuperos.filter(r => r.estado === 'pendiente').length === 0 ? (
-                    <div className="text-center py-8 text-slate-500">
-                      <RefreshCw className="w-8 h-8 mx-auto mb-2 opacity-40" />
-                      <p className="text-sm">No hay recuperos pendientes</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {recuperos
-                        .filter(r => r.estado === 'pendiente')
-                        .slice(0, 5)
-                        .map((recupero) => (
-                          <div 
-                            key={recupero.id}
-                            className="p-3 rounded-lg border border-amber-200 bg-amber-50/50 cursor-pointer hover:bg-amber-50 transition-colors"
-                            onClick={() => setNuevaClaseModal({ open: true, recupero })}
-                          >
-                            <p className="font-medium text-slate-800 text-sm">{recupero.alumno_nombre}</p>
-                            <p className="text-xs text-slate-500 mt-0.5">
-                              Clase del {recupero.fecha_original && format(parseISO(recupero.fecha_original), "d 'de' MMM", { locale: es })}
-                            </p>
-                          </div>
-                        ))}
-                      {recuperos.filter(r => r.estado === 'pendiente').length > 5 && (
-                        <Link to={createPageUrl('Recuperos')}>
-                          <Button variant="ghost" size="sm" className="w-full text-amber-600">
-                            Ver todos ({recuperos.filter(r => r.estado === 'pendiente').length})
-                          </Button>
-                        </Link>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          )}
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
         
         {/* Clases con Alumnos del Profesor */}
