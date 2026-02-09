@@ -24,6 +24,11 @@ export default function RecordatoriosCanchaAdmin() {
      queryFn: () => base44.entities.TurnoCancha.list(),
    });
 
+   const { data: clientes = [] } = useQuery({
+     queryKey: ['clientes-list'],
+     queryFn: () => base44.entities.Cliente.list(),
+   });
+
    const recordatoriosConTurnos = useMemo(() => {
      return recordatorios.map(rec => {
        const turno = turnos.find(t => t.id === rec.turno_cancha_id);
