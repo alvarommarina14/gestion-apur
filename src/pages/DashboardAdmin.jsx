@@ -695,11 +695,10 @@ export default function DashboardAdmin() {
                 </Card>
               </Collapsible>
             )}
-          </TabsContent>
-        </Tabs>
-      </div>
-
-
-    </div>
-  );
-}
+            </div>
+            )}
+            </Tabs>
+            </div>
+            </div>
+            );
+            }
