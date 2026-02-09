@@ -908,16 +908,18 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
             </Select>
           </div>
 
-          <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
-            <div>
-              <Label className="font-medium text-slate-800">Pagado</Label>
-              <p className="text-xs text-slate-500 mt-0.5">Marcar si el turno ya está pago</p>
+          {formData.modalidad_alquiler === 'suelto' && (
+            <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+              <div>
+                <Label className="font-medium text-slate-800">Pagado</Label>
+                <p className="text-xs text-slate-500 mt-0.5">Marcar si el turno ya está pago</p>
+              </div>
+              <Switch
+                checked={formData.pagado}
+                onCheckedChange={(checked) => setFormData({ ...formData, pagado: checked })}
+              />
             </div>
-            <Switch
-              checked={formData.pagado}
-              onCheckedChange={(checked) => setFormData({ ...formData, pagado: checked })}
-            />
-          </div>
+          )}
 
           {!formData.pagado && (
             <div className="space-y-2">
