@@ -57,11 +57,11 @@ const rolesConfig = {
 };
 
 const SECCIONES_PROFESOR = [
-  'dashboard', 'alumnos', 'pagos', 'recordatorios', 'reportes'
+  'gestion_clases', 'gestion_alumnos', 'gestion_pagos', 'recordatorios', 'reportes'
 ];
 
 const SECCIONES_EMPLEADO = [
-  'agenda_canchas', 'recordatorios_cancha', 'reportes'
+  'empleados', 'booking_canchas', 'recordatorios_cancha_empleado', 'reportes'
 ];
 
 const seccionesConfig = [
@@ -440,9 +440,8 @@ export default function GestionAccesoUnificada() {
           <p className="text-slate-500 text-sm">Configura permisos, aprueba usuarios y clases</p>
         </header>
 
-        <Tabs defaultValue="permisos" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="permisos">Permisos</TabsTrigger>
+        <Tabs defaultValue="usuarios" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="usuarios">
               Usuarios
               {usuariosPendientes.length > 0 && (
@@ -456,157 +455,6 @@ export default function GestionAccesoUnificada() {
               )}
             </TabsTrigger>
           </TabsList>
-
-          {/* TAB PERMISOS */}
-          <TabsContent value="permisos">
-            <div className="grid lg:grid-cols-3 gap-6">
-              {/* Panel izquierdo: Lista de usuarios */}
-              <div className="lg:col-span-1">
-                <Card className="shadow-sm">
-                  <CardHeader className="pb-3 border-b">
-                    <CardTitle className="text-base">Usuarios</CardTitle>
-                    <p className="text-xs text-slate-500 mt-1">Configura qué puede ver cada usuario</p>
-                  </CardHeader>
-                  <CardContent className="pt-3 space-y-2 max-h-[calc(100vh-300px)] overflow-y-auto">
-                    {usuariosConRol.map(usuario => (
-                      <button
-                        key={usuario.id}
-                        onClick={() => handleSelectUsuario(usuario)}
-                        className={cn(
-                          'w-full text-left px-3 py-2.5 rounded-lg text-sm transition-all',
-                          selectedUsuario?.id === usuario.id
-                            ? 'bg-emerald-100 border-2 border-emerald-300'
-                            : 'hover:bg-slate-100 border-2 border-transparent'
-                        )}
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-slate-800 truncate">{usuario.full_name}</p>
-                            <p className="text-xs text-slate-500 capitalize mt-0.5">
-                              {rolesConfig[usuario.rol]?.label || usuario.rol}
-                            </p>
-                          </div>
-                          {selectedUsuario?.id === usuario.id && (
-                            <ChevronRight className="w-4 h-4 flex-shrink-0 mt-0.5 text-emerald-600" />
-                          )}
-                        </div>
-                      </button>
-                    ))}
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Panel central: Permisos del usuario */}
-              <div className="lg:col-span-2">
-                {selectedUsuario ? (
-                  <Card className="shadow-sm">
-                    <CardHeader className="pb-3 border-b flex flex-row items-center justify-between">
-                      <div>
-                        <CardTitle className="flex items-center gap-2">
-                          {selectedUsuario.full_name}
-                          <Badge className={cn(rolesConfig[selectedUsuario.rol]?.color)}>
-                            {rolesConfig[selectedUsuario.rol]?.label}
-                          </Badge>
-                        </CardTitle>
-                        <p className="text-xs text-slate-500 mt-1">Configura los permisos específicos de este usuario</p>
-                      </div>
-                      {hasChanges && (
-                        <Button
-                          onClick={handleGuardar}
-                          disabled={updateUsuarioMutation.isPending}
-                          className="bg-emerald-600 hover:bg-emerald-700 gap-2"
-                        >
-                          <Save className="w-4 h-4" />
-                          Guardar
-                        </Button>
-                      )}
-                    </CardHeader>
-                    <CardContent className="pt-4 space-y-4 max-h-[calc(100vh-300px)] overflow-y-auto">
-                      {localPermisos.secciones_acceso?.map((seccion, idx) => (
-                        <div key={seccion.seccion} className="border rounded-lg p-4 space-y-3 hover:border-emerald-200 transition-colors">
-                          <p className="text-sm font-semibold text-slate-800 capitalize">
-                            {seccion.seccion.replace(/_/g, ' ')}
-                          </p>
-                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            {['ver', 'crear', 'editar', 'eliminar'].map(tipo => (
-                              <div key={tipo} className="flex items-center gap-2">
-                                <Switch
-                                  checked={seccion[tipo] || false}
-                                  onCheckedChange={(checked) =>
-                                    handlePermissionChange(idx, tipo, checked)
-                                  }
-                                />
-                                <span className="text-xs text-slate-600 capitalize font-medium">{tipo}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <Card className="shadow-sm">
-                    <CardContent className="pt-12 pb-12 text-center text-slate-500">
-                      <Users className="w-12 h-12 mx-auto mb-3 opacity-40" />
-                      <p className="font-medium mb-1">Selecciona un usuario</p>
-                      <p className="text-sm">Configura exactamente qué puede ver cada persona</p>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-
-              {/* Panel derecho: Empleados */}
-              <div className="lg:col-span-1">
-                <Card className="shadow-sm">
-                  <CardHeader className="pb-3 border-b">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Users className="w-4 h-4" />
-                      Empleados
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-3 space-y-2 max-h-[calc(100vh-300px)] overflow-y-auto">
-                    {usuariosConRol.filter(u => u.rol === 'empleado').map(emp => (
-                      <div key={emp.id} className="border rounded-lg p-2.5 space-y-2">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-slate-800 truncate">{emp.full_name}</p>
-                            <div className="flex gap-1 mt-1 flex-wrap">
-                              {emp.activo !== false && (
-                                <Badge className="bg-emerald-100 text-emerald-700 text-xs">Activo</Badge>
-                              )}
-                              {emp.recibir_notificaciones_cancha !== false && (
-                                <Badge className="bg-purple-100 text-purple-700 text-xs">🔔</Badge>
-                              )}
-                            </div>
-                          </div>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleEditEmpleado(emp)}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                        </div>
-                        <div className="text-xs text-slate-500 space-y-0.5">
-                          <div className="flex items-center gap-1">
-                            <Mail className="w-3 h-3" />
-                            <span className="truncate">{emp.email}</span>
-                          </div>
-                          {emp.tel && (
-                            <div className="flex items-center gap-1">
-                              <Phone className="w-3 h-3" />
-                              <span>{emp.tel}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </TabsContent>
 
           {/* TAB USUARIOS PENDIENTES */}
           <TabsContent value="usuarios">
