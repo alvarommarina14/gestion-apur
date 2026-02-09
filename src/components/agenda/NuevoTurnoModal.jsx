@@ -429,15 +429,30 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
           );
           console.log(`🗑️ Turnos relacionados encontrados: ${turnosRelacionados.length}`);
 
-          // Eliminar de Google Calendar primero
+          // Eliminar de Google Calendar primero - buscar el ID del evento recurrente
           const primerTurnoConGcal = turnosRelacionados.find(t => t.gcal_event_id);
           if (primerTurnoConGcal?.gcal_event_id) {
             try {
-              await base44.functions.invoke('sincronizarSerieRecurrenteGoogleCalendar', {
+              console.log(`🔥 Eliminando serie recurrente de Google Calendar: ${primerTurnoConGcal.gcal_event_id}`);
+              const result = await base44.functions.invoke('sincronizarSerieRecurrenteGoogleCalendar', {
                 recurringEventId: primerTurnoConGcal.gcal_event_id
               });
+              console.log('✅ Serie eliminada de Google Calendar:', result);
             } catch (err) {
-              console.error('Error eliminando serie recurrente de Google Calendar:', err);
+              console.error('❌ Error eliminando serie recurrente de Google Calendar:', err);
+              // Intentar eliminar cada evento individualmente si falla la serie
+              for (const turno of turnosRelacionados) {
+                if (turno.gcal_event_id) {
+                  try {
+                    await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
+                      turno_id: turno.id, 
+                      action: 'delete' 
+                    });
+                  } catch (e) {
+                    console.error(`Error eliminando evento individual ${turno.gcal_event_id}:`, e);
+                  }
+                }
+              }
             }
           }
 
