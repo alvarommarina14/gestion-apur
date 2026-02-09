@@ -869,7 +869,9 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
                   <Label>Profesor</Label>
                   <Select
                     value={formData.profesor_id}
-                    onValueChange={(v) => setFormData({ ...formData, profesor_id: v })}
+                    onValueChange={(v) => {
+                      setFormData({ ...formData, profesor_id: v, alumnos_ids: [] });
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar profesor" />
@@ -898,11 +900,11 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
                 </div>
               </div>
 
-              {(formData.tipo_clase || 'individual') === 'grupal' && (
+              {(formData.tipo_clase || 'individual') === 'grupal' && formData.profesor_id && (
                 <div className="space-y-2">
-                  <Label>Alumnos (selecciona varios)</Label>
+                  <Label>Alumnos del profesor (selecciona varios)</Label>
                   <div className="border rounded-lg p-3 space-y-2 max-h-48 overflow-y-auto">
-                    {alumnos.map(a => (
+                    {alumnos.filter(a => a.profesor_id === formData.profesor_id).map(a => (
                       <div key={a.id} className="flex items-center gap-2">
                         <Checkbox
                           checked={formData.alumnos_ids?.includes(a.id)}
