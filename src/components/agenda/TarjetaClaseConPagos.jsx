@@ -119,14 +119,30 @@ export default function TarjetaClaseConPagos({ turno, isAdmin, onTurnoClick }) {
         </span>
       </div>
 
-      {/* Cliente y hora */}
-      <div className="mb-2">
-        <p className="font-bold text-slate-900 text-base leading-tight">
-          {turno.cliente}
-        </p>
-        <p className="text-sm text-slate-600 mt-0.5">
-          {turno.hora_inicio} - {turno.hora_fin}
-        </p>
+      {/* Cliente con monto y estado */}
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <div>
+          <p className="font-bold text-slate-900 text-base leading-tight">
+            {turno.cliente}
+          </p>
+          <p className="text-sm text-slate-600 mt-0.5">
+            {turno.hora_inicio} - {turno.hora_fin}
+          </p>
+        </div>
+        <div className="flex items-center gap-1.5 whitespace-nowrap">
+          <span className="font-bold text-slate-900 text-sm">
+            {formatMoney(turno.monto)}
+          </span>
+          {turno.pagado ? (
+            <div className="h-5 w-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+              <CheckCircle className="w-4 h-4 text-emerald-600" />
+            </div>
+          ) : (
+            <div className="h-5 w-5 rounded-full bg-rose-100 flex items-center justify-center flex-shrink-0">
+              <XCircle className="w-4 h-4 text-rose-600" />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Profesor */}
