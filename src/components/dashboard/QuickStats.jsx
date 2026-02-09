@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import MetricCard from '@/components/ui/MetricCard';
 
-export default function QuickStats({ stats }) {
+export default function QuickStats({ stats, hideFinancial = false }) {
   const formatMoney = (amount) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -25,6 +25,29 @@ export default function QuickStats({ stats }) {
   const porcentajeCobrado = stats.ingresoEsperado > 0 
     ? Math.round((stats.ingresoReal / stats.ingresoEsperado) * 100) 
     : 0;
+
+  if (hideFinancial) {
+    // Solo mostrar clases para empleados
+    return (
+      <div className="grid grid-cols-2 lg:grid-cols-2 gap-4">
+        <MetricCard
+          title="Clases hoy"
+          value={stats.clasesHoy || 0}
+          subtitle={`${stats.clasesPendientesHoy || 0} pendientes`}
+          icon={CalendarCheck}
+          variant="info"
+        />
+        
+        <MetricCard
+          title="Total del mes"
+          value={stats.realizadas || 0}
+          subtitle="Clases realizadas"
+          icon={CalendarCheck}
+          variant="success"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
