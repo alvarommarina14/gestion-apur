@@ -8,19 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import RegistrarCobroModal from '@/components/recordatorios-cancha/RegistrarCobroModal';
+
 
 export default function RecordatoriosCanchaAdmin() {
    const [fechaSeleccionada, setFechaSeleccionada] = useState(format(new Date(), 'yyyy-MM-dd'));
-   const [cobroModal, setCobroModal] = useState({ open: false, recordatorio: null, cliente: null });
-   const queryClient = useQueryClient();
-
-   const eliminarRecordatorioMutation = useMutation({
-      mutationFn: (recordatorioId) => base44.entities.RecordatorioCancha.delete(recordatorioId),
-      onSuccess: () => {
-         queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
-      },
-   });
 
    const { data: recordatorios = [] } = useQuery({
      queryKey: ['recordatorios-cancha'],
@@ -231,39 +222,7 @@ export default function RecordatoriosCanchaAdmin() {
                       </div>
                     )}
 
-                    {/* Botones de cobro y eliminar */}
-                     <div className="pt-3 border-t border-slate-100 flex gap-2">
-                       <Button
-                         variant="outline"
-                         size="sm"
-                         onClick={() => setCobroModal({
-                           open: true,
-                           recordatorio: rec,
-                           cliente: clientes.find(c => c.nombre === rec.turno?.cliente) || { id: 'temporal', nombre: rec.turno?.cliente }
-                         })}
-                         className={cn(
-                           'flex-1',
-                           rec.turno?.pagado
-                             ? 'border-emerald-300 text-emerald-700 hover:bg-emerald-50'
-                             : 'border-orange-300 text-orange-700 hover:bg-orange-50'
-                         )}
-                       >
-                         <DollarSign className="w-4 h-4 mr-2" />
-                         {rec.turno?.pagado ? 'Editar pago registrado' : 'Registrar cobro'}
-                       </Button>
-                       <Button
-                         variant="outline"
-                         size="sm"
-                         onClick={() => {
-                           if (confirm('¿Eliminar este recordatorio?')) {
-                             eliminarRecordatorioMutation.mutate(rec.id);
-                           }
-                         }}
-                         className="border-red-300 text-red-700 hover:bg-red-50"
-                       >
-                         <Trash2 className="w-4 h-4" />
-                       </Button>
-                     </div>
+
                     </div>
                 </CardContent>
               </Card>
@@ -273,12 +232,6 @@ export default function RecordatoriosCanchaAdmin() {
 
         </div>
 
-        <RegistrarCobroModal
-          open={cobroModal.open}
-          onOpenChange={(open) => setCobroModal({ ...cobroModal, open })}
-          recordatorio={cobroModal.recordatorio}
-          cliente={cobroModal.cliente}
-        />
         </div>
         );
         }
