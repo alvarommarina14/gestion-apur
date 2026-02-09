@@ -260,19 +260,19 @@ export default function DashboardAdmin() {
                         {formatMoney(metricasOcupacion.ingresoCobrado)}
                       </p>
                     </div>
-                    <CheckCircle className="w-10 h-10 text-emerald-200" />
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="shadow-sm border-rose-200 bg-rose-50/30">
+              <Card className="shadow-sm border-blue-200 bg-blue-50/30">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-slate-600">Morosos</p>
-                      <p className="text-2xl font-bold text-rose-600">{metricasCobros.cobrosMorosos}</p>
+                      <p className="text-sm text-slate-600">Pendiente</p>
+                      <p className="text-2xl font-bold text-blue-600">
+                        {formatMoney(metricasOcupacion.ingresoPendiente)}
+                      </p>
                     </div>
-                    <AlertCircle className="w-10 h-10 text-rose-200" />
                   </div>
                 </CardContent>
               </Card>
