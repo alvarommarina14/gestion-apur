@@ -113,6 +113,12 @@ export default function Dashboard() {
     queryFn: () => base44.entities.Recupero.list(),
   });
   
+  const { data: turnosCanchas = [] } = useQuery({
+    queryKey: ['turnos-canchas'],
+    queryFn: () => base44.entities.TurnoCancha.list(),
+    enabled: !profesorSeleccionado, // Solo cargar si NO es profesor
+  });
+  
   // Calcular estadísticas (filtradas por profesor si es el caso)
   const stats = useMemo(() => {
     const alumnosActivos = alumnos.filter(a => a.estado !== 'pausado');
