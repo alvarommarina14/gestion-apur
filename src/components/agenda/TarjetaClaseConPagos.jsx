@@ -92,12 +92,16 @@ export default function TarjetaClaseConPagos({ turno, isAdmin, onTurnoClick }) {
     >
       {/* Header con estado */}
       <div className="flex items-center justify-between mb-2">
-        <span className={cn(
-          'px-2 py-1 rounded-md text-xs font-bold flex items-center gap-1',
-          turno.pagado
-            ? 'bg-emerald-100 text-emerald-700'
-            : 'bg-rose-100 text-rose-700'
-        )}>
+        <button
+          onClick={handleTogglePago}
+          disabled={isUpdating}
+          className={cn(
+            'px-2 py-1 rounded-md text-xs font-bold flex items-center gap-1 transition-all cursor-pointer hover:opacity-80 disabled:opacity-50',
+            turno.pagado
+              ? 'bg-emerald-100 text-emerald-700'
+              : 'bg-rose-100 text-rose-700'
+          )}
+        >
           {turno.pagado ? (
             <>
               <CheckCircle className="w-3 h-3" />
@@ -109,7 +113,7 @@ export default function TarjetaClaseConPagos({ turno, isAdmin, onTurnoClick }) {
               PENDIENTE
             </>
           )}
-        </span>
+        </button>
         <span className="text-xs font-semibold text-slate-500">
           {turno.duracion} min
         </span>
