@@ -328,6 +328,17 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
                 </div>
               </div>
 
+              {cliente.es_alumno && cliente.profesor_nombre && (
+                <div className="space-y-2">
+                  <Label>Profesor</Label>
+                  <Input
+                    value={cliente.profesor_nombre}
+                    disabled
+                    className="bg-slate-50"
+                  />
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label>Notas</Label>
                 <Textarea
@@ -338,8 +349,8 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
                   placeholder="Observaciones, preferencias, etc..."
                 />
               </div>
-            </div>
-          </TabsContent>
+              </div>
+              </TabsContent>
 
           <TabsContent value="cobros" className="flex-1 overflow-y-auto px-1">
             <SeccionCobros cliente={cliente} />
