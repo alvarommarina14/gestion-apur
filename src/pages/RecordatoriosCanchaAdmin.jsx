@@ -56,42 +56,43 @@ export default function RecordatoriosCanchaAdmin() {
         {/* Header */}
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Recordatorios de Cancha</h1>
-            <p className="text-slate-500 text-sm">Gestión administrativa - Los recordatorios se crean automáticamente desde Agenda</p>
+            <h1 className="text-2xl font-bold text-slate-900">Canchas - Admin</h1>
+            <p className="text-slate-500 text-sm">Vista de recordatorios - Selecciona una fecha para ver los detalles</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Calendar className="w-5 h-5 text-slate-400" />
+            <Input
+              type="date"
+              value={fechaSeleccionada}
+              onChange={(e) => setFechaSeleccionada(e.target.value)}
+              className="w-full sm:w-auto"
+            />
           </div>
         </header>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Card className="shadow-sm">
             <CardContent className="pt-6">
               <div className="text-center">
                 <p className="text-2xl font-bold text-slate-900">{recordatoriosFiltrados.length}</p>
-                <p className="text-sm text-slate-500 mt-1">Total</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="shadow-sm border-amber-200 bg-amber-50/30">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-amber-600">{stats.pendientes}</p>
-                <p className="text-sm text-slate-500 mt-1">Pendientes</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="shadow-sm border-emerald-200 bg-emerald-50/30">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-emerald-600">{stats.hechos}</p>
-                <p className="text-sm text-slate-500 mt-1">Completados</p>
+                <p className="text-sm text-slate-500 mt-1">Total del día</p>
               </div>
             </CardContent>
           </Card>
           <Card className="shadow-sm border-blue-200 bg-blue-50/30">
             <CardContent className="pt-6">
               <div className="text-center">
-                <p className="text-xl font-bold text-blue-600">{formatMoney(stats.montoCobrado)}</p>
-                <p className="text-xs text-slate-500 mt-1">de {formatMoney(stats.montoTotal)}</p>
+                <p className="text-2xl font-bold text-blue-600">{stats.abonos}</p>
+                <p className="text-sm text-slate-500 mt-1">Abonos</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm border-emerald-200 bg-emerald-50/30">
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-emerald-600">{stats.clases}</p>
+                <p className="text-sm text-slate-500 mt-1">Clases</p>
               </div>
             </CardContent>
           </Card>
