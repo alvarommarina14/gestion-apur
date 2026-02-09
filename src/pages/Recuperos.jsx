@@ -282,35 +282,43 @@ export default function Recuperos() {
                       </div>
                       
                       {(user?.rol === 'admin' || user?.rol === 'profesor') && (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap justify-end">
+                          <Button
+                            size="sm"
+                            className="bg-emerald-600 hover:bg-emerald-700"
+                            onClick={() => setNuevaClaseModal({ open: true, recupero })}
+                          >
+                            <Calendar className="w-4 h-4 mr-1" />
+                            Programar
+                          </Button>
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => handleEditRecupero(recupero)}
                           >
-                            <Edit className="w-4 h-4" />
+                            <Edit className="w-4 h-4 mr-1" />
+                            Editar
                           </Button>
                           {recupero.estado === 'pendiente' && (
-                            <>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="text-rose-600 border-rose-200 hover:bg-rose-50"
-                                onClick={() => handleMarcarPerdido(recupero)}
-                              >
-                                <XCircle className="w-4 h-4 mr-1" />
-                                Perdido
-                              </Button>
-                              <Button
-                                size="sm"
-                                className="bg-emerald-600 hover:bg-emerald-700"
-                                onClick={() => setNuevaClaseModal({ open: true, recupero })}
-                              >
-                                <Calendar className="w-4 h-4 mr-1" />
-                                Programar
-                              </Button>
-                            </>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-rose-600 border-rose-200 hover:bg-rose-50"
+                              onClick={() => handleMarcarPerdido(recupero)}
+                            >
+                              <XCircle className="w-4 h-4 mr-1" />
+                              Perdido
+                            </Button>
                           )}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-rose-600 border-rose-200 hover:bg-rose-50"
+                            onClick={() => handleDeleteRecupero(recupero)}
+                          >
+                            <Trash2 className="w-4 h-4 mr-1" />
+                            Eliminar
+                          </Button>
                         </div>
                       )}
                     </div>
