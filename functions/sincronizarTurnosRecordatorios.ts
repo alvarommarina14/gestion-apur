@@ -50,6 +50,7 @@ Deno.serve(async (req) => {
         profesor: turno.profesor,
         monto: turno.monto,
         pagado: turno.pagado,
+        alumnos_ids: turno.alumnos_ids || [],
       });
 
       return Response.json({ 
@@ -71,6 +72,7 @@ Deno.serve(async (req) => {
         profesor: turno.profesor,
         monto: turno.monto,
         pagado: turno.pagado,
+        alumnos_ids: turno.alumnos_ids || [],
         asignado_a: 'Empleado',
         notificar: true,
         minutos_antes: 10,
