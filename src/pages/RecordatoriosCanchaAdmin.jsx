@@ -241,7 +241,7 @@ export default function RecordatoriosCanchaAdmin() {
                         )}
                       >
                         <DollarSign className="w-4 h-4 mr-2" />
-                        {rec.turno?.pagado ? 'Pago registrado' : 'Registrar cobro'}
+                        {rec.turno?.pagado ? 'Editar pago registrado' : 'Registrar cobro'}
                       </Button>
                     </div>
                     </div>
