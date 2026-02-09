@@ -15,7 +15,8 @@ import {
               Settings,
               LogOut,
               Shield,
-              CheckCircle
+              CheckCircle,
+              ArrowLeft
             } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { cn } from '@/lib/utils';
