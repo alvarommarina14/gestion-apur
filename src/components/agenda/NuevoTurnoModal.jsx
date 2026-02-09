@@ -972,7 +972,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
             </Select>
           </div>
 
-          {formData.modalidad_alquiler === 'suelto' && (
+          {formData.tipo_turno === 'alquiler' && formData.modalidad_alquiler === 'suelto' && (
             <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
               <div>
                 <Label className="font-medium text-slate-800">Pagado</Label>
@@ -985,7 +985,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
             </div>
           )}
 
-          {!formData.pagado && (
+          {formData.tipo_turno === 'alquiler' && !formData.pagado && (
             <div className="space-y-2">
               <Label>Monto</Label>
               <Input
