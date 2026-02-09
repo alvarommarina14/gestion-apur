@@ -119,7 +119,7 @@ export default function Recuperos() {
 
   const handleDeleteRecupero = async (recupero) => {
     if (!recupero?.id) {
-      console.error('Error: recupero sin ID', recupero);
+      alert('Error: No se puede eliminar este recupero (ID faltante)');
       return;
     }
     
@@ -137,8 +137,10 @@ export default function Recuperos() {
       await base44.entities.Recupero.delete(recupero.id);
       queryClient.invalidateQueries({ queryKey: ['recuperos'] });
       queryClient.invalidateQueries({ queryKey: ['alumnos'] });
+      alert('Recupero eliminado correctamente');
     } catch (error) {
       console.error('Error eliminando recupero:', error);
+      alert(`Error al eliminar: ${error.message}`);
     }
   };
 
