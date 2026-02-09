@@ -65,6 +65,21 @@ export default function TarjetaClaseConPagos({ turno, isAdmin, onTurnoClick }) {
     }).format(amount || 0);
   };
 
+  const handleTogglePago = async (e) => {
+    e.stopPropagation();
+    setIsUpdating(true);
+    try {
+      await base44.entities.TurnoCancha.update(turno.id, {
+        pagado: !turno.pagado
+      });
+      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+    } catch (error) {
+      console.error('Error updating pago:', error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   return (
     <div
       className={cn(
