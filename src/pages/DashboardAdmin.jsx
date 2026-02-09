@@ -47,6 +47,7 @@ export default function DashboardAdmin() {
   const mesStr = format(mesSeleccionado, 'yyyy-MM');
   const [morososExpanded, setMorososExpanded] = useState(false);
   const [cobroModal, setCobroModal] = useState({ open: false, cobro: null, cliente: null });
+  const [limpiezaModalOpen, setLimpiezaModalOpen] = useState(false);
 
   const { data: user } = useQuery({
     queryKey: ['me'],
