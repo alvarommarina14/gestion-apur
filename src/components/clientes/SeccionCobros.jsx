@@ -172,6 +172,13 @@ export default function SeccionCobros({ cliente }) {
         onOpenChange={setModalNuevoCobro}
         cliente={cliente}
       />
+
+      <RegistrarPagoCobroModal
+        open={modalPago.open}
+        onOpenChange={(open) => setModalPago({ ...modalPago, open })}
+        cobro={modalPago.cobro}
+        cliente={cliente}
+      />
     </div>
   );
 }
