@@ -42,10 +42,7 @@ export default function Tareas() {
 
   const { data: empleados = [] } = useQuery({
     queryKey: ['empleados'],
-    queryFn: async () => {
-      const users = await base44.entities.User.list();
-      return users.filter(u => u.rol === 'empleado');
-    },
+    queryFn: () => base44.entities.User.list(),
   });
 
   const { data: tareas = [], isLoading } = useQuery({
