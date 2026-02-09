@@ -247,24 +247,24 @@ export default function EditarClaseModal({ open, onOpenChange, clase }) {
             </div>
             <h3 className="text-lg font-semibold text-slate-900">Clase actualizada</h3>
             <p className="text-slate-500 mt-1">Los cambios se guardaron correctamente</p>
-          </div>
-          </DialogContent>
-          </Dialog>
+            </div>
+            </DialogContent>
+            </Dialog>
 
-          {turnoAsociado && (
-          <CancelarCanchaModal
-          open={showCancelModal}
-          onOpenChange={setShowCancelModal}
-          turno={turnoAsociado}
-          onSuccess={() => {
+            {turnoAsociado && (
+            <CancelarCanchaModal
+            open={showCancelModal}
+            onOpenChange={setShowCancelModal}
+            turno={turnoAsociado}
+            onSuccess={() => {
             setShowCancelModal(false);
             queryClient.invalidateQueries({ queryKey: ['cancelaciones-cancha'] });
-          }}
-          />
-          )}
-          </>
-          );
-          }
+            }}
+            />
+            )}
+            </>
+            );
+            }
 
   return (
     <>
@@ -446,6 +446,19 @@ export default function EditarClaseModal({ open, onOpenChange, clase }) {
            </Button>
          </DialogFooter>
       </DialogContent>
-    </Dialog>
-  );
-}
+      </Dialog>
+
+      {turnoAsociado && (
+      <CancelarCanchaModal
+        open={showCancelModal}
+        onOpenChange={setShowCancelModal}
+        turno={turnoAsociado}
+        onSuccess={() => {
+          setShowCancelModal(false);
+          queryClient.invalidateQueries({ queryKey: ['cancelaciones-cancha'] });
+        }}
+      />
+      )}
+      </>
+      );
+      }
