@@ -24,6 +24,8 @@ import {
 import { CheckCircle } from 'lucide-react';
 
 export default function NuevoCbroModal({ open, onOpenChange, cliente }) {
+  // Obtener precio del cliente, si no existe usamos 0
+  const precioCliente = cliente?.precio || 0;
   const queryClient = useQueryClient();
   const [success, setSuccess] = useState(false);
 
