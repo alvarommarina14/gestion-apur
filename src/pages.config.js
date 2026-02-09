@@ -65,12 +65,12 @@ import ProfesorRegistro from './pages/ProfesorRegistro';
 import Profesores from './pages/Profesores';
 import Recordatorios from './pages/Recordatorios';
 import RecordatoriosCanchaAdmin from './pages/RecordatoriosCanchaAdmin';
-import RecordatoriosCanchaEmpleado from './pages/RecordatoriosCanchaEmpleado';
 import RecuperoCanchas from './pages/RecuperoCanchas';
 import Recuperos from './pages/Recuperos';
 import Reportes from './pages/Reportes';
 import SeleccionRol from './pages/SeleccionRol';
 import Tareas from './pages/Tareas';
+import RecordatoriosCanchaEmpleado from './pages/RecordatoriosCanchaEmpleado';
 import __Layout from './Layout.jsx';
 
 
@@ -93,12 +93,12 @@ export const PAGES = {
     "Profesores": Profesores,
     "Recordatorios": Recordatorios,
     "RecordatoriosCanchaAdmin": RecordatoriosCanchaAdmin,
-    "RecordatoriosCanchaEmpleado": RecordatoriosCanchaEmpleado,
     "RecuperoCanchas": RecuperoCanchas,
     "Recuperos": Recuperos,
     "Reportes": Reportes,
     "SeleccionRol": SeleccionRol,
     "Tareas": Tareas,
+    "RecordatoriosCanchaEmpleado": RecordatoriosCanchaEmpleado,
 }
 
 export const pagesConfig = {

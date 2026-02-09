@@ -1,14 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, addDays, parseISO } from 'date-fns';
+import { format, parseISO, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Plus, ChevronLeft, ChevronRight, Calendar, Filter, Edit, Trash2, CheckCircle, DollarSign } from 'lucide-react';
+import { Calendar, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Checkbox } from '@/components/ui/checkbox';
-import NuevoRecordatorioCanchaModal from '@/components/recordatorios-cancha/NuevoRecordatorioCanchaModal';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 export default function RecordatoriosCanchaAdmin() {
