@@ -136,14 +136,20 @@ export default function TarjetaClaseConPagos({ turno, isAdmin, onTurnoClick }) {
       </div>
 
       {/* Precio de la clase */}
-      {turno.monto > 0 && (
-        <div className="flex items-center gap-1.5 mb-2">
-          <DollarSign className="w-4 h-4 text-slate-500" />
-          <span className="font-bold text-slate-900 text-base">
-            {formatMoney(turno.monto)}
-          </span>
-        </div>
-      )}
+      <div className="flex items-center gap-1.5 mb-3 p-2 bg-white/50 rounded border border-slate-200">
+        <DollarSign className="w-4 h-4 text-slate-600" />
+        <span className="font-bold text-slate-900">
+          {formatMoney(turno.monto)}
+        </span>
+        <span className={cn(
+          'ml-auto px-2 py-0.5 rounded text-xs font-semibold',
+          turno.pagado
+            ? 'bg-emerald-100 text-emerald-700'
+            : 'bg-rose-100 text-rose-700'
+        )}>
+          {turno.pagado ? 'Pagado' : 'Deuda'}
+        </span>
+      </div>
 
       {/* Alumnos con estado de pago */}
       {alumnosConPago.length > 0 && (
