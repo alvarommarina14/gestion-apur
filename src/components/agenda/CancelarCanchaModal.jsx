@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
@@ -19,14 +19,30 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { AlertTriangle, X } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, differenceInHours } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function CancelarCanchaModal({ open, onOpenChange, turno }) {
   const queryClient = useQueryClient();
+  const [tiempoAviso, setTiempoAviso] = useState('');
   const [motivo, setMotivo] = useState('');
   const [detalles, setDetalles] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Calcular horas hasta la cancha
+  const horasHasta = useMemo(() => {
+    if (!turno?.fecha || !turno?.hora_inicio) return null;
+    try {
+      const now = new Date();
+      const [hora, minutos] = turno.hora_inicio.split(':');
+      const turnoDate = new Date(`${turno.fecha}T${hora}:${minutos}:00`);
+      return differenceInHours(turnoDate, now);
+    } catch (e) {
+      return null;
+    }
+  }, [turno]);
+
+  const esMenosDe24Horas = horasHasta !== null && horasHasta < 24;
 
   const cancelarMutation = useMutation({
     mutationFn: async () => {
@@ -38,9 +54,9 @@ export default function CancelarCanchaModal({ open, onOpenChange, turno }) {
         fecha: turno.fecha,
         hora_inicio: turno.hora_inicio,
         monto: turno.monto || 0,
-        motivo_cancelacion: motivo,
+        motivo_cancelacion: esMenosDe24Horas ? 'menos_24h' : motivo,
         detalles: detalles || null,
-        estado_recupero: 'pendiente',
+        estado_recupero: esMenosDe24Horas ? 'descontado' : 'pendiente',
       });
 
       // Actualizar estado del turno
@@ -52,13 +68,15 @@ export default function CancelarCanchaModal({ open, onOpenChange, turno }) {
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['cancelaciones-cancha'] });
       onOpenChange(false);
+      setTiempoAviso('');
       setMotivo('');
       setDetalles('');
     },
   });
 
   const handleSubmit = async () => {
-    if (!motivo) return;
+    if (!tiempoAviso) return;
+    if (!esMenosDe24Horas && !motivo) return;
     setLoading(true);
     await cancelarMutation.mutateAsync();
     setLoading(false);
@@ -77,79 +95,102 @@ export default function CancelarCanchaModal({ open, onOpenChange, turno }) {
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="bg-rose-50 border border-rose-200 rounded-lg p-4 space-y-2">
-            <p className="text-sm font-medium text-slate-900">{turno.cliente}</p>
-            <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
-              <div>
-                <p className="text-slate-500">Cancha</p>
-                <p className="font-medium">{turno.cancha}</p>
-              </div>
-              <div>
-                <p className="text-slate-500">Fecha</p>
-                <p className="font-medium">
-                  {format(parseISO(turno.fecha), "d 'de' MMM", { locale: es })}
-                </p>
-              </div>
-              <div>
-                <p className="text-slate-500">Hora</p>
-                <p className="font-medium">{turno.hora_inicio}</p>
-              </div>
-              <div>
-                <p className="text-slate-500">Monto</p>
-                <p className="font-medium">${(turno.monto || 0).toLocaleString('es-AR')}</p>
-              </div>
-            </div>
-          </div>
+           <div className="bg-rose-50 border border-rose-200 rounded-lg p-4 space-y-2">
+             <p className="text-sm font-medium text-slate-900">{turno.cliente}</p>
+             <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
+               <div>
+                 <p className="text-slate-500">Cancha</p>
+                 <p className="font-medium">{turno.cancha}</p>
+               </div>
+               <div>
+                 <p className="text-slate-500">Fecha</p>
+                 <p className="font-medium">
+                   {format(parseISO(turno.fecha), "d 'de' MMM", { locale: es })}
+                 </p>
+               </div>
+               <div>
+                 <p className="text-slate-500">Hora</p>
+                 <p className="font-medium">{turno.hora_inicio}</p>
+               </div>
+               <div>
+                 <p className="text-slate-500">Monto</p>
+                 <p className="font-medium">${(turno.monto || 0).toLocaleString('es-AR')}</p>
+               </div>
+             </div>
+           </div>
 
-          <div className="space-y-2">
-            <Label>Motivo de cancelación *</Label>
-            <Select value={motivo} onValueChange={setMotivo}>
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar motivo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="cliente_solicita">Cliente solicita</SelectItem>
-                <SelectItem value="clima">Clima/Clima adverso</SelectItem>
-                <SelectItem value="mantenimiento">Mantenimiento de cancha</SelectItem>
-                <SelectItem value="falta_clientes">Falta de clientes</SelectItem>
-                <SelectItem value="otro">Otro</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+           <div className="space-y-2">
+             <Label>Tipo de aviso *</Label>
+             <Select value={tiempoAviso} onValueChange={setTiempoAviso}>
+               <SelectTrigger>
+                 <SelectValue placeholder="Seleccionar tipo" />
+               </SelectTrigger>
+               <SelectContent>
+                 <SelectItem value="menos_24h">Menos de 24 horas (No descuenta abono)</SelectItem>
+                 <SelectItem value="mas_24h">Más de 24 horas</SelectItem>
+               </SelectContent>
+             </Select>
+           </div>
 
-          <div className="space-y-2">
-            <Label>Detalles (opcional)</Label>
-            <Textarea
-              value={detalles}
-              onChange={(e) => setDetalles(e.target.value)}
-              placeholder="Información adicional sobre la cancelación..."
-              rows={3}
-            />
-          </div>
+           {tiempoAviso === 'mas_24h' && (
+             <div className="space-y-2">
+               <Label>Motivo de cancelación *</Label>
+               <Select value={motivo} onValueChange={setMotivo}>
+                 <SelectTrigger>
+                   <SelectValue placeholder="Seleccionar motivo" />
+                 </SelectTrigger>
+                 <SelectContent>
+                   <SelectItem value="cliente_solicita">Cliente solicita</SelectItem>
+                   <SelectItem value="clima">Clima/Clima adverso</SelectItem>
+                   <SelectItem value="mantenimiento">Mantenimiento de cancha</SelectItem>
+                   <SelectItem value="falta_clientes">Falta de clientes</SelectItem>
+                   <SelectItem value="otro">Otro</SelectItem>
+                 </SelectContent>
+               </Select>
+             </div>
+           )}
 
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-700">
-            ℹ️ La cancelación quedará registrada y podrá ser recuperada o descontada posteriormente.
-          </div>
-        </div>
+           <div className="space-y-2">
+             <Label>Detalles (opcional)</Label>
+             <Textarea
+               value={detalles}
+               onChange={(e) => setDetalles(e.target.value)}
+               placeholder="Información adicional sobre la cancelación..."
+               rows={3}
+             />
+           </div>
+
+           {tiempoAviso === 'menos_24h' && (
+             <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-700">
+               ⚠️ Cancelación con menos de 24 horas: NO se descuenta del abono del cliente.
+             </div>
+           )}
+
+           {tiempoAviso === 'mas_24h' && (
+             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-700">
+               ℹ️ Cancelación con más de 24 horas: Se registra el motivo para auditoría.
+             </div>
+           )}
+         </div>
 
         <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={loading}
-          >
-            <X className="w-4 h-4 mr-2" />
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={!motivo || loading}
-            className="bg-rose-600 hover:bg-rose-700"
-          >
-            {loading ? 'Procesando...' : 'Cancelar cancha'}
-          </Button>
-        </DialogFooter>
+           <Button
+             type="button"
+             variant="outline"
+             onClick={() => onOpenChange(false)}
+             disabled={loading}
+           >
+             <X className="w-4 h-4 mr-2" />
+             Volver
+           </Button>
+           <Button
+             onClick={handleSubmit}
+             disabled={!tiempoAviso || (tiempoAviso === 'mas_24h' && !motivo) || loading}
+             className="bg-rose-600 hover:bg-rose-700"
+           >
+             {loading ? 'Procesando...' : 'Cancelar cancha'}
+           </Button>
+         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
