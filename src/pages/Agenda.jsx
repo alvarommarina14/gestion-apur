@@ -179,6 +179,16 @@ export default function Agenda() {
              <p className="text-slate-500 dark:text-slate-400 text-sm">Sistema de reservas del club</p>
            </div>
            <div className="flex items-center gap-2 flex-wrap">
+             {isAdmin && !showCalendario && (
+               <Button
+                 onClick={handleDescargarPDF}
+                 variant="outline"
+                 className="border-blue-300 text-blue-700 hover:bg-blue-50 h-11 lg:h-10 text-base lg:text-sm active:scale-95 touch-manipulation"
+               >
+                 <Download className="w-5 h-5 mr-2" />
+                 Descargar PDF
+               </Button>
+             )}
              {canEdit && (
                <>
                  <Button
