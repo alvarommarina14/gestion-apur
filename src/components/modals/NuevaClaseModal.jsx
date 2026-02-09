@@ -103,7 +103,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
     setFormData(prev => {
       const isSelected = prev.alumnos_ids.includes(alumnoId);
       
-      if (formData.tipo === 'individual') {
+      if (prev.tipo === 'individual') {
         // Individual: solo puede haber 1 alumno
         return {
           ...prev,
