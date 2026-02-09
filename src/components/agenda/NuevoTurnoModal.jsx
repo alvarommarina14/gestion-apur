@@ -845,8 +845,8 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="60">60 min</SelectItem>
-                  <SelectItem value="90">90 min</SelectItem>
+                  <SelectItem value="50">50 min</SelectItem>
+                  <SelectItem value="80">80 min</SelectItem>
                 </SelectContent>
               </Select>
             </div>
