@@ -6,11 +6,9 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -18,15 +16,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { AlertTriangle, X } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { format, parseISO, differenceInHours } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function CancelarCanchaModal({ open, onOpenChange, turno, onSuccess }) {
    const queryClient = useQueryClient();
-   const [tiempoAviso, setTiempoAviso] = useState('');
-   const [motivo, setMotivo] = useState('');
-   const [detalles, setDetalles] = useState('');
+   const [motivoMas24h, setMotivoMas24h] = useState('');
+   const [mostrarSelectMotivo, setMostrarSelectMotivo] = useState(false);
 
   // Calcular horas hasta la cancha
   const horasHasta = useMemo(() => {
@@ -44,19 +41,33 @@ export default function CancelarCanchaModal({ open, onOpenChange, turno, onSucce
   const esMenosDe24Horas = horasHasta !== null && horasHasta < 24;
 
   const cancelarMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (esmenDe24h) => {
       // Crear registro de cancelación
-      await base44.entities.CancelacionCancha.create({
+      const cancelacionData = {
         turno_cancha_id: turno.id,
         cliente: turno.cliente,
         cancha: turno.cancha,
         fecha: turno.fecha,
         hora_inicio: turno.hora_inicio,
         monto: turno.monto || 0,
-        motivo_cancelacion: tiempoAviso === 'menos_24h' ? 'menos_24h' : motivo,
-        detalles: detalles || null,
-        estado_recupero: tiempoAviso === 'menos_24h' ? 'descontado' : 'pendiente',
-      });
+        motivo_cancelacion: esmenDe24h ? 'menos_24h' : motivoMas24h,
+        estado: 'cancelado',
+      };
+
+      await base44.entities.CancelacionCancha.create(cancelacionData);
+
+      // Si es más de 24h, crear registro en Recupero
+      if (!esmenDe24h && motivoMas24h) {
+        await base44.entities.Recupero.create({
+          alumno_id: '',
+          alumno_nombre: turno.cliente,
+          clase_original_id: '',
+          fecha_original: turno.fecha,
+          motivo: motivoMas24h,
+          estado: 'pendiente',
+          notas: `Cancha ${turno.cancha} - ${turno.hora_inicio}`,
+        });
+      }
 
       // Actualizar estado del turno
       await base44.entities.TurnoCancha.update(turno.id, {
@@ -69,10 +80,10 @@ export default function CancelarCanchaModal({ open, onOpenChange, turno, onSucce
        queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
        queryClient.invalidateQueries({ queryKey: ['clases'] });
        queryClient.invalidateQueries({ queryKey: ['cancelaciones-cancha'] });
+       queryClient.invalidateQueries({ queryKey: ['recupero'] });
        onOpenChange(false);
-       setTiempoAviso('');
-       setMotivo('');
-       setDetalles('');
+       setMotivoMas24h('');
+       setMostrarSelectMotivo(false);
        onSuccess?.();
      },
     onError: (error) => {
@@ -80,10 +91,13 @@ export default function CancelarCanchaModal({ open, onOpenChange, turno, onSucce
     }
   });
 
-  const handleSubmit = async () => {
-    if (!tiempoAviso) return;
-    if (!esMenosDe24Horas && !motivo) return;
-    await cancelarMutation.mutateAsync();
+  const handleCancelarMenos24h = async () => {
+    await cancelarMutation.mutateAsync(true);
+  };
+
+  const handleCancelarMas24h = async () => {
+    if (!motivoMas24h) return;
+    await cancelarMutation.mutateAsync(false);
   };
 
   if (!turno) return null;
@@ -123,79 +137,73 @@ export default function CancelarCanchaModal({ open, onOpenChange, turno, onSucce
              </div>
            </div>
 
-           <div className="space-y-2">
-             <Label>Tipo de aviso *</Label>
-             <Select value={tiempoAviso} onValueChange={setTiempoAviso}>
-               <SelectTrigger>
-                 <SelectValue placeholder="Seleccionar tipo" />
-               </SelectTrigger>
-               <SelectContent>
-                 <SelectItem value="menos_24h">Menos de 24 horas (No descuenta abono)</SelectItem>
-                 <SelectItem value="mas_24h">Más de 24 horas</SelectItem>
-               </SelectContent>
-             </Select>
+           {!mostrarSelectMotivo ? (
+             <div className="space-y-3">
+               <p className="text-sm font-medium text-slate-700">Selecciona tipo de cancelación:</p>
+
+               <Button
+                 onClick={handleCancelarMenos24h}
+                 disabled={cancelarMutation.isPending}
+                 className="w-full bg-amber-600 hover:bg-amber-700"
+               >
+                 Canceló con menos de 24h (No se descuenta)
+               </Button>
+
+               <Button
+                 onClick={() => setMostrarSelectMotivo(true)}
+                 disabled={cancelarMutation.isPending}
+                 variant="outline"
+                 className="w-full text-slate-700"
+               >
+                 Canceló con más de 24h (Ver motivos)
+               </Button>
+             </div>
+           ) : (
+             <div className="space-y-3">
+               <div className="space-y-2">
+                 <Label>Motivo de cancelación *</Label>
+                 <Select value={motivoMas24h} onValueChange={setMotivoMas24h}>
+                   <SelectTrigger>
+                     <SelectValue placeholder="Seleccionar motivo" />
+                   </SelectTrigger>
+                   <SelectContent>
+                     <SelectItem value="cliente_solicita">Cliente solicita</SelectItem>
+                     <SelectItem value="clima">Clima/Clima adverso</SelectItem>
+                     <SelectItem value="mantenimiento">Mantenimiento de cancha</SelectItem>
+                     <SelectItem value="falta_clientes">Falta de clientes</SelectItem>
+                     <SelectItem value="otro">Otro</SelectItem>
+                   </SelectContent>
+                 </Select>
+               </div>
+
+               <div className="flex gap-2">
+                 <Button
+                   onClick={() => {
+                     setMostrarSelectMotivo(false);
+                     setMotivoMas24h('');
+                   }}
+                   disabled={cancelarMutation.isPending}
+                   variant="outline"
+                   className="flex-1"
+                 >
+                   Volver
+                 </Button>
+                 <Button
+                   onClick={handleCancelarMas24h}
+                   disabled={!motivoMas24h || cancelarMutation.isPending}
+                   className="flex-1 bg-rose-600 hover:bg-rose-700"
+                 >
+                   {cancelarMutation.isPending ? 'Procesando...' : 'Confirmar'}
+                 </Button>
+               </div>
+             </div>
+           )}
+
+           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-700">
+             ℹ️ La cancha se eliminará de la grilla automáticamente después de confirmar.
            </div>
-
-           {tiempoAviso === 'mas_24h' && (
-             <div className="space-y-2">
-               <Label>Motivo de cancelación *</Label>
-               <Select value={motivo} onValueChange={setMotivo}>
-                 <SelectTrigger>
-                   <SelectValue placeholder="Seleccionar motivo" />
-                 </SelectTrigger>
-                 <SelectContent>
-                   <SelectItem value="cliente_solicita">Cliente solicita</SelectItem>
-                   <SelectItem value="clima">Clima/Clima adverso</SelectItem>
-                   <SelectItem value="mantenimiento">Mantenimiento de cancha</SelectItem>
-                   <SelectItem value="falta_clientes">Falta de clientes</SelectItem>
-                   <SelectItem value="otro">Otro</SelectItem>
-                 </SelectContent>
-               </Select>
-             </div>
-           )}
-
-           <div className="space-y-2">
-             <Label>Detalles (opcional)</Label>
-             <Textarea
-               value={detalles}
-               onChange={(e) => setDetalles(e.target.value)}
-               placeholder="Información adicional sobre la cancelación..."
-               rows={3}
-             />
-           </div>
-
-           {tiempoAviso === 'menos_24h' && (
-             <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-700">
-               ⚠️ Cancelación con menos de 24 horas: NO se descuenta del abono del cliente.
-             </div>
-           )}
-
-           {tiempoAviso === 'mas_24h' && (
-             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-700">
-               ℹ️ Cancelación con más de 24 horas: Se registra el motivo para auditoría.
-             </div>
-           )}
          </div>
-
-        <DialogFooter>
-           <Button
-             type="button"
-             variant="outline"
-             onClick={() => onOpenChange(false)}
-             disabled={cancelarMutation.isPending}
-           >
-             <X className="w-4 h-4 mr-2" />
-             Volver
-           </Button>
-           <Button
-             onClick={handleSubmit}
-             disabled={!tiempoAviso || (tiempoAviso === 'mas_24h' && !motivo) || cancelarMutation.isPending}
-             className="bg-rose-600 hover:bg-rose-700"
-           >
-             {cancelarMutation.isPending ? 'Procesando...' : 'Cancelar cancha'}
-           </Button>
-         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-}
+  }
