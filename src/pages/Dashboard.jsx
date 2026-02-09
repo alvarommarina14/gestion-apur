@@ -78,7 +78,7 @@ export default function Dashboard() {
   React.useEffect(() => {
     const cargarProfesor = async () => {
       try {
-        if (user?.profesor_id) {
+        if (user?.profesor_id && user.profesor_id.trim()) {
           const profesor = await base44.entities.Profesor.read(user.profesor_id);
           setProfesorSeleccionado(profesor);
         }
@@ -87,7 +87,7 @@ export default function Dashboard() {
       }
     };
     
-    if (user?.profesor_id) {
+    if (user?.profesor_id && user.profesor_id.trim()) {
       cargarProfesor();
     }
   }, [user?.profesor_id]);
