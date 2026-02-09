@@ -32,7 +32,7 @@ export default function NuevoCbroModal({ open, onOpenChange, cliente }) {
   const [formData, setFormData] = useState({
     tipo_cobro: 'abono_mensual',
     mes: format(new Date(), 'yyyy-MM'),
-    monto: '',
+    monto: precioCliente > 0 ? precioCliente : '',
     estado: 'pendiente',
     fecha_pago: '',
     medio_pago: '',
