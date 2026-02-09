@@ -215,34 +215,15 @@ export default function Agenda() {
 
         {/* Stats - Solo para Admin */}
         {isAdmin && stats && (
-         <div className="grid grid-cols-3 gap-3 sm:gap-4">
+         <div className="grid grid-cols-1 gap-3 sm:gap-4">
            <Card className="shadow-sm dark:bg-slate-800 dark:border-slate-700">
               <CardContent className="pt-4 sm:pt-6 pb-4">
                 <div className="text-center">
                   <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">{stats.total}</p>
-                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Turnos</p>
+                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Turnos del día</p>
                 </div>
               </CardContent>
             </Card>
-           <Card className="shadow-sm border-emerald-200 bg-emerald-50/30">
-             <CardContent className="pt-4 sm:pt-6 pb-4">
-               <div className="text-center">
-                 <p className="text-xl sm:text-2xl font-bold text-emerald-600">{stats.pagados}</p>
-                 <p className="text-xs sm:text-sm text-slate-500 mt-1">Pagados</p>
-               </div>
-             </CardContent>
-           </Card>
-
-           <Card className="shadow-sm border-blue-200 bg-blue-50/30">
-             <CardContent className="pt-4 sm:pt-6 pb-4">
-               <div className="text-center">
-                 <p className="text-base sm:text-lg font-bold text-blue-600">{formatMoney(stats.montoPagado)}</p>
-                 <p className="text-[10px] sm:text-xs text-slate-500 mt-1">
-                   de {formatMoney(stats.montoPagado + stats.montoPendiente)}
-                 </p>
-               </div>
-             </CardContent>
-           </Card>
          </div>
         )}
 
