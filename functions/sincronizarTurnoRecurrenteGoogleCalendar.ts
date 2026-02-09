@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Turno no encontrado' }, { status: 404 });
     }
 
-    const CALENDAR_ID = 'primary';
+    const CALENDAR_ID = 'f6f2dcd149e0fee6eb7056b8fef6bdb7e8c8f09324a222f1427adc59c40c3400@group.calendar.google.com';
     const accessToken = await base44.asServiceRole.connectors.getAccessToken('googlecalendar');
 
     // Calcular hora de fin
