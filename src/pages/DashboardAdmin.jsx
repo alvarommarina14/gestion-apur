@@ -175,31 +175,7 @@ export default function DashboardAdmin() {
     }).format(amount || 0);
   };
 
-  const enviarWhatsApp = (cobro) => {
-    const cliente = clientes.find(c => c.id === cobro.cliente_id) || 
-                    alumnos.find(a => a.id === cobro.cliente_id);
-    
-    if (!cliente) return;
 
-    const telefono = cliente.telefono || cliente.whatsapp || '';
-    const mensaje = `Hola ${cobro.cliente_nombre}, te recordamos que tenés un pago pendiente de ${formatMoney(cobro.monto)} con vencimiento el ${format(parseISO(cobro.fecha_vencimiento), "d 'de' MMMM", { locale: es })}. ¡Gracias!`;
-    
-    const url = `https://wa.me/${telefono.replace(/\D/g, '')}?text=${encodeURIComponent(mensaje)}`;
-    window.open(url, '_blank');
-  };
-
-  const enviarEmail = (cobro) => {
-    const cliente = clientes.find(c => c.id === cobro.cliente_id) || 
-                    alumnos.find(a => a.id === cobro.cliente_id);
-    
-    if (!cliente) return;
-
-    const email = cliente.email || '';
-    const asunto = `Recordatorio de pago - ${cobro.tipo_cobro === 'abono_mensual' ? 'Abono mensual' : 'Cancha suelta'}`;
-    const cuerpo = `Hola ${cobro.cliente_nombre},\n\nTe recordamos que tenés un pago pendiente:\n\nMonto: ${formatMoney(cobro.monto)}\nVencimiento: ${format(parseISO(cobro.fecha_vencimiento), "d 'de' MMMM 'de' yyyy", { locale: es })}\n\n¡Gracias!`;
-    
-    window.location.href = `mailto:${email}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
-  };
 
   if (user?.role !== 'admin') {
     return (
