@@ -293,8 +293,8 @@ export default function DashboardAdmin() {
             <ReporteOcupacion turnos={turnosFiltrados} />
           </TabsContent>
 
-          {/* TAB OCUPACIÓN ORIGINAL (eliminado, ahora está en ReporteOcupacion) */}
-          <TabsContent value="ocupacion-old" className="space-y-6 hidden">
+          {/* SECCIÓN OCULTA - Ocupación detallada */}
+          <div className="hidden">
             {/* KPIs principales */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Card className="shadow-sm">
