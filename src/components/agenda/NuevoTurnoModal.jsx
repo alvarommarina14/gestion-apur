@@ -861,6 +861,68 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
             </div>
           </div>
 
+          {/* Tipo de turno y opciones de clase */}
+          {formData.tipo_turno === 'clase' && (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Profesor</Label>
+                  <Select
+                    value={formData.profesor_id}
+                    onValueChange={(v) => setFormData({ ...formData, profesor_id: v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar profesor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {profesores.map(p => (
+                        <SelectItem key={p.id} value={p.id}>{p.nombre}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Tipo</Label>
+                  <Select
+                    value={formData.tipo_clase || 'individual'}
+                    onValueChange={(v) => setFormData({ ...formData, tipo_clase: v, alumnos_ids: v === 'individual' ? [] : formData.alumnos_ids })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="individual">Individual</SelectItem>
+                      <SelectItem value="grupal">Grupal</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {(formData.tipo_clase || 'individual') === 'grupal' && (
+                <div className="space-y-2">
+                  <Label>Alumnos (selecciona varios)</Label>
+                  <div className="border rounded-lg p-3 space-y-2 max-h-48 overflow-y-auto">
+                    {alumnos.map(a => (
+                      <div key={a.id} className="flex items-center gap-2">
+                        <Checkbox
+                          checked={formData.alumnos_ids?.includes(a.id)}
+                          onCheckedChange={(checked) => {
+                            const ids = formData.alumnos_ids || [];
+                            setFormData({
+                              ...formData,
+                              alumnos_ids: checked ? [...ids, a.id] : ids.filter(id => id !== a.id)
+                            });
+                          }}
+                        />
+                        <label className="text-sm cursor-pointer flex-1">{a.nombre}</label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
           <div className="space-y-2">
             <Label>Cliente / Nombre</Label>
             <Select
