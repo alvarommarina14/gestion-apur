@@ -50,34 +50,6 @@ export default function RecordatoriosCanchaAdmin() {
     }).format(amount || 0);
   };
 
-  const handleEliminar = (id) => {
-    if (confirm('¿Eliminar este recordatorio?')) {
-      eliminarMutation.mutate(id);
-    }
-  };
-
-  const handleEliminarSeleccionados = () => {
-    if (seleccionados.length === 0) return;
-    
-    if (confirm(`¿Eliminar ${seleccionados.length} recordatorio${seleccionados.length > 1 ? 's' : ''}?`)) {
-      eliminarMultiplesMutation.mutate(seleccionados);
-    }
-  };
-
-  const toggleSeleccion = (id) => {
-    setSeleccionados(prev => 
-      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-    );
-  };
-
-  const toggleSeleccionarTodos = () => {
-    if (seleccionados.length === recordatoriosFiltrados.length) {
-      setSeleccionados([]);
-    } else {
-      setSeleccionados(recordatoriosFiltrados.map(r => r.id));
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
