@@ -55,7 +55,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
     recurrencia_cantidad: 4,
   }));
 
-  const { data: alumnos = [] } = useQuery({
+  const { data: alumnos = [], isLoading: loadingAlumnos } = useQuery({
     queryKey: ['alumnos', formData.profesor_id],
     queryFn: () => {
       if (!formData.profesor_id) return [];
