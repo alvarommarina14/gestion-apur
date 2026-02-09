@@ -113,31 +113,52 @@ export default function Dashboard() {
     queryFn: () => base44.entities.Recupero.list(),
   });
   
-  // Calcular estadísticas
+  // Calcular estadísticas (filtradas por profesor si es el caso)
   const stats = useMemo(() => {
     const alumnosActivos = alumnos.filter(a => a.estado !== 'pausado');
     const morosos = alumnos.filter(a => a.estado === 'moroso');
     
     // Ingresos
     const ingresoEsperado = alumnosActivos.reduce((sum, a) => sum + (a.precio_mensual || 0), 0);
-    const pagosMes = pagos.filter(p => p.mes_correspondiente === currentMonth);
+    let pagosMes = pagos.filter(p => p.mes_correspondiente === currentMonth);
+    
+    // Si hay profesor seleccionado, filtrar pagos por alumnos del profesor
+    if (profesorSeleccionado) {
+      const alumnosIds = alumnos.map(a => a.id);
+      pagosMes = pagosMes.filter(p => alumnosIds.includes(p.alumno_id));
+    }
+    
     const ingresoReal = pagosMes.reduce((sum, p) => sum + (p.monto || 0), 0);
     const deudaTotal = alumnos.reduce((sum, a) => sum + (a.deuda_total || 0), 0);
     
-    // Clases de hoy
-    const clasesHoy = clases.filter(c => c.fecha === todayStr);
+    // Clases de hoy (filtradas por profesor)
+    let clasesHoy = clases.filter(c => c.fecha === todayStr);
+    if (profesorSeleccionado) {
+      clasesHoy = clasesHoy.filter(c => c.profesor_id === profesorSeleccionado.id);
+    }
     const clasesPendientesHoy = clasesHoy.filter(c => 
       c.estado === 'programada' && !c.asistencia_registrada
     );
     
-    // Clases del mes
-    const clasesMes = clases.filter(c => c.fecha?.startsWith(currentMonth));
+    // Clases del mes (filtradas por profesor)
+    let clasesMes = clases.filter(c => c.fecha?.startsWith(currentMonth));
+    if (profesorSeleccionado) {
+      clasesMes = clasesMes.filter(c => c.profesor_id === profesorSeleccionado.id);
+    }
+    
     const realizadas = clasesMes.filter(c => c.estado === 'realizada').length;
     const canceladas = clasesMes.filter(c => 
       ['cancelada_anticipada', 'cancelada_tarde', 'no_show', 'suspendida'].includes(c.estado)
     ).length;
     const recuperadas = clasesMes.filter(c => c.es_recupero && c.estado === 'realizada').length;
-    const aRecuperar = recuperos.filter(r => r.estado === 'pendiente').length;
+    
+    // Recuperos filtrados por alumnos del profesor
+    let recuperosFiltrados = recuperos;
+    if (profesorSeleccionado) {
+      const alumnosIds = alumnos.map(a => a.id);
+      recuperosFiltrados = recuperos.filter(r => alumnosIds.includes(r.alumno_id));
+    }
+    const aRecuperar = recuperosFiltrados.filter(r => r.estado === 'pendiente').length;
     
     return {
       ingresoEsperado,
@@ -151,14 +172,16 @@ export default function Dashboard() {
       recuperadas,
       aRecuperar,
     };
-  }, [alumnos, clases, pagos, recuperos, todayStr, currentMonth]);
+  }, [alumnos, clases, pagos, recuperos, todayStr, currentMonth, profesorSeleccionado]);
   
-  // Clases de hoy ordenadas por hora
+  // Clases de hoy ordenadas por hora (filtradas por profesor)
   const clasesHoy = useMemo(() => {
-    return clases
-      .filter(c => c.fecha === todayStr)
-      .sort((a, b) => (a.hora_inicio || '').localeCompare(b.hora_inicio || ''));
-  }, [clases, todayStr]);
+    let clasesDelDia = clases.filter(c => c.fecha === todayStr);
+    if (profesorSeleccionado) {
+      clasesDelDia = clasesDelDia.filter(c => c.profesor_id === profesorSeleccionado.id);
+    }
+    return clasesDelDia.sort((a, b) => (a.hora_inicio || '').localeCompare(b.hora_inicio || ''));
+  }, [clases, todayStr, profesorSeleccionado]);
   
   // Alumnos a cobrar (ciclo del 5 al 15)
   const alumnosACobrar = useMemo(() => {
@@ -221,8 +244,13 @@ export default function Dashboard() {
       });
     }
     
-    // Recuperos sin fecha
-    const recuperosSinFecha = recuperos.filter(r => r.estado === 'pendiente' && !r.fecha_programada);
+    // Recuperos sin fecha (filtrados por profesor)
+    let recuperosFiltrados = recuperos;
+    if (profesorSeleccionado) {
+      const alumnosIds = alumnos.map(a => a.id);
+      recuperosFiltrados = recuperos.filter(r => alumnosIds.includes(r.alumno_id));
+    }
+    const recuperosSinFecha = recuperosFiltrados.filter(r => r.estado === 'pendiente' && !r.fecha_programada);
     if (recuperosSinFecha.length > 0) {
       items.push({
         id: 'recuperos',
