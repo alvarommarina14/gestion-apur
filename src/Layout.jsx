@@ -77,6 +77,10 @@ const navigationRecuperos = [
   { name: 'Recupero de Canchas', href: 'RecuperoCanchas', icon: RefreshCw, permissionKey: 'booking_canchas' },
 ];
 
+const navigationFinanzas = [
+  { name: 'Finanzas', href: 'Finanzas', icon: DollarSign, adminOnly: true, permissionKey: 'configuracion' },
+];
+
 const navigationConfiguracion = [
   { name: 'Gestión de Acceso', href: 'GestionAccesoUnificada', icon: Shield, permissionKey: 'configuracion' },
   { name: 'Configuración', href: 'Configuracion', icon: Settings, permissionKey: 'configuracion' },
