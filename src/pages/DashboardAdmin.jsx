@@ -282,7 +282,7 @@ export default function DashboardAdmin() {
             <Card className="shadow-sm bg-blue-50 border-blue-200">
               <CardContent className="pt-6 text-center space-y-2">
                 <p className="text-slate-700 font-medium">Para gestionar pagos y cobros,</p>
-                <a href={require('@/utils').createPageUrl('Finanzas')} className="text-blue-600 hover:text-blue-700 font-semibold underline">
+                <a href={createPageUrl('Finanzas')} className="text-blue-600 hover:text-blue-700 font-semibold underline">
                   ir a la página de Finanzas →
                 </a>
               </CardContent>
