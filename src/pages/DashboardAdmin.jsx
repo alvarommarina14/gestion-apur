@@ -15,18 +15,7 @@ import {
   CheckCircle, AlertCircle, Lightbulb, Target, MessageCircle, Mail, 
   ChevronDown, ChevronUp, CreditCard
 } from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
+
 import ReporteOcupacion from '@/components/reportes/ReporteOcupacion';
 
 const HORARIOS = [];
