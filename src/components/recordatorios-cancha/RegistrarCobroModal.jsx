@@ -31,15 +31,15 @@ export default function RegistrarCobroModal({ open, onOpenChange, recordatorio, 
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (recordatorio) {
-      setMontoPago(recordatorio.monto?.toString() || '');
-      setTipo('pago');
-      setMedioPago('');
-      setMotivo('');
-      setNotas('');
-    }
-    setError(null);
-  }, [recordatorio, open]);
+     if (open && recordatorio) {
+       setMontoPago(recordatorio.monto?.toString() || '');
+       setTipo('pago');
+       setMedioPago('');
+       setMotivo('');
+       setNotas('');
+       setError(null);
+     }
+   }, [recordatorio, open]);
 
   const registrarCobroMutation = useMutation({
     mutationFn: async (data) => {
