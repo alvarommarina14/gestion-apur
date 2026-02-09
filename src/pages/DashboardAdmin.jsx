@@ -28,10 +28,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import RegistrarCobroModal from '@/components/dashboard-admin/RegistrarCobroModal';
-import ReportesIngresos from '@/components/reportes/ReportesIngresos';
 import ReporteOcupacion from '@/components/reportes/ReporteOcupacion';
-import ReporteProfesores from '@/components/reportes/ReporteProfesores';
-import ReporteCobros from '@/components/reportes/ReporteCobros';
 
 const HORARIOS = [];
 for (let h = 8; h <= 21; h++) {
