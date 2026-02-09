@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+import TarjetaClaseConPagos from './TarjetaClaseConPagos';
 
 const HORARIOS = [];
 for (let h = 8; h <= 21; h++) {
