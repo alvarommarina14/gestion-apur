@@ -360,19 +360,19 @@ export default function RecuperoCanchas() {
           </div>
 
           <DialogFooter className="flex gap-2 justify-between">
-           <div>
-             {selectedCancelacion?.estado_recupero === 'pendiente' && !accion && (
-               <Button
-                 variant="destructive"
-                 size="sm"
-                 onClick={handleEliminar}
-                 disabled={deleteMutation.isPending}
-               >
-                 <Trash2 className="w-4 h-4 mr-1" />
-                 Eliminar
-               </Button>
-             )}
-           </div>
+            <div>
+              {!accion && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleEliminar}
+                  disabled={deleteMutation.isPending}
+                >
+                  <Trash2 className="w-4 h-4 mr-1" />
+                  Eliminar
+                </Button>
+              )}
+            </div>
            <div className="flex gap-2">
              <Button
                type="button"
