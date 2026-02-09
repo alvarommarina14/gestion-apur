@@ -710,13 +710,7 @@ export default function DashboardAdmin() {
         </Tabs>
       </div>
 
-      {/* Modal de Registro de Cobro */}
-      <RegistrarCobroModal
-        open={cobroModal.open}
-        onOpenChange={(open) => setCobroModal({ ...cobroModal, open })}
-        cobro={cobroModal.cobro}
-        cliente={cobroModal.cliente}
-      />
+
     </div>
   );
 }
