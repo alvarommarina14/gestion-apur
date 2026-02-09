@@ -222,7 +222,29 @@ export default function RecordatoriosCanchaAdmin() {
                         <p className="text-sm text-slate-700 mt-1 bg-slate-50 p-2 rounded">{rec.notas}</p>
                       </div>
                     )}
-                  </div>
+
+                    {/* Botón de cobro */}
+                    <div className="pt-3 border-t border-slate-100">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCobroModal({
+                          open: true,
+                          recordatorio: rec,
+                          cliente: clientes.find(c => c.nombre === rec.turno?.cliente) || { id: 'temporal', nombre: rec.turno?.cliente }
+                        })}
+                        className={cn(
+                          'w-full',
+                          rec.turno?.pagado
+                            ? 'border-emerald-300 text-emerald-700 hover:bg-emerald-50'
+                            : 'border-orange-300 text-orange-700 hover:bg-orange-50'
+                        )}
+                      >
+                        <DollarSign className="w-4 h-4 mr-2" />
+                        {rec.turno?.pagado ? 'Pago registrado' : 'Registrar cobro'}
+                      </Button>
+                    </div>
+                    </div>
                 </CardContent>
               </Card>
             ))}
