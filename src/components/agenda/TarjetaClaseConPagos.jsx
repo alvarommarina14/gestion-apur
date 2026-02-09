@@ -96,12 +96,10 @@ export default function TarjetaClaseConPagos({ turno, isAdmin, onTurnoClick }) {
       </div>
 
       {/* Profesor */}
-      {turno.profesor_id && (
-        <div className="flex items-center gap-1 text-sm text-slate-600 mb-2">
-          <User className="w-3.5 h-3.5" />
-          <span>{turno.profesor}</span>
-        </div>
-      )}
+      <div className="flex items-center gap-1 text-sm text-slate-600 mb-2">
+        <User className="w-3.5 h-3.5" />
+        <span>{turno.profesor || 'No asignado'}</span>
+      </div>
 
       {/* Alumnos con estado de pago */}
       {alumnosConPago.length > 0 && (
