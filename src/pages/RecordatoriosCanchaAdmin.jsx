@@ -252,6 +252,13 @@ export default function RecordatoriosCanchaAdmin() {
         )}
 
         </div>
-    </div>
-  );
-}
+
+        <RegistrarCobroModal
+          open={cobroModal.open}
+          onOpenChange={(open) => setCobroModal({ ...cobroModal, open })}
+          recordatorio={cobroModal.recordatorio}
+          cliente={cobroModal.cliente}
+        />
+        </div>
+        );
+        }
