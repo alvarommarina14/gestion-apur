@@ -75,24 +75,17 @@ export default function CancelarCanchaModal({ open, onOpenChange, turno, onSucce
       });
     },
     onSuccess: async () => {
-        // Remover inmediatamente de todos los caches locales
-        // Actualizar la query con la fecha específica del turno
-        queryClient.setQueryData(['turnos-cancha', turno.fecha], (oldData) => {
-          if (!oldData) return oldData;
-          return oldData.filter(t => t.id !== turno.id);
-        });
-        
-        // También actualizar cualquier otra query de turnos (para vista de calendario, etc)
-        queryClient.setQueryData(['turnos-cancha', 'mes'], (oldData) => {
-          if (!oldData) return oldData;
-          return oldData.filter(t => t.id !== turno.id);
-        });
-        
         setMotivoMas24h('');
         setMostrarSelectMotivo(false);
         onOpenChange(false);
         
-        // Cerrar modal y notificar al parent
+        // Remover del cache DESPUÉS de cerrar modal para forzar refetch
+        await new Promise(r => setTimeout(r, 100));
+        
+        // Invalidar para que React Query refetch automáticamente filtrado
+        queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+        
+        // Notificar al parent
         onSuccess?.();
       },
     onError: (error) => {
