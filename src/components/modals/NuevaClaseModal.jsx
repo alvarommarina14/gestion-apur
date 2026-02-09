@@ -34,27 +34,6 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  
-  const { data: alumnos = [] } = useQuery({
-    queryKey: ['alumnos', formData.profesor_id],
-    queryFn: () => {
-      if (!formData.profesor_id) return [];
-      return base44.entities.Alumno.filter({ profesor_id: formData.profesor_id });
-    },
-    enabled: !!formData.profesor_id,
-  });
-  
-  const { data: profesores = [] } = useQuery({
-    queryKey: ['profesores'],
-    queryFn: () => base44.entities.Profesor.list(),
-  });
-  
-  const alumnosActivos = alumnos.filter(a => a.estado !== 'pausado');
-  
-  const { data: user } = useQuery({
-    queryKey: ['me'],
-    queryFn: () => base44.auth.me(),
-  });
 
   const [formData, setFormData] = useState(() => ({
     fecha: new Date(),
