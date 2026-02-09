@@ -294,9 +294,10 @@ export default function DashboardAdmin() {
           </TabsContent>
 
           {/* SECCIÓN OCULTA - Ocupación detallada */}
-          <div className="hidden">
-            {/* KPIs principales */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {false && (
+            <div>
+              {/* KPIs principales */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Card className="shadow-sm">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
