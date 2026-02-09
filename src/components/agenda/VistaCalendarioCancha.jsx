@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, XCircle, Clock, User, DollarSign, Bell, MoreVertical } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, User, DollarSign, Bell, MoreVertical, Ban } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -21,7 +21,7 @@ for (let h = 8; h <= 21; h++) {
 
 const CANCHAS = ['1', '2', '3', '4'];
 
-export default function VistaCalendarioCancha({ turnos = [], recordatorios = [], bloqueos = [], selectedDate, selectedCancha, fecha, isAdmin, onTurnoClick, onEditarClase, isLoading }) {
+export default function VistaCalendarioCancha({ turnos = [], recordatorios = [], bloqueos = [], selectedDate, selectedCancha, fecha, isAdmin, onTurnoClick, onEditarClase, onCancelarCancha, isLoading }) {
   const [profesorTurnos, setProfesorTurnos] = useState(new Set());
   
   const { data: user } = useQuery({
@@ -325,7 +325,7 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
                                     <span className="text-xs font-semibold text-slate-500">
                                       {turno.duracion} min
                                     </span>
-                                    {isAdmin && turno.tipo_turno === 'clase' && (
+                                    {isAdmin && (
                                       <DropdownMenu>
                                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                                           <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
@@ -333,12 +333,23 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
                                           </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
-                                          <DropdownMenuItem onClick={(e) => {
-                                            e.stopPropagation();
-                                            onEditarClase?.(turno);
-                                          }}>
-                                            Editar/Cancelar
-                                          </DropdownMenuItem>
+                                          {turno.tipo_turno === 'clase' && (
+                                            <DropdownMenuItem onClick={(e) => {
+                                              e.stopPropagation();
+                                              onEditarClase?.(turno);
+                                            }}>
+                                              Editar/Cancelar
+                                            </DropdownMenuItem>
+                                          )}
+                                          {turno.tipo_turno === 'alquiler' && turno.modalidad_alquiler === 'abono' && (
+                                            <DropdownMenuItem onClick={(e) => {
+                                              e.stopPropagation();
+                                              onCancelarCancha?.(turno);
+                                            }} className="text-rose-600">
+                                              <Ban className="w-4 h-4 mr-2" />
+                                              Cancelar cancha
+                                            </DropdownMenuItem>
+                                          )}
                                         </DropdownMenuContent>
                                       </DropdownMenu>
                                     )}
