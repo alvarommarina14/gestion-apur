@@ -42,57 +42,53 @@ export default function RegistrarCobroModal({ open, onOpenChange, recordatorio, 
    }, [recordatorio, open]);
 
   const registrarCobroMutation = useMutation({
-    mutationFn: async (data) => {
-      if (data.tipo === 'pago') {
-        // Registrar pago
-        const cobroData = {
-          cliente_id: cliente.id,
-          cliente_nombre: cliente.nombre,
-          tipo_cobro: recordatorio.turno?.modalidad_alquiler || recordatorio.turno?.tipo_turno,
-          mes: recordatorio.fecha.substring(0, 7),
-          monto: Number(data.montoPago),
-          estado: 'pagado',
-          fecha_pago: new Date().toISOString().split('T')[0],
-          medio_pago: data.medioPago,
-          notas: data.notas,
-        };
+     mutationFn: async (data) => {
+       // Siempre actualizar el turno con el nuevo estado
+       if (recordatorio.turno) {
+         if (data.tipo === 'pago') {
+           // Marcar como pagado
+           await base44.entities.TurnoCancha.update(recordatorio.turno.id, {
+             pagado: true,
+             notas_pago: data.medioPago,
+             cobrado_por: 'Admin',
+             hora_cobro: new Date().toISOString(),
+           });
+         } else {
+           // Marcar como no pagado
+           await base44.entities.TurnoCancha.update(recordatorio.turno.id, {
+             pagado: false,
+             notas_pago: `No pago - Motivo: ${data.motivo}`,
+           });
+         }
+       }
 
-        await base44.entities.CobroCliente.create(cobroData);
+       // Crear o actualizar registro en CobroCliente
+       const cobroData = {
+         cliente_id: cliente.id,
+         cliente_nombre: cliente.nombre,
+         tipo_cobro: recordatorio.turno?.modalidad_alquiler || recordatorio.turno?.tipo_turno,
+         mes: recordatorio.fecha.substring(0, 7),
+         monto: Number(data.tipo === 'pago' ? data.montoPago : recordatorio.monto),
+         estado: data.tipo === 'pago' ? 'pagado' : 'pendiente',
+         fecha_pago: data.tipo === 'pago' ? new Date().toISOString().split('T')[0] : null,
+         medio_pago: data.tipo === 'pago' ? data.medioPago : null,
+         notas: data.tipo === 'pago' 
+           ? data.notas
+           : `No pago - Motivo: ${data.motivo}. ${data.notas}`,
+       };
 
-        // Actualizar turno como pagado
-        if (recordatorio.turno) {
-          await base44.entities.TurnoCancha.update(recordatorio.turno.id, {
-            pagado: true,
-            notas_pago: data.medioPago,
-            cobrado_por: 'Admin',
-            hora_cobro: new Date().toISOString(),
-          });
-        }
-      } else {
-        // Registrar no pago
-        const cobroData = {
-          cliente_id: cliente.id,
-          cliente_nombre: cliente.nombre,
-          tipo_cobro: recordatorio.turno?.modalidad_alquiler || recordatorio.turno?.tipo_turno,
-          mes: recordatorio.fecha.substring(0, 7),
-          monto: Number(recordatorio.monto),
-          estado: 'pendiente',
-          notas: `No pago - Motivo: ${data.motivo}. ${data.notas}`,
-        };
-
-        await base44.entities.CobroCliente.create(cobroData);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
-      queryClient.invalidateQueries({ queryKey: ['turnos-cancha-all'] });
-      queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
-      onOpenChange(false);
-    },
-    onError: (err) => {
-      setError(err.message || 'Error al registrar');
-    },
-  });
+       await base44.entities.CobroCliente.create(cobroData);
+     },
+     onSuccess: () => {
+       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+       queryClient.invalidateQueries({ queryKey: ['turnos-cancha-all'] });
+       queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
+       onOpenChange(false);
+     },
+     onError: (err) => {
+       setError(err.message || 'Error al registrar');
+     },
+   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
