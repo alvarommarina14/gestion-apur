@@ -172,6 +172,50 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
              </div>
           </div>
 
+          <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+            <Checkbox
+              id="es-alumno"
+              checked={formData.es_alumno}
+              onCheckedChange={(checked) => setFormData({
+                ...formData,
+                es_alumno: checked,
+                profesor_id: checked ? formData.profesor_id : '',
+                profesor_nombre: checked ? formData.profesor_nombre : '',
+              })}
+            />
+            <Label htmlFor="es-alumno" className="font-medium cursor-pointer">
+              Es alumno
+            </Label>
+          </div>
+
+          {formData.es_alumno && (
+            <div className="space-y-2">
+              <Label>Profesor *</Label>
+              <Select
+                value={formData.profesor_id}
+                onValueChange={(profesorId) => {
+                  const profesor = profesores.find(p => p.id === profesorId);
+                  setFormData({
+                    ...formData,
+                    profesor_id: profesorId,
+                    profesor_nombre: profesor?.nombre || '',
+                  });
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecciona profesor" />
+                </SelectTrigger>
+                <SelectContent>
+                  {profesores.map(prof => (
+                    <SelectItem key={prof.id} value={prof.id}>
+                      {prof.nombre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label>Notas</Label>
             <Textarea
