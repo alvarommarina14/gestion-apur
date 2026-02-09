@@ -27,7 +27,6 @@ export default function CancelarCanchaModal({ open, onOpenChange, turno, onSucce
    const [tiempoAviso, setTiempoAviso] = useState('');
    const [motivo, setMotivo] = useState('');
    const [detalles, setDetalles] = useState('');
-   const [loading, setLoading] = useState(false);
 
   // Calcular horas hasta la cancha
   const horasHasta = useMemo(() => {
@@ -183,17 +182,17 @@ export default function CancelarCanchaModal({ open, onOpenChange, turno, onSucce
              type="button"
              variant="outline"
              onClick={() => onOpenChange(false)}
-             disabled={loading}
+             disabled={cancelarMutation.isPending}
            >
              <X className="w-4 h-4 mr-2" />
              Volver
            </Button>
            <Button
              onClick={handleSubmit}
-             disabled={!tiempoAviso || (tiempoAviso === 'mas_24h' && !motivo) || loading}
+             disabled={!tiempoAviso || (tiempoAviso === 'mas_24h' && !motivo) || cancelarMutation.isPending}
              className="bg-rose-600 hover:bg-rose-700"
            >
-             {loading ? 'Procesando...' : 'Cancelar cancha'}
+             {cancelarMutation.isPending ? 'Procesando...' : 'Cancelar cancha'}
            </Button>
          </DialogFooter>
       </DialogContent>
