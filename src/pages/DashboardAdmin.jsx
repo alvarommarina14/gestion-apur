@@ -438,8 +438,8 @@ export default function DashboardAdmin() {
             </div>
           </TabsContent>
 
-          {/* TAB COBROS OPERACIONES (anterior) */}
-          <TabsContent value="cobros-old" className="space-y-6 hidden">
+          {/* SECCIÓN OCULTA - Cobros anterior */}
+          <div className="hidden">
             {/* Stats Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="shadow-sm border-rose-200 bg-rose-50/30">
