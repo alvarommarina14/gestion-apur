@@ -137,22 +137,6 @@ Deno.serve(async (req) => {
       },
     });
 
-    // Resumen al pie
-    const finalY = doc.lastAutoTable.finalY + 10;
-    const totalTurnos = filteredTurnos.length;
-    const totalPagados = filteredTurnos.filter(t => t.pagado).length;
-    const totalMonto = filteredTurnos.reduce((sum, t) => sum + (t.monto || 0), 0);
-    const montoPagado = filteredTurnos.filter(t => t.pagado).reduce((sum, t) => sum + (t.monto || 0), 0);
-
-    doc.setFontSize(9);
-    doc.setTextColor(...primaryColor);
-    doc.text('RESUMEN:', 14, finalY);
-
-    doc.setFontSize(8);
-    doc.setTextColor(...textColor);
-    doc.text(`Total turnos: ${totalTurnos} | Pagados: ${totalPagados} | Pendientes: ${totalTurnos - totalPagados}`, 14, finalY + 5);
-    doc.text(`Monto total: $${totalMonto.toLocaleString('es-AR')} | Pagado: $${montoPagado.toLocaleString('es-AR')} | Pendiente: $${(totalMonto - montoPagado).toLocaleString('es-AR')}`, 14, finalY + 10);
-
     // Pie de página
     const hoy = new Date();
     const horaGen = new Intl.DateTimeFormat('es-AR', { 
