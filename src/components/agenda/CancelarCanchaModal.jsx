@@ -22,12 +22,12 @@ import { AlertTriangle, X } from 'lucide-react';
 import { format, parseISO, differenceInHours } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-export default function CancelarCanchaModal({ open, onOpenChange, turno }) {
-  const queryClient = useQueryClient();
-  const [tiempoAviso, setTiempoAviso] = useState('');
-  const [motivo, setMotivo] = useState('');
-  const [detalles, setDetalles] = useState('');
-  const [loading, setLoading] = useState(false);
+export default function CancelarCanchaModal({ open, onOpenChange, turno, onSuccess }) {
+   const queryClient = useQueryClient();
+   const [tiempoAviso, setTiempoAviso] = useState('');
+   const [motivo, setMotivo] = useState('');
+   const [detalles, setDetalles] = useState('');
+   const [loading, setLoading] = useState(false);
 
   // Calcular horas hasta la cancha
   const horasHasta = useMemo(() => {
@@ -64,14 +64,18 @@ export default function CancelarCanchaModal({ open, onOpenChange, turno }) {
         estado: 'cancelado',
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
-      queryClient.invalidateQueries({ queryKey: ['cancelaciones-cancha'] });
-      onOpenChange(false);
-      setTiempoAviso('');
-      setMotivo('');
-      setDetalles('');
-    },
+    onSuccess: async () => {
+       // Esperar un poco para que la BD se actualice completamente
+       await new Promise(resolve => setTimeout(resolve, 500));
+       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+       queryClient.invalidateQueries({ queryKey: ['clases'] });
+       queryClient.invalidateQueries({ queryKey: ['cancelaciones-cancha'] });
+       onOpenChange(false);
+       setTiempoAviso('');
+       setMotivo('');
+       setDetalles('');
+       onSuccess?.();
+     },
     onError: (error) => {
       console.error('Error al cancelar cancha:', error);
     }
@@ -80,9 +84,7 @@ export default function CancelarCanchaModal({ open, onOpenChange, turno }) {
   const handleSubmit = async () => {
     if (!tiempoAviso) return;
     if (!esMenosDe24Horas && !motivo) return;
-    setLoading(true);
     await cancelarMutation.mutateAsync();
-    setLoading(false);
   };
 
   if (!turno) return null;
