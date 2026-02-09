@@ -130,10 +130,10 @@ export default function Layout({ children, currentPageName }) {
         }
         
         // Cargar profesor seleccionado
-        if (user?.profesor_id) {
+        if (currentUser?.profesor_id && currentUser.profesor_id.trim()) {
           // Si está en base de datos, usar ese
           try {
-            const profesor = await base44.entities.Profesor.read(user.profesor_id);
+            const profesor = await base44.entities.Profesor.read(currentUser.profesor_id);
             setProfesorSeleccionado(profesor);
             localStorage.setItem('profesor_seleccionado', JSON.stringify(profesor));
           } catch (e) {
