@@ -379,31 +379,54 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
             </div>
           </div>
           
-          {/* Selección de alumnos */}
+          {/* Selección de Profesor */}
           <div className="space-y-2">
-            <Label>Alumnos</Label>
-            <div className="border rounded-lg max-h-40 overflow-y-auto">
-              {alumnosActivos.map((alumno) => (
-                <div
-                  key={alumno.id}
-                  className={cn(
-                    'flex items-center gap-3 p-3 border-b last:border-b-0 cursor-pointer hover:bg-slate-50',
-                    formData.alumnos_ids.includes(alumno.id) && 'bg-emerald-50'
-                  )}
-                >
-                  <Checkbox
-                    checked={formData.alumnos_ids.includes(alumno.id)}
-                    disabled={!!recupero}
-                    onCheckedChange={() => !recupero && handleAlumnoToggle(alumno.id)}
-                  />
-                  <span className="text-sm font-medium">{alumno.nombre}</span>
-                </div>
-              ))}
-            </div>
-            {formData.alumnos_ids.length === 0 && (
-              <p className="text-xs text-rose-500">Selecciona al menos un alumno</p>
-            )}
+            <Label>Profesor</Label>
+            <Select
+              value={formData.profesor_id}
+              onValueChange={(v) => setFormData({ ...formData, profesor_id: v, alumnos_ids: [] })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar profesor" />
+              </SelectTrigger>
+              <SelectContent>
+                {profesores.sort((a, b) => a.nombre.localeCompare(b.nombre)).map(p => (
+                  <SelectItem key={p.id} value={p.id}>{p.nombre}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+
+          {/* Selección de alumnos */}
+          {formData.profesor_id && (
+            <div className="space-y-2">
+              <Label>Alumnos del profesor</Label>
+              <div className="border rounded-lg max-h-40 overflow-y-auto">
+                {alumnosActivos
+                  .filter(a => a.profesor_id === formData.profesor_id)
+                  .sort((a, b) => a.nombre.localeCompare(b.nombre))
+                  .map((alumno) => (
+                    <div
+                      key={alumno.id}
+                      className={cn(
+                        'flex items-center gap-3 p-3 border-b last:border-b-0 cursor-pointer hover:bg-slate-50',
+                        formData.alumnos_ids.includes(alumno.id) && 'bg-emerald-50'
+                      )}
+                    >
+                      <Checkbox
+                        checked={formData.alumnos_ids.includes(alumno.id)}
+                        disabled={!!recupero}
+                        onCheckedChange={() => !recupero && handleAlumnoToggle(alumno.id)}
+                      />
+                      <span className="text-sm font-medium">{alumno.nombre}</span>
+                    </div>
+                  ))}
+              </div>
+              {formData.alumnos_ids.length === 0 && (
+                <p className="text-xs text-rose-500">Selecciona al menos un alumno</p>
+              )}
+            </div>
+          )}
           
           <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
             <div>
