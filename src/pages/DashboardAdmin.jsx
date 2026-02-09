@@ -53,36 +53,7 @@ export default function DashboardAdmin() {
     queryFn: () => base44.entities.TurnoCancha.list('-fecha', 500),
   });
 
-  // Datos para Cobros
-  const { data: cobrosClientes = [] } = useQuery({
-    queryKey: ['cobros-clientes'],
-    queryFn: () => base44.entities.CobroCliente.list('-fecha_vencimiento', 500),
-  });
 
-  const { data: alumnos = [] } = useQuery({
-    queryKey: ['alumnos'],
-    queryFn: () => base44.entities.Alumno.list('nombre', 500),
-  });
-
-  const { data: pagos = [] } = useQuery({
-    queryKey: ['pagos'],
-    queryFn: () => base44.entities.Pago.list('-fecha', 500),
-  });
-
-  const { data: clientes = [] } = useQuery({
-    queryKey: ['clientes'],
-    queryFn: () => base44.entities.Cliente.list('nombre', 500),
-  });
-
-  const { data: clases = [] } = useQuery({
-    queryKey: ['clases'],
-    queryFn: () => base44.entities.Clase.list('-fecha', 1000),
-  });
-
-  const { data: profesores = [] } = useQuery({
-    queryKey: ['profesores'],
-    queryFn: () => base44.entities.Profesor.list('nombre'),
-  });
 
   // Filtrar turnos según período
   const turnosFiltrados = useMemo(() => {
