@@ -28,6 +28,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Calendar, CheckCircle, AlertTriangle, Trash2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import FormularioClaseAdmin from '@/components/agenda/FormularioClaseAdmin';
+import BotonesCancelacion from '@/components/agenda/BotonesCancelacion';
 
 export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isProfesor = false }) {
   const queryClient = useQueryClient();
@@ -976,7 +977,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
                  Toda la recurrencia
                </Button>
              )}
-
+             <BotonesCancelacion turno={turno} />
            </div>
          )}
         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
