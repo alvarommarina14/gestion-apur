@@ -240,6 +240,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
           duracion: 50,
           tipo: 'individual',
           cancha: '',
+          profesor_id: '',
           alumnos_ids: [],
           precio: '',
           pagado: false,
