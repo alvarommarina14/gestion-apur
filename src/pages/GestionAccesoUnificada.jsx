@@ -82,7 +82,7 @@ const seccionesConfig = [
 
 export default function GestionAccesoUnificada() {
   const queryClient = useQueryClient();
-  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedUsuario, setSelectedUsuario] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [localPermisos, setLocalPermisos] = useState({});
   const [editEmpleado, setEditEmpleado] = useState(null);
@@ -134,18 +134,6 @@ export default function GestionAccesoUnificada() {
   });
 
   // Mutaciones
-  const updateRolMutation = useMutation({
-    mutationFn: async (updates) => {
-      await Promise.all(updates.map(({ id, data }) => 
-        base44.entities.RolPermiso.update(id, data)
-      ));
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['permisos_todos'] });
-      setHasChanges(false);
-    },
-  });
-
   const updateUsuarioMutation = useMutation({
     mutationFn: async (data) => {
       const existing = permisos.usuarioPermisos?.find(p => p.usuario_id === data.usuario_id);
@@ -304,15 +292,6 @@ export default function GestionAccesoUnificada() {
   });
 
   // Datos procesados
-  const permisosPorRol = useMemo(() => {
-    const grouped = {};
-    permisos.rolPermisos?.forEach(permiso => {
-      if (!grouped[permiso.rol]) grouped[permiso.rol] = {};
-      grouped[permiso.rol][permiso.seccion] = permiso;
-    });
-    return grouped;
-  }, [permisos]);
-
   const usuariosConRol = useMemo(() => {
     return usuarios.filter(u => ['profesor', 'empleado'].includes(u.rol));
   }, [usuarios]);
@@ -331,14 +310,8 @@ export default function GestionAccesoUnificada() {
   }, []);
 
   // Handlers
-  const handleSelectRol = (rol) => {
-    setSelectedItem({ type: 'rol', value: rol });
-    setLocalPermisos(permisosPorRol[rol] || {});
-    setHasChanges(false);
-  };
-
   const handleSelectUsuario = (usuario) => {
-    setSelectedItem({ type: 'usuario', value: usuario });
+    setSelectedUsuario(usuario);
     const permisoActual = permisos.usuarioPermisos?.find(p => p.usuario_id === usuario.id);
     const secciones = usuario.rol === 'profesor' ? SECCIONES_PROFESOR : SECCIONES_EMPLEADO;
     
@@ -365,53 +338,15 @@ export default function GestionAccesoUnificada() {
     setHasChanges(true);
   };
 
-  const handleTogglePermiso = (rol, seccion, tipo) => {
-    const current = localPermisos[seccion];
-    if (!current) return;
-    setLocalPermisos(prev => ({
-      ...prev,
-      [seccion]: {
-        ...current,
-        permisos: { ...current.permisos, [tipo]: !current.permisos[tipo] },
-      },
-    }));
-    setHasChanges(true);
-  };
-
   const handleGuardar = async () => {
-    if (selectedItem.type === 'rol') {
-      const updates = [];
-      Object.entries(localPermisos).forEach(([seccion, permiso]) => {
-        if (permiso.id) {
-          updates.push({
-            id: permiso.id,
-            data: {
-              rol: permiso.rol,
-              seccion: permiso.seccion,
-              permisos: permiso.permisos,
-              activo: permiso.activo,
-            },
-          });
-        }
-      });
-      await updateRolMutation.mutateAsync(updates);
-      
-      // Registrar cambio de permisos de rol
-      await registrarCambioPermisos(
-        { id: selectedItem.value, full_name: `Rol: ${selectedItem.value}` },
-        { tipo: 'rol', cambios: Object.keys(localPermisos).length },
-        `Actualización de permisos del rol ${selectedItem.value}`
-      );
-    } else {
-      await updateUsuarioMutation.mutateAsync(localPermisos);
-      
-      // Registrar cambio de permisos de usuario
-      await registrarCambioPermisos(
-        selectedItem.value,
-        { tipo: 'usuario', secciones: localPermisos.secciones_acceso?.length || 0 },
-        `Actualización de permisos individuales`
-      );
-    }
+    await updateUsuarioMutation.mutateAsync(localPermisos);
+    
+    // Registrar cambio de permisos de usuario
+    await registrarCambioPermisos(
+      selectedUsuario,
+      { tipo: 'usuario', secciones: localPermisos.secciones_acceso?.length || 0 },
+      `Actualización de permisos individuales`
+    );
   };
 
   const handleEditEmpleado = (usuario) => {
@@ -524,57 +459,35 @@ export default function GestionAccesoUnificada() {
 
           {/* TAB PERMISOS */}
           <TabsContent value="permisos">
-            <div className="grid lg:grid-cols-4 gap-6">
-              {/* Panel izquierdo: Selección */}
-              <div className="lg:col-span-1 space-y-4">
-                <Card className="shadow-sm">
-                  <CardHeader className="pb-3 border-b">
-                    <CardTitle className="text-base">Roles Globales</CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-3 space-y-2">
-                    {Object.entries(rolesConfig).map(([key, config]) => (
-                      <button
-                        key={key}
-                        onClick={() => handleSelectRol(key)}
-                        className={cn(
-                          'w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
-                          selectedItem?.value === key
-                            ? 'bg-emerald-100 text-emerald-700'
-                            : 'hover:bg-slate-100 text-slate-700'
-                        )}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="capitalize">{config.label}</span>
-                          {selectedItem?.value === key && <ChevronRight className="w-4 h-4" />}
-                        </div>
-                      </button>
-                    ))}
-                  </CardContent>
-                </Card>
-
+            <div className="grid lg:grid-cols-3 gap-6">
+              {/* Panel izquierdo: Lista de usuarios */}
+              <div className="lg:col-span-1">
                 <Card className="shadow-sm">
                   <CardHeader className="pb-3 border-b">
                     <CardTitle className="text-base">Usuarios</CardTitle>
+                    <p className="text-xs text-slate-500 mt-1">Configura qué puede ver cada usuario</p>
                   </CardHeader>
-                  <CardContent className="pt-3 space-y-2 max-h-96 overflow-y-auto">
+                  <CardContent className="pt-3 space-y-2 max-h-[calc(100vh-300px)] overflow-y-auto">
                     {usuariosConRol.map(usuario => (
                       <button
                         key={usuario.id}
                         onClick={() => handleSelectUsuario(usuario)}
                         className={cn(
                           'w-full text-left px-3 py-2.5 rounded-lg text-sm transition-all',
-                          selectedItem?.value?.id === usuario.id
-                            ? 'bg-emerald-100'
-                            : 'hover:bg-slate-100'
+                          selectedUsuario?.id === usuario.id
+                            ? 'bg-emerald-100 border-2 border-emerald-300'
+                            : 'hover:bg-slate-100 border-2 border-transparent'
                         )}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-slate-800 truncate">{usuario.full_name}</p>
-                            <p className="text-xs text-slate-500 capitalize">{usuario.rol}</p>
+                            <p className="text-xs text-slate-500 capitalize mt-0.5">
+                              {rolesConfig[usuario.rol]?.label || usuario.rol}
+                            </p>
                           </div>
-                          {selectedItem?.value?.id === usuario.id && (
-                            <ChevronRight className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                          {selectedUsuario?.id === usuario.id && (
+                            <ChevronRight className="w-4 h-4 flex-shrink-0 mt-0.5 text-emerald-600" />
                           )}
                         </div>
                       </button>
@@ -583,22 +496,24 @@ export default function GestionAccesoUnificada() {
                 </Card>
               </div>
 
-              {/* Panel central: Permisos */}
+              {/* Panel central: Permisos del usuario */}
               <div className="lg:col-span-2">
-                {selectedItem ? (
+                {selectedUsuario ? (
                   <Card className="shadow-sm">
                     <CardHeader className="pb-3 border-b flex flex-row items-center justify-between">
                       <div>
-                        <CardTitle>
-                          {selectedItem.type === 'rol' 
-                            ? `${rolesConfig[selectedItem.value].label}` 
-                            : selectedItem.value.full_name}
+                        <CardTitle className="flex items-center gap-2">
+                          {selectedUsuario.full_name}
+                          <Badge className={cn(rolesConfig[selectedUsuario.rol]?.color)}>
+                            {rolesConfig[selectedUsuario.rol]?.label}
+                          </Badge>
                         </CardTitle>
+                        <p className="text-xs text-slate-500 mt-1">Configura los permisos específicos de este usuario</p>
                       </div>
                       {hasChanges && (
                         <Button
                           onClick={handleGuardar}
-                          disabled={updateRolMutation.isPending || updateUsuarioMutation.isPending}
+                          disabled={updateUsuarioMutation.isPending}
                           className="bg-emerald-600 hover:bg-emerald-700 gap-2"
                         >
                           <Save className="w-4 h-4" />
@@ -607,64 +522,34 @@ export default function GestionAccesoUnificada() {
                       )}
                     </CardHeader>
                     <CardContent className="pt-4 space-y-4 max-h-[calc(100vh-300px)] overflow-y-auto">
-                      {selectedItem.type === 'rol' ? (
-                        Object.entries(seccionesPorCategoria).map(([categoria, secciones]) => (
-                          <div key={categoria}>
-                            <h4 className="font-semibold text-slate-700 mb-2 text-sm">{categoria}</h4>
-                            <div className="space-y-2">
-                              {secciones.map(seccion => {
-                                const permiso = localPermisos[seccion.id];
-                                if (!permiso) return null;
-
-                                return (
-                                  <div key={seccion.id} className="border rounded-lg p-3 space-y-2">
-                                    <p className="text-sm font-medium text-slate-800">{seccion.label}</p>
-                                    <div className="grid grid-cols-4 gap-2">
-                                      {['ver', 'crear', 'editar', 'eliminar'].map(tipo => (
-                                        <div key={tipo} className="flex items-center gap-2">
-                                          <Switch
-                                            checked={permiso.permisos?.[tipo] || false}
-                                            onCheckedChange={() => handleTogglePermiso(selectedItem.value, seccion.id, tipo)}
-                                          />
-                                          <span className="text-xs text-slate-600 capitalize">{tipo}</span>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
+                      {localPermisos.secciones_acceso?.map((seccion, idx) => (
+                        <div key={seccion.seccion} className="border rounded-lg p-4 space-y-3 hover:border-emerald-200 transition-colors">
+                          <p className="text-sm font-semibold text-slate-800 capitalize">
+                            {seccion.seccion.replace(/_/g, ' ')}
+                          </p>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            {['ver', 'crear', 'editar', 'eliminar'].map(tipo => (
+                              <div key={tipo} className="flex items-center gap-2">
+                                <Switch
+                                  checked={seccion[tipo] || false}
+                                  onCheckedChange={(checked) =>
+                                    handlePermissionChange(idx, tipo, checked)
+                                  }
+                                />
+                                <span className="text-xs text-slate-600 capitalize font-medium">{tipo}</span>
+                              </div>
+                            ))}
                           </div>
-                        ))
-                      ) : (
-                        localPermisos.secciones_acceso?.map((seccion, idx) => (
-                          <div key={seccion.seccion} className="border rounded-lg p-3 space-y-2">
-                            <p className="text-sm font-medium text-slate-800 capitalize">
-                              {seccion.seccion.replace(/_/g, ' ')}
-                            </p>
-                            <div className="grid grid-cols-4 gap-2">
-                              {['ver', 'crear', 'editar', 'eliminar'].map(tipo => (
-                                <div key={tipo} className="flex items-center gap-2">
-                                  <Switch
-                                    checked={seccion[tipo] || false}
-                                    onCheckedChange={(checked) =>
-                                      handlePermissionChange(idx, tipo, checked)
-                                    }
-                                  />
-                                  <span className="text-xs text-slate-600 capitalize">{tipo}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        ))
-                      )}
+                        </div>
+                      ))}
                     </CardContent>
                   </Card>
                 ) : (
                   <Card className="shadow-sm">
                     <CardContent className="pt-12 pb-12 text-center text-slate-500">
-                      <AlertCircle className="w-12 h-12 mx-auto mb-3 opacity-40" />
-                      <p>Selecciona un rol o usuario para ver sus permisos</p>
+                      <Users className="w-12 h-12 mx-auto mb-3 opacity-40" />
+                      <p className="font-medium mb-1">Selecciona un usuario</p>
+                      <p className="text-sm">Configura exactamente qué puede ver cada persona</p>
                     </CardContent>
                   </Card>
                 )}
