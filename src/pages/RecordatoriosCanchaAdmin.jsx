@@ -81,44 +81,12 @@ export default function RecordatoriosCanchaAdmin() {
         </header>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4">
           <Card className="shadow-sm">
             <CardContent className="pt-6">
               <div className="text-center">
                 <p className="text-2xl font-bold text-slate-900">{recordatoriosFiltrados.length}</p>
-                <p className="text-sm text-slate-500 mt-1">Total del día</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="shadow-sm border-blue-200 bg-blue-50/30">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-blue-600">{stats.abonos}</p>
-                <p className="text-sm text-slate-500 mt-1">Abonos</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="shadow-sm border-emerald-200 bg-emerald-50/30">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-emerald-600">{stats.clases}</p>
-                <p className="text-sm text-slate-500 mt-1">Clases</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="shadow-sm border-orange-200 bg-orange-50/30">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <p className="text-xl font-bold text-orange-600">${stats.montoPendiente.toLocaleString('es-AR')}</p>
-                <p className="text-xs text-slate-500 mt-1">Por cobrar</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="shadow-sm border-emerald-300 bg-emerald-100/30">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <p className="text-xl font-bold text-emerald-700">${stats.montoCobrado.toLocaleString('es-AR')}</p>
-                <p className="text-xs text-slate-500 mt-1">Cobrado</p>
+                <p className="text-sm text-slate-500 mt-1">Recordatorios del día</p>
               </div>
             </CardContent>
           </Card>
