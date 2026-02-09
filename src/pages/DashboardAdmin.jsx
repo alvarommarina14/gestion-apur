@@ -143,15 +143,21 @@ export default function DashboardAdmin() {
       start: startOfMonth(mesSeleccionado),
       end: endOfMonth(mesSeleccionado),
     }).length;
-    
-    const slotsDisponiblesPorDia = 4 * 28;
+
+    // Calcular slots disponibles: 4 canchas × 27 franjas de 30 min (08:00-21:30) × dias del mes
+    const franjasHorarias = 27; // 13.5 horas × 2 franjas de 30 min
+    const slotsDisponiblesPorDia = 4 * franjasHorarias;
     const totalSlotsDisponibles = slotsDisponiblesPorDia * diasDelMes;
-    
+
+    // Calcular slots ocupados: contar franjas de 30 min que ocupa cada turno
     const slotsOcupados = turnosFiltrados.reduce((sum, t) => {
-      return sum + (t.duracion === 90 ? 3 : 2);
+      const franjasOcupadas = Math.ceil(t.duracion / 30);
+      return sum + franjasOcupadas;
     }, 0);
-    
-    const ocupacionPorcentaje = ((slotsOcupados / totalSlotsDisponibles) * 100).toFixed(1);
+
+    const ocupacionPorcentaje = totalSlotsDisponibles > 0 
+      ? ((slotsOcupados / totalSlotsDisponibles) * 100).toFixed(1)
+      : 0;
     
     const ordenados = [...ocupacionPorHorario].sort((a, b) => b.cantidad - a.cantidad);
     const masUsados = ordenados.slice(0, 3);
