@@ -32,44 +32,7 @@ export default function RecordatoriosCanchaEmpleado() {
     staleTime: 30000,
   });
 
-  const marcarHechoMutation = useMutation({
-    mutationFn: async (recordatorio) => {
-      await base44.entities.RecordatorioCancha.update(recordatorio.id, {
-        estado: 'hecho',
-        hecho_por: user.email,
-        hecho_por_nombre: user.full_name,
-        hora_confirmacion: new Date().toISOString(),
-      });
 
-      if (recordatorio.turno_cancha_id) {
-        await base44.entities.TurnoCancha.update(recordatorio.turno_cancha_id, {
-          pagado: true,
-        });
-      }
-
-      if (recordatorio.repeticion_semanal) {
-        const fechaActual = parseISO(recordatorio.fecha);
-        const proximaSemana = new Date(fechaActual);
-        proximaSemana.setDate(proximaSemana.getDate() + 7);
-
-        await base44.entities.RecordatorioCancha.create({
-          fecha: format(proximaSemana, 'yyyy-MM-dd'),
-          hora: recordatorio.hora,
-          cancha: recordatorio.cancha,
-          profesor: recordatorio.profesor,
-          monto: recordatorio.monto,
-          repeticion_semanal: true,
-          dia_semana: format(proximaSemana, 'EEEE', { locale: es }),
-          recordatorio_base_id: recordatorio.recordatorio_base_id || recordatorio.id,
-          notas: recordatorio.notas,
-        });
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
-      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
-    },
-  });
 
   const itemsCombinados = useMemo(() => {
     const items = [];
