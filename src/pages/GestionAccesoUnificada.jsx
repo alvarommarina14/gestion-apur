@@ -371,7 +371,7 @@ export default function GestionAccesoUnificada() {
       recibir_notificaciones_cancha: usuario.recibir_notificaciones_cancha !== false,
     });
     const permisoActual = permisos.usuarioPermisos?.find(p => p.usuario_id === usuario.id);
-    setSeccionesEmpleado(permisoActual?.secciones_acceso || {});
+    setSeccionesEmpleado(permisoActual?.secciones_acceso || []);
   };
 
   const handleSaveEmpleado = async () => {
@@ -396,6 +396,7 @@ export default function GestionAccesoUnificada() {
       await base44.entities.PermisoUsuario.create(permisoData);
     }
     queryClient.invalidateQueries({ queryKey: ['permisos_todos'] });
+    queryClient.invalidateQueries({ queryKey: ['permisos_usuario'] });
   };
 
   const toggleSeleccionClase = (claseId) => {
@@ -928,32 +929,38 @@ export default function GestionAccesoUnificada() {
             </div>
 
             <div className="border-t pt-4">
-              <Label className="font-semibold mb-3 block">Acceso a secciones</Label>
+              <Label className="font-semibold mb-3 block">Acceso a secciones (Empleados)</Label>
               <div className="space-y-3">
                 {[
-                  { id: 'tareas', nombre: 'Tareas', icon: '✅' },
-                  { id: 'agenda_canchas', nombre: 'Agenda de Canchas', icon: '📅' },
-                  { id: 'recordatorios_cancha', nombre: 'Recordatorios', icon: '🔔' },
+                  { id: 'empleados', nombre: 'Tareas', icon: '✅' },
+                  { id: 'booking_canchas', nombre: 'Agenda de Canchas', icon: '📅' },
+                  { id: 'recordatorios_cancha_empleado', nombre: 'Mis Recordatorios', icon: '🔔' },
                   { id: 'reportes', nombre: 'Reportes', icon: '📊' },
-                ].map(seccion => (
-                  <div key={seccion.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-slate-50">
-                    <Switch
-                      checked={seccionesEmpleado[seccion.id]?.ver || false}
-                      onCheckedChange={(checked) => {
-                        setSeccionesEmpleado({
-                          ...seccionesEmpleado,
-                          [seccion.id]: {
-                            ...(seccionesEmpleado[seccion.id] || {}),
+                ].map(seccion => {
+                  const seccionData = seccionesEmpleado.find(s => s.seccion === seccion.id) || { seccion: seccion.id, ver: false };
+                  
+                  return (
+                    <div key={seccion.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-slate-50">
+                      <Switch
+                        checked={seccionData.ver || false}
+                        onCheckedChange={(checked) => {
+                          const nuevasSecciones = seccionesEmpleado.filter(s => s.seccion !== seccion.id);
+                          nuevasSecciones.push({
+                            seccion: seccion.id,
                             ver: checked,
-                          },
-                        });
-                      }}
-                    />
-                    <Label className="flex-1 cursor-pointer m-0">
-                      {seccion.icon} {seccion.nombre}
-                    </Label>
-                  </div>
-                ))}
+                            crear: checked,
+                            editar: checked,
+                            eliminar: false,
+                          });
+                          setSeccionesEmpleado(nuevasSecciones);
+                        }}
+                      />
+                      <Label className="flex-1 cursor-pointer m-0">
+                        {seccion.icon} {seccion.nombre}
+                      </Label>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </form>
