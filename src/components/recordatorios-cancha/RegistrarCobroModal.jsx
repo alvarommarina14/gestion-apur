@@ -122,11 +122,13 @@ export default function RegistrarCobroModal({ open, onOpenChange, recordatorio, 
   if (!recordatorio || !cliente) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Registrar Cobro</DialogTitle>
-        </DialogHeader>
+     <Dialog open={open} onOpenChange={onOpenChange}>
+       <DialogContent className="sm:max-w-md">
+         <DialogHeader>
+           <DialogTitle>
+             {recordatorio?.turno?.pagado ? 'Editar Pago' : 'Registrar Cobro'}
+           </DialogTitle>
+         </DialogHeader>
 
         <div className="bg-slate-50 p-3 rounded-lg text-sm space-y-1 mb-4">
           <p>
