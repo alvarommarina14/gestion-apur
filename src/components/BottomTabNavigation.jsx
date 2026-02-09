@@ -6,7 +6,11 @@ import { cn } from '@/lib/utils';
 
 export default function BottomTabNavigation({ currentPageName, userRole }) {
   const tabs = [
-    { name: 'Dashboard', href: 'Dashboard', icon: LayoutDashboard },
+    { 
+      name: 'Dashboard', 
+      href: userRole === 'profesor' ? 'ProfesorMenu' : 'Dashboard', 
+      icon: LayoutDashboard 
+    },
     { name: 'Agenda', href: 'Agenda', icon: Calendar },
     { name: 'Alumnos', href: 'Alumnos', icon: Users },
   ];
@@ -23,7 +27,8 @@ export default function BottomTabNavigation({ currentPageName, userRole }) {
          style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       <div className="flex justify-around items-center h-16">
         {visibleTabs.map((tab) => {
-          const isActive = currentPageName === tab.href;
+          const isActive = currentPageName === tab.href || 
+            (tab.href === 'ProfesorMenu' && currentPageName === 'Dashboard');
           const Icon = tab.icon;
 
           return (
