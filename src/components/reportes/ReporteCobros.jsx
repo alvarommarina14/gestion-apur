@@ -16,23 +16,8 @@ export default function ReporteCobros({ turnos = [], pagos = [], cobrosClientes 
     const morosos = cobrosClientes.filter(c => c.estado === 'moroso');
     const deudaMorosos = morosos.reduce((sum, c) => sum + (c.monto || 0), 0);
 
-    // Ingresos por medio de pago
+    // Ingresos por medio de pago - EN CERO por ahora (sin datos de pagos integrados)
     const mediosPago = {};
-    
-    turnos.filter(t => t.pagado).forEach(t => {
-      const medio = t.notas_pago?.includes('transferencia') ? 'Transferencia' 
-        : t.notas_pago?.includes('Efectivo') ? 'Efectivo'
-        : t.notas_pago?.includes('débito') ? 'Débito'
-        : t.notas_pago?.includes('crédito') ? 'Crédito'
-        : 'Otro';
-      mediosPago[medio] = (mediosPago[medio] || 0) + (t.monto || 0);
-    });
-
-    pagos.forEach(p => {
-      const medio = p.medio_pago || 'Efectivo';
-      const capitalizado = medio.charAt(0).toUpperCase() + medio.slice(1);
-      mediosPago[capitalizado] = (mediosPago[capitalizado] || 0) + (p.monto || 0);
-    });
 
     // Cobros por empleado (de turnos)
     const cobrosPorEmpleado = {};
@@ -138,32 +123,17 @@ export default function ReporteCobros({ turnos = [], pagos = [], cobrosClientes 
       {/* Gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Ingresos por medio de pago */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Ingresos por Medio de Pago</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={analisisCobros.mediosPago}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ medio, percent }) => `${medio} ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="monto"
-                >
-                  {analisisCobros.mediosPago.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={coloresMedios[entry.medio] || '#64748b'} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => formatMoney(value)} />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Ingresos por Medio de Pago</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="py-12 text-center text-slate-500">
+                <DollarSign className="w-12 h-12 mx-auto mb-3 opacity-40" />
+                <p className="text-sm">En construcción - Sincronización pendiente con cobros de profesores y admin</p>
+              </div>
+            </CardContent>
+          </Card>
 
         {/* Cobros por empleado */}
         <Card>
@@ -196,21 +166,9 @@ export default function ReporteCobros({ turnos = [], pagos = [], cobrosClientes 
           <CardTitle className="text-base">Detalle por Medio de Pago</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {analisisCobros.mediosPago.map((item, idx) => (
-              <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div 
-                    className="w-4 h-4 rounded-full" 
-                    style={{ backgroundColor: coloresMedios[item.medio] || '#64748b' }}
-                  />
-                  <span className="font-medium text-slate-900">{item.medio}</span>
-                </div>
-                <span className="text-lg font-bold text-slate-900">
-                  {formatMoney(item.monto)}
-                </span>
-              </div>
-            ))}
+          <div className="py-12 text-center text-slate-500">
+            <DollarSign className="w-12 h-12 mx-auto mb-3 opacity-40" />
+            <p className="text-sm">Sin datos - Se sincronizará con cobros de profesores y admin</p>
           </div>
         </CardContent>
       </Card>
