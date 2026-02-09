@@ -6,13 +6,20 @@ import { es } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { DollarSign, Plus, AlertCircle, CheckCircle } from 'lucide-react';
+import { DollarSign, Plus, AlertCircle, CheckCircle, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import NuevoCbroModal from './NuevoCbroModal';
 
 export default function SeccionCobros({ cliente }) {
-  const [modalNuevoCobro, setModalNuevoCobro] = useState(false);
-  const queryClient = useQueryClient();
+   const [modalNuevoCobro, setModalNuevoCobro] = useState(false);
+   const queryClient = useQueryClient();
+
+   const deleteCbroMutation = useMutation({
+     mutationFn: (cobroId) => base44.entities.CobroCliente.delete(cobroId),
+     onSuccess: () => {
+       queryClient.invalidateQueries({ queryKey: ['cobros-cliente', cliente.id] });
+     },
+   });
 
   const { data: cobros = [] } = useQuery({
     queryKey: ['cobros-cliente', cliente.id],
