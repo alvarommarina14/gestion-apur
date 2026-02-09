@@ -1,19 +1,17 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { CheckCircle, Clock, MapPin, User, DollarSign, Eye } from 'lucide-react';
+import { CheckCircle, Clock, MapPin, User, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 
 
 export default function RecordatoriosCanchaEmpleado() {
   const queryClient = useQueryClient();
-  const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const today = format(new Date(), 'yyyy-MM-dd');
 
   const { data: user } = useQuery({
     queryKey: ['me'],
@@ -21,18 +19,55 @@ export default function RecordatoriosCanchaEmpleado() {
   });
 
   const { data: recordatorios = [], isLoading } = useQuery({
-    queryKey: ['recordatorios-cancha', selectedDate],
-    queryFn: () => base44.entities.RecordatorioCancha.filter({ fecha: selectedDate }),
+    queryKey: ['recordatorios-cancha', today],
+    queryFn: () => base44.entities.RecordatorioCancha.filter({ fecha: today }),
     staleTime: 30000,
   });
 
   const { data: turnos = [] } = useQuery({
-    queryKey: ['turnos-cancha', selectedDate],
-    queryFn: () => base44.entities.TurnoCancha.filter({ fecha: selectedDate }),
+    queryKey: ['turnos-cancha', today],
+    queryFn: () => base44.entities.TurnoCancha.filter({ fecha: today }),
     staleTime: 30000,
   });
 
+  const marcarHechoMutation = useMutation({
+    mutationFn: async (recordatorio) => {
+      await base44.entities.RecordatorioCancha.update(recordatorio.id, {
+        estado: 'hecho',
+        hecho_por: user.email,
+        hecho_por_nombre: user.full_name,
+        hora_confirmacion: new Date().toISOString(),
+      });
 
+      if (recordatorio.turno_cancha_id) {
+        await base44.entities.TurnoCancha.update(recordatorio.turno_cancha_id, {
+          pagado: true,
+        });
+      }
+
+      if (recordatorio.repeticion_semanal) {
+        const fechaActual = parseISO(recordatorio.fecha);
+        const proximaSemana = new Date(fechaActual);
+        proximaSemana.setDate(proximaSemana.getDate() + 7);
+
+        await base44.entities.RecordatorioCancha.create({
+          fecha: format(proximaSemana, 'yyyy-MM-dd'),
+          hora: recordatorio.hora,
+          cancha: recordatorio.cancha,
+          profesor: recordatorio.profesor,
+          monto: recordatorio.monto,
+          repeticion_semanal: true,
+          dia_semana: format(proximaSemana, 'EEEE', { locale: es }),
+          recordatorio_base_id: recordatorio.recordatorio_base_id || recordatorio.id,
+          notas: recordatorio.notas,
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+    },
+  });
 
   const itemsCombinados = useMemo(() => {
     const items = [];
@@ -108,20 +143,9 @@ export default function RecordatoriosCanchaEmpleado() {
         <header>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Recordatorios de Cancha</h1>
           <p className="text-slate-500 text-xs sm:text-sm">
-            {format(parseISO(selectedDate), "EEEE d 'de' MMMM, yyyy", { locale: es })}
+            {format(new Date(), "EEEE d 'de' MMMM, yyyy", { locale: es })}
           </p>
         </header>
-
-        {/* Selector de fecha */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-slate-700">Seleccionar fecha</Label>
-          <Input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="max-w-xs"
-          />
-        </div>
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-2 sm:gap-4">
@@ -244,12 +268,25 @@ export default function RecordatoriosCanchaEmpleado() {
                             {format(parseISO(item.hora_confirmacion), 'HH:mm')}
                           </div>
                         )}
-                        </div>
+                      </div>
 
-                        <div className="flex items-center gap-2 text-slate-400 shrink-0">
-                        <Eye className="w-5 h-5" />
-                        <span className="text-sm font-medium">Ver</span>
+                      {item.estado === 'pendiente' && item.tipo === 'recordatorio' && (
+                        <Button
+                          onClick={() => marcarHechoMutation.mutate(item.data)}
+                          disabled={marcarHechoMutation.isPending}
+                          className="bg-emerald-600 hover:bg-emerald-700 shrink-0 h-11 px-5 text-base active:scale-95 touch-manipulation"
+                        >
+                          <CheckCircle className="w-5 h-5 mr-2" />
+                          HECHO
+                        </Button>
+                      )}
+
+                      {item.estado === 'hecho' && (
+                        <div className="flex items-center gap-2 text-emerald-600 shrink-0">
+                          <CheckCircle className="w-5 h-5" />
+                          <span className="text-sm font-medium">Completado</span>
                         </div>
+                      )}
                     </div>
                   </div>
                 ))}
