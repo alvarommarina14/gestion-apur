@@ -571,71 +571,76 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
          } else {
        // Si es repetición semanal, crear turnos para 52 semanas (batch optimizado)
        if (data.repeticion_semanal) {
-         try {
-           const empleadosSeleccionados = empleados.filter(e => data.empleados_asignados_ids.includes(e.id));
+         (async () => {
+           try {
+             console.log('🔄 Iniciando creación de turnos recurrentes...');
+             const empleadosSeleccionados = empleados.filter(e => data.empleados_asignados_ids.includes(e.id));
 
-           // Preparar todos los turnos
-           const turnosACrear = [];
-           for (let i = 0; i < 52; i++) {
-             const fechaTurno = addWeeks(parseISO(data.fecha), i);
-             turnosACrear.push({
-               ...data,
-               fecha: format(fechaTurno, 'yyyy-MM-dd'),
-               empleados_asignados_emails: empleadosSeleccionados.map(e => e.email),
-               empleados_asignados_nombres: empleadosSeleccionados.map(e => e.full_name),
-               estado: 'activo',
-               make_sync_status: 'pendiente',
-               base44_agenda_link: `${window.location.origin}/AgendaEmpleados`,
-             });
-           }
-
-           // Crear todos los turnos de una vez
-           const turnosCreados = await base44.entities.TurnoCancha.bulkCreate(turnosACrear);
-
-           // Crear recordatorios en batch
-           const recordatorios = turnosCreados.map((turno) => {
-             const fechaTurno = parseISO(turno.fecha);
-             return {
-               turno_cancha_id: turno.id,
-               fecha: turno.fecha,
-               hora: turno.hora_inicio,
-               cancha: turno.cancha,
-               cliente: turno.cliente,
-               tipo_turno: turno.tipo_turno,
-               modalidad_alquiler: turno.modalidad_alquiler || null,
-               profesor: turno.profesor || null,
-               monto: turno.monto,
-               pagado: turno.pagado,
-               repeticion_semanal: true,
-               dia_semana: format(fechaTurno, 'EEEE', { locale: es }),
-               notas: turno.notas || `Alquiler de ${turno.cliente}`,
-             };
-           });
-
-           await base44.entities.RecordatorioCancha.bulkCreate(recordatorios);
-
-           // Sincronizar primer turno con recurrencia en Google Calendar
-           if (turnosCreados.length > 0) {
-             try {
-               await base44.functions.invoke('sincronizarTurnoRecurrenteGoogleCalendar', { 
-                 turno_id: turnosCreados[0].id
+             // Preparar todos los turnos
+             const turnosACrear = [];
+             for (let i = 0; i < 52; i++) {
+               const fechaTurno = addWeeks(parseISO(data.fecha), i);
+               turnosACrear.push({
+                 ...data,
+                 fecha: format(fechaTurno, 'yyyy-MM-dd'),
+                 empleados_asignados_emails: empleadosSeleccionados.map(e => e.email),
+                 empleados_asignados_nombres: empleadosSeleccionados.map(e => e.full_name),
+                 estado: 'activo',
+                 make_sync_status: 'pendiente',
+                 base44_agenda_link: `${window.location.origin}/AgendaEmpleados`,
                });
-             } catch (err) {
-               console.error('Error sincronizando recurrencia con Google Calendar:', err);
              }
-           }
 
-           // Invalidar queries y cerrar inmediatamente
-           queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
-           queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
-           queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha-push'] });
-           setIsSubmitting(false);
-           onOpenChange(false);
-         } catch (err) {
-           console.error('Error creando turnos semanales:', err);
-           setError(`Error creando turnos: ${err.message}`);
-           setIsSubmitting(false);
-         }
+             // Crear todos los turnos de una vez
+             console.log('📝 Creando 52 turnos en batch...');
+             const turnosCreados = await base44.entities.TurnoCancha.bulkCreate(turnosACrear);
+             console.log(`✅ ${turnosCreados.length} turnos creados`);
+
+             // Crear recordatorios en batch
+             console.log('🔔 Creando recordatorios...');
+             const recordatorios = turnosCreados.map((turno) => {
+               const fechaTurno = parseISO(turno.fecha);
+               return {
+                 turno_cancha_id: turno.id,
+                 fecha: turno.fecha,
+                 hora: turno.hora_inicio,
+                 cancha: turno.cancha,
+                 cliente: turno.cliente,
+                 tipo_turno: turno.tipo_turno,
+                 modalidad_alquiler: turno.modalidad_alquiler || null,
+                 profesor: turno.profesor || null,
+                 monto: turno.monto,
+                 pagado: turno.pagado,
+                 repeticion_semanal: true,
+                 dia_semana: format(fechaTurno, 'EEEE', { locale: es }),
+                 notas: turno.notas || `Alquiler de ${turno.cliente}`,
+               };
+             });
+
+             await base44.entities.RecordatorioCancha.bulkCreate(recordatorios);
+             console.log(`✅ ${recordatorios.length} recordatorios creados`);
+
+             // Sincronizar primer turno con recurrencia en Google Calendar (sin esperar)
+             if (turnosCreados.length > 0) {
+               base44.functions.invoke('sincronizarTurnoRecurrenteGoogleCalendar', { 
+                 turno_id: turnosCreados[0].id
+               }).catch(err => console.error('Error sincronizando con Google Calendar:', err));
+             }
+
+             // Invalidar queries y cerrar inmediatamente
+             await queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+             await queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+             await queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha-push'] });
+             
+             console.log('✅ Proceso completado, cerrando modal...');
+             setIsSubmitting(false);
+             onOpenChange(false);
+           } catch (err) {
+             console.error('❌ Error creando turnos semanales:', err);
+             setError(`Error: ${err.message || 'No se pudieron crear los turnos'}`);
+             setIsSubmitting(false);
+           }
+         })();
        } else {
          createMutation.mutate(data);
        }
