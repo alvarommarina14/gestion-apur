@@ -75,17 +75,27 @@ export default function CancelarCanchaModal({ open, onOpenChange, turno, onSucce
       });
     },
     onSuccess: async () => {
-       // Esperar un poco para que la BD se actualice completamente
-       await new Promise(resolve => setTimeout(resolve, 500));
-       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
-       queryClient.invalidateQueries({ queryKey: ['clases'] });
-       queryClient.invalidateQueries({ queryKey: ['cancelaciones-cancha'] });
-       queryClient.invalidateQueries({ queryKey: ['recupero'] });
-       onOpenChange(false);
-       setMotivoMas24h('');
-       setMostrarSelectMotivo(false);
-       onSuccess?.();
-     },
+        // Esperar un poco para que la BD se actualice completamente
+        await new Promise(resolve => setTimeout(resolve, 800));
+
+        // Invalidar queries específicas
+        queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+        queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+        queryClient.invalidateQueries({ queryKey: ['clases'] });
+        queryClient.invalidateQueries({ queryKey: ['cancelaciones-cancha'] });
+        queryClient.invalidateQueries({ queryKey: ['recupero'] });
+
+        // Refetch inmediato para asegurar que se actualiza
+        await Promise.all([
+          queryClient.refetchQueries({ queryKey: ['turnos-cancha'] }),
+          queryClient.refetchQueries({ queryKey: ['recordatorios-cancha'] })
+        ]);
+
+        setMotivoMas24h('');
+        setMostrarSelectMotivo(false);
+        onOpenChange(false);
+        onSuccess?.();
+      },
     onError: (error) => {
       console.error('Error al cancelar cancha:', error);
     }
