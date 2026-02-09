@@ -76,6 +76,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
     if (open) {
       setFormData(prev => ({
         ...prev,
+        profesor_id: '',
         alumnos_ids: recupero ? [recupero.alumno_id] : [],
         es_recupero: !!recupero,
         clase_original_id: recupero?.clase_original_id || '',
