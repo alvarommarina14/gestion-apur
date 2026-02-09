@@ -166,8 +166,14 @@ export default function ClientesPage() {
                           <span className="truncate">{cliente.email}</span>
                         </div>
                       )}
+                      {cliente.precio > 0 && (
+                        <div className="flex items-center gap-2 text-blue-600 font-semibold">
+                          <DollarSign className="w-4 h-4" />
+                          <span>${(cliente.precio || 0).toLocaleString('es-AR')}/mes</span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-2 text-emerald-600 font-semibold">
-                        <DollarSign className="w-4 h-4" />
+                        <TrendingUp className="w-4 h-4" />
                         <span>${(cliente.total_gastado || 0).toLocaleString('es-AR')}</span>
                       </div>
                     </div>
