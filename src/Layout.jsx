@@ -52,7 +52,6 @@ const navigationGestionClases = [
 
 const navigationAgenda = [
   { name: 'Agenda', href: 'Agenda', icon: Calendar, permissionKey: 'booking_canchas' },
-  { name: 'Dashboard Admin', href: 'DashboardAdmin', icon: LayoutDashboard, adminOnly: true, permissionKey: 'dashboard_ocupacion' },
   { name: 'Canchas Admin', href: 'RecordatoriosCanchaAdmin', icon: Calendar, adminOnly: true, permissionKey: 'recordatorios_cancha_admin' },
   { name: 'Mis Recordatorios', href: 'RecordatoriosCanchaEmpleado', icon: Calendar, empleadoOnly: true, permissionKey: 'recordatorios_cancha_empleado' },
 ];
