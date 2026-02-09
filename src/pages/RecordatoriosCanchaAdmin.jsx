@@ -66,15 +66,26 @@ export default function RecordatoriosCanchaAdmin() {
   };
 
   const calcularPrecioTotal = (rec) => {
-    // Obtener alumnos_ids del recordatorio o del turno asociado
-    const alumnosIds = rec.alumnos_ids || rec.turno?.alumnos_ids || [];
+    if (rec.turno?.tipo_turno === 'clase') {
+      // Intentar por IDs primero
+      const alumnosIds = rec.alumnos_ids || rec.turno?.alumnos_ids || [];
+      if (alumnosIds?.length > 0) {
+        const precioAlumnos = alumnosIds.reduce((sum, alumnoId) => {
+          const alumno = alumnos.find(a => a.id === alumnoId);
+          return sum + (alumno?.precio_mensual || 0);
+        }, 0);
+        if (precioAlumnos > 0) return precioAlumnos;
+      }
 
-    if (rec.turno?.tipo_turno === 'clase' && alumnosIds?.length > 0) {
-      const precioAlumnos = alumnosIds.reduce((sum, alumnoId) => {
-        const alumno = alumnos.find(a => a.id === alumnoId);
-        return sum + (alumno?.precio_mensual || 0);
-      }, 0);
-      return precioAlumnos > 0 ? precioAlumnos : rec.monto;
+      // Fallback: buscar por nombres
+      const alumnosNombres = rec.turno?.alumnos_nombres || [];
+      if (Array.isArray(alumnosNombres) && alumnosNombres.length > 0) {
+        const precioAlumnos = alumnosNombres.reduce((sum, nombre) => {
+          const alumno = alumnos.find(a => a.nombre === nombre);
+          return sum + (alumno?.precio_mensual || 0);
+        }, 0);
+        if (precioAlumnos > 0) return precioAlumnos;
+      }
     }
     return rec.monto;
   };
