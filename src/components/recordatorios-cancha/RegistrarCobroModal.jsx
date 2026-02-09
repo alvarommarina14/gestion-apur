@@ -99,7 +99,7 @@ export default function RegistrarCobroModal({ open, onOpenChange, recordatorio, 
     setError(null);
 
     if (tipo === 'pago') {
-      if (!medioPago) {
+      if (!medioPago || medioPago.trim() === '') {
         setError('Selecciona un medio de pago');
         return;
       }
@@ -107,9 +107,9 @@ export default function RegistrarCobroModal({ open, onOpenChange, recordatorio, 
         setError('Ingresa un monto válido');
         return;
       }
-    } else {
-      if (!motivo) {
-        setError('Selecciona un motivo');
+    } else if (tipo === 'no_pago') {
+      if (!motivo || motivo.trim() === '') {
+        setError('Selecciona un motivo para el no pago');
         return;
       }
     }
