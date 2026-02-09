@@ -240,15 +240,12 @@ export default function Layout({ children, currentPageName }) {
             )}
 
             {/* Menú Profesor */}
-            {!cargandoPermisos && user?.rol === 'profesor' && (
+            {user?.rol === 'profesor' && (
               <div>
                 <p className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
                   Gestión de Clases
                 </p>
                 {navigationProfesor.map((item) => {
-                  // Verificar permisos individuales
-                  if (!tieneAcceso(item.permissionKey)) return null;
-
                   const isActive = currentPageName === item.href;
                   const Icon = item.icon;
 
