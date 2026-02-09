@@ -40,7 +40,7 @@ export default function PushNotificationManager() {
                         try {
                                 console.log(
                                         "🔄 Iniciando suscripción push para:",
-                                        user.email,
+                                        user?.email,
                                 );
 
                                 if (!("serviceWorker" in navigator)) {
@@ -50,10 +50,10 @@ export default function PushNotificationManager() {
                                         return;
                                 }
 
-                                if (Notification.permission !== "granted") {
+                                if (Notification?.permission !== "granted") {
                                         console.log(
                                                 "⏳ Esperando permisos de notificación. Estado actual:",
-                                                Notification.permission,
+                                                Notification?.permission,
                                         );
                                         return;
                                 }
@@ -62,7 +62,7 @@ export default function PushNotificationManager() {
                                         "✅ Permisos otorgados, registrando service worker...",
                                 );
                                 const registration =
-                                        await navigator.serviceWorker.register(
+                                        await navigator?.serviceWorker?.register(
                                                 "/service-worker.js",
                                         );
                                 console.log(
@@ -70,7 +70,7 @@ export default function PushNotificationManager() {
                                         registration,
                                 );
 
-                                await navigator.serviceWorker.ready;
+                                await navigator?.serviceWorker?.ready;
                                 console.log("✅ Service worker listo");
 
                                 const messaging = getMessaging(app);
@@ -100,7 +100,7 @@ export default function PushNotificationManager() {
                                         subscribed.current = true;
                                         console.log(
                                                 "✅ FCM token guardado exitosamente en User:",
-                                                user.email,
+                                                user?.email,
                                         );
 
                                         onMessage(messaging, (payload) => {
@@ -110,24 +110,24 @@ export default function PushNotificationManager() {
                                                 );
 
                                                 if (
-                                                        Notification.permission ===
+                                                        Notification?.permission ===
                                                         "granted"
                                                 ) {
                                                         new Notification(
                                                                 payload
-                                                                        .notification
+                                                                        ?.notification
                                                                         ?.title ||
                                                                         "Nueva notificación",
                                                                 {
                                                                         body:
                                                                                 payload
-                                                                                        .notification
+                                                                                        ?.notification
                                                                                         ?.body ||
                                                                                 "",
                                                                         icon: "/icon-192x192.png",
                                                                         tag:
                                                                                 payload
-                                                                                        .data
+                                                                                        ?.data
                                                                                         ?.tag ||
                                                                                 "default",
                                                                 },
@@ -144,12 +144,12 @@ export default function PushNotificationManager() {
                                         "❌ Error suscribiendo a FCM:",
                                         error,
                                 );
-                                console.error("Stack:", error.stack);
+                                console.error("Stack:", error?.stack);
                         }
                 };
 
                 subscribeToPush();
-        }, [user]);
+        }, [user, savePushSubscriptionMutation]);
 
         return null;
 }
