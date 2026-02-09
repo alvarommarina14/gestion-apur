@@ -932,20 +932,22 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
             </div>
           )}
 
-          <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <div>
-              <Label className="font-medium text-slate-800">Repetición semanal</Label>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Se creará automáticamente el mismo turno cada semana
-              </p>
+          {formData.modalidad_alquiler === 'abono' && (
+            <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div>
+                <Label className="font-medium text-slate-800">Repetición semanal</Label>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Se creará automáticamente el mismo turno cada semana
+                </p>
+              </div>
+              <Switch
+                checked={formData.repeticion_semanal}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, repeticion_semanal: checked })
+                }
+              />
             </div>
-            <Switch
-              checked={formData.repeticion_semanal}
-              onCheckedChange={(checked) =>
-                setFormData({ ...formData, repeticion_semanal: checked })
-              }
-            />
-          </div>
+          )}
 
           <div className="space-y-2">
             <Label>Notas (opcional)</Label>
