@@ -452,36 +452,9 @@ export default function DashboardAdmin() {
             </Card>
           </TabsContent>
 
-          {/* TAB INGRESOS */}
-          <TabsContent value="ingresos">
-            <ReportesIngresos 
-              turnos={turnos} 
-              cobrosClientes={cobrosClientes} 
-              pagos={pagos} 
-            />
-          </TabsContent>
-
           {/* TAB OCUPACIÓN */}
           <TabsContent value="ocupacion">
             <ReporteOcupacion turnos={turnosFiltrados} />
-          </TabsContent>
-
-          {/* TAB PROFESORES */}
-          <TabsContent value="profesores">
-            <ReporteProfesores 
-              clases={clases} 
-              profesores={profesores} 
-              pagos={pagos} 
-            />
-          </TabsContent>
-
-          {/* TAB COBROS DETALLADO */}
-          <TabsContent value="cobros">
-            <ReporteCobros 
-              turnos={turnos} 
-              pagos={pagos} 
-              cobrosClientes={cobrosClientes} 
-            />
           </TabsContent>
 
           {/* TAB OCUPACIÓN ORIGINAL (eliminado, ahora está en ReporteOcupacion) */}
