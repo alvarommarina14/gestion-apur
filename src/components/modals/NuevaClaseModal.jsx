@@ -39,6 +39,11 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
     queryKey: ['alumnos'],
     queryFn: () => base44.entities.Alumno.list(),
   });
+
+  const { data: profesores = [] } = useQuery({
+    queryKey: ['profesores'],
+    queryFn: () => base44.entities.Profesor.list(),
+  });
   
   const alumnosActivos = alumnos.filter(a => a.estado !== 'pausado');
   
