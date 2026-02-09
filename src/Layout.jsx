@@ -64,7 +64,6 @@ const navigationProfesor = [
   { name: 'Dashboard', href: 'Dashboard', icon: LayoutDashboard, permissionKey: 'dashboard' },
   { name: 'Alumnos', href: 'Alumnos', icon: Users, permissionKey: 'alumnos' },
   { name: 'Pagos', href: 'Pagos', icon: DollarSign, permissionKey: 'pagos' },
-  { name: 'Recordatorios', href: 'Recordatorios', icon: RefreshCw, permissionKey: 'recordatorios' },
   { name: 'Reportes', href: 'Reportes', icon: FileText, permissionKey: 'reportes' },
 ];
 
