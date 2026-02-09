@@ -366,12 +366,9 @@ export default function DashboardAdmin() {
         </Card>
 
         <Tabs defaultValue="resumen" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="resumen" className="text-xs lg:text-sm">Resumen</TabsTrigger>
             <TabsTrigger value="ocupacion" className="text-xs lg:text-sm">Ocupación</TabsTrigger>
-            <TabsTrigger value="ingresos" className="text-xs lg:text-sm">Ingresos</TabsTrigger>
-            <TabsTrigger value="profesores" className="text-xs lg:text-sm">Profesores</TabsTrigger>
-            <TabsTrigger value="cobros" className="text-xs lg:text-sm">Cobros</TabsTrigger>
           </TabsList>
 
           {/* TAB RESUMEN (Dashboard actual simplificado) */}
