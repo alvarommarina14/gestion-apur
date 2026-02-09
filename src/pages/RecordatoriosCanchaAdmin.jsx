@@ -10,79 +10,37 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 export default function RecordatoriosCanchaAdmin() {
-  const queryClient = useQueryClient();
-  const [vista, setVista] = useState('semana');
-  const [currentWeek, setCurrentWeek] = useState(new Date());
-  const [nuevoModal, setNuevoModal] = useState({ open: false, recordatorio: null });
-  const [seleccionados, setSeleccionados] = useState([]);
+   const [fechaSeleccionada, setFechaSeleccionada] = useState(format(new Date(), 'yyyy-MM-dd'));
 
-  const { data: recordatorios = [], isLoading } = useQuery({
-    queryKey: ['recordatorios-cancha'],
-    queryFn: () => base44.entities.RecordatorioCancha.list('-fecha'),
-  });
+   const { data: recordatorios = [] } = useQuery({
+     queryKey: ['recordatorios-cancha'],
+     queryFn: () => base44.entities.RecordatorioCancha.list('-fecha'),
+   });
 
-  const { data: turnos = [] } = useQuery({
-    queryKey: ['turnos-cancha-all'],
-    queryFn: () => base44.entities.TurnoCancha.list(),
-  });
+   const { data: turnos = [] } = useQuery({
+     queryKey: ['turnos-cancha-all'],
+     queryFn: () => base44.entities.TurnoCancha.list(),
+   });
 
-  const eliminarMutation = useMutation({
-    mutationFn: (id) => base44.entities.RecordatorioCancha.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
-    },
-  });
+   const recordatoriosConTurnos = useMemo(() => {
+     return recordatorios.map(rec => {
+       const turno = turnos.find(t => t.id === rec.turno_cancha_id);
+       return { ...rec, turno };
+     });
+   }, [recordatorios, turnos]);
 
-  const eliminarMultiplesMutation = useMutation({
-    mutationFn: async (ids) => {
-      await Promise.all(ids.map(id => base44.entities.RecordatorioCancha.delete(id)));
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
-      setSeleccionados([]);
-    },
-  });
+   const recordatoriosFiltrados = useMemo(() => {
+     return recordatoriosConTurnos
+       .filter(r => r.fecha === fechaSeleccionada)
+       .sort((a, b) => (a.hora || '').localeCompare(b.hora || ''));
+   }, [recordatoriosConTurnos, fechaSeleccionada]);
 
-  const weekStart = startOfWeek(currentWeek, { locale: es });
-  const weekEnd = endOfWeek(currentWeek, { locale: es });
-
-  const recordatoriosConTurnos = useMemo(() => {
-    return recordatorios.map(rec => {
-      const turno = turnos.find(t => t.id === rec.turno_cancha_id);
-      return { ...rec, turno };
-    });
-  }, [recordatorios, turnos]);
-
-  const recordatoriosFiltrados = useMemo(() => {
-    if (vista === 'todos') return recordatoriosConTurnos;
-    
-    return recordatoriosConTurnos.filter(r => {
-      const fecha = parseISO(r.fecha);
-      return fecha >= weekStart && fecha <= weekEnd;
-    });
-  }, [recordatoriosConTurnos, vista, weekStart, weekEnd]);
-
-  const recordatoriosPorDia = useMemo(() => {
-    const dias = {};
-    for (let i = 0; i < 7; i++) {
-      const dia = addDays(weekStart, i);
-      const diaStr = format(dia, 'yyyy-MM-dd');
-      dias[diaStr] = recordatoriosFiltrados
-        .filter(r => r.fecha === diaStr)
-        .sort((a, b) => (a.hora || '').localeCompare(b.hora || ''));
-    }
-    return dias;
-  }, [recordatoriosFiltrados, weekStart]);
-
-  const stats = useMemo(() => {
-    const pendientes = recordatoriosFiltrados.filter(r => r.estado === 'pendiente').length;
-    const hechos = recordatoriosFiltrados.filter(r => r.estado === 'hecho').length;
-    const montoTotal = recordatoriosFiltrados.reduce((sum, r) => sum + (r.monto || 0), 0);
-    const montoCobrado = recordatoriosFiltrados
-      .filter(r => r.estado === 'hecho')
-      .reduce((sum, r) => sum + (r.monto || 0), 0);
-    return { pendientes, hechos, montoTotal, montoCobrado };
-  }, [recordatoriosFiltrados]);
+   const stats = useMemo(() => {
+     const abonos = recordatoriosFiltrados.filter(r => r.turno?.modalidad_alquiler === 'abono').length;
+     const clases = recordatoriosFiltrados.filter(r => r.turno?.tipo_turno === 'clase').length;
+     const montoTotal = recordatoriosFiltrados.reduce((sum, r) => sum + (r.monto || 0), 0);
+     return { abonos, clases, montoTotal };
+   }, [recordatoriosFiltrados]);
 
   const formatMoney = (amount) => {
     return new Intl.NumberFormat('es-AR', {
