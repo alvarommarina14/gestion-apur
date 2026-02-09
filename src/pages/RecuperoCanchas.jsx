@@ -359,26 +359,41 @@ export default function RecuperoCanchas() {
             )}
           </div>
 
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setSelectedCancelacion(null);
-                setAccion(null);
-              }}
-            >
-              Cerrar
-            </Button>
-            {accion && (
-              <Button
-                onClick={accion === 'recuperar' ? handleRecuperar : handleDescontar}
-                disabled={updateMutation.isPending}
-                className={accion === 'recuperar' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-blue-600 hover:bg-blue-700'}
-              >
-                {updateMutation.isPending ? 'Guardando...' : `${accion === 'recuperar' ? 'Recuperar' : 'Descontar'}`}
-              </Button>
-            )}
+          <DialogFooter className="flex gap-2 justify-between">
+           <div>
+             {selectedCancelacion?.estado_recupero === 'pendiente' && !accion && (
+               <Button
+                 variant="destructive"
+                 size="sm"
+                 onClick={handleEliminar}
+                 disabled={deleteMutation.isPending}
+               >
+                 <Trash2 className="w-4 h-4 mr-1" />
+                 Eliminar
+               </Button>
+             )}
+           </div>
+           <div className="flex gap-2">
+             <Button
+               type="button"
+               variant="outline"
+               onClick={() => {
+                 setSelectedCancelacion(null);
+                 setAccion(null);
+               }}
+             >
+               Cerrar
+             </Button>
+             {accion && (
+               <Button
+                 onClick={accion === 'recuperar' ? handleRecuperar : handleDescontar}
+                 disabled={updateMutation.isPending || deleteMutation.isPending}
+                 className={accion === 'recuperar' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-blue-600 hover:bg-blue-700'}
+               >
+                 {updateMutation.isPending ? 'Guardando...' : `${accion === 'recuperar' ? 'Recuperar' : 'Descontar'}`}
+               </Button>
+             )}
+           </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
