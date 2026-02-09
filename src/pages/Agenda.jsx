@@ -82,6 +82,8 @@ export default function Agenda() {
   }, [turnos]);
 
   const stats = useMemo(() => {
+    if (!isAdmin) return null;
+    
     const total = turnosFiltrados.length;
     const pagados = turnosFiltrados.filter(t => t.pagado).length;
     const pendientes = total - pagados;
@@ -89,7 +91,7 @@ export default function Agenda() {
     const montoPendiente = turnosFiltrados.filter(t => !t.pagado).reduce((sum, t) => sum + (t.monto || 0), 0);
     
     return { total, pagados, pendientes, montoPagado, montoPendiente };
-  }, [turnosFiltrados]);
+  }, [turnosFiltrados, isAdmin]);
 
   const formatMoney = (amount) => {
     return new Intl.NumberFormat('es-AR', {
@@ -155,36 +157,38 @@ export default function Agenda() {
            </div>
          </header>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-3 sm:gap-4">
-          <Card className="shadow-sm dark:bg-slate-800 dark:border-slate-700">
+        {/* Stats - Solo para Admin */}
+        {isAdmin && stats && (
+         <div className="grid grid-cols-3 gap-3 sm:gap-4">
+           <Card className="shadow-sm dark:bg-slate-800 dark:border-slate-700">
+              <CardContent className="pt-4 sm:pt-6 pb-4">
+                <div className="text-center">
+                  <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">{stats.total}</p>
+                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Turnos</p>
+                </div>
+              </CardContent>
+            </Card>
+           <Card className="shadow-sm border-emerald-200 bg-emerald-50/30">
              <CardContent className="pt-4 sm:pt-6 pb-4">
                <div className="text-center">
-                 <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">{stats.total}</p>
-                 <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Turnos</p>
+                 <p className="text-xl sm:text-2xl font-bold text-emerald-600">{stats.pagados}</p>
+                 <p className="text-xs sm:text-sm text-slate-500 mt-1">Pagados</p>
                </div>
              </CardContent>
            </Card>
-          <Card className="shadow-sm border-emerald-200 bg-emerald-50/30">
-            <CardContent className="pt-4 sm:pt-6 pb-4">
-              <div className="text-center">
-                <p className="text-xl sm:text-2xl font-bold text-emerald-600">{stats.pagados}</p>
-                <p className="text-xs sm:text-sm text-slate-500 mt-1">Pagados</p>
-              </div>
-            </CardContent>
-          </Card>
 
-          <Card className="shadow-sm border-blue-200 bg-blue-50/30">
-            <CardContent className="pt-4 sm:pt-6 pb-4">
-              <div className="text-center">
-                <p className="text-base sm:text-lg font-bold text-blue-600">{formatMoney(stats.montoPagado)}</p>
-                <p className="text-[10px] sm:text-xs text-slate-500 mt-1">
-                  de {formatMoney(stats.montoPagado + stats.montoPendiente)}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+           <Card className="shadow-sm border-blue-200 bg-blue-50/30">
+             <CardContent className="pt-4 sm:pt-6 pb-4">
+               <div className="text-center">
+                 <p className="text-base sm:text-lg font-bold text-blue-600">{formatMoney(stats.montoPagado)}</p>
+                 <p className="text-[10px] sm:text-xs text-slate-500 mt-1">
+                   de {formatMoney(stats.montoPagado + stats.montoPendiente)}
+                 </p>
+               </div>
+             </CardContent>
+           </Card>
+         </div>
+        )}
 
         {/* Controles */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
@@ -231,8 +235,8 @@ export default function Agenda() {
           </div>
         </div>
 
-        {/* Alerta de pagos pendientes */}
-        {turnosPendientesPago.length > 0 && (
+        {/* Alerta de pagos pendientes - Solo para Admin */}
+        {isAdmin && turnosPendientesPago.length > 0 && (
           <Card className="shadow-sm border-rose-200 bg-rose-50">
             <CardContent className="py-4">
               <div className="flex items-center justify-between">
