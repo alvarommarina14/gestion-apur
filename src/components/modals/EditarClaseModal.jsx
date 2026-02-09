@@ -239,32 +239,33 @@ export default function EditarClaseModal({ open, onOpenChange, clase }) {
 
   if (success) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-md">
-          <div className="py-12 text-center">
-            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="w-8 h-8 text-emerald-600" />
+      <>
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <DialogContent className="sm:max-w-md">
+            <div className="py-12 text-center">
+              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-8 h-8 text-emerald-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900">Clase actualizada</h3>
+              <p className="text-slate-500 mt-1">Los cambios se guardaron correctamente</p>
             </div>
-            <h3 className="text-lg font-semibold text-slate-900">Clase actualizada</h3>
-            <p className="text-slate-500 mt-1">Los cambios se guardaron correctamente</p>
-            </div>
-            </DialogContent>
-            </Dialog>
+          </DialogContent>
+        </Dialog>
 
-            {turnoAsociado && (
-            <CancelarCanchaModal
+        {turnoAsociado && (
+          <CancelarCanchaModal
             open={showCancelModal}
             onOpenChange={setShowCancelModal}
             turno={turnoAsociado}
             onSuccess={() => {
-            setShowCancelModal(false);
-            queryClient.invalidateQueries({ queryKey: ['cancelaciones-cancha'] });
+              setShowCancelModal(false);
+              queryClient.invalidateQueries({ queryKey: ['cancelaciones-cancha'] });
             }}
-            />
-            )}
-            </>
-            );
-            }
+          />
+        )}
+      </>
+    );
+  }
 
   return (
     <>
