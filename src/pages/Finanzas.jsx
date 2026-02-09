@@ -60,6 +60,11 @@ export default function Finanzas() {
     queryFn: () => base44.entities.TurnoCancha.list('-fecha', 500),
   });
 
+  const hoy = format(new Date(), 'yyyy-MM-dd');
+  const turnosHoy = useMemo(() => {
+    return turnos.filter(t => t.fecha === hoy && t.estado !== 'cancelado');
+  }, [turnos]);
+
   const sincronizarMutation = useMutation({
     mutationFn: () => base44.functions.invoke('sincronizarEstadosPago', {}),
     onSuccess: () => {
@@ -209,6 +214,20 @@ export default function Finanzas() {
     };
   }, [turnosFiltrados, mesSeleccionado]);
 
+  const metricasFinanzasHoy = useMemo(() => {
+    const totalTurnos = turnosHoy.length;
+    const totalCobrado = turnosHoy.filter(t => t.pagado).reduce((sum, t) => sum + (t.monto || 0), 0);
+    const totalPendiente = turnosHoy.filter(t => !t.pagado).reduce((sum, t) => sum + (t.monto || 0), 0);
+    const totalTurnosHoy = totalCobrado + totalPendiente;
+
+    return {
+      totalTurnos,
+      totalCobrado,
+      totalPendiente,
+      totalTurnosHoy,
+    };
+  }, [turnosHoy]);
+
   const formatMoney = (amount) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -278,9 +297,39 @@ export default function Finanzas() {
             </button>
           </div>
         </CardContent>
-      </Card>
+        </Card>
 
-      <Tabs defaultValue="alumnos" className="space-y-6">
+        {/* Finanzas del día */}
+        <Card className="border-blue-200 bg-blue-50/30">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Calendar className="w-5 h-5 text-blue-600" />
+              Finanzas del día
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <p className="text-sm text-slate-600 mb-2">Turnos</p>
+                <p className="text-2xl font-bold text-slate-900">{metricasFinanzasHoy.totalTurnos}</p>
+              </div>
+              <div>
+                <p className="text-sm text-slate-600 mb-2">Cobrado</p>
+                <p className="text-2xl font-bold text-emerald-600">{formatMoney(metricasFinanzasHoy.totalCobrado)}</p>
+              </div>
+              <div>
+                <p className="text-sm text-slate-600 mb-2">Por cobrar</p>
+                <p className="text-2xl font-bold text-orange-600">{formatMoney(metricasFinanzasHoy.totalPendiente)}</p>
+              </div>
+              <div>
+                <p className="text-sm text-slate-600 mb-2">Total</p>
+                <p className="text-2xl font-bold text-blue-600">{formatMoney(metricasFinanzasHoy.totalTurnosHoy)}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Tabs defaultValue="alumnos" className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="alumnos">Alumnos</TabsTrigger>
           <TabsTrigger value="clientes">Clientes</TabsTrigger>
