@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { format, addDays, subDays, startOfWeek, addWeeks, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Plus, ChevronLeft, ChevronRight, Calendar, Filter, Trash2 } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, Calendar, Filter, Trash2, Ban } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -18,6 +18,7 @@ import VistaCalendarioCancha from '@/components/agenda/VistaCalendarioCancha';
 import CalendarioCompleto from '@/components/agenda/CalendarioCompleto';
 import NuevoTurnoModal from '@/components/agenda/NuevoTurnoModal';
 import EditarClaseProfesorModal from '@/components/agenda/EditarClaseProfesorModal';
+import NuevoBloqueoModal from '@/components/disponibilidad/NuevoBloqueoModal';
 import { cn } from '@/lib/utils';
 
 export default function Agenda() {
@@ -27,6 +28,7 @@ export default function Agenda() {
   const [selectedCancha, setSelectedCancha] = useState('todas');
   const [turnoModal, setTurnoModal] = useState({ open: false, turno: null });
   const [claseModal, setClaseModal] = useState({ open: false, turno: null });
+  const [bloqueoModal, setBloqueoModal] = useState(false);
   const [showCalendario, setShowCalendario] = useState(false);
   const [limpiadoLoading, setLimpiadoLoading] = useState(false);
 
@@ -60,6 +62,11 @@ export default function Agenda() {
       }
       return base44.entities.RecordatorioCancha.filter({ fecha: fechaStr });
     },
+  });
+
+  const { data: bloqueos = [] } = useQuery({
+    queryKey: ['disponibilidad-canchas'],
+    queryFn: () => base44.entities.DisponibilidadCancha.filter({ estado: 'activo' }),
   });
 
   const isAdmin = user?.role === 'admin';
@@ -146,13 +153,25 @@ export default function Agenda() {
            </div>
            <div className="flex items-center gap-2 flex-wrap">
              {canEdit && (
-               <Button
-                 onClick={() => setTurnoModal({ open: true, turno: null })}
-                 className="bg-emerald-600 hover:bg-emerald-700 h-11 lg:h-10 text-base lg:text-sm active:scale-95 touch-manipulation w-full sm:w-auto"
-               >
-                 <Plus className="w-5 h-5 mr-2" />
-                 Nuevo turno
-               </Button>
+               <>
+                 <Button
+                   onClick={() => setTurnoModal({ open: true, turno: null })}
+                   className="bg-emerald-600 hover:bg-emerald-700 h-11 lg:h-10 text-base lg:text-sm active:scale-95 touch-manipulation w-full sm:w-auto"
+                 >
+                   <Plus className="w-5 h-5 mr-2" />
+                   Nuevo turno
+                 </Button>
+                 {isAdmin && (
+                   <Button
+                     onClick={() => setBloqueoModal(true)}
+                     variant="outline"
+                     className="border-rose-300 text-rose-700 hover:bg-rose-50 h-11 lg:h-10 text-base lg:text-sm active:scale-95 touch-manipulation w-full sm:w-auto"
+                   >
+                     <Ban className="w-5 h-5 mr-2" />
+                     Bloquear cancha
+                   </Button>
+                 )}
+               </>
              )}
            </div>
          </header>
@@ -270,6 +289,7 @@ export default function Agenda() {
           <VistaCalendarioCancha
             turnos={turnosFiltrados}
             recordatorios={recordatorios}
+            bloqueos={bloqueos}
             selectedDate={selectedDate}
             selectedCancha={selectedCancha}
             fecha={selectedDate}
@@ -293,11 +313,17 @@ export default function Agenda() {
       )}
 
       {isAdmin && (
-        <EditarClaseProfesorModal
-          open={claseModal.open}
-          onOpenChange={(open) => setClaseModal({ ...claseModal, open })}
-          turno={claseModal.turno}
-        />
+        <>
+          <EditarClaseProfesorModal
+            open={claseModal.open}
+            onOpenChange={(open) => setClaseModal({ ...claseModal, open })}
+            turno={claseModal.turno}
+          />
+          <NuevoBloqueoModal
+            open={bloqueoModal}
+            onOpenChange={setBloqueoModal}
+          />
+        </>
       )}
     </div>
   );

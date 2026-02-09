@@ -21,7 +21,7 @@ for (let h = 8; h <= 21; h++) {
 
 const CANCHAS = ['1', '2', '3', '4'];
 
-export default function VistaCalendarioCancha({ turnos = [], recordatorios = [], selectedDate, selectedCancha, fecha, isAdmin, onTurnoClick, onEditarClase, isLoading }) {
+export default function VistaCalendarioCancha({ turnos = [], recordatorios = [], bloqueos = [], selectedDate, selectedCancha, fecha, isAdmin, onTurnoClick, onEditarClase, isLoading }) {
   const [profesorTurnos, setProfesorTurnos] = useState(new Set());
   
   const { data: user } = useQuery({
@@ -45,16 +45,48 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
         map[cancha][hora] = null;
       });
     });
+
+    const fechaStr = format(selectedDate, 'yyyy-MM-dd');
     
-    // Primero agregar turnos reales
+    // Primero agregar bloqueos
+    bloqueos.forEach(bloqueo => {
+      const fechaInicio = new Date(bloqueo.fecha_inicio);
+      const fechaFin = new Date(bloqueo.fecha_fin);
+      const fechaSeleccionada = new Date(fechaStr);
+      
+      if (fechaSeleccionada >= fechaInicio && fechaSeleccionada <= fechaFin) {
+        const canchasAfectadas = bloqueo.cancha === 'todas' ? CANCHAS : [bloqueo.cancha];
+        
+        canchasAfectadas.forEach(cancha => {
+          if (bloqueo.todo_el_dia) {
+            // Bloquear todos los horarios
+            HORARIOS.forEach(hora => {
+              if (map[cancha] && map[cancha][hora] !== undefined) {
+                map[cancha][hora] = { ...bloqueo, tipo: 'bloqueo', hora_inicio: hora };
+              }
+            });
+          } else if (bloqueo.hora_inicio && bloqueo.hora_fin) {
+            // Bloquear solo el rango de horas
+            HORARIOS.forEach(hora => {
+              if (hora >= bloqueo.hora_inicio && hora < bloqueo.hora_fin) {
+                if (map[cancha] && map[cancha][hora] !== undefined) {
+                  map[cancha][hora] = { ...bloqueo, tipo: 'bloqueo', hora_inicio: hora };
+                }
+              }
+            });
+          }
+        });
+      }
+    });
+    
+    // Luego agregar turnos reales (tienen prioridad sobre bloqueos)
     turnos.forEach(turno => {
       if (map[turno.cancha] && map[turno.cancha][turno.hora_inicio] !== undefined) {
         map[turno.cancha][turno.hora_inicio] = { ...turno, tipo: 'turno' };
       }
     });
 
-    // Luego agregar recordatorios que NO tienen turno asociado
-    const fechaStr = format(selectedDate, 'yyyy-MM-dd');
+    // Finalmente agregar recordatorios que NO tienen turno asociado
     const recordatoriosFiltrados = recordatorios.filter(r => 
       r.fecha === fechaStr && 
       !r.turno_cancha_id && // Solo los que NO están vinculados a un turno
@@ -77,7 +109,7 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
     });
     
     return map;
-  }, [turnos, recordatorios, selectedDate, selectedCancha]);
+  }, [turnos, recordatorios, bloqueos, selectedDate, selectedCancha]);
 
   const calcularFilas = (turno) => {
     if (!turno) return 1;
@@ -150,8 +182,33 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
                     {CANCHAS.map(cancha => {
                       const turno = turnosPorCanchaHora[cancha][hora];
                       
-                      // Si hay turno o recordatorio en este slot
+                      // Si hay turno, recordatorio o bloqueo en este slot
                       if (turno) {
+                        // Si es un bloqueo
+                        if (turno.tipo === 'bloqueo') {
+                          return (
+                            <td
+                              key={cancha}
+                              className="p-2 border-r border-slate-200 align-top"
+                            >
+                              <div className="h-full rounded-lg border-2 border-rose-300 bg-rose-50/50 p-3">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Ban className="w-4 h-4 text-rose-600" />
+                                  <span className="text-xs font-bold text-rose-700 uppercase">
+                                    No Disponible
+                                  </span>
+                                </div>
+                                <p className="text-sm font-semibold text-slate-900">
+                                  {turno.descripcion || turno.motivo}
+                                </p>
+                                {turno.todo_el_dia && (
+                                  <p className="text-xs text-slate-600 mt-1">Todo el día</p>
+                                )}
+                              </div>
+                            </td>
+                          );
+                        }
+                        
                         // Si es un recordatorio sin turno
                         if (turno.tipo === 'recordatorio') {
                           return (
