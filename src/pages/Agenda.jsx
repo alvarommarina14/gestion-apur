@@ -46,12 +46,16 @@ export default function Agenda() {
   
   const { data: turnos = [], isLoading } = useQuery({
     queryKey: ['turnos-cancha', showCalendario ? mesStr : fechaStr],
-    queryFn: () => {
+    queryFn: async () => {
       if (showCalendario) {
         // Cargar todos los turnos del mes para el calendario
-        return base44.entities.TurnoCancha.list('-fecha', 500);
+        const allTurnos = await base44.entities.TurnoCancha.list('-fecha', 500);
+        // Filtrar cancelados
+        return allTurnos.filter(t => t.estado !== 'cancelado');
       }
-      return base44.entities.TurnoCancha.filter({ fecha: fechaStr });
+      const dayTurnos = await base44.entities.TurnoCancha.filter({ fecha: fechaStr });
+      // Filtrar cancelados
+      return dayTurnos.filter(t => t.estado !== 'cancelado');
     },
   });
 
