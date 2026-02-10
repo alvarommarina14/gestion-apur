@@ -15,7 +15,6 @@ export default function ClasesConAlumnos({ profesorSeleccionado, onRegistrarPago
   const [claseSeleccionada, setClaseSeleccionada] = useState(null);
   const [alumnoSeleccionado, setAlumnoSeleccionado] = useState(null);
   const [claseAsistencia, setClaseAsistencia] = useState(null);
-  const [alumnoAsistencia, setAlumnoAsistencia] = useState(null);
   const [claseCancelar, setClaseCancelar] = useState(null);
 
   const { data: turnos = [] } = useQuery({
@@ -187,7 +186,6 @@ export default function ClasesConAlumnos({ profesorSeleccionado, onRegistrarPago
                                     size="sm"
                                     onClick={() => {
                                       setClaseAsistencia(clase);
-                                      setAlumnoAsistencia(alumno);
                                     }}
                                     variant="outline"
                                     className="gap-1 text-blue-600 border-blue-300 hover:bg-blue-50"
@@ -230,13 +228,11 @@ export default function ClasesConAlumnos({ profesorSeleccionado, onRegistrarPago
 
       {/* Modales */}
       <RegistrarAsistenciaModal 
-        open={!!claseAsistencia && !!alumnoAsistencia}
+        open={!!claseAsistencia}
         onOpenChange={() => {
           setClaseAsistencia(null);
-          setAlumnoAsistencia(null);
         }}
         clase={claseAsistencia}
-        alumno={alumnoAsistencia}
       />
       
       <CancelarClaseModal 
