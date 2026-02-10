@@ -210,6 +210,15 @@ export default function ClientesPage() {
         )}
       </div>
 
+      <SeleccionTipoClienteModal
+        open={modalSeleccion}
+        onOpenChange={setModalSeleccion}
+        onSelect={(tipo) => {
+          setTipoClienteSeleccionado(tipo);
+          setModalNuevo(true);
+        }}
+      />
+
       <DetalleClienteModal
          open={modalDetalle.open}
          onOpenChange={(open) => setModalDetalle({ ...modalDetalle, open })}
@@ -218,7 +227,11 @@ export default function ClientesPage() {
 
       <NuevoClienteModal
         open={modalNuevo}
-        onOpenChange={setModalNuevo}
+        onOpenChange={(open) => {
+          setModalNuevo(open);
+          if (!open) setTipoClienteSeleccionado(null);
+        }}
+        tipoCliente={tipoClienteSeleccionado}
       />
     </div>
   );
