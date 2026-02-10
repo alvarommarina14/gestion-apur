@@ -598,6 +598,108 @@ export default function RecordatoriosCanchaHoy({ turnos = [], fecha }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Modal Pagos Grupales */}
+      <Dialog open={modalPagoGrupal} onOpenChange={setModalPagoGrupal}>
+        <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-emerald-600" />
+              Registrar Pagos - {turnoSeleccionado?.cliente}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* Alumnos */}
+            <div className="space-y-3">
+              {alumnos.length === 0 ? (
+                <p className="text-sm text-slate-500 text-center py-4">No hay alumnos registrados</p>
+              ) : (
+                alumnos.map((alumno) => (
+                  <div key={alumno.id} className="border rounded-lg p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold text-slate-900">{alumno.nombre}</p>
+                        <p className="text-sm text-slate-500">{formatMoney(alumno.precio_mensual)}/mes</p>
+                      </div>
+                      <Select 
+                        value={pagosAlumnos[alumno.id] || 'pendiente'}
+                        onValueChange={(value) => {
+                          setPagosAlumnos({
+                            ...pagosAlumnos,
+                            [alumno.id]: value === 'pendiente' ? undefined : value
+                          });
+                        }}
+                      >
+                        <SelectTrigger className="w-32">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pendiente">Pendiente</SelectItem>
+                          <SelectItem value="pagado">
+                            <span className="text-emerald-600">Pagó</span>
+                          </SelectItem>
+                          <SelectItem value="no_pagado">
+                            <span className="text-rose-600">No pagó</span>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Medio de pago */}
+            <div className="space-y-2">
+              <Label>Medio de pago *</Label>
+              <Select value={medioPago} onValueChange={setMedioPago}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar medio" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Efectivo">Efectivo</SelectItem>
+                  <SelectItem value="Transferencia">Transferencia</SelectItem>
+                  <SelectItem value="Mercado Pago">Mercado Pago</SelectItem>
+                  <SelectItem value="Débito">Débito</SelectItem>
+                  <SelectItem value="Crédito">Crédito</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Notas */}
+            <div className="space-y-2">
+              <Label>Notas (opcional)</Label>
+              <Textarea
+                value={notasPago}
+                onChange={(e) => setNotasPago(e.target.value)}
+                placeholder="Observaciones..."
+                rows={2}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setModalPagoGrupal(false)}>
+              Cancelar
+            </Button>
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700"
+              disabled={!medioPago || Object.keys(pagosAlumnos).length === 0 || registrarPagoGrupalMutation.isPending}
+              onClick={() => {
+                registrarPagoGrupalMutation.mutate({
+                  turno: turnoSeleccionado,
+                  pagosAlumnos,
+                  medio: medioPago,
+                  notas: notasPago
+                });
+              }}
+            >
+              {registrarPagoGrupalMutation.isPending ? 'Guardando...' : 'Registrar pagos'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
