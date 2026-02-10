@@ -76,7 +76,6 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
           const a = alumnosDisponibles.find(x => x.id === aId);
           return a?.nombre || '';
         }).filter(Boolean),
-        precio: parseFloat(precio) || 0,
         estado: 'programada',
         profesor_id: profesorId
       });
@@ -91,7 +90,6 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
         cliente: alumnosDisponibles.find(x => x.id === alumnos[0])?.nombre || 'Clase',
         tipo_turno: 'clase',
         profesor: profesores.find(p => p.id === profesorId)?.nombre || '',
-        monto: parseFloat(precio) || 0,
         pagado: false,
         estado: 'activo',
         empleados_asignados_ids: [],
@@ -122,7 +120,6 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
     setAlumnos([]);
     setBusquedaAlumno('');
     setShowListaAlumnos(false);
-    setPrecio('');
     setNotas('');
     onClose();
   };
@@ -336,22 +333,6 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
                 ))}
               </div>
             )}
-          </div>
-
-          {/* Precio y Notas */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-sm font-medium text-slate-700 block mb-2">
-                Precio
-              </label>
-              <input
-                type="number"
-                value={precio}
-                onChange={(e) => setPrecio(e.target.value)}
-                placeholder="0.00"
-                className="w-full px-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
           </div>
 
           <div>
