@@ -248,10 +248,40 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
                    step="100"
                    value={formData.precio}
                    onChange={(e) => setFormData({ ...formData, precio: parseFloat(e.target.value) || 0 })}
-                   placeholder="Ej: 5000"
+                   placeholder="Ej: 35000"
                    required={formData.es_alumno}
                  />
                </div>
+             </div>
+            )}
+
+            {formData.tipo_cliente === 'abono' && (
+             <div className="space-y-2">
+               <Label>Precio mensual *</Label>
+               <Input
+                 type="number"
+                 min="0"
+                 step="100"
+                 value={formData.precio}
+                 onChange={(e) => setFormData({ ...formData, precio: parseFloat(e.target.value) || 0 })}
+                 placeholder="Ej: 120000"
+                 required
+               />
+             </div>
+            )}
+
+            {formData.tipo_cliente === 'suelto' && (
+             <div className="space-y-2">
+               <Label>Precio *</Label>
+               <Input
+                 type="number"
+                 min="0"
+                 step="100"
+                 value={formData.precio}
+                 onChange={(e) => setFormData({ ...formData, precio: parseFloat(e.target.value) || 0 })}
+                 placeholder="Ej: 50000"
+                 required
+               />
              </div>
             )}
 

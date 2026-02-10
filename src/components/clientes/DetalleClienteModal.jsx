@@ -114,6 +114,7 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
         email: cliente.email || '',
         clasificacion: cliente.clasificacion,
         tipo_cliente: cliente.tipo_cliente || 'clase',
+        precio: cliente.precio || 0,
         notas: cliente.notas || '',
       });
     }
@@ -133,8 +134,15 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
       
       await base44.entities.Cliente.update(id, data);
       
+      // Si cambió el precio, actualizar total_gastado
+      if (data.precio !== undefined && data.precio !== cliente.precio) {
+        await base44.entities.Cliente.update(id, {
+          total_gastado: (cliente.total_gastado || 0) + (data.precio || 0) - (cliente.precio || 0)
+        });
+      }
+      
       // Registrar auditoría para cada cambio
-      for (const cambio of cambios) {
+      for (const cambio de cambios) {
         await registrarCambioCliente(
           id, 
           cliente.nombre, 
@@ -323,6 +331,7 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
                     <SelectContent>
                       <SelectItem value="clase">Clase</SelectItem>
                       <SelectItem value="abono">Abono</SelectItem>
+                      <SelectItem value="suelto">Suelto</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -335,6 +344,22 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
                     value={cliente.profesor_nombre}
                     disabled
                     className="bg-slate-50"
+                  />
+                </div>
+              )}
+
+              {((formData.tipo_cliente === 'abono' || formData.tipo_cliente === 'suelto') && editando) && (
+                <div className="space-y-2">
+                  <Label>
+                    {formData.tipo_cliente === 'abono' ? 'Precio mensual' : 'Precio'}
+                  </Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="100"
+                    value={formData.precio || cliente.precio || 0}
+                    onChange={(e) => setFormData({ ...formData, precio: parseFloat(e.target.value) || 0 })}
+                    placeholder={formData.tipo_cliente === 'abono' ? 'Ej: 120000' : 'Ej: 50000'}
                   />
                 </div>
               )}
