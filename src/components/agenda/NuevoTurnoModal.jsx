@@ -981,18 +981,33 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
 
           <div className="space-y-2">
             <Label>Cliente / Nombre</Label>
+            <Select
+              value={formData.cliente}
+              onValueChange={(v) => setFormData({ ...formData, cliente: v })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar cliente o ingresar nombre" />
+              </SelectTrigger>
+              <SelectContent>
+                {clientes.length > 0 && (
+                  <>
+                    {clientes.map(cliente => (
+                      <SelectItem key={cliente.id} value={cliente.nombre}>
+                        {cliente.nombre}
+                      </SelectItem>
+                    ))}
+                  </>
+                )}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-slate-500 mt-1">O ingresa un nombre nuevo manualmente</p>
             <Input
               value={formData.cliente}
               onChange={(e) => setFormData({ ...formData, cliente: e.target.value })}
-              placeholder="Buscar o escribir nombre del cliente"
-              list="clientes-list"
+              placeholder="Nombre del cliente"
               required
+              className="mt-2"
             />
-            <datalist id="clientes-list">
-              {clientes.map(cliente => (
-                <option key={cliente.id} value={cliente.nombre} />
-              ))}
-            </datalist>
           </div>
 
           <div className="space-y-2">
@@ -1024,9 +1039,20 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
             </div>
           )}
 
+          {formData.tipo_turno === 'alquiler' && !formData.pagado && (
+            <div className="space-y-2">
+              <Label>Monto</Label>
+              <Input
+                type="number"
+                value={formData.monto}
+                onChange={(e) => setFormData({ ...formData, monto: e.target.value })}
+                placeholder="0"
+                required
+              />
+            </div>
+          )}
 
-
-          {formData.tipo_turno === 'alquiler' && formData.modalidad_alquiler === 'abono' && (
+          {formData.modalidad_alquiler === 'abono' && (
             <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
               <div>
                 <Label className="font-medium text-slate-800">Repetición semanal</Label>
