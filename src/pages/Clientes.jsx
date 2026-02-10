@@ -30,7 +30,7 @@ import { cn } from '@/lib/utils';
 export default function ClientesPage() {
   const queryClient = useQueryClient();
   const [busqueda, setBusqueda] = useState('');
-  const [filtroClasificacion, setFiltroClasificacion] = useState('todos');
+  const [filtroTipo, setFiltroTipo] = useState('todos');
   const [modalDetalle, setModalDetalle] = useState({ open: false, cliente: null });
   const [modalNuevo, setModalNuevo] = useState(false);
 
@@ -43,8 +43,10 @@ export default function ClientesPage() {
   const clientesFiltrados = useMemo(() => {
     let filtrados = clientes;
 
-    if (filtroClasificacion !== 'todos') {
-      filtrados = filtrados.filter(c => c.clasificacion === filtroClasificacion);
+    if (filtroTipo === 'clase') {
+      filtrados = filtrados.filter(c => c.es_alumno);
+    } else if (filtroTipo === 'alquiler') {
+      filtrados = filtrados.filter(c => !c.es_alumno);
     }
 
     if (busqueda.trim()) {
@@ -57,7 +59,7 @@ export default function ClientesPage() {
     }
 
     return filtrados;
-  }, [clientes, filtroClasificacion, busqueda]);
+  }, [clientes, filtroTipo, busqueda]);
 
   const clasificacionConfig = {
     nuevo: { icon: UserPlus, color: 'bg-blue-100 text-blue-700', label: 'Nuevo' },
@@ -96,11 +98,11 @@ export default function ClientesPage() {
               />
             </div>
           </div>
-          <Tabs value={filtroClasificacion} onValueChange={setFiltroClasificacion}>
+          <Tabs value={filtroTipo} onValueChange={setFiltroTipo}>
             <TabsList>
               <TabsTrigger value="todos">Todos</TabsTrigger>
-              <TabsTrigger value="nuevo">Nuevos</TabsTrigger>
-              <TabsTrigger value="recurrente">Recurrentes</TabsTrigger>
+              <TabsTrigger value="clase">Clientes Clase</TabsTrigger>
+              <TabsTrigger value="alquiler">Alquiler Cancha</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -120,7 +122,7 @@ export default function ClientesPage() {
               <Users className="w-12 h-12 mx-auto mb-3 opacity-40" />
               <p className="font-medium mb-2">No hay clientes</p>
               <p className="text-sm mb-4">
-                {busqueda || filtroClasificacion !== 'todos' 
+                {busqueda || filtroTipo !== 'todos' 
                   ? 'No se encontraron resultados con los filtros aplicados'
                   : 'Comienza agregando tu primer cliente'}
               </p>
@@ -146,9 +148,13 @@ export default function ClientesPage() {
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
                         <h3 className="font-semibold text-slate-900 mb-1">{cliente.nombre}</h3>
-                        <Badge className={cn('text-xs', config.color)}>
-                          <Icon className="w-3 h-3 mr-1" />
-                          {config.label}
+                        <Badge className={cn(
+                          'text-xs',
+                          cliente.es_alumno 
+                            ? 'bg-purple-100 text-purple-700' 
+                            : 'bg-blue-100 text-blue-700'
+                        )}>
+                          {cliente.es_alumno ? 'Clase' : 'Alquiler'}
                         </Badge>
                       </div>
                     </div>
