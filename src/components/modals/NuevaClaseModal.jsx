@@ -453,7 +453,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
                   ))}
               </div>
             )}
-            {formData.profesor_id && formData.alumnos_ids.length === 0 && (
+            {formData.alumnos_ids.length === 0 && alumnosActivos.length > 0 && (
               <p className="text-xs text-rose-500">Selecciona al menos un alumno</p>
             )}
           </div>
