@@ -29,6 +29,7 @@ import { Calendar, CheckCircle, AlertTriangle, Trash2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import FormularioClaseAdmin from '@/components/agenda/FormularioClaseAdmin';
 import BotonesCancelacion from '@/components/agenda/BotonesCancelacion';
+import ModalEditarTurno from '@/components/agenda/ModalEditarTurno';
 
 export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isProfesor = false }) {
   const queryClient = useQueryClient();
@@ -660,6 +661,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
    };
 
   const [tieneRepeticionSemanal, setTieneRepeticionSemanal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
     const verificarRepeticion = async () => {
@@ -1149,6 +1151,54 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
       </Dialog>
 
 
+    </>
+  );
+
+  return (
+    <>
+      {/** Modal original */}
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-emerald-600" />
+              {turno ? 'Editar turno' : 'Nuevo turno'}
+            </DialogTitle>
+          </DialogHeader>
+
+          {turno ? (
+            <Tabs defaultValue="datos" className="flex-1 flex flex-col overflow-hidden">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="datos">Datos</TabsTrigger>
+                <TabsTrigger value="historial">Historial</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="datos" className="flex-1 overflow-y-auto mt-4">
+                <form onSubmit={handleSubmit} className="space-y-4 px-1">
+                  {formContent}
+                </form>
+              </TabsContent>
+              
+              <TabsContent value="historial" className="flex-1 overflow-y-auto mt-4">
+                <HistorialAuditoria entidadId={turno?.id} entidad="TurnoCancha" />
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto space-y-4 px-1">
+              {formContent}
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/** Modal de edición */}
+      {turno && (
+        <ModalEditarTurno
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          turno={turno}
+        />
+      )}
     </>
   );
 }
