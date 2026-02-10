@@ -299,22 +299,42 @@ export default function Agenda() {
 
 
         {/* Vista de día */}
-         <VistaCalendarioCancha
-           turnos={turnosFiltrados}
-           recordatorios={recordatorios}
-           bloqueos={bloqueos}
-           selectedDate={selectedDate}
-           selectedCancha={selectedCancha}
-           fecha={selectedDate}
-           isAdmin={isAdmin}
-           onTurnoClick={(turno) => turno.tipo_turno === 'clase' ? setAccionesClaseModal({ open: true, turno }) : setCancelarTurnoModal({ open: true, turno })}
-           onEditarClase={(clase) => {
-             setEditarClaseAgendaModal({ open: true, turno: clase });
-           }}
-           onEditarTurno={(turno) => setTurnoModal({ open: true, turno })}
-           onCancelarCancha={(turno) => isAdmin && turno.modalidad_alquiler === 'abono' && setCancelarModal({ open: true, turno })}
-           isLoading={isLoading}
-         />
+         {vista === 'dia' && (
+           <VistaCalendarioCancha
+             turnos={turnosFiltrados}
+             recordatorios={recordatorios}
+             bloqueos={bloqueos}
+             selectedDate={selectedDate}
+             selectedCancha={selectedCancha}
+             fecha={selectedDate}
+             isAdmin={isAdmin}
+             onTurnoClick={(turno) => turno.tipo_turno === 'clase' ? setAccionesClaseModal({ open: true, turno }) : setCancelarTurnoModal({ open: true, turno })}
+             onEditarClase={(clase) => {
+               setEditarClaseAgendaModal({ open: true, turno: clase });
+             }}
+             onEditarTurno={(turno) => setTurnoModal({ open: true, turno })}
+             onCancelarCancha={(turno) => isAdmin && turno.modalidad_alquiler === 'abono' && setCancelarModal({ open: true, turno })}
+             isLoading={isLoading}
+           />
+         )}
+
+         {/* Vista calendario */}
+         {vista === 'calendario' && (
+           <CalendarioMes 
+             selectedDate={selectedDate}
+             turnos={turnosCalendario}
+             onDayClick={setSelectedDate}
+             onTurnoClick={(turno) => {
+               setSelectedDate(new Date(turno.fecha));
+               setVista('dia');
+               setTimeout(() => {
+                 turno.tipo_turno === 'clase' 
+                   ? setAccionesClaseModal({ open: true, turno }) 
+                   : setCancelarTurnoModal({ open: true, turno });
+               }, 100);
+             }}
+           />
+         )}
       </div>
 
       {/* Modales */}
