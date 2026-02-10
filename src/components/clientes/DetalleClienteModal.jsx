@@ -142,7 +142,7 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
       }
       
       // Registrar auditoría para cada cambio
-      for (const cambio de cambios) {
+      for (const cambio of cambios) {
         await registrarCambioCliente(
           id, 
           cliente.nombre, 
