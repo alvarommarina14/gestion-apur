@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
-import { CalendarIcon, Plus, CheckCircle } from 'lucide-react';
+import { CalendarIcon, Plus, CheckCircle, Search, X } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
@@ -34,6 +34,12 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null, c
    const queryClient = useQueryClient();
    const [loading, setLoading] = useState(false);
    const [success, setSuccess] = useState(false);
+   const [busquedaAlumno, setBusquedaAlumno] = useState('');
+   const [showListaAlumnos, setShowListaAlumnos] = useState(false);
+   const [busquedaProfesor, setBusquedaProfesor] = useState('');
+   const [showListaProfesores, setShowListaProfesores] = useState(false);
+   const [showNuevoProfesor, setShowNuevoProfesor] = useState(false);
+   const [nuevoProfesor, setNuevoProfesor] = useState('');
 
    const [formData, setFormData] = useState(() => {
      if (clase) {
@@ -89,11 +95,19 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null, c
   });
   
   const alumnosActivos = alumnos.filter(a => a.estado !== 'pausado');
-  
+
   const { data: user } = useQuery({
     queryKey: ['me'],
     queryFn: () => base44.auth.me(),
   });
+
+  const alumnosFiltrados = alumnosActivos.filter(a =>
+    a.nombre.toLowerCase().includes(busquedaAlumno.toLowerCase())
+  );
+
+  const profesoresFiltrados = profesores.filter(p =>
+    p.activo && p.nombre.toLowerCase().includes(busquedaProfesor.toLowerCase())
+  );
 
   useEffect(() => {
     if (open) {
@@ -223,10 +237,20 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null, c
           sincronizar_calendar: user?.rol === 'admin',
         });
       } else {
+        // Crear profesor si es necesario
+        let profesorId = formData.profesor_id;
+        if (showNuevoProfesor && nuevoProfesor) {
+          const nuevoProf = await base44.entities.Profesor.create({
+            nombre: nuevoProfesor,
+            activo: true
+          });
+          profesorId = nuevoProf.id;
+        }
+
         // Crear una sola clase sin repetición
-        const horaFin = calcularHoraFin(formData.hora_inicio, formData.duracion);
-        
-        const claseData = {
+          const horaFin = calcularHoraFin(formData.hora_inicio, formData.duracion);
+
+          const claseData = {
           fecha: format(formData.fecha, 'yyyy-MM-dd'),
           hora_inicio: formData.hora_inicio,
           duracion: Number(formData.duracion),
@@ -241,9 +265,9 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null, c
           clase_original_id: formData.clase_original_id,
           notas: formData.notas,
           asistencia_registrada: false,
-          profesor_id: user?.id,
+          profesor_id: profesorId || user?.id,
           estado_aprobacion: user?.rol === 'profesor' ? 'pendiente' : 'aprobada',
-        };
+          };
 
         const claseCreada = await base44.entities.Clase.create(claseData);
 
@@ -263,8 +287,8 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null, c
               cancha: formData.cancha,
               cliente: alumnosNombres.join(', ') || 'Clase',
               tipo_turno: 'clase',
-              profesor: profesores.find(p => p.id === formData.profesor_id)?.nombre || 'Sin asignar',
-              profesor_id: formData.profesor_id || user?.id,
+              profesor: profesores.find(p => p.id === profesorId)?.nombre || 'Sin asignar',
+              profesor_id: profesorId || user?.id,
               monto: formData.precio ? Number(formData.precio) : 0,
               pagado: formData.pagado,
               empleados_asignados_ids: empleadosIds,
@@ -475,21 +499,81 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null, c
 
           <div className="space-y-2">
             <Label>Profesor</Label>
-            <Select
-               value={formData.profesor_id}
-               onValueChange={(v) => setFormData(prev => ({ ...prev, profesor_id: v, alumnos_ids: [] }))}
-             >
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar profesor" />
-              </SelectTrigger>
-              <SelectContent>
-                {profesores.filter(p => p.activo).map(profesor => (
-                  <SelectItem key={profesor.id} value={profesor.id}>
-                    {profesor.nombre}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {!showNuevoProfesor ? (
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    placeholder="Buscar profesor..."
+                    value={busquedaProfesor}
+                    onChange={(e) => setBusquedaProfesor(e.target.value)}
+                    onFocus={() => setShowListaProfesores(true)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {showListaProfesores && (
+                    <>
+                      <div className="absolute z-10 w-full bg-white border border-slate-200 rounded-md shadow-lg max-h-48 overflow-y-auto mt-1">
+                        {profesoresFiltrados.length > 0 ? (
+                          profesoresFiltrados.map(p => (
+                            <button
+                              key={p.id}
+                              type="button"
+                              onClick={() => {
+                                setFormData(prev => ({ ...prev, profesor_id: p.id }));
+                                setBusquedaProfesor(p.nombre);
+                                setShowListaProfesores(false);
+                              }}
+                              className="w-full text-left px-3 py-2 hover:bg-slate-50 border-b border-slate-100 last:border-b-0 text-sm text-slate-700"
+                            >
+                              {p.nombre}
+                            </button>
+                          ))
+                        ) : (
+                          <div className="px-3 py-2 text-sm text-slate-500">
+                            No hay profesores disponibles
+                          </div>
+                        )}
+                      </div>
+                      <div
+                        className="fixed inset-0 z-0"
+                        onClick={() => setShowListaProfesores(false)}
+                      />
+                    </>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowNuevoProfesor(true);
+                    setBusquedaProfesor('');
+                  }}
+                >
+                  + Nuevo
+                </Button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={nuevoProfesor}
+                  onChange={(e) => setNuevoProfesor(e.target.value)}
+                  placeholder="Nombre del profesor"
+                  className="flex-1 px-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowNuevoProfesor(false);
+                    setNuevoProfesor('');
+                    setBusquedaProfesor('');
+                  }}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            )}
           </div>
           
           {/* Selección de alumnos */}
@@ -498,38 +582,80 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null, c
                {formData.tipo === 'individual' ? 'Alumno' : 'Alumnos'}
                <span className="text-rose-500 ml-1">*</span>
              </Label>
-             {loadingAlumnos ? (
-              <p className="text-xs text-slate-500 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                Cargando alumnos...
-              </p>
-            ) : alumnosActivos.length === 0 ? (
-              <p className="text-xs text-slate-500 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                Este profesor no tiene alumnos activos
-              </p>
-            ) : alumnosActivos.length === 0 ? (
-               <p className="text-xs text-slate-500 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                 No hay alumnos creados
-               </p>
-             ) : (
-               <div className="border rounded-lg max-h-40 overflow-y-auto">
-                 {alumnosActivos.map((alumno) => (
-                    <div
-                      key={alumno.id}
-                      className={cn(
-                        'flex items-center gap-3 p-3 border-b last:border-b-0 cursor-pointer hover:bg-slate-50',
-                        formData.alumnos_ids.includes(alumno.id) && 'bg-emerald-50'
-                      )}
-                    >
-                      <Checkbox
-                        checked={formData.alumnos_ids.includes(alumno.id)}
-                        disabled={!!recupero}
-                        onCheckedChange={() => !recupero && handleAlumnoToggle(alumno.id)}
-                      />
-                      <span className="text-sm font-medium">{alumno.nombre}</span>
-                    </div>
-                  ))}
-              </div>
-            )}
+             <div className="relative">
+               <div className="relative mb-2">
+                 <Search className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+                 <input
+                   type="text"
+                   placeholder="Buscar alumno..."
+                   value={busquedaAlumno}
+                   onChange={(e) => setBusquedaAlumno(e.target.value)}
+                   onFocus={() => setShowListaAlumnos(true)}
+                   className="w-full pl-10 pr-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                 />
+               </div>
+
+               {/* Lista de alumnos con checkboxes */}
+               {showListaAlumnos && (
+                 <div className="absolute z-10 w-full bg-white border border-slate-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                   {alumnosFiltrados.length > 0 ? (
+                     alumnosFiltrados.map(a => (
+                       <label
+                         key={a.id}
+                         className="flex items-center gap-3 px-3 py-2 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-b-0"
+                       >
+                         <input
+                           type="checkbox"
+                           checked={formData.alumnos_ids.includes(a.id)}
+                           onChange={() => handleAlumnoToggle(a.id)}
+                           disabled={!!recupero}
+                           className="w-4 h-4 rounded"
+                         />
+                         <span className="text-sm text-slate-700">{a.nombre}</span>
+                       </label>
+                     ))
+                   ) : (
+                     <div className="px-3 py-2 text-sm text-slate-500">
+                       No hay alumnos disponibles
+                     </div>
+                   )}
+                 </div>
+               )}
+
+               {/* Cerrar lista al hacer click afuera */}
+               {showListaAlumnos && (
+                 <div
+                   className="fixed inset-0 z-0"
+                   onClick={() => setShowListaAlumnos(false)}
+                 />
+               )}
+             </div>
+
+             {/* Alumnos seleccionados como tags */}
+             {formData.alumnos_ids.length > 0 && (
+               <div className="flex flex-wrap gap-2 mt-3">
+                 {formData.alumnos_ids.map(id => {
+                   const alumno = alumnosActivos.find(a => a.id === id);
+                   return alumno ? (
+                     <div
+                       key={id}
+                       className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full flex items-center gap-2 text-sm"
+                     >
+                       {alumno.nombre}
+                       {!recupero && (
+                         <button
+                           type="button"
+                           onClick={() => handleAlumnoToggle(id)}
+                           className="hover:text-blue-900"
+                         >
+                           <X className="w-4 h-4" />
+                         </button>
+                       )}
+                     </div>
+                   ) : null;
+                 })}
+               </div>
+             )}
             {formData.alumnos_ids.length === 0 && alumnosActivos.length > 0 && (
               <p className="text-xs text-rose-500">Selecciona al menos un alumno</p>
             )}
