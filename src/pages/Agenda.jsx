@@ -24,6 +24,7 @@ import CancelarCanchaModal from '@/components/agenda/CancelarCanchaModal';
 import ModalCancelarTurno from '@/components/agenda/ModalCancelarTurno';
 import EditarClaseEnAgendaModal from '@/components/agenda/EditarClaseEnAgendaModal';
 import ModalClientesClase from '@/components/agenda/ModalClientesClase';
+import AccionesClaseModal from '@/components/agenda/AccionesClaseModal';
 
 import { cn } from '@/lib/utils';
 
@@ -38,9 +39,10 @@ export default function Agenda() {
    const [cancelarModal, setCancelarModal] = useState({ open: false, turno: null });
    const [cancelarTurnoModal, setCancelarTurnoModal] = useState({ open: false, turno: null });
     const [editarClaseAgendaModal, setEditarClaseAgendaModal] = useState({ open: false, turno: null });
-    const [clientesClaseModal, setClientesClaseModal] = useState({ open: false, turno: null });
-    const [showCalendario, setShowCalendario] = useState(false);
-    const [limpiadoLoading, setLimpiadoLoading] = useState(false);
+     const [clientesClaseModal, setClientesClaseModal] = useState({ open: false, turno: null });
+     const [accionesClaseModal, setAccionesClaseModal] = useState({ open: false, turno: null });
+     const [showCalendario, setShowCalendario] = useState(false);
+     const [limpiadoLoading, setLimpiadoLoading] = useState(false);
 
   const { data: user } = useQuery({
     queryKey: ['me'],
@@ -327,7 +329,7 @@ export default function Agenda() {
             selectedCancha={selectedCancha}
             fecha={selectedDate}
             isAdmin={isAdmin}
-            onTurnoClick={(turno) => turno.tipo_turno === 'clase' ? setClientesClaseModal({ open: true, turno }) : setCancelarTurnoModal({ open: true, turno })}
+            onTurnoClick={(turno) => turno.tipo_turno === 'clase' ? setAccionesClaseModal({ open: true, turno }) : setCancelarTurnoModal({ open: true, turno })}
             onEditarClase={(clase) => {
               // Abrir modal específico para editar clase en agenda
               setEditarClaseAgendaModal({ open: true, turno: clase });
@@ -393,6 +395,20 @@ export default function Agenda() {
           onCancelarTurno={(turno) => {
             setCancelarModal({ open: true, turno });
           }}
+          />
+
+          <AccionesClaseModal
+            open={accionesClaseModal.open}
+            onOpenChange={(open) => setAccionesClaseModal({ ...accionesClaseModal, open })}
+            turno={accionesClaseModal.turno}
+            onCancelar={(cancelMode) => {
+              setCancelarModal({ open: true, turno: accionesClaseModal.turno, cancelMode });
+              setAccionesClaseModal({ open: false, turno: null });
+            }}
+            onRegistrarAsistencia={(turno) => {
+              setClientesClaseModal({ open: true, turno });
+              setAccionesClaseModal({ open: false, turno: null });
+            }}
           />
           </div>
           );
