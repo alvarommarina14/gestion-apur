@@ -20,6 +20,8 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
   const [alumnos, setAlumnos] = useState([]);
   const [busquedaAlumno, setBusquedaAlumno] = useState('');
   const [showListaAlumnos, setShowListaAlumnos] = useState(false);
+  const [busquedaProfesor, setBusquedaProfesor] = useState('');
+  const [showListaProfesores, setShowListaProfesores] = useState(false);
   const [notas, setNotas] = useState('');
   const [recurrenciaSemanal, setRecurrenciaSemanal] = useState(false);
   const queryClient = useQueryClient();
@@ -159,6 +161,10 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
     a.nombre.toLowerCase().includes(busquedaAlumno.toLowerCase())
   );
 
+  const profesoresFiltrados = profesores.filter(p =>
+    p.activo && p.nombre.toLowerCase().includes(busquedaProfesor.toLowerCase())
+  );
+
   const alumnosSeleccionados = alumnos.map(id => 
     alumnosDisponibles.find(a => a.id === id)
   ).filter(Boolean);
@@ -216,29 +222,60 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
             </div>
           </div>
 
-          {/* Profesor */}
+          {/* Profesor con búsqueda */}
           <div>
             <label className="text-sm font-medium text-slate-700 block mb-2">
               Profesor
             </label>
             {!showNuevoProfesor ? (
               <div className="flex gap-2">
-                <Select value={profesor} onValueChange={setProfesor}>
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Selecciona profesor" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {profesores.filter(p => p.activo).map(p => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.nombre}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    placeholder="Buscar profesor..."
+                    value={busquedaProfesor}
+                    onChange={(e) => setBusquedaProfesor(e.target.value)}
+                    onFocus={() => setShowListaProfesores(true)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {showListaProfesores && (
+                    <>
+                      <div className="absolute z-10 w-full bg-white border border-slate-200 rounded-md shadow-lg max-h-48 overflow-y-auto mt-1">
+                        {profesoresFiltrados.length > 0 ? (
+                          profesoresFiltrados.map(p => (
+                            <button
+                              key={p.id}
+                              type="button"
+                              onClick={() => {
+                                setProfesor(p.id);
+                                setBusquedaProfesor(p.nombre);
+                                setShowListaProfesores(false);
+                              }}
+                              className="w-full text-left px-3 py-2 hover:bg-slate-50 border-b border-slate-100 last:border-b-0 text-sm text-slate-700"
+                            >
+                              {p.nombre}
+                            </button>
+                          ))
+                        ) : (
+                          <div className="px-3 py-2 text-sm text-slate-500">
+                            No hay profesores disponibles
+                          </div>
+                        )}
+                      </div>
+                      <div
+                        className="fixed inset-0 z-0"
+                        onClick={() => setShowListaProfesores(false)}
+                      />
+                    </>
+                  )}
+                </div>
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setShowNuevoProfesor(true)}
+                  onClick={() => {
+                    setShowNuevoProfesor(true);
+                    setBusquedaProfesor('');
+                  }}
                 >
                   + Nuevo
                 </Button>
@@ -258,6 +295,7 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
                   onClick={() => {
                     setShowNuevoProfesor(false);
                     setNuevoProfesor('');
+                    setBusquedaProfesor('');
                   }}
                 >
                   Cancelar
