@@ -73,6 +73,12 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
     enabled: open,
   });
 
+  const { data: profesores = [] } = useQuery({
+    queryKey: ['profesores'],
+    queryFn: () => base44.entities.Profesor.list(),
+    enabled: open,
+  });
+
   const { data: pagosAlumnos = [] } = useQuery({
     queryKey: ['pagos-alumnos', cliente?.id],
     queryFn: async () => {
@@ -116,6 +122,8 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
         tipo_cliente: cliente.tipo_cliente || 'clase',
         precio: cliente.precio || 0,
         notas: cliente.notas || '',
+        profesor_id: cliente.profesor_id || '',
+        profesor_nombre: cliente.profesor_nombre || '',
       });
     }
     setEditando(false);
@@ -337,14 +345,39 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
                 </div>
               </div>
 
-              {cliente.es_alumno && cliente.profesor_nombre && (
+              {cliente.es_alumno && (
                 <div className="space-y-2">
                   <Label>Profesor</Label>
-                  <Input
-                    value={cliente.profesor_nombre}
-                    disabled
-                    className="bg-slate-50"
-                  />
+                  {editando ? (
+                    <Select
+                      value={formData.profesor_id || ''}
+                      onValueChange={(v) => {
+                        const profesor = profesores.find(p => p.id === v);
+                        setFormData({ 
+                          ...formData, 
+                          profesor_id: v,
+                          profesor_nombre: profesor?.nombre || ''
+                        });
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar profesor" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {profesores.map((prof) => (
+                          <SelectItem key={prof.id} value={prof.id}>
+                            {prof.nombre}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input
+                      value={cliente.profesor_nombre || 'Sin asignar'}
+                      disabled
+                      className="bg-slate-50"
+                    />
+                  )}
                 </div>
               )}
 
