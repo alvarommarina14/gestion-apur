@@ -29,24 +29,23 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
    const queryClient = useQueryClient();
    const [success, setSuccess] = useState(false);
    const [clienteCreado, setClienteCreado] = useState(null);
-   const [tipoRegistro, setTipoRegistro] = useState(null); // 'abono' o 'alumno'
    const [formData, setFormData] = useState({
-        nombre: '',
-        telefono: '',
-        email: '',
-        clasificacion: 'recurrente',
-        tipo_cliente: 'clase',
-        precio: 0,
-        es_alumno: false,
-        profesor_id: '',
-        profesor_nombre: '',
-        clases_por_mes: '4',
-        horario_preferido: '',
-        sede_preferida: '',
-        tipo_asistencia: 'un_dia',
-        dia_preferido: '',
-        notas: '',
-      });
+       nombre: '',
+       telefono: '',
+       email: '',
+       clasificacion: 'recurrente',
+       tipo_cliente: 'clase',
+       precio: 0,
+       es_alumno: false,
+       profesor_id: '',
+       profesor_nombre: '',
+       clases_por_mes: '4',
+       horario_preferido: '',
+       sede_preferida: '',
+       tipo_asistencia: 'un_dia',
+       dia_preferido: '',
+       notas: '',
+     });
 
    const { data: profesores = [] } = useQuery({
      queryKey: ['profesores-list'],
@@ -73,7 +72,6 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
          notas: '',
        });
        setSuccess(false);
-       setTipoRegistro(null);
      }
   }, [open]);
 
@@ -100,47 +98,8 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const dataToSubmit = {
-      ...formData,
-      tipo_cliente: tipoRegistro === 'abono' ? 'abono' : 'clase',
-      es_alumno: tipoRegistro === 'alumno',
-    };
-    createMutation.mutate(dataToSubmit);
+    createMutation.mutate(formData);
   };
-
-  // Mostrar selector de tipo de registro
-  if (tipoRegistro === null) {
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <UserPlus className="w-5 h-5 text-emerald-600" />
-              Nuevo Cliente
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-3">
-            <Button
-              onClick={() => setTipoRegistro('abono')}
-              className="w-full h-20 bg-purple-50 hover:bg-purple-100 text-slate-900 border-2 border-purple-200 flex flex-col items-center justify-center gap-2"
-            >
-              <span className="text-lg font-semibold">💳 Abono Cancha</span>
-              <span className="text-xs text-slate-600">Alquiler con abono mensual</span>
-            </Button>
-
-            <Button
-              onClick={() => setTipoRegistro('alumno')}
-              className="w-full h-20 bg-emerald-50 hover:bg-emerald-100 text-slate-900 border-2 border-emerald-200 flex flex-col items-center justify-center gap-2"
-            >
-              <span className="text-lg font-semibold">👨‍🎓 Alumno</span>
-              <span className="text-xs text-slate-600">Clases con profesor</span>
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
 
   if (success) {
      return (
@@ -157,7 +116,7 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
      );
    }
 
-   if (clienteCreado && tipoRegistro === 'alumno') {
+   if (clienteCreado) {
      return (
        <NuevoAlumnoModal 
          open={true}
@@ -167,7 +126,6 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
              queryClient.invalidateQueries({ queryKey: ['clientes'] });
              queryClient.invalidateQueries({ queryKey: ['alumnos'] });
              setClienteCreado(null);
-             setTipoRegistro(null);
              onOpenChange(false);
            }
          }}
@@ -184,28 +142,13 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
    }
 
    return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-      if (!isOpen) {
-        setTipoRegistro(null);
-        onOpenChange(false);
-      }
-    }}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTipoRegistro(null)}
-              className="h-8 w-8 -ml-2"
-            >
-              <span className="text-xl">←</span>
-            </Button>
-            <DialogTitle className="flex items-center gap-2">
-              <UserPlus className="w-5 h-5 text-emerald-600" />
-              {tipoRegistro === 'abono' ? 'Nuevo Abono de Cancha' : 'Nuevo Alumno'}
-            </DialogTitle>
-          </div>
+          <DialogTitle className="flex items-center gap-2">
+            <UserPlus className="w-5 h-5 text-emerald-600" />
+            Nuevo Cliente
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -240,55 +183,59 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
             </div>
           </div>
 
-          {tipoRegistro === 'abono' ? (
-            // Flujo para Abono de Cancha
-            <>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Clasificación</Label>
-                  <Select
-                    value={formData.clasificacion}
-                    onValueChange={(v) => setFormData({ ...formData, clasificacion: v })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="recurrente">Recurrente</SelectItem>
-                      <SelectItem value="suelto">Suelto</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Clasificación</Label>
+              <Select
+                value={formData.clasificacion}
+                onValueChange={(v) => setFormData({ ...formData, clasificacion: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                     <SelectItem value="recurrente">Recurrente</SelectItem>
+                     <SelectItem value="suelto">Suelto</SelectItem>
+                   </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+               <Label>Tipo</Label>
+               <Select
+                 value={formData.tipo_cliente}
+                 onValueChange={(v) => setFormData({ ...formData, tipo_cliente: v })}
+               >
+                 <SelectTrigger>
+                   <SelectValue />
+                 </SelectTrigger>
+                 <SelectContent>
+                   <SelectItem value="clase">Clase</SelectItem>
+                   <SelectItem value="abono">Abono</SelectItem>
+                   <SelectItem value="suelto">Suelto</SelectItem>
+                 </SelectContent>
+               </Select>
+             </div>
+            </div>
 
-              <div className="space-y-2">
-                <Label>Precio mensual *</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  step="100"
-                  value={formData.precio}
-                  onChange={(e) => setFormData({ ...formData, precio: parseFloat(e.target.value) || 0 })}
-                  placeholder="Ej: 120000"
-                  required
-                />
-              </div>
-            </>
-          ) : (
-            // Flujo para Alumno
-            <>
-              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                <Checkbox
-                  id="es-alumno"
-                  checked={true}
-                  disabled
-                />
-                <Label htmlFor="es-alumno" className="font-medium cursor-pointer">
-                  Es alumno
-                </Label>
-              </div>
+            {formData.tipo_cliente === 'clase' && (
+            <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+              <Checkbox
+                id="es-alumno"
+                checked={formData.es_alumno}
+                onCheckedChange={(checked) => setFormData({
+                  ...formData,
+                  es_alumno: checked,
+                  profesor_id: checked ? formData.profesor_id : '',
+                  profesor_nombre: checked ? formData.profesor_nombre : '',
+                })}
+              />
+              <Label htmlFor="es-alumno" className="font-medium cursor-pointer">
+                Es alumno
+              </Label>
+            </div>
+            )}
 
-              {true && (
+            {formData.es_alumno && (
              <div className="space-y-4">
                <div className="space-y-2">
                  <Label>Profesor *</Label>
@@ -403,8 +350,37 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
                  </div>
                )}
              </div>
-             </>
-             )}
+            )}
+
+            {formData.tipo_cliente === 'abono' && (
+             <div className="space-y-2">
+               <Label>Precio mensual *</Label>
+               <Input
+                 type="number"
+                 min="0"
+                 step="100"
+                 value={formData.precio}
+                 onChange={(e) => setFormData({ ...formData, precio: parseFloat(e.target.value) || 0 })}
+                 placeholder="Ej: 120000"
+                 required
+               />
+             </div>
+            )}
+
+            {formData.tipo_cliente === 'suelto' && (
+             <div className="space-y-2">
+               <Label>Precio *</Label>
+               <Input
+                 type="number"
+                 min="0"
+                 step="100"
+                 value={formData.precio}
+                 onChange={(e) => setFormData({ ...formData, precio: parseFloat(e.target.value) || 0 })}
+                 placeholder="Ej: 50000"
+                 required
+               />
+             </div>
+            )}
 
           <div className="space-y-2">
             <Label>Notas</Label>

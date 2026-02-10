@@ -28,6 +28,16 @@ const roles = [
     borderColor: 'border-blue-200',
     iconColor: 'text-blue-600',
   },
+  {
+    value: 'profesor',
+    label: 'Profesor',
+    icon: GraduationCap,
+    description: 'Gestión de tus alumnos, clases y pagos',
+    color: 'from-emerald-500 to-emerald-600',
+    bgColor: 'bg-emerald-50',
+    borderColor: 'border-emerald-200',
+    iconColor: 'text-emerald-600',
+  },
 ];
 
 export default function SeleccionRol() {

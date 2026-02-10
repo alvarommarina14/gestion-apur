@@ -61,7 +61,12 @@ const navigationEmpleados = [
   { name: 'Tareas', href: 'Tareas', icon: CheckCircle, permissionKey: 'empleados' },
 ];
 
-const navigationProfesor = [];
+const navigationProfesor = [
+  { name: 'Dashboard', href: 'Dashboard', icon: LayoutDashboard, permissionKey: 'dashboard' },
+  { name: 'Alumnos', href: 'Alumnos', icon: Users, permissionKey: 'alumnos' },
+  { name: 'Pagos', href: 'Pagos', icon: DollarSign, permissionKey: 'pagos' },
+  { name: 'Reportes', href: 'Reportes', icon: FileText, permissionKey: 'reportes' },
+];
 
 const navigationClientes = [
   { name: 'Clientes', href: 'Clientes', icon: Users, permissionKey: 'gestion_clientes' },
@@ -108,15 +113,44 @@ export default function Layout({ children, currentPageName }) {
             window.location.href = createPageUrl('SeleccionRol');
             return;
           }
-
+          
           // Si tiene rol admin pero está pendiente de aprobación, redirigir
           if (currentUser.rol === 'admin' && currentUser.estado_aprobacion === 'pendiente') {
             window.location.href = createPageUrl('PendienteAprobacion');
             return;
           }
+          
+          // Si es profesor, verificar si tiene profesor seleccionado
+          if (currentUser.rol === 'profesor') {
+            if (!currentUser.profesor_id) {
+              window.location.href = createPageUrl('ProfesorRegistro');
+              return;
+            } else if (currentPageName === 'SeleccionRol' || currentPageName === 'ProfesorRegistro' || currentPageName === 'ProfesorMenu') {
+              // Si ya tiene profesor seleccionado, ir directo al Dashboard
+              window.location.href = createPageUrl('Dashboard');
+              return;
+            }
+          }
         }
         
-
+        // Cargar profesor seleccionado
+        if (currentUser?.profesor_id && currentUser.profesor_id.trim()) {
+          // Si está en base de datos, usar ese
+          try {
+            const profesor = await base44.entities.Profesor.read(currentUser.profesor_id);
+            setProfesorSeleccionado(profesor);
+            localStorage.setItem('profesor_seleccionado', JSON.stringify(profesor));
+          } catch (e) {
+            console.error('Error al cargar profesor:', e);
+          }
+        } else if (localStorage.getItem('profesor_seleccionado')) {
+          // Fallback a localStorage si existe
+          try {
+            setProfesorSeleccionado(JSON.parse(localStorage.getItem('profesor_seleccionado')));
+          } catch (e) {
+            console.error('Error parsing profesor seleccionado', e);
+          }
+        }
       } catch (error) {
         console.error('Error al verificar usuario:', error);
       }

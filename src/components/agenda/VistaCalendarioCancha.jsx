@@ -16,21 +16,6 @@ import { cn } from '@/lib/utils';
 import TarjetaClaseConPagos from './TarjetaClaseConPagos';
 import PagoRapidoModal from './PagoRapidoModal';
 
-// Función para verificar si un cliente pagó su abono en el mes
-const verificarClientePagadoEnMes = async (clienteId, mesVerificar) => {
-  try {
-    const cobros = await base44.entities.CobroCliente.filter({
-      cliente_id: clienteId,
-      mes: mesVerificar,
-      estado: 'pagado'
-    });
-    return cobros.length > 0;
-  } catch (error) {
-    console.error('Error verificando cobro cliente:', error);
-    return false;
-  }
-};
-
 const HORARIOS = [];
 for (let h = 8; h <= 21; h++) {
   HORARIOS.push(`${h.toString().padStart(2, '0')}:00`);
@@ -69,11 +54,6 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
     queryFn: () => base44.auth.me(),
   });
 
-  const { data: cobrosClientes = [] } = useQuery({
-    queryKey: ['cobros-clientes'],
-    queryFn: () => base44.entities.CobroCliente.list(),
-  });
-
   useEffect(() => {
     if (user?.profesor_id) {
       const turnosProfsor = turnos
@@ -92,7 +72,6 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
     });
 
     const fechaStr = format(selectedDate, 'yyyy-MM-dd');
-    const mesTurno = fechaStr.substring(0, 7); // YYYY-MM
     
     // Primero agregar bloqueos
     bloqueos.forEach(bloqueo => {
@@ -128,21 +107,7 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
     // Luego agregar turnos reales (tienen prioridad sobre bloqueos) - excluir cancelados
     turnos.forEach(turno => {
       if (turno.estado !== 'cancelado' && map[turno.cancha] && map[turno.cancha][turno.hora_inicio] !== undefined) {
-        // Verificar si cliente pagó abono para este mes (aplicable a alquiler con abono)
-        let turnoConPago = { ...turno, tipo: 'turno' };
-        
-        if (turno.tipo_turno === 'alquiler' && turno.modalidad_alquiler === 'abono' && turno.cliente_id) {
-          const cobroPagado = cobrosClientes.some(c => 
-            c.cliente_id === turno.cliente_id && 
-            c.mes === mesTurno && 
-            c.estado === 'pagado'
-          );
-          if (cobroPagado) {
-            turnoConPago.pagado = true;
-          }
-        }
-        
-        map[turno.cancha][turno.hora_inicio] = turnoConPago;
+        map[turno.cancha][turno.hora_inicio] = { ...turno, tipo: 'turno' };
       }
     });
 
@@ -169,7 +134,7 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
     });
     
     return map;
-  }, [turnos, recordatorios, bloqueos, selectedDate, selectedCancha, cobrosClientes]);
+  }, [turnos, recordatorios, bloqueos, selectedDate, selectedCancha]);
 
   const calcularFilas = (turno) => {
     if (!turno) return 1;
