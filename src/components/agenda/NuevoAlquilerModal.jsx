@@ -40,9 +40,7 @@ export default function NuevoAlquilerModal({ isOpen, onClose, initialDate }) {
       const horaFin = new Date(new Date(`2000-01-01 ${horaInicio}`).getTime() + duracion * 60000);
       const horaFinStr = `${String(horaFin.getHours()).padStart(2, '0')}:${String(horaFin.getMinutes()).padStart(2, '0')}`;
 
-      // Crear turno de alquiler
-      await base44.entities.TurnoCancha.create({
-        fecha: format(initialDate, 'yyyy-MM-dd'),
+      const datosTurno = {
         hora_inicio: horaInicio,
         hora_fin: horaFinStr,
         duracion: duracion === 80 ? 80 : 60,
@@ -54,7 +52,25 @@ export default function NuevoAlquilerModal({ isOpen, onClose, initialDate }) {
         estado: 'activo',
         empleados_asignados_ids: [],
         notas
-      });
+      };
+
+      if (recurrenciaSemanal) {
+        // Crear 52 alquileres (un año de repeticiones semanales)
+        for (let i = 0; i < 52; i++) {
+          const fecha = new Date(initialDate);
+          fecha.setDate(fecha.getDate() + (i * 7));
+          
+          await base44.entities.TurnoCancha.create({
+            ...datosTurno,
+            fecha: format(fecha, 'yyyy-MM-dd')
+          });
+        }
+      } else {
+        await base44.entities.TurnoCancha.create({
+          ...datosTurno,
+          fecha: format(initialDate, 'yyyy-MM-dd')
+        });
+      }
 
       return true;
     },
@@ -78,6 +94,7 @@ export default function NuevoAlquilerModal({ isOpen, onClose, initialDate }) {
     setClienteSeleccionado('');
     setShowListaClientes(false);
     setNotas('');
+    setRecurrenciaSemanal(false);
     onClose();
   };
 
@@ -222,6 +239,20 @@ export default function NuevoAlquilerModal({ isOpen, onClose, initialDate }) {
               placeholder="Detalles o comentarios..."
               className="resize-none h-20"
             />
+          </div>
+
+          {/* Recurrencia semanal */}
+          <div className="flex items-center gap-3 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+            <input
+              type="checkbox"
+              id="recurrencia-alquiler"
+              checked={recurrenciaSemanal}
+              onChange={(e) => setRecurrenciaSemanal(e.target.checked)}
+              className="w-4 h-4 rounded cursor-pointer"
+            />
+            <label htmlFor="recurrencia-alquiler" className="text-sm font-medium text-emerald-700 cursor-pointer">
+              Repetir semanalmente durante un año
+            </label>
           </div>
 
           {/* Botones */}
