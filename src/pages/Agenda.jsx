@@ -319,14 +319,19 @@ export default function Agenda() {
 
       {/* Modales */}
       {canEdit && (
-        <NuevoTurnoModal
-          open={turnoModal.open}
-          onOpenChange={(open) => setTurnoModal({ ...turnoModal, open })}
-          turno={turnoModal.turno}
-          fecha={selectedDate}
-          isProfesor={isProfesor}
-          type={turnoModal.type}
-        />
+        <>
+          <NuevaClaseModal
+            open={claseModal}
+            onOpenChange={setClaseModal}
+          />
+          <NuevoTurnoModal
+            open={turnoModal.open}
+            onOpenChange={(open) => setTurnoModal({ ...turnoModal, open })}
+            turno={turnoModal.turno}
+            fecha={selectedDate}
+            isProfesor={isProfesor}
+          />
+        </>
       )}
 
       {isAdmin && (
