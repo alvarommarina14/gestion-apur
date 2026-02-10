@@ -20,6 +20,7 @@ import NuevoTurnoModal from '@/components/agenda/NuevoTurnoModal';
 import EditarClaseProfesorModal from '@/components/agenda/EditarClaseProfesorModal';
 import NuevoBloqueoModal from '@/components/disponibilidad/NuevoBloqueoModal';
 import CancelarCanchaModal from '@/components/agenda/CancelarCanchaModal';
+import ModalCancelarTurno from '@/components/agenda/ModalCancelarTurno';
 import { cn } from '@/lib/utils';
 
 export default function Agenda() {
@@ -31,6 +32,7 @@ export default function Agenda() {
   const [claseModal, setClaseModal] = useState({ open: false, turno: null });
   const [bloqueoModal, setBloqueoModal] = useState(false);
   const [cancelarModal, setCancelarModal] = useState({ open: false, turno: null });
+  const [cancelarTurnoModal, setCancelarTurnoModal] = useState({ open: false, turno: null });
   const [showCalendario, setShowCalendario] = useState(false);
   const [limpiadoLoading, setLimpiadoLoading] = useState(false);
 
@@ -301,7 +303,7 @@ export default function Agenda() {
               setSelectedDate(fecha);
               setTurnoModal({ open: true, turno: null });
             }}
-            onTurnoClick={() => {}}
+            onTurnoClick={(turno) => setCancelarTurnoModal({ open: true, turno })}
           />
         ) : (
           <VistaCalendarioCancha
@@ -312,7 +314,7 @@ export default function Agenda() {
             selectedCancha={selectedCancha}
             fecha={selectedDate}
             isAdmin={isAdmin}
-            onTurnoClick={() => {}}
+            onTurnoClick={(turno) => setCancelarTurnoModal({ open: true, turno })}
             onEditarClase={() => {}}
             onCancelarCancha={(turno) => isAdmin && turno.modalidad_alquiler === 'abono' && setCancelarModal({ open: true, turno })}
             isLoading={isLoading}
@@ -351,8 +353,14 @@ export default function Agenda() {
                // El modal maneja invalidación, solo reabrir modal después
              }}
            />
-        </>
-      )}
-    </div>
-  );
-}
+          </>
+          )}
+
+          <ModalCancelarTurno
+          open={cancelarTurnoModal.open}
+          onOpenChange={(open) => setCancelarTurnoModal({ ...cancelarTurnoModal, open })}
+          turno={cancelarTurnoModal.turno}
+          />
+          </div>
+          );
+          }
