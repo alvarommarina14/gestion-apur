@@ -316,35 +316,12 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
                                   onTurnoClick={onTurnoClick}
                                 />
                               ) : (
-                                <div
-                                   className={cn(
-                                     'h-full rounded-lg border-2 p-3 transition-all',
-                                     turno.pagado
-                                       ? 'bg-emerald-50 border-emerald-400'
-                                       : 'bg-rose-50 border-rose-400'
-                                   )}
-                                 >
-                                  {/* Header con estado de pago */}
+                               <div className="h-full rounded-lg border-2 border-purple-300 bg-purple-50 p-3 transition-all">
+                                  {/* Header con duración y opciones */}
                                   <div className="flex items-center justify-between mb-2">
-                                    <Badge
-                                      variant={turno.pagado ? 'default' : 'destructive'}
-                                      className={cn(
-                                        'flex items-center gap-1',
-                                        turno.pagado && 'bg-emerald-600'
-                                      )}
-                                    >
-                                      {turno.pagado ? (
-                                        <>
-                                          <CheckCircle className="w-3 h-3" />
-                                          PAGADO
-                                        </>
-                                      ) : (
-                                        <>
-                                          <XCircle className="w-3 h-3" />
-                                          PENDIENTE
-                                        </>
-                                      )}
-                                    </Badge>
+                                    <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs font-semibold">
+                                      Alquiler - {turno.modalidad_alquiler === 'abono' ? 'Abono' : 'Suelto'}
+                                    </span>
                                     <span className="text-xs font-semibold text-slate-500">
                                       {turno.duracion} min
                                     </span>
@@ -382,55 +359,8 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
                                       </p>
                                     </div>
 
-                                    {/* Tipo de turno y Profesor */}
-                                    <div className="flex items-center gap-1.5 flex-wrap">
-                                      <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs font-semibold">
-                                        Alquiler - {turno.modalidad_alquiler === 'abono' ? 'Abono' : 'Suelto'}
-                                      </span>
-                                      {turno.modalidad_alquiler === 'abono' && (
-                                        <Badge variant="outline" className="text-xs bg-emerald-50 border-emerald-200 text-emerald-700">
-                                          Abono pagado
-                                        </Badge>
-                                      )}
-                                      {turno.modalidad_alquiler === 'suelto' && turno.pagado && (
-                                        <Badge variant="outline" className="text-xs bg-emerald-50 border-emerald-200 text-emerald-700">
-                                          Cancha pagada
-                                        </Badge>
-                                      )}
-                                    </div>
-
-                                     {/* Precio y botón de pago */}
-                                     <div className="flex items-center justify-between gap-2 p-2 bg-white/50 rounded border border-slate-200">
-                                       <div className="flex items-center gap-1.5">
-                                         <DollarSign className="w-4 h-4 text-slate-600" />
-                                         <span className="font-bold text-slate-900">
-                                           {formatMoney(turno.monto)}
-                                         </span>
-                                       </div>
-                                       {!turno.pagado && isAdmin && (
-                                         <Button
-                                           size="sm"
-                                           onClick={(e) => {
-                                             e.stopPropagation();
-                                             setTurnoParaPago(turno);
-                                             setShowPagoModal(true);
-                                           }}
-                                           className="h-7 bg-emerald-600 hover:bg-emerald-700 text-xs"
-                                         >
-                                           <CheckCircle className="w-3 h-3 mr-1" />
-                                           Cobrar
-                                         </Button>
-                                       )}
-                                       {turno.pagado && (
-                                         <Badge className="bg-emerald-600">
-                                           <CheckCircle className="w-3 h-3 mr-1" />
-                                           Pagado
-                                         </Badge>
-                                       )}
-                                     </div>
-
                                      {turno.notas && (
-                                       <p className="text-xs text-slate-500 italic mt-2 border-t pt-2">
+                                       <p className="text-xs text-slate-500 italic border-t pt-2">
                                          {turno.notas}
                                        </p>
                                      )}
