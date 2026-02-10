@@ -25,6 +25,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DetalleClienteModal from '@/components/clientes/DetalleClienteModal';
 import NuevoClienteModal from '@/components/clientes/NuevoClienteModal';
+import SeleccionTipoClienteModal from '@/components/clientes/SeleccionTipoClienteModal';
 import { cn } from '@/lib/utils';
 
 export default function ClientesPage() {
@@ -33,6 +34,8 @@ export default function ClientesPage() {
   const [filtroTipo, setFiltroTipo] = useState('todos');
   const [modalDetalle, setModalDetalle] = useState({ open: false, cliente: null });
   const [modalNuevo, setModalNuevo] = useState(false);
+  const [modalSeleccion, setModalSeleccion] = useState(false);
+  const [tipoClienteSeleccionado, setTipoClienteSeleccionado] = useState(null);
 
   const { data: clientes = [], isLoading } = useQuery({
     queryKey: ['clientes'],
