@@ -89,7 +89,7 @@ export default function FinanzasClientes() {
 
   // Cálculos
   const metricasClientes = useMemo(() => {
-    const clientesConCobros = clientesFiltrados.map(cliente => {
+    const clientesConCobros = clientes.map(cliente => {
       const cobrosDelCliente = cobrosClientes.filter(c => c.cliente_id === cliente.id);
       const cobrosMes = cobrosDelCliente.filter(c => c.mes === mesStr);
 
