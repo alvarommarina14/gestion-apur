@@ -282,11 +282,12 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
         </DialogHeader>
 
         <Tabs defaultValue="info" className="flex-1 flex flex-col overflow-hidden">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="info">Info</TabsTrigger>
-            <TabsTrigger value="cobros">Cobros</TabsTrigger>
-            <TabsTrigger value="pagos">Pagos</TabsTrigger>
-          </TabsList>
+           <TabsList className="grid w-full grid-cols-4">
+             <TabsTrigger value="info">Info</TabsTrigger>
+             <TabsTrigger value="asistencia">Asistencia</TabsTrigger>
+             <TabsTrigger value="cobros">Cobros</TabsTrigger>
+             <TabsTrigger value="pagos">Pagos</TabsTrigger>
+           </TabsList>
 
           <TabsContent value="info" className="flex-1 overflow-y-auto space-y-4 px-1">
             <div className="flex items-center justify-between">
