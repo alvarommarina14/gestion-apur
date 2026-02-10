@@ -28,6 +28,7 @@ export default function Agenda() {
   const [vista, setVista] = useState('dia');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedCancha, setSelectedCancha] = useState('todas');
+  const [nuevoTurnoType, setNuevoTurnoType] = useState(null); // 'clase' o 'cancha'
   const [turnoModal, setTurnoModal] = useState({ open: false, turno: null });
   const [claseModal, setClaseModal] = useState({ open: false, turno: null });
   const [bloqueoModal, setBloqueoModal] = useState(false);
