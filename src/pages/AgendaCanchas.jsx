@@ -42,18 +42,21 @@ export default function AgendaCanchas() {
   const handleDescargarPDF = async () => {
     try {
       const response = await base44.functions.invoke('generarPDFAgenda', {
-        fecha: format(selectedDate, 'yyyy-MM-dd')
+        fecha: format(selectedDate, 'yyyy-MM-dd'),
+        selectedCancha: 'todas'
       });
       
-      if (response.data?.pdfUrl) {
-        const link = document.createElement('a');
-        link.href = response.data.pdfUrl;
-        link.download = `planilla_${format(selectedDate, 'dd-MM-yyyy')}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        toast.success('PDF descargado correctamente');
-      }
+      // La respuesta es el PDF directamente
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `planilla_${format(selectedDate, 'dd-MM-yyyy')}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(link);
+      toast.success('PDF descargado correctamente');
     } catch (error) {
       toast.error('Error al descargar PDF: ' + error.message);
     }
