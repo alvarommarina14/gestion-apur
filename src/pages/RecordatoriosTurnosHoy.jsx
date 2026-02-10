@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Clock, Users, DollarSign, CheckCircle, AlertCircle } from 'lucide-react';
+import { Clock, Users, DollarSign, CheckCircle, AlertCircle, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -88,6 +88,22 @@ export default function RecordatoriosTurnosHoy() {
       queryClient.invalidateQueries({ queryKey: ['turnos-hoy'] });
       queryClient.invalidateQueries({ queryKey: ['clases-hoy'] });
       toast.success('Marcado como realizado');
+    } catch (error) {
+      toast.error('Error: ' + error.message);
+    }
+  };
+
+  const handleEliminar = async (item) => {
+    if (!confirm('¿Eliminar este turno?')) return;
+    try {
+      if (item.type === 'turno') {
+        await base44.entities.TurnoCancha.delete(item.id);
+      } else if (item.type === 'clase') {
+        await base44.entities.Clase.delete(item.id);
+      }
+      queryClient.invalidateQueries({ queryKey: ['turnos-hoy'] });
+      queryClient.invalidateQueries({ queryKey: ['clases-hoy'] });
+      toast.success('Eliminado correctamente');
     } catch (error) {
       toast.error('Error: ' + error.message);
     }
@@ -223,15 +239,26 @@ export default function RecordatoriosTurnosHoy() {
                   </div>
                 </div>
 
-                <Button
-                  onClick={() => handleMarcarRealizado(item)}
-                  variant="outline"
-                  size="sm"
-                  className="ml-4 gap-2 whitespace-nowrap"
-                >
-                  <CheckCircle className="w-4 h-4" />
-                  Realizado
-                </Button>
+                <div className="flex gap-2 ml-4">
+                  <Button
+                    onClick={() => handleMarcarRealizado(item)}
+                    variant="outline"
+                    size="sm"
+                    className="gap-2 whitespace-nowrap"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    Realizado
+                  </Button>
+                  <Button
+                    onClick={() => handleEliminar(item)}
+                    variant="outline"
+                    size="sm"
+                    className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Eliminar
+                  </Button>
+                </div>
               </div>
             </Card>
           ))}
