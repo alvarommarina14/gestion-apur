@@ -263,10 +263,21 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
           <DialogTitle className="flex items-center gap-3">
             <User className="w-5 h-5 text-emerald-600" />
             {cliente.nombre}
-            <Badge className={cn('ml-auto', config.color)}>
-              <Icon className="w-3 h-3 mr-1" />
-              {config.label}
-            </Badge>
+            <div className="ml-auto flex gap-2">
+              <Badge className={cn('', config.color)}>
+                <Icon className="w-3 h-3 mr-1" />
+                {config.label}
+              </Badge>
+              <Badge className={cn('', 
+                estadisticas.estadoGeneral === 'pagado' ? 'bg-emerald-100 text-emerald-700' :
+                estadisticas.estadoGeneral === 'pendiente' ? 'bg-amber-100 text-amber-700' :
+                'bg-rose-100 text-rose-700'
+              )}>
+                {estadisticas.estadoGeneral === 'pagado' ? '✓ Pagado' :
+                 estadisticas.estadoGeneral === 'pendiente' ? '⏳ Pendiente' :
+                 '⚠️ Moroso'}
+              </Badge>
+            </div>
           </DialogTitle>
         </DialogHeader>
 
