@@ -30,13 +30,13 @@ export default function Agenda() {
   const [vista, setVista] = useState('dia');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedCancha, setSelectedCancha] = useState('todas');
-  const [claseModal, setClaseModal] = useState(false);
-  const [turnoModal, setTurnoModal] = useState({ open: false, turno: null });
-  const [bloqueoModal, setBloqueoModal] = useState(false);
-  const [cancelarModal, setCancelarModal] = useState({ open: false, turno: null });
-  const [cancelarTurnoModal, setCancelarTurnoModal] = useState({ open: false, turno: null });
-  const [showCalendario, setShowCalendario] = useState(false);
-  const [limpiadoLoading, setLimpiadoLoading] = useState(false);
+  const [claseModal, setClaseModal] = useState({ open: false, clase: null });
+   const [turnoModal, setTurnoModal] = useState({ open: false, turno: null });
+   const [bloqueoModal, setBloqueoModal] = useState(false);
+   const [cancelarModal, setCancelarModal] = useState({ open: false, turno: null });
+   const [cancelarTurnoModal, setCancelarTurnoModal] = useState({ open: false, turno: null });
+   const [showCalendario, setShowCalendario] = useState(false);
+   const [limpiadoLoading, setLimpiadoLoading] = useState(false);
 
   const { data: user } = useQuery({
     queryKey: ['me'],
@@ -199,7 +199,7 @@ export default function Agenda() {
              {canEdit && (
                  <>
                    <Button
-                     onClick={() => setClaseModal(true)}
+                     onClick={() => setClaseModal({ open: true, clase: null })}
                      className="bg-emerald-600 hover:bg-emerald-700 h-11 lg:h-10 text-base lg:text-sm active:scale-95 touch-manipulation w-full sm:w-auto"
                    >
                      <Plus className="w-5 h-5 mr-2" />
@@ -311,7 +311,14 @@ export default function Agenda() {
             fecha={selectedDate}
             isAdmin={isAdmin}
             onTurnoClick={(turno) => setCancelarTurnoModal({ open: true, turno })}
-            onEditarClase={(turno) => setTurnoModal({ open: true, turno })}
+            onEditarClase={(clase) => {
+              // Diferenciamos: si es una clase (tiene profesor_id), abrimos el modal de clase
+              if (clase.tipo_turno === 'clase' || clase.profesor_id) {
+                setClaseModal({ open: true, clase });
+              } else {
+                setTurnoModal({ open: true, turno: clase });
+              }
+            }}
             onEditarTurno={(turno) => setTurnoModal({ open: true, turno })}
             onCancelarCancha={(turno) => isAdmin && turno.modalidad_alquiler === 'abono' && setCancelarModal({ open: true, turno })}
             isLoading={isLoading}
@@ -323,8 +330,8 @@ export default function Agenda() {
       {canEdit && (
         <>
           <NuevaClaseModal
-            open={claseModal}
-            onOpenChange={setClaseModal}
+            open={claseModal.open}
+            onOpenChange={(open) => setClaseModal({ ...claseModal, open })}
           />
           <NuevoTurnoModal
             open={turnoModal.open}
