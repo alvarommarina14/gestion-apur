@@ -113,7 +113,7 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
   });
 
   React.useEffect(() => {
-    if (cliente) {
+    if (cliente && open) {
       setFormData({
         nombre: cliente.nombre,
         telefono: cliente.telefono || '',
@@ -125,9 +125,9 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
         profesor_id: cliente.profesor_id || '',
         profesor_nombre: cliente.profesor_nombre || '',
       });
+      setEditando(false);
     }
-    setEditando(false);
-  }, [cliente, open]);
+  }, [cliente?.id, open]);
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }) => {
@@ -140,9 +140,7 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
         }
       }
       
-      await base44.entities.Cliente.update(id, data);
-      
-      // Si es alumno y cambió el profesor, actualizar también el alumno sincronizado
+      // Si es alumno y cambió el profesor, actualizar también el alumno sincronizado PRIMERO
       if (cliente.es_alumno && (data.profesor_id || data.profesor_nombre)) {
         const alumnoSincronizado = alumnos.find(a => 
           a.nombre.toLowerCase() === cliente.nombre.toLowerCase()
@@ -156,6 +154,9 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
           }
         }
       }
+      
+      // Ahora actualizar el cliente
+      await base44.entities.Cliente.update(id, data);
       
       // Si cambió el precio, actualizar total_gastado
       if (data.precio !== undefined && data.precio !== cliente.precio) {
@@ -174,8 +175,12 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
           cambio.valorNuevo
         );
       }
+      
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (updatedData) => {
+      // Actualizar el formData con los datos guardados para evitar que se pierdan
+      setFormData(prev => ({ ...prev, ...updatedData }));
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
       queryClient.invalidateQueries({ queryKey: ['alumnos'] });
       setEditando(false);
