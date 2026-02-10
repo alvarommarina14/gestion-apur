@@ -27,7 +27,7 @@ import {
 } from '@/components/ui/dialog';
 import { Trash2, CheckCircle, Clock, AlertCircle, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import NuevaClaseModal from '@/components/modals/NuevaClaseModal';
+import ProgramarRecuperoModal from '@/components/modals/ProgramarRecuperoModal';
 
 export default function RecuperoCanchas() {
   const queryClient = useQueryClient();
@@ -37,7 +37,7 @@ export default function RecuperoCanchas() {
    const [selectedCancelacion, setSelectedCancelacion] = useState(null);
   const [selectedRecupero, setSelectedRecupero] = useState(null);
   const [accion, setAccion] = useState(null);
-  const [nuevaClaseModal, setNuevaClaseModal] = useState({ open: false, recupero: null });
+  const [programarRecuperoModal, setProgramarRecuperoModal] = useState({ open: false, recupero: null });
   const [formData, setFormData] = useState({
     fecha_recupero: format(new Date(), 'yyyy-MM-dd'),
     turno_recupero_id: '',
@@ -62,6 +62,11 @@ export default function RecuperoCanchas() {
   const { data: clases = [] } = useQuery({
     queryKey: ['clases-lista'],
     queryFn: () => base44.entities.Clase.list('-fecha', 500),
+  });
+
+  const { data: profesores = [] } = useQuery({
+    queryKey: ['profesores-lista'],
+    queryFn: () => base44.entities.Profesor.list('-nombre'),
   });
 
   const cancelacionesFiltradas = useMemo(() => {
@@ -364,13 +369,13 @@ export default function RecuperoCanchas() {
                       </div>
                       <div className="flex gap-2">
                         <Button
-                          size="sm"
-                          className="bg-emerald-600 hover:bg-emerald-700"
-                          onClick={() => setNuevaClaseModal({ open: true, recupero })}
-                        >
-                          <Calendar className="w-4 h-4 mr-1" />
-                          Programar
-                        </Button>
+                           size="sm"
+                           className="bg-emerald-600 hover:bg-emerald-700"
+                           onClick={() => setProgramarRecuperoModal({ open: true, recupero })}
+                         >
+                           <Calendar className="w-4 h-4 mr-1" />
+                           Programar
+                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
@@ -529,11 +534,12 @@ export default function RecuperoCanchas() {
              </DialogContent>
              </Dialog>
 
-             {/* Modal para programar clase */}
-             <NuevaClaseModal 
-             open={nuevaClaseModal.open}
-             onOpenChange={(open) => setNuevaClaseModal({ ...nuevaClaseModal, open })}
-             recupero={nuevaClaseModal.recupero}
+             {/* Modal para programar recupero */}
+             <ProgramarRecuperoModal 
+               open={programarRecuperoModal.open}
+               onOpenChange={(open) => setProgramarRecuperoModal({ open, recupero: programarRecuperoModal.recupero })}
+               recupero={programarRecuperoModal.recupero}
+               profesores={profesores}
              />
              </div>
              );
