@@ -296,7 +296,7 @@ export default function Agenda() {
             onDateSelect={setSelectedDate}
             onCreateTurno={(fecha) => {
               setSelectedDate(fecha);
-              setTurnoModal({ open: true, turno: null });
+              setTurnoModal({ open: true, turno: null, type: 'cancha' });
             }}
             onTurnoClick={(turno) => setCancelarTurnoModal({ open: true, turno })}
           />
