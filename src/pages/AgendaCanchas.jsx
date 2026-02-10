@@ -21,6 +21,7 @@ export default function AgendaCanchas() {
   const [showBloqueoModal, setShowBloqueoModal] = useState(false);
   const [nuevoTurnoType, setNuevoTurnoType] = useState('alquiler');
   const [turnoEditando, setTurnoEditando] = useState(null);
+  const [bloqueoEditando, setBloqueoEditando] = useState(null);
   const queryClient = useQueryClient();
 
   const { data: turnos = [], isLoading: turnosLoading } = useQuery({
@@ -89,7 +90,24 @@ export default function AgendaCanchas() {
 
   const handleCloseBloqueoModal = () => {
     setShowBloqueoModal(false);
+    setBloqueoEditando(null);
     queryClient.invalidateQueries({ queryKey: ['bloqueos'] });
+  };
+
+  const handleEditBloqueo = (bloqueo) => {
+    setBloqueoEditando(bloqueo);
+    setShowBloqueoModal(true);
+  };
+
+  const handleDeleteBloqueo = async (bloqueo) => {
+    if (!confirm('¿Eliminar este bloqueo?')) return;
+    try {
+      await base44.entities.DisponibilidadCancha.delete(bloqueo.id);
+      queryClient.invalidateQueries({ queryKey: ['bloqueos'] });
+      toast.success('Bloqueo eliminado');
+    } catch (error) {
+      toast.error('Error al eliminar: ' + error.message);
+    }
   };
 
   const motivosBloqueo = [
@@ -209,6 +227,8 @@ export default function AgendaCanchas() {
                 bloqueos={bloqueos}
                 onEdit={handleEditTurno}
                 onDelete={handleDeleteTurno}
+                onEditBloqueo={handleEditBloqueo}
+                onDeleteBloqueo={handleDeleteBloqueo}
               />
             )}
           </Card>
@@ -251,6 +271,7 @@ export default function AgendaCanchas() {
           isOpen={showBloqueoModal}
           onClose={handleCloseBloqueoModal}
           initialDate={selectedDate}
+          bloqueo={bloqueoEditando}
         />
       )}
     </div>
