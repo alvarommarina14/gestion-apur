@@ -269,48 +269,69 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
             <label className="text-sm font-medium text-slate-700 block mb-2">
               Alumnos ({alumnos.length})
             </label>
-            <div className="flex gap-2 mb-2">
-              <Select value={alumnoSeleccionado} onValueChange={setAlumnoSeleccionado}>
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Selecciona alumno" />
-                </SelectTrigger>
-                <SelectContent>
-                  {alumnosDisponibles
-                    .filter(a => !alumnos.includes(a.id))
-                    .map(a => (
-                      <SelectItem key={a.id} value={a.id}>
-                        {a.nombre}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-              <Button
-                type="button"
-                onClick={agregarAlumno}
-                disabled={!alumnoSeleccionado || (tipo === 'individual' && alumnos.length > 0)}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                Agregar
-              </Button>
+            <div className="relative">
+              <div className="relative mb-2">
+                <Search className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Buscar alumno..."
+                  value={busquedaAlumno}
+                  onChange={(e) => setBusquedaAlumno(e.target.value)}
+                  onFocus={() => setShowListaAlumnos(true)}
+                  className="w-full pl-10 pr-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Lista de alumnos con checkboxes */}
+              {showListaAlumnos && (
+                <div className="absolute z-10 w-full bg-white border border-slate-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                  {alumnosFiltrados.length > 0 ? (
+                    alumnosFiltrados.map(a => (
+                      <label
+                        key={a.id}
+                        className="flex items-center gap-3 px-3 py-2 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-b-0"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={alumnos.includes(a.id)}
+                          onChange={() => toggleAlumno(a.id)}
+                          className="w-4 h-4 rounded"
+                        />
+                        <span className="text-sm text-slate-700">{a.nombre}</span>
+                      </label>
+                    ))
+                  ) : (
+                    <div className="px-3 py-2 text-sm text-slate-500">
+                      No hay alumnos disponibles
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Cerrar lista al hacer click afuera */}
+              {showListaAlumnos && (
+                <div
+                  className="fixed inset-0 z-0"
+                  onClick={() => setShowListaAlumnos(false)}
+                />
+              )}
             </div>
 
-            {/* Lista de alumnos seleccionados */}
+            {/* Alumnos seleccionados como tags */}
             {alumnosSeleccionados.length > 0 && (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 mt-3">
                 {alumnosSeleccionados.map(a => (
                   <div
                     key={a.id}
                     className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full flex items-center gap-2 text-sm"
                   >
                     {a.nombre}
-                    {tipo === 'grupal' && (
-                      <button
-                        onClick={() => removerAlumno(a.id)}
-                        className="hover:text-blue-900"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    )}
+                    <button
+                      onClick={() => toggleAlumno(a.id)}
+                      className="hover:text-blue-900"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
                   </div>
                 ))}
               </div>
