@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -180,7 +182,9 @@ export default function ClasesAlumnosSection({ profesor }) {
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
                         <div>
-                          <CardTitle className="text-lg">{clase.hora_inicio}</CardTitle>
+                          <CardTitle className="text-lg">
+                            {format(new Date(clase.fecha), 'EEEE', { locale: es })} • {clase.hora_inicio}
+                          </CardTitle>
                           <CardDescription className="mt-1">
                             {clase.sede} • Cancha {clase.cancha}
                           </CardDescription>
