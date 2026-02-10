@@ -61,8 +61,6 @@ export default function FinanzasClientes() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
-      setEditandoCobro(null);
-      setMontoPago('');
     },
   });
 
