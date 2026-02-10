@@ -174,8 +174,7 @@ export default function ProfesorMenuPage() {
           </Card>
         </div>
 
-        {/* Sección Clases y Alumnos */}
-        <ClasesAlumnosSection profesor={profesor} />
+
 
         {/* Opciones del menú */}
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
