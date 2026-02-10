@@ -47,9 +47,7 @@ const PAGE_TO_PERMISSION = {
   'Configuracion': 'configuracion',
 };
 
-const navigationGestionClases = [
-  { name: 'Profesores', href: 'Profesores', icon: Users, permissionKey: 'gestion_profesores' },
-];
+
 
 const navigationAgenda = [
   { name: 'Agenda', href: 'Agenda', icon: Calendar, permissionKey: 'booking_canchas' },

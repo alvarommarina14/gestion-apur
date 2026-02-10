@@ -70,8 +70,8 @@ import RecordatoriosCanchaHoy from './pages/RecordatoriosCanchaHoy';
 import RecuperoCanchas from './pages/RecuperoCanchas';
 import Recuperos from './pages/Recuperos';
 import Reportes from './pages/Reportes';
-import Tareas from './pages/Tareas';
 import SeleccionRol from './pages/SeleccionRol';
+import Tareas from './pages/Tareas';
 import __Layout from './Layout.jsx';
 
 
@@ -99,8 +99,8 @@ export const PAGES = {
     "RecuperoCanchas": RecuperoCanchas,
     "Recuperos": Recuperos,
     "Reportes": Reportes,
-    "Tareas": Tareas,
     "SeleccionRol": SeleccionRol,
+    "Tareas": Tareas,
 }
 
 export const pagesConfig = {
