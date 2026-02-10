@@ -12,6 +12,7 @@ import PlanillaCanchas from '@/components/agenda/PlanillaCanchas';
 import CalendarioVistasTurnos from '@/components/agenda/CalendarioVistasTurnos';
 import NuevoTurnoModal from '@/components/agenda/NuevoTurnoModal';
 import BloquearTurnoModal from '@/components/agenda/BloquearTurnoModal';
+import NuevaClaseAgendaModal from '@/components/agenda/NuevaClaseAgendaModal';
 import { toast } from 'sonner';
 
 export default function AgendaCanchas() {
@@ -19,6 +20,7 @@ export default function AgendaCanchas() {
   const [viewMode, setViewMode] = useState('planilla');
   const [showNuevoTurnoModal, setShowNuevoTurnoModal] = useState(false);
   const [showBloqueoModal, setShowBloqueoModal] = useState(false);
+  const [showNuevaClaseModal, setShowNuevaClaseModal] = useState(false);
   const [nuevoTurnoType, setNuevoTurnoType] = useState('alquiler');
   const [turnoEditando, setTurnoEditando] = useState(null);
   const [bloqueoEditando, setBloqueoEditando] = useState(null);
@@ -66,6 +68,10 @@ export default function AgendaCanchas() {
     setTurnoEditando(null);
     setNuevoTurnoType(type);
     setShowNuevoTurnoModal(true);
+  };
+
+  const handleNuevaClase = () => {
+    setShowNuevaClaseModal(true);
   };
 
   const handleEditTurno = (turno) => {
@@ -140,7 +146,7 @@ export default function AgendaCanchas() {
       {/* Botones de acciones principales */}
       <div className="flex flex-wrap gap-3">
         <Button
-          onClick={() => handleNuevoTurno('clase')}
+          onClick={handleNuevaClase}
           className="gap-2 bg-blue-600 hover:bg-blue-700"
         >
           <Plus className="w-4 h-4" />
@@ -275,6 +281,18 @@ export default function AgendaCanchas() {
           onClose={handleCloseBloqueoModal}
           initialDate={selectedDate}
           bloqueo={bloqueoEditando}
+        />
+      )}
+
+      {showNuevaClaseModal && (
+        <NuevaClaseAgendaModal
+          isOpen={showNuevaClaseModal}
+          onClose={() => {
+            setShowNuevaClaseModal(false);
+            queryClient.invalidateQueries({ queryKey: ['clases'] });
+            queryClient.invalidateQueries({ queryKey: ['turnos'] });
+          }}
+          initialDate={selectedDate}
         />
       )}
     </div>
