@@ -16,12 +16,12 @@ const MOTIVOS = [
   { value: 'otro', label: 'Otro' }
 ];
 
-export default function BloquearTurnoModal({ isOpen, onClose, initialDate }) {
-  const [cancha, setCancha] = useState('1');
-  const [horaInicio, setHoraInicio] = useState('08:00');
-  const [horaFin, setHoraFin] = useState('09:00');
-  const [motivo, setMotivo] = useState('mantenimiento');
-  const [descripcion, setDescripcion] = useState('');
+export default function BloquearTurnoModal({ isOpen, onClose, initialDate, bloqueo }) {
+  const [cancha, setCancha] = useState(bloqueo?.cancha || '1');
+  const [horaInicio, setHoraInicio] = useState(bloqueo?.hora_inicio || '08:00');
+  const [horaFin, setHoraFin] = useState(bloqueo?.hora_fin || '09:00');
+  const [motivo, setMotivo] = useState(bloqueo?.motivo || 'mantenimiento');
+  const [descripcion, setDescripcion] = useState(bloqueo?.descripcion || '');
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
@@ -29,43 +29,65 @@ export default function BloquearTurnoModal({ isOpen, onClose, initialDate }) {
       const fechaInicio = format(initialDate, 'yyyy-MM-dd');
       const fechaFin = format(initialDate, 'yyyy-MM-dd');
 
-      return await base44.entities.DisponibilidadCancha.create({
-        cancha,
-        fecha_inicio: fechaInicio,
-        fecha_fin: fechaFin,
-        hora_inicio: horaInicio,
-        hora_fin: horaFin,
-        motivo,
-        descripcion,
-        todo_el_dia: false,
-        estado: 'activo'
-      });
+      if (bloqueo?.id) {
+        return await base44.entities.DisponibilidadCancha.update(bloqueo.id, {
+          cancha,
+          hora_inicio: horaInicio,
+          hora_fin: horaFin,
+          motivo,
+          descripcion
+        });
+      } else {
+        return await base44.entities.DisponibilidadCancha.create({
+          cancha,
+          fecha_inicio: fechaInicio,
+          fecha_fin: fechaFin,
+          hora_inicio: horaInicio,
+          hora_fin: horaFin,
+          motivo,
+          descripcion,
+          todo_el_dia: false,
+          estado: 'activo'
+        });
+      }
     },
     onSuccess: () => {
-      toast.success('Turno bloqueado correctamente');
+      toast.success(bloqueo?.id ? 'Bloqueo actualizado' : 'Turno bloqueado correctamente');
       queryClient.invalidateQueries({ queryKey: ['bloqueos'] });
       queryClient.invalidateQueries({ queryKey: ['turnos'] });
       handleClose();
     },
     onError: (error) => {
-      toast.error('Error al bloquear: ' + error.message);
+      toast.error('Error: ' + error.message);
     }
   });
 
   const handleClose = () => {
-    setCancha('1');
-    setHoraInicio('08:00');
-    setHoraFin('09:00');
-    setMotivo('mantenimiento');
-    setDescripcion('');
+    setCancha(bloqueo?.cancha || '1');
+    setHoraInicio(bloqueo?.hora_inicio || '08:00');
+    setHoraFin(bloqueo?.hora_fin || '09:00');
+    setMotivo(bloqueo?.motivo || 'mantenimiento');
+    setDescripcion(bloqueo?.descripcion || '');
     onClose();
+  };
+
+  const handleDelete = async () => {
+    if (!confirm('¿Eliminar este bloqueo?')) return;
+    try {
+      await base44.entities.DisponibilidadCancha.delete(bloqueo.id);
+      toast.success('Bloqueo eliminado');
+      queryClient.invalidateQueries({ queryKey: ['bloqueos'] });
+      handleClose();
+    } catch (error) {
+      toast.error('Error al eliminar: ' + error.message);
+    }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Bloquear Cancha</DialogTitle>
+          <DialogTitle>{bloqueo?.id ? 'Editar Bloqueo' : 'Bloquear Cancha'}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -145,12 +167,20 @@ export default function BloquearTurnoModal({ isOpen, onClose, initialDate }) {
             <Button variant="outline" onClick={handleClose}>
               Cancelar
             </Button>
+            {bloqueo?.id && (
+              <Button
+                onClick={handleDelete}
+                variant="destructive"
+              >
+                Eliminar
+              </Button>
+            )}
             <Button
               onClick={() => mutation.mutate()}
               disabled={mutation.isPending}
               className="bg-emerald-600 hover:bg-emerald-700"
             >
-              {mutation.isPending ? 'Bloqueando...' : 'Bloquear'}
+              {mutation.isPending ? 'Guardando...' : bloqueo?.id ? 'Actualizar' : 'Bloquear'}
             </Button>
           </div>
         </div>
