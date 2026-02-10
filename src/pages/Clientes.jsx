@@ -221,7 +221,7 @@ export default function ClientesPage() {
 
       <DetalleClienteModal
          open={modalDetalle.open}
-         onOpenChange={(open) => setModalDetalle({ ...modalDetalle, open })}
+         onOpenChange={(open) => !open && setModalDetalle({ open: false, cliente: null })}
          cliente={modalDetalle.cliente}
        />
 
