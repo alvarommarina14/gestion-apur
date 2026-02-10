@@ -22,7 +22,7 @@ export default function TarjetaClaseConPagos({ turno, isAdmin, onTurnoClick, onE
         return null;
       }
     },
-    enabled: !!turno.profesor_id && !turno.profesor,
+    enabled: !!turno.profesor_id,
   });
 
   return (
