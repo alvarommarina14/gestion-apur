@@ -23,10 +23,12 @@ import { UserPlus, CheckCircle } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { registrarCreacion } from '@/components/utils/auditLog';
 import { useQuery } from '@tanstack/react-query';
+import NuevoAlumnoModal from '@/components/modals/NuevoAlumnoModal';
 
 export default function NuevoClienteModal({ open, onOpenChange }) {
    const queryClient = useQueryClient();
    const [success, setSuccess] = useState(false);
+   const [clienteCreado, setClienteCreado] = useState(null);
    const [formData, setFormData] = useState({
       nombre: '',
       telefono: '',
@@ -67,35 +69,20 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
     mutationFn: async (data) => {
       const newCliente = await base44.entities.Cliente.create(data);
       await registrarCreacion('Cliente', newCliente.id, data.nombre);
-
-      // Si es alumno, crear también en la entidad Alumno
-       if (data.es_alumno && data.profesor_id) {
-         await base44.entities.Alumno.create({
-           profesor_id: data.profesor_id,
-           profesor_nombre: data.profesor_nombre,
-           nombre: data.nombre,
-           whatsapp: data.telefono,
-           observaciones: data.notas,
-           estado: 'activo',
-           precio_mensual: data.precio || 0,
-           clases_por_mes: 0,
-           clases_a_recuperar: 0,
-           deuda_total: 0,
-           total_clases_asistidas: 0,
-         });
-         await registrarCreacion('Alumno', newCliente.id, data.nombre);
-       }
-
       return newCliente;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clientes'] });
-      queryClient.invalidateQueries({ queryKey: ['alumnos'] });
-      setSuccess(true);
-      setTimeout(() => {
-        setSuccess(false);
-        onOpenChange(false);
-      }, 1500);
+    onSuccess: (newCliente) => {
+      if (formData.es_alumno && formData.profesor_id) {
+        // Mostrar modal de nuevo alumno si marcó "es alumno"
+        setClienteCreado(newCliente);
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['clientes'] });
+        setSuccess(true);
+        setTimeout(() => {
+          setSuccess(false);
+          onOpenChange(false);
+        }, 1500);
+      }
     },
   });
 
@@ -105,21 +92,46 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
   };
 
   if (success) {
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-md">
-          <div className="py-12 text-center">
-            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="w-8 h-8 text-emerald-600" />
-            </div>
-            <h3 className="text-lg font-semibold text-slate-900">¡Cliente creado!</h3>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
+     return (
+       <Dialog open={open} onOpenChange={onOpenChange}>
+         <DialogContent className="sm:max-w-md">
+           <div className="py-12 text-center">
+             <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+               <CheckCircle className="w-8 h-8 text-emerald-600" />
+             </div>
+             <h3 className="text-lg font-semibold text-slate-900">¡Cliente creado!</h3>
+           </div>
+         </DialogContent>
+       </Dialog>
+     );
+   }
 
-  return (
+   if (clienteCreado) {
+     return (
+       <NuevoAlumnoModal 
+         open={true}
+         onOpenChange={(isOpen) => {
+           if (!isOpen) {
+             // Cerrar todo y resetear
+             queryClient.invalidateQueries({ queryKey: ['clientes'] });
+             queryClient.invalidateQueries({ queryKey: ['alumnos'] });
+             setClienteCreado(null);
+             onOpenChange(false);
+           }
+         }}
+         clienteData={{
+           nombre: clienteCreado.nombre,
+           whatsapp: clienteCreado.telefono,
+           profesor_id: formData.profesor_id,
+           profesor_nombre: formData.profesor_nombre,
+           precio_mensual: formData.precio,
+           observaciones: formData.notas,
+         }}
+       />
+     );
+   }
+
+   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
