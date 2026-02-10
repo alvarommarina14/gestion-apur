@@ -110,62 +110,65 @@ export default function ModalCancelarTurno({ open, onOpenChange, turno }) {
 
     setLoading(true);
     try {
-      // Buscar recordatorio base para obtener la serie
-      const recordatorios = await base44.entities.RecordatorioCancha.filter({ 
-        turno_cancha_id: turno.id 
+      // Obtener el día de la semana del turno actual
+      const fechaTurno = new Date(turno.fecha + 'T00:00:00');
+      const diaSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][fechaTurno.getDay()];
+      
+      // Buscar TODOS los turnos que coincidan con el mismo día, hora y cancha
+      const todosTurnos = await base44.entities.TurnoCancha.list();
+      const turnosRecurrentes = todosTurnos.filter(t => {
+        if (t.estado === 'cancelado') return false; // Ignorar ya cancelados
+        const fechaT = new Date(t.fecha + 'T00:00:00');
+        const diaT = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][fechaT.getDay()];
+        
+        return (
+          diaT === diaSemana &&
+          t.hora_inicio === turno.hora_inicio &&
+          t.cancha === turno.cancha &&
+          t.cliente === turno.cliente
+        );
       });
 
-      if (recordatorios.length === 0 || !recordatorios[0].repeticion_semanal) {
-        alert('Este turno no tiene recurrencia semanal');
+      if (turnosRecurrentes.length === 0) {
+        alert('No se encontraron turnos recurrentes para cancelar');
         setLoading(false);
         return;
       }
 
-      const recordatorioBase = recordatorios[0];
-      
-      // Buscar todos los recordatorios de la serie (mismo día de semana, hora y cancha)
-      const todosRecordatorios = await base44.entities.RecordatorioCancha.filter({
-        dia_semana: recordatorioBase.dia_semana,
-        hora: recordatorioBase.hora,
-        cancha: recordatorioBase.cancha,
-        repeticion_semanal: true
-      });
-
-      // Obtener todos los turnos asociados
-      const turnosIds = todosRecordatorios
-        .map(r => r.turno_cancha_id)
-        .filter(id => id);
-
       // Cancelar todos los turnos
-      for (const turnoId of turnosIds) {
-        await base44.entities.TurnoCancha.update(turnoId, {
+      for (const t of turnosRecurrentes) {
+        await base44.entities.TurnoCancha.update(t.id, {
           estado: 'cancelado',
-          notas: `CANCELACIÓN RECURRENCIA SEMANAL`
+          notas: `${t.notas || ''}\n\nCANCELACIÓN RECURRENCIA SEMANAL`.trim()
         });
-      }
 
-      // Actualizar todos los recordatorios
-      for (const rec of todosRecordatorios) {
-        await base44.entities.RecordatorioCancha.update(rec.id, {
-          estado: 'cancelado'
+        // Cancelar recordatorio si existe
+        const recordatorios = await base44.entities.RecordatorioCancha.filter({ 
+          turno_cancha_id: t.id 
         });
-      }
-
-      // Eliminar serie de Google Calendar
-      if (turno.gcal_event_id) {
-        try {
-          await base44.functions.invoke('eliminarClasesRecurrentesGoogleCalendar', {
-            baseEventId: turno.gcal_event_id
+        
+        if (recordatorios.length > 0) {
+          await base44.entities.RecordatorioCancha.update(recordatorios[0].id, {
+            estado: 'cancelado'
           });
-        } catch (err) {
-          console.error('Error eliminando serie de Google Calendar:', err);
+        }
+
+        // Eliminar de Google Calendar si existe
+        if (t.gcal_event_id) {
+          try {
+            await base44.functions.invoke('eliminarEventoGoogleCalendar', {
+              eventId: t.gcal_event_id
+            });
+          } catch (err) {
+            console.error('Error eliminando de Google Calendar:', err);
+          }
         }
       }
 
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
       
-      alert(`✅ Se cancelaron ${turnosIds.length} turnos de la recurrencia semanal`);
+      alert(`✅ Se cancelaron ${turnosRecurrentes.length} turnos de la recurrencia semanal`);
       onOpenChange(false);
       setMotivo('');
       setAnticipacion('mas_24h');
