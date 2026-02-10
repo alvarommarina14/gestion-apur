@@ -8,7 +8,7 @@ import { Calendar, Plus, Download, Lock, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import PlanillaCanchas from '@/components/agenda/PlanillaCanchas';
-import CalendarioMes from '@/components/agenda/CalendarioMes';
+import CalendarioVistasTurnos from '@/components/agenda/CalendarioVistasTurnos';
 import NuevoTurnoModal from '@/components/agenda/NuevoTurnoModal';
 import NuevoBloqueoModal from '@/components/disponibilidad/NuevoBloqueoModal';
 import { toast } from 'sonner';
@@ -194,17 +194,11 @@ export default function AgendaCanchas() {
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
               </div>
             ) : (
-              <CalendarioMes
+              <CalendarioVistasTurnos
                 date={selectedDate}
                 turnos={turnos}
-                recordatorios={recordatorios}
-                bloqueos={bloqueos}
-                onDayClick={(date) => {
+                onDateClick={(date) => {
                   setSelectedDate(date);
-                  setViewMode('planilla');
-                }}
-                onTurnoClick={(turno) => {
-                  setSelectedDate(new Date(turno.fecha));
                   setViewMode('planilla');
                 }}
               />
