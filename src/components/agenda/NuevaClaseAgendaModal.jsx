@@ -100,7 +100,9 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
     onSuccess: () => {
       toast.success('Clase creada correctamente');
       queryClient.invalidateQueries({ queryKey: ['clases'] });
+      queryClient.invalidateQueries({ queryKey: ['clases-hoy'] });
       queryClient.invalidateQueries({ queryKey: ['turnos'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos-hoy'] });
       handleClose();
     },
     onError: (error) => {

@@ -61,6 +61,7 @@ export default function NuevoAlquilerModal({ isOpen, onClose, initialDate }) {
     onSuccess: () => {
       toast.success('Alquiler creado correctamente');
       queryClient.invalidateQueries({ queryKey: ['turnos'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos-hoy'] });
       handleClose();
     },
     onError: (error) => {
