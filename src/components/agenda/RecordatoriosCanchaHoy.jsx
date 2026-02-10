@@ -44,12 +44,15 @@ export default function RecordatoriosCanchaHoy({ turnos = [], fecha }) {
       const recordatorios = await base44.entities.RecordatorioCancha.filter({ 
         turno_cancha_id: turnoId 
       });
-      
+
       for (const rec of recordatorios) {
         await base44.entities.RecordatorioCancha.delete(rec.id);
       }
     },
     onSuccess: () => {
+      const fechaHoy = new Date();
+      const fechaStr = format(fechaHoy, 'yyyy-MM-dd');
+      queryClient.invalidateQueries({ queryKey: ['turnos-cancha', fechaStr] });
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha-push'] });
     }
