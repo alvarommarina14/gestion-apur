@@ -57,8 +57,9 @@ export default function NuevoClienteModal({ open, onOpenChange, tipoCliente }) {
        sede_preferida: '',
        tipo_asistencia: 'un_dia',
        dia_preferido: '',
+       dias_semana: [],
        notas: '',
-     });
+       });
 
    const { data: profesores = [] } = useQuery({
      queryKey: ['profesores-list'],
