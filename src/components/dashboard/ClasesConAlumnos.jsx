@@ -17,9 +17,9 @@ export default function ClasesConAlumnos({ profesorSeleccionado, onRegistrarPago
   const [claseAsistencia, setClaseAsistencia] = useState(null);
   const [claseCancelar, setClaseCancelar] = useState(null);
 
-  const { data: turnos = [] } = useQuery({
-    queryKey: ['turnos-profesor'],
-    queryFn: () => base44.entities.TurnoCancha.list('-fecha'),
+  const { data: clases = [] } = useQuery({
+    queryKey: ['clases-profesor'],
+    queryFn: () => base44.entities.Clase.list('-fecha'),
   });
 
   const { data: alumnos = [] } = useQuery({
@@ -27,15 +27,15 @@ export default function ClasesConAlumnos({ profesorSeleccionado, onRegistrarPago
     queryFn: () => base44.entities.Alumno.list(),
   });
 
-  // Agrupar turnos de clase por día de esta semana y próxima
+  // Agrupar clases por día de esta semana y próxima
   const clasesAgrupadas = useMemo(() => {
     const hoy = new Date();
 
-    // Filtrar solo clases del profesor, próximos 10 días
-    const clasesProximos = turnos.filter(t => {
-      if (t.tipo_turno !== 'clase') return false;
-      if (profesorSeleccionado && t.profesor !== profesorSeleccionado.nombre) return false;
-      const fecha = parseISO(t.fecha);
+    // Filtrar solo clases del profesor, próximos 10 días, no canceladas
+    const clasesProximos = clases.filter(c => {
+      if (c.estado === 'cancelada_anticipada' || c.estado === 'cancelada_tarde') return false;
+      if (profesorSeleccionado && c.profesor_id !== profesorSeleccionado.id) return false;
+      const fecha = parseISO(c.fecha);
       return fecha >= hoy && fecha <= addDays(hoy, 9);
     });
 
@@ -52,7 +52,7 @@ export default function ClasesConAlumnos({ profesorSeleccionado, onRegistrarPago
       fecha,
       clases: agrupadas[fecha].sort((a, b) => (a.hora_inicio || '').localeCompare(b.hora_inicio || ''))
     }));
-  }, [turnos, profesorSeleccionado]);
+  }, [clases, profesorSeleccionado]);
 
   const obtenerAlumno = (id) => alumnos.find(a => a.id === id);
 
@@ -97,28 +97,28 @@ export default function ClasesConAlumnos({ profesorSeleccionado, onRegistrarPago
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3 flex-1">
-                        <div className="text-sm font-bold text-emerald-700 bg-emerald-200 rounded px-2 py-1 w-16 text-center">
-                          {clase.hora_inicio}
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-medium text-slate-900 text-sm">
-                            Clase - Cancha {clase.cancha}
-                          </p>
-                          <p className="text-xs text-slate-500">
-                            ${(clase.monto || 0).toLocaleString('es-AR')}
-                          </p>
+                          <div className="text-sm font-bold text-emerald-700 bg-emerald-200 rounded px-2 py-1 w-16 text-center">
+                            {clase.hora_inicio}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium text-slate-900 text-sm">
+                              {clase.tipo === 'grupal' ? 'Clase Grupal' : 'Clase Individual'} - {clase.sede}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              ${(clase.precio || 0).toLocaleString('es-AR')}
+                            </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        {clase.pagado ? (
+                        {clase.estado === 'realizada' ? (
                           <Badge className="bg-emerald-100 text-emerald-700 flex items-center gap-1">
                             <CheckCircle className="w-3 h-3" />
-                            Pagado
+                            Realizada
                           </Badge>
                         ) : (
-                          <Badge className="bg-rose-100 text-rose-700 flex items-center gap-1">
+                          <Badge className="bg-blue-100 text-blue-700 flex items-center gap-1">
                             <Clock className="w-3 h-3" />
-                            Pendiente
+                            Programada
                           </Badge>
                         )}
                         <Badge variant="outline" className="bg-white">
@@ -196,20 +196,14 @@ export default function ClasesConAlumnos({ profesorSeleccionado, onRegistrarPago
                                   <Button
                                     size="sm"
                                     onClick={() => {
-                                      onRegistrarPago({ ...alumno, clase, turnoId: clase.id });
+                                      onRegistrarPago({ ...alumno, clase, claseId: clase.id });
                                       setAlumnoSeleccionado(null);
                                       setClaseSeleccionada(null);
                                     }}
-                                    disabled={clase.pagado}
-                                    className={cn(
-                                      "gap-1",
-                                      clase.pagado 
-                                        ? "bg-emerald-100 text-emerald-700 cursor-not-allowed"
-                                        : "bg-emerald-600 hover:bg-emerald-700"
-                                    )}
+                                    className="gap-1 bg-emerald-600 hover:bg-emerald-700"
                                   >
                                     <DollarSign className="w-3 h-3" />
-                                    {clase.pagado ? 'Pagado' : 'Cobrar'}
+                                    Cobrar
                                   </Button>
                                 </div>
                               )}
