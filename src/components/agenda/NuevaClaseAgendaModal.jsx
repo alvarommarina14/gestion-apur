@@ -21,6 +21,7 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
   const [busquedaAlumno, setBusquedaAlumno] = useState('');
   const [showListaAlumnos, setShowListaAlumnos] = useState(false);
   const [notas, setNotas] = useState('');
+  const [recurrenciaSemanal, setRecurrenciaSemanal] = useState(false);
   const queryClient = useQueryClient();
 
   // Fetch profesores
@@ -59,11 +60,10 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
         throw new Error('Selecciona al menos un alumno');
       }
 
-      // Crear clase
       const horaFin = new Date(new Date(`2000-01-01 ${horaInicio}`).getTime() + duracion * 60000);
       const horaFinStr = `${String(horaFin.getHours()).padStart(2, '0')}:${String(horaFin.getMinutes()).padStart(2, '0')}`;
-
-      const clase = await base44.entities.Clase.create({
+      
+      const datosClase = {
         fecha: format(initialDate, 'yyyy-MM-dd'),
         hora_inicio: horaInicio,
         duracion,
@@ -77,10 +77,9 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
         }).filter(Boolean),
         estado: 'programada',
         profesor_id: profesorId
-      });
+      };
 
-      // Crear turno en cancha si es en la grilla
-      await base44.entities.TurnoCancha.create({
+      const datosTurno = {
         fecha: format(initialDate, 'yyyy-MM-dd'),
         hora_inicio: horaInicio,
         hora_fin: horaFinStr,
@@ -93,9 +92,29 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
         estado: 'activo',
         empleados_asignados_ids: [],
         notas
-      });
+      };
 
-      return clase;
+      if (recurrenciaSemanal) {
+        // Crear 52 clases y turnos (un año de repeticiones semanales)
+        for (let i = 0; i < 52; i++) {
+          const fecha = new Date(initialDate);
+          fecha.setDate(fecha.getDate() + (i * 7));
+          
+          await base44.entities.Clase.create({
+            ...datosClase,
+            fecha: format(fecha, 'yyyy-MM-dd')
+          });
+
+          await base44.entities.TurnoCancha.create({
+            ...datosTurno,
+            fecha: format(fecha, 'yyyy-MM-dd')
+          });
+        }
+      } else {
+        const clase = await base44.entities.Clase.create(datosClase);
+        await base44.entities.TurnoCancha.create(datosTurno);
+        return clase;
+      }
     },
     onSuccess: () => {
       toast.success('Clase creada correctamente');
@@ -122,6 +141,7 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
     setBusquedaAlumno('');
     setShowListaAlumnos(false);
     setNotas('');
+    setRecurrenciaSemanal(false);
     onClose();
   };
 
@@ -346,6 +366,20 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
               placeholder="Detalles o comentarios..."
               className="resize-none h-20"
             />
+          </div>
+
+          {/* Recurrencia semanal */}
+          <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <input
+              type="checkbox"
+              id="recurrencia"
+              checked={recurrenciaSemanal}
+              onChange={(e) => setRecurrenciaSemanal(e.target.checked)}
+              className="w-4 h-4 rounded cursor-pointer"
+            />
+            <label htmlFor="recurrencia" className="text-sm font-medium text-blue-700 cursor-pointer">
+              Repetir semanalmente durante un año
+            </label>
           </div>
 
           {/* Botones */}
