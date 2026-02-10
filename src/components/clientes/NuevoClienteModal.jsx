@@ -305,11 +305,18 @@ export default function NuevoClienteModal({ open, onOpenChange, tipoCliente }) {
                <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-2">
                    <Label>Sede preferida</Label>
-                   <Input
+                   <Select
                      value={formData.sede_preferida}
-                     onChange={(e) => setFormData({ ...formData, sede_preferida: e.target.value })}
-                     placeholder="Club Norte"
-                   />
+                     onValueChange={(v) => setFormData({ ...formData, sede_preferida: v })}
+                   >
+                     <SelectTrigger>
+                       <SelectValue placeholder="Seleccionar sede" />
+                     </SelectTrigger>
+                     <SelectContent>
+                       <SelectItem value="APUR">APUR</SelectItem>
+                       <SelectItem value="Palos Verdes">Palos Verdes</SelectItem>
+                     </SelectContent>
+                   </Select>
                  </div>
                  <div className="space-y-2">
                    <Label>Horario</Label>
