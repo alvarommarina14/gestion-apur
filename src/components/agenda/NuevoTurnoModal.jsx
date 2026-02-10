@@ -451,7 +451,8 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
 
         if (recordatorioBase && recordatorioBase.repeticion_semanal) {
           console.log('✅ Es recurrente, eliminando serie completa...');
-          // Buscar todos los turnos con las mismas características
+
+          // Buscar todos los turnos con las mismas características (sin fecha límite)
           const turnosRelacionados = todosTurnos.filter(t => 
             t.cliente === turnoData.cliente &&
             t.cancha === turnoData.cancha &&
@@ -466,38 +467,66 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
           if (primerTurnoConGcal?.gcal_event_id) {
             try {
               console.log(`🔥 Eliminando serie recurrente de Google Calendar: ${primerTurnoConGcal.gcal_event_id}`);
-              const result = await base44.functions.invoke('sincronizarSerieRecurrenteGoogleCalendar', {
+              await base44.functions.invoke('sincronizarSerieRecurrenteGoogleCalendar', {
                 recurringEventId: primerTurnoConGcal.gcal_event_id
               });
-              console.log('✅ Serie eliminada de Google Calendar:', result);
+              console.log('✅ Serie eliminada de Google Calendar');
             } catch (err) {
-              console.error('❌ Error eliminando serie recurrente de Google Calendar:', err);
+              console.error('❌ Error eliminando serie de Google Calendar, intentando eventos individuales...', err);
               // Intentar eliminar cada evento individualmente si falla la serie
-              for (const turno of turnosRelacionados) {
-                if (turno.gcal_event_id) {
-                  try {
-                    await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
-                      turno_id: turno.id, 
-                      action: 'delete' 
-                    });
-                  } catch (e) {
-                    console.error(`Error eliminando evento individual ${turno.gcal_event_id}:`, e);
-                  }
-                }
-              }
+              const gcalPromises = turnosRelacionados
+                .filter(t => t.gcal_event_id)
+                .map(t => 
+                  base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
+                    turno_id: t.id, 
+                    action: 'delete' 
+                  }).catch(e => console.error(`Error evento ${t.gcal_event_id}:`, e))
+                );
+              await Promise.all(gcalPromises);
             }
           }
 
-          // Obtener todos los recordatorios relacionados
+          // Obtener recordatorios relacionados y eliminar en batch
           const todosRecordatorios = await base44.entities.RecordatorioCancha.list();
           const recordatoriosRelacionados = todosRecordatorios.filter(r => 
             turnosRelacionados.some(t => t.id === r.turno_cancha_id)
           );
 
-          // Eliminar en paralelo para mayor velocidad
+          console.log(`🗑️ Eliminando ${recordatoriosRelacionados.length} recordatorios y ${turnosRelacionados.length} turnos...`);
+
+          // Usar bulkDelete para máxima eficiencia
+          const turnoIds = turnosRelacionados.map(t => t.id);
+          const recordatorioIds = recordatoriosRelacionados.map(r => r.id);
+
           await Promise.all([
-            ...recordatoriosRelacionados.map(rec => base44.entities.RecordatorioCancha.delete(rec.id)),
-            ...turnosRelacionados.map(turno => base44.entities.TurnoCancha.delete(turno.id))
+            // Eliminar recordatorios en lotes si es necesario
+            ...(recordatorioIds.length > 0 ? [
+              recordatorioIds.length > 500 
+                ? Promise.all(
+                    Array.from({ length: Math.ceil(recordatorioIds.length / 500) }, (_, i) =>
+                      base44.entities.RecordatorioCancha.bulkDelete(
+                        recordatorioIds.slice(i * 500, (i + 1) * 500).map(id => ({ id }))
+                      )
+                    )
+                  )
+                : base44.entities.RecordatorioCancha.bulkDelete(
+                    recordatorioIds.map(id => ({ id }))
+                  )
+            ] : []),
+            // Eliminar turnos en lotes si es necesario
+            ...(turnoIds.length > 0 ? [
+              turnoIds.length > 500 
+                ? Promise.all(
+                    Array.from({ length: Math.ceil(turnoIds.length / 500) }, (_, i) =>
+                      base44.entities.TurnoCancha.bulkDelete(
+                        turnoIds.slice(i * 500, (i + 1) * 500).map(id => ({ id }))
+                      )
+                    )
+                  )
+                : base44.entities.TurnoCancha.bulkDelete(
+                    turnoIds.map(id => ({ id }))
+                  )
+            ] : [])
           ]);
 
           console.log(`✅ Serie completa eliminada: ${recordatoriosRelacionados.length} recordatorios y ${turnosRelacionados.length} turnos`);
