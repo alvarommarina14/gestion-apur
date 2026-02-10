@@ -31,9 +31,14 @@ import NuevaClaseModal from '@/components/modals/NuevaClaseModal';
 
 export default function RecuperoCanchas() {
   const queryClient = useQueryClient();
+  const [tab, setTab] = useState('canchas');
   const [filterEstado, setFilterEstado] = useState('pendiente');
+  const [filterEstadoClases, setFilterEstadoClases] = useState('pendiente');
+  const [tipoClaseFilter, setTipoClaseFilter] = useState('todas');
   const [selectedCancelacion, setSelectedCancelacion] = useState(null);
-  const [accion, setAccion] = useState(null); // 'recuperar' o 'descontar'
+  const [selectedRecupero, setSelectedRecupero] = useState(null);
+  const [accion, setAccion] = useState(null);
+  const [nuevaClaseModal, setNuevaClaseModal] = useState({ open: false, recupero: null });
   const [formData, setFormData] = useState({
     fecha_recupero: format(new Date(), 'yyyy-MM-dd'),
     turno_recupero_id: '',
@@ -48,6 +53,16 @@ export default function RecuperoCanchas() {
   const { data: turnos = [] } = useQuery({
     queryKey: ['turnos-cancha-lista'],
     queryFn: () => base44.entities.TurnoCancha.list('-fecha', 200),
+  });
+
+  const { data: recuperos = [] } = useQuery({
+    queryKey: ['recuperos'],
+    queryFn: () => base44.entities.Recupero.list('-created_date'),
+  });
+
+  const { data: clases = [] } = useQuery({
+    queryKey: ['clases-lista'],
+    queryFn: () => base44.entities.Clase.list('-fecha', 500),
   });
 
   const cancelacionesFiltradas = useMemo(() => {
