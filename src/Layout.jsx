@@ -108,23 +108,11 @@ export default function Layout({ children, currentPageName }) {
             window.location.href = createPageUrl('SeleccionRol');
             return;
           }
-          
+
           // Si tiene rol admin pero está pendiente de aprobación, redirigir
           if (currentUser.rol === 'admin' && currentUser.estado_aprobacion === 'pendiente') {
             window.location.href = createPageUrl('PendienteAprobacion');
             return;
-          }
-          
-          // Si es profesor, verificar si tiene profesor seleccionado
-          if (currentUser.rol === 'profesor') {
-            if (!currentUser.profesor_id) {
-              window.location.href = createPageUrl('ProfesorRegistro');
-              return;
-            } else if (currentPageName === 'SeleccionRol' || currentPageName === 'ProfesorRegistro' || currentPageName === 'ProfesorMenu') {
-              // Si ya tiene profesor seleccionado, ir directo al Dashboard
-              window.location.href = createPageUrl('Dashboard');
-              return;
-            }
           }
         }
         
