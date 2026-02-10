@@ -142,6 +142,21 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
       
       await base44.entities.Cliente.update(id, data);
       
+      // Si es alumno y cambió el profesor, actualizar también el alumno sincronizado
+      if (cliente.es_alumno && (data.profesor_id || data.profesor_nombre)) {
+        const alumnoSincronizado = alumnos.find(a => 
+          a.nombre.toLowerCase() === cliente.nombre.toLowerCase()
+        );
+        if (alumnoSincronizado) {
+          const updateData = {};
+          if (data.profesor_id) updateData.profesor_id = data.profesor_id;
+          if (data.profesor_nombre) updateData.profesor_nombre = data.profesor_nombre;
+          if (Object.keys(updateData).length > 0) {
+            await base44.entities.Alumno.update(alumnoSincronizado.id, updateData);
+          }
+        }
+      }
+      
       // Si cambió el precio, actualizar total_gastado
       if (data.precio !== undefined && data.precio !== cliente.precio) {
         await base44.entities.Cliente.update(id, {
@@ -150,7 +165,7 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
       }
       
       // Registrar auditoría para cada cambio
-      for (const cambio of cambios) {
+      for (const cambio de cambios) {
         await registrarCambioCliente(
           id, 
           cliente.nombre, 
@@ -162,6 +177,7 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
+      queryClient.invalidateQueries({ queryKey: ['alumnos'] });
       setEditando(false);
     },
   });
