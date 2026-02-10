@@ -308,18 +308,18 @@ export default function Agenda() {
 
         {/* Vista de calendario o día */}
          {showCalendario ? (
-            <CalendarioCompleto
-             turnos={turnos}
-             clases={clases}
-             recordatorios={recordatorios}
-             selectedDate={selectedDate}
-             onDateSelect={setSelectedDate}
-             onCreateTurno={(fecha) => {
-               setSelectedDate(fecha);
-               setTurnoModal({ open: true, turno: null });
-             }}
-             onTurnoClick={(turno) => turno.tipo_turno === 'clase' ? setClientesClaseModal({ open: true, turno }) : setCancelarTurnoModal({ open: true, turno })}
-           />
+             <CalendarioCompleto
+              turnos={turnosFiltrados}
+              clases={clases}
+              recordatorios={recordatorios}
+              selectedDate={selectedDate}
+              onDateSelect={setSelectedDate}
+              onCreateTurno={(fecha) => {
+                setSelectedDate(fecha);
+                setTurnoModal({ open: true, turno: null });
+              }}
+              onTurnoClick={(turno) => turno.tipo_turno === 'clase' ? setAccionesClaseModal({ open: true, turno }) : setCancelarTurnoModal({ open: true, turno })}
+            />
         ) : (
           <VistaCalendarioCancha
             turnos={turnosFiltrados}
