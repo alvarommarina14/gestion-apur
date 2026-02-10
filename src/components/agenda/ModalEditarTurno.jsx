@@ -20,7 +20,8 @@ export default function ModalEditarTurno({ isOpen, onClose, turno }) {
     monto: turno?.monto || 0,
     notas: turno?.notas || '',
     profesor_id: turno?.profesor_id || '',
-    alumnos_ids: turno?.alumnos_ids || [],
+    alumnos_ids: Array.isArray(turno?.alumnos_ids) ? turno.alumnos_ids : [],
+    tipo_turno: turno?.tipo_turno || 'alquiler',
   });
 
   const queryClient = useQueryClient();
@@ -193,24 +194,58 @@ export default function ModalEditarTurno({ isOpen, onClose, turno }) {
             </div>
           </div>
 
-          {/* Profesor (si es clase) */}
-          {turno?.tipo_turno === 'clase' && (
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Profesor</Label>
-              <Select
-                value={formData.profesor_id}
-                onValueChange={(v) => setFormData({ ...formData, profesor_id: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar profesor" />
-                </SelectTrigger>
-                <SelectContent>
-                  {profesores.map(p => (
-                    <SelectItem key={p.id} value={p.id}>{p.nombre}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Profesor y Alumnos (si es clase) */}
+          {formData.tipo_turno === 'clase' && (
+            <>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Profesor</Label>
+                <Select
+                  value={formData.profesor_id}
+                  onValueChange={(v) => setFormData({ ...formData, profesor_id: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar profesor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {profesores.map(p => (
+                      <SelectItem key={p.id} value={p.id}>{p.nombre}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Alumnos</Label>
+                <div className="border rounded-lg p-3 space-y-2 max-h-48 overflow-y-auto">
+                  {formData.profesor_id ? (
+                    alumnos
+                      .filter(a => a.profesor_id === formData.profesor_id)
+                      .map(a => (
+                        <div key={a.id} className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            id={`alumno-${a.id}`}
+                            checked={formData.alumnos_ids.includes(a.id)}
+                            onChange={(e) => {
+                              const ids = formData.alumnos_ids || [];
+                              const nuevosIds = e.target.checked 
+                                ? [...ids, a.id] 
+                                : ids.filter(id => id !== a.id);
+                              setFormData({ ...formData, alumnos_ids: nuevosIds });
+                            }}
+                            className="w-4 h-4 rounded cursor-pointer"
+                          />
+                          <label htmlFor={`alumno-${a.id}`} className="text-sm cursor-pointer flex-1">
+                            {a.nombre}
+                          </label>
+                        </div>
+                      ))
+                  ) : (
+                    <p className="text-xs text-slate-500">Selecciona un profesor primero</p>
+                  )}
+                </div>
+              </div>
+            </>
           )}
 
           {/* Monto */}
