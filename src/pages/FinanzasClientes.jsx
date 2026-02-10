@@ -194,16 +194,10 @@ export default function FinanzasClientes() {
           <CardContent className="pt-6">
             <p className="text-center text-slate-600">Solo administradores pueden acceder.</p>
           </CardContent>
-          </Card>
-
-          <DetalleClienteModal
-              open={modalDetalle.open}
-              onOpenChange={(open) => !open && setModalDetalle({ open: false, cliente: null })}
-              cliente={modalDetalle.cliente}
-              />
-          </div>
-          );
-          }
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 lg:p-6 space-y-6">
