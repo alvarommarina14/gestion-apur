@@ -54,6 +54,7 @@ import Configuracion from './pages/Configuracion';
 import Dashboard from './pages/Dashboard';
 import Empleados from './pages/Empleados';
 import Finanzas from './pages/Finanzas';
+import FinanzasClientes from './pages/FinanzasClientes';
 import GestionAccesoUnificada from './pages/GestionAccesoUnificada';
 import GestionDisponibilidad from './pages/GestionDisponibilidad';
 import GestionPermisosUsuarios from './pages/GestionPermisosUsuarios';
@@ -72,7 +73,6 @@ import Recuperos from './pages/Recuperos';
 import Reportes from './pages/Reportes';
 import SeleccionRol from './pages/SeleccionRol';
 import Tareas from './pages/Tareas';
-import FinanzasClientes from './pages/FinanzasClientes';
 import __Layout from './Layout.jsx';
 
 
@@ -84,6 +84,7 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "Empleados": Empleados,
     "Finanzas": Finanzas,
+    "FinanzasClientes": FinanzasClientes,
     "GestionAccesoUnificada": GestionAccesoUnificada,
     "GestionDisponibilidad": GestionDisponibilidad,
     "GestionPermisosUsuarios": GestionPermisosUsuarios,
@@ -102,7 +103,6 @@ export const PAGES = {
     "Reportes": Reportes,
     "SeleccionRol": SeleccionRol,
     "Tareas": Tareas,
-    "FinanzasClientes": FinanzasClientes,
 }
 
 export const pagesConfig = {

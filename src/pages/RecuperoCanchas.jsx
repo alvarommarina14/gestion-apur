@@ -180,13 +180,18 @@ export default function RecuperoCanchas() {
     }
   };
 
-  // Filtrar clases individuales y grupales
-  const clasesIndividuales = clases.filter(c => c.tipo === 'individual');
-  const clasesGrupales = clases.filter(c => c.tipo === 'grupal');
-
+  // Filtrar recuperos por tipo de clase (dependiendo de las notas)
   const recuperosFiltrados = useMemo(() => {
-    return recuperos.filter(r => r.estado === filterEstadoClases);
-  }, [recuperos, filterEstadoClases]);
+    let filtered = recuperos.filter(r => r.estado === filterEstadoClases);
+    
+    if (tipoClaseFilter === 'individuales') {
+      filtered = filtered.filter(r => r.notas && r.notas.includes('Individual'));
+    } else if (tipoClaseFilter === 'grupales') {
+      filtered = filtered.filter(r => r.notas && r.notas.includes('Grupal'));
+    }
+    
+    return filtered;
+  }, [recuperos, filterEstadoClases, tipoClaseFilter]);
 
   const estadoActual = selectedCancelacion ? estadoConfig[selectedCancelacion.estado_recupero] : null;
   const IconoEstado = estadoActual?.icon;
