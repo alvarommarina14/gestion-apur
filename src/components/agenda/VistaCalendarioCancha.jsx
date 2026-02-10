@@ -92,6 +92,7 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
     });
 
     const fechaStr = format(selectedDate, 'yyyy-MM-dd');
+    const mesTurno = fechaStr.substring(0, 7); // YYYY-MM
     
     // Primero agregar bloqueos
     bloqueos.forEach(bloqueo => {
@@ -127,7 +128,21 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
     // Luego agregar turnos reales (tienen prioridad sobre bloqueos) - excluir cancelados
     turnos.forEach(turno => {
       if (turno.estado !== 'cancelado' && map[turno.cancha] && map[turno.cancha][turno.hora_inicio] !== undefined) {
-        map[turno.cancha][turno.hora_inicio] = { ...turno, tipo: 'turno' };
+        // Verificar si cliente pagó abono para este mes (aplicable a alquiler con abono)
+        let turnoConPago = { ...turno, tipo: 'turno' };
+        
+        if (turno.tipo_turno === 'alquiler' && turno.modalidad_alquiler === 'abono' && turno.cliente_id) {
+          const cobroPagado = cobrosClientes.some(c => 
+            c.cliente_id === turno.cliente_id && 
+            c.mes === mesTurno && 
+            c.estado === 'pagado'
+          );
+          if (cobroPagado) {
+            turnoConPago.pagado = true;
+          }
+        }
+        
+        map[turno.cancha][turno.hora_inicio] = turnoConPago;
       }
     });
 
