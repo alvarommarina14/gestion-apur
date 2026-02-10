@@ -92,6 +92,18 @@ export default function AgendaCanchas() {
     queryClient.invalidateQueries({ queryKey: ['bloqueos'] });
   };
 
+  const motivosBloqueo = [
+    { value: 'mantenimiento', label: 'Mantenimiento' },
+    { value: 'evento_privado', label: 'Evento privado' },
+    { value: 'clima', label: 'Clima' },
+    { value: 'reparacion', label: 'Reparación' },
+    { value: 'otro', label: 'Otro' }
+  ];
+
+  const handleBloquear = (motivo) => {
+    setShowBloqueoModal(true);
+  };
+
   const turnosFecha = turnos.filter(t => t.fecha === format(selectedDate, 'yyyy-MM-dd'));
 
   return (
@@ -238,6 +250,7 @@ export default function AgendaCanchas() {
           isOpen={showBloqueoModal}
           onClose={handleCloseBloqueoModal}
           initialDate={selectedDate}
+          motivoBloqueo="otro"
         />
       )}
     </div>
