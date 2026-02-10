@@ -85,8 +85,8 @@ export default function NuevoClienteModal({ open, onOpenChange, tipoCliente }) {
     },
     onSuccess: (newCliente) => {
        queryClient.invalidateQueries({ queryKey: ['clientes'] });
-       if (formData.es_alumno && formData.profesor_id) {
-         // Mostrar modal de nuevo alumno si marcó "es alumno"
+       if (tipoCliente === 'alumno' && formData.es_alumno && formData.profesor_id) {
+         // Mostrar modal de nuevo alumno si es tipo alumno
          setClienteCreado(newCliente);
        } else {
          setSuccess(true);
