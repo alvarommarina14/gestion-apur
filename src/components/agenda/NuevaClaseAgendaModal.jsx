@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { X } from 'lucide-react';
+import { X, Search } from 'lucide-react';
 
 export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) {
   const [cancha, setCancha] = useState('1');
@@ -18,7 +18,8 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
   const [nuevoProfesor, setNuevoProfesor] = useState('');
   const [showNuevoProfesor, setShowNuevoProfesor] = useState(false);
   const [alumnos, setAlumnos] = useState([]);
-  const [alumnoSeleccionado, setAlumnoSeleccionado] = useState('');
+  const [busquedaAlumno, setBusquedaAlumno] = useState('');
+  const [showListaAlumnos, setShowListaAlumnos] = useState(false);
   const [precio, setPrecio] = useState('');
   const [notas, setNotas] = useState('');
   const queryClient = useQueryClient();
@@ -119,22 +120,26 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
     setNuevoProfesor('');
     setShowNuevoProfesor(false);
     setAlumnos([]);
-    setAlumnoSeleccionado('');
+    setBusquedaAlumno('');
+    setShowListaAlumnos(false);
     setPrecio('');
     setNotas('');
     onClose();
   };
 
-  const agregarAlumno = () => {
-    if (alumnoSeleccionado && !alumnos.includes(alumnoSeleccionado)) {
-      setAlumnos([...alumnos, alumnoSeleccionado]);
-      setAlumnoSeleccionado('');
+  const toggleAlumno = (alumnoId) => {
+    if (tipo === 'individual' && alumnos.length > 0 && !alumnos.includes(alumnoId)) {
+      setAlumnos([alumnoId]);
+    } else if (alumnos.includes(alumnoId)) {
+      setAlumnos(alumnos.filter(id => id !== alumnoId));
+    } else {
+      setAlumnos([...alumnos, alumnoId]);
     }
   };
 
-  const removerAlumno = (alumnoId) => {
-    setAlumnos(alumnos.filter(id => id !== alumnoId));
-  };
+  const alumnosFiltrados = alumnosDisponibles.filter(a =>
+    a.nombre.toLowerCase().includes(busquedaAlumno.toLowerCase())
+  );
 
   const alumnosSeleccionados = alumnos.map(id => 
     alumnosDisponibles.find(a => a.id === id)
