@@ -14,6 +14,7 @@ import {
   FileText,
   ArrowLeft
 } from 'lucide-react';
+import ClasesAlumnosSection from '@/components/profesor/ClasesAlumnosSection';
 
 const menuOptions = [
   {
@@ -173,28 +174,31 @@ export default function ProfesorMenuPage() {
           </Card>
         </div>
 
+        {/* Sección Clases y Alumnos */}
+        <ClasesAlumnosSection profesor={profesor} />
+
         {/* Opciones del menú */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {menuOptions.map((option) => {
-            const Icon = option.icon;
-            return (
-              <Card
-                key={option.href}
-                className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1"
-                onClick={() => navigate(createPageUrl(option.href))}
-              >
-                <CardHeader>
-                  <div className={`w-12 h-12 rounded-xl ${colorClasses[option.color]} flex items-center justify-center mb-3 border-2`}>
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <CardTitle className="text-xl">{option.title}</CardTitle>
-                  <CardDescription>{option.description}</CardDescription>
-                </CardHeader>
-              </Card>
-            );
-          })}
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+           {menuOptions.map((option) => {
+             const Icon = option.icon;
+             return (
+               <Card
+                 key={option.href}
+                 className="cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1"
+                 onClick={() => navigate(createPageUrl(option.href))}
+               >
+                 <CardHeader>
+                   <div className={`w-12 h-12 rounded-xl ${colorClasses[option.color]} flex items-center justify-center mb-3 border-2`}>
+                     <Icon className="w-6 h-6" />
+                   </div>
+                   <CardTitle className="text-xl">{option.title}</CardTitle>
+                   <CardDescription>{option.description}</CardDescription>
+                 </CardHeader>
+               </Card>
+             );
+           })}
+         </div>
         </div>
-      </div>
-    </div>
-  );
-}
+        </div>
+        );
+        }
