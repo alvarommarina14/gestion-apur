@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { DollarSign, TrendingUp, AlertCircle, CheckCircle, Search, RefreshCw, Plus, Edit, Check } from 'lucide-react';
+import { DollarSign, TrendingUp, AlertCircle, CheckCircle, Search, RefreshCw, Plus, Edit, Check, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function FinanzasClientes() {
@@ -21,6 +21,8 @@ export default function FinanzasClientes() {
   const [sincronizando, setSincronizando] = useState(false);
   const [editandoCobro, setEditandoCobro] = useState(null);
   const [montoPago, setMontoPago] = useState('');
+  const [editandoCliente, setEditandoCliente] = useState(null);
+  const [clienteAEliminar, setClienteAEliminar] = useState(null);
   const queryClient = useQueryClient();
 
   const mesStr = format(mesSeleccionado, 'yyyy-MM');
@@ -70,6 +72,18 @@ export default function FinanzasClientes() {
     },
   });
 
+  // Eliminar cliente
+  const eliminarClienteMutation = useMutation({
+    mutationFn: async (clienteId) => {
+      return await base44.entities.Cliente.delete(clienteId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clientes'] });
+      queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
+      setClienteAEliminar(null);
+    },
+  });
+
   // Sincronizar estados (cambiar a moroso después del día 15)
   const sincronizarMutation = useMutation({
     mutationFn: async () => {
@@ -107,7 +121,7 @@ export default function FinanzasClientes() {
       const montoPagado = cobrosMes.filter(c => c.estado === 'pagado').reduce((sum, c) => sum + (c.monto || 0), 0);
 
       const montoEsperado = cliente.precio || 0;
-      const estado = montoPagado === montoEsperado ? 'pagado' : montoMoroso > 0 ? 'moroso' : montoPendiente > 0 ? 'pendiente' : 'pagado';
+      const estado = montoPagado === montoEsperado ? 'pagado' : montoMoroso > 0 ? 'moroso' : montoPendiente > 0 ? 'pendiente' : 'pendiente';
 
       return {
         ...cliente,
@@ -256,7 +270,7 @@ export default function FinanzasClientes() {
       {/* Lista de clientes */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Clientes del mes</CardTitle>
+          <CardTitle className="text-lg">Clientes</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-2">
@@ -333,77 +347,110 @@ export default function FinanzasClientes() {
                       </div>
                     </div>
 
-                    <Dialog open={editandoCobro?.id === cliente.id} onOpenChange={(open) => {
-                      if (!open) {
-                        setEditandoCobro(null);
-                        setMontoPago('');
-                      }
-                    }}>
-                      <DialogTrigger asChild>
+                    <div className="flex gap-2 flex-wrap">
+                      {/* Registrar Pago */}
+                      <Dialog open={editandoCobro?.id === cliente.id} onOpenChange={(open) => {
+                        if (!open) {
+                          setEditandoCobro(null);
+                          setMontoPago('');
+                        }
+                      }}>
+                        <DialogTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant={cliente.estado === 'pagado' ? 'outline' : 'default'}
+                            onClick={() => {
+                              setEditandoCobro(cliente);
+                              setMontoPago(String(cliente.montoPendiente || cliente.montoMoroso || cliente.montoEsperado));
+                            }}
+                          >
+                            <DollarSign className="w-4 h-4 mr-2" />
+                            Pago
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Registrar Pago - {cliente.nombre}</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div>
+                              <label className="text-sm font-medium text-slate-700 mb-2 block">
+                                Monto a pagar
+                              </label>
+                              <div className="flex gap-2">
+                                <Input
+                                  type="number"
+                                  value={montoPago}
+                                  onChange={(e) => setMontoPago(e.target.value)}
+                                  placeholder="0"
+                                  className="flex-1"
+                                />
+                                <Button
+                                  onClick={() => setMontoPago(String(cliente.montoEsperado))}
+                                  variant="outline"
+                                  size="sm"
+                                >
+                                  Total
+                                </Button>
+                              </div>
+                              <p className="text-xs text-slate-500 mt-2">
+                                Monto esperado: {formatMoney(cliente.montoEsperado)}
+                              </p>
+                            </div>
+                            <Button
+                              onClick={() => pagarCobroMutation.mutate({
+                                cobroId: cliente.cobros[0]?.id,
+                                monto: montoPago,
+                              })}
+                              disabled={!montoPago || pagarCobroMutation.isPending}
+                              className="w-full"
+                            >
+                              Confirmar Pago
+                            </Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+
+                      {/* Editar Cliente */}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setEditandoCliente(cliente)}
+                      >
+                        <Edit className="w-4 h-4 mr-2" />
+                        Editar
+                      </Button>
+
+                      {/* Eliminar Cliente */}
+                      <AlertDialog open={clienteAEliminar?.id === cliente.id} onOpenChange={(open) => {
+                        if (!open) setClienteAEliminar(null);
+                      }}>
                         <Button
                           size="sm"
-                          variant={cliente.estado === 'pagado' ? 'outline' : 'default'}
-                          onClick={() => {
-                            setEditandoCobro(cliente);
-                            setMontoPago(String(cliente.montoPendiente || cliente.montoMoroso || cliente.montoEsperado));
-                          }}
-                          className="w-full sm:w-auto"
+                          variant="outline"
+                          className="text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                          onClick={() => setClienteAEliminar(cliente)}
                         >
-                          {cliente.estado === 'pagado' ? (
-                            <>
-                              <Check className="w-4 h-4 mr-2" />
-                              Pagado
-                            </>
-                          ) : (
-                            <>
-                              <DollarSign className="w-4 h-4 mr-2" />
-                              Pagar
-                            </>
-                          )}
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Eliminar
                         </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Registrar Pago - {cliente.nombre}</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <div>
-                            <label className="text-sm font-medium text-slate-700 mb-2 block">
-                              Monto a pagar
-                            </label>
-                            <div className="flex gap-2">
-                              <Input
-                                type="number"
-                                value={montoPago}
-                                onChange={(e) => setMontoPago(e.target.value)}
-                                placeholder="0"
-                                className="flex-1"
-                              />
-                              <Button
-                                onClick={() => setMontoPago(String(cliente.montoEsperado))}
-                                variant="outline"
-                                size="sm"
-                              >
-                                Total
-                              </Button>
-                            </div>
-                            <p className="text-xs text-slate-500 mt-2">
-                              Monto esperado: {formatMoney(cliente.montoEsperado)}
-                            </p>
+                        <AlertDialogContent>
+                          <AlertDialogTitle>¿Eliminar cliente?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Se eliminará "{cliente.nombre}" y todos sus registros. Esta acción no se puede deshacer.
+                          </AlertDialogDescription>
+                          <div className="flex gap-3">
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => eliminarClienteMutation.mutate(cliente.id)}
+                              className="bg-rose-600 hover:bg-rose-700"
+                            >
+                              Eliminar
+                            </AlertDialogAction>
                           </div>
-                          <Button
-                            onClick={() => pagarCobroMutation.mutate({
-                              cobroId: cliente.cobros[0]?.id,
-                              monto: montoPago,
-                            })}
-                            disabled={!montoPago || pagarCobroMutation.isPending}
-                            className="w-full"
-                          >
-                            Confirmar Pago
-                          </Button>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
                 );
               })
