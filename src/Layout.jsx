@@ -31,7 +31,6 @@ import NotificationPermissionModal from '@/components/NotificationPermissionModa
 
 // Mapeo de páginas a secciones de permisos
 const PAGE_TO_PERMISSION = {
-  'Profesores': 'gestion_profesores',
   'Agenda': 'booking_canchas',
   'DashboardAdmin': 'dashboard_ocupacion',
   'RecordatoriosCanchaAdmin': 'recordatorios_cancha_admin',
