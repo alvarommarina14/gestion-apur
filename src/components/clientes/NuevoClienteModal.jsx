@@ -103,6 +103,40 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
     createMutation.mutate(formData);
   };
 
+  // Mostrar selector de tipo de registro
+  if (tipoRegistro === null) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-emerald-600" />
+              Nuevo Cliente
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            <Button
+              onClick={() => setTipoRegistro('abono')}
+              className="w-full h-20 bg-purple-50 hover:bg-purple-100 text-slate-900 border-2 border-purple-200 flex flex-col items-center justify-center gap-2"
+            >
+              <span className="text-lg font-semibold">💳 Abono Cancha</span>
+              <span className="text-xs text-slate-600">Alquiler con abono mensual</span>
+            </Button>
+
+            <Button
+              onClick={() => setTipoRegistro('alumno')}
+              className="w-full h-20 bg-emerald-50 hover:bg-emerald-100 text-slate-900 border-2 border-emerald-200 flex flex-col items-center justify-center gap-2"
+            >
+              <span className="text-lg font-semibold">👨‍🎓 Alumno</span>
+              <span className="text-xs text-slate-600">Clases con profesor</span>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   if (success) {
      return (
        <Dialog open={open} onOpenChange={onOpenChange}>
