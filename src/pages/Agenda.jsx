@@ -21,7 +21,6 @@ import EditarClaseProfesorModal from '@/components/agenda/EditarClaseProfesorMod
 import NuevoBloqueoModal from '@/components/disponibilidad/NuevoBloqueoModal';
 import CancelarCanchaModal from '@/components/agenda/CancelarCanchaModal';
 import ModalCancelarTurno from '@/components/agenda/ModalCancelarTurno';
-import RecordatoriosCanchaHoy from '@/components/agenda/RecordatoriosCanchaHoy';
 import { cn } from '@/lib/utils';
 
 export default function Agenda() {
@@ -275,10 +274,7 @@ export default function Agenda() {
           </div>
         </div>
 
-        {/* Recordatorios Canchas Hoy - Solo para Admin */}
-        {isAdmin && !showCalendario && (
-          <RecordatoriosCanchaHoy turnos={turnos} fecha={selectedDate} />
-        )}
+
 
         {/* Vista de calendario o día */}
         {showCalendario ? (

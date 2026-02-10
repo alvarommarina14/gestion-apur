@@ -3,21 +3,22 @@ import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-              LayoutDashboard, 
-              Users, 
-              Calendar, 
-              DollarSign, 
-              RefreshCw,
-              FileText,
-              Menu,
-              X,
-              ChevronRight,
-              Settings,
-              LogOut,
-              Shield,
-              CheckCircle,
-              ArrowLeft
-            } from 'lucide-react';
+                  LayoutDashboard, 
+                  Users, 
+                  Calendar, 
+                  DollarSign, 
+                  RefreshCw,
+                  FileText,
+                  Menu,
+                  X,
+                  ChevronRight,
+                  Settings,
+                  LogOut,
+                  Shield,
+                  CheckCircle,
+                  ArrowLeft,
+                  Bell
+                } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -52,6 +53,7 @@ const navigationGestionClases = [
 
 const navigationAgenda = [
   { name: 'Agenda', href: 'Agenda', icon: Calendar, permissionKey: 'booking_canchas' },
+  { name: 'Recordatorios Hoy', href: 'RecordatoriosCanchaHoy', icon: Bell, adminOnly: true, permissionKey: 'booking_canchas' },
   { name: 'Mis Recordatorios', href: 'RecordatoriosCanchaEmpleado', icon: Calendar, empleadoOnly: true, permissionKey: 'recordatorios_cancha_empleado' },
 ];
 
