@@ -30,17 +30,22 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
    const [success, setSuccess] = useState(false);
    const [clienteCreado, setClienteCreado] = useState(null);
    const [formData, setFormData] = useState({
-      nombre: '',
-      telefono: '',
-      email: '',
-      clasificacion: 'recurrente',
-      tipo_cliente: 'clase',
-      precio: 0,
-      es_alumno: false,
-      profesor_id: '',
-      profesor_nombre: '',
-      notas: '',
-    });
+       nombre: '',
+       telefono: '',
+       email: '',
+       clasificacion: 'recurrente',
+       tipo_cliente: 'clase',
+       precio: 0,
+       es_alumno: false,
+       profesor_id: '',
+       profesor_nombre: '',
+       clases_por_mes: '4',
+       horario_preferido: '',
+       sede_preferida: '',
+       tipo_asistencia: 'un_dia',
+       dia_preferido: '',
+       notas: '',
+     });
 
    const { data: profesores = [] } = useQuery({
      queryKey: ['profesores-list'],
@@ -59,6 +64,11 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
          es_alumno: false,
          profesor_id: '',
          profesor_nombre: '',
+         clases_por_mes: '4',
+         horario_preferido: '',
+         sede_preferida: '',
+         tipo_asistencia: 'un_dia',
+         dia_preferido: '',
          notas: '',
        });
        setSuccess(false);
@@ -72,18 +82,18 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
       return newCliente;
     },
     onSuccess: (newCliente) => {
-      if (formData.es_alumno && formData.profesor_id) {
-        // Mostrar modal de nuevo alumno si marcó "es alumno"
-        setClienteCreado(newCliente);
-      } else {
-        queryClient.invalidateQueries({ queryKey: ['clientes'] });
-        setSuccess(true);
-        setTimeout(() => {
-          setSuccess(false);
-          onOpenChange(false);
-        }, 1500);
-      }
-    },
+       queryClient.invalidateQueries({ queryKey: ['clientes'] });
+       if (formData.es_alumno && formData.profesor_id) {
+         // Mostrar modal de nuevo alumno si marcó "es alumno"
+         setClienteCreado(newCliente);
+       } else {
+         setSuccess(true);
+         setTimeout(() => {
+           setSuccess(false);
+           onOpenChange(false);
+         }, 1500);
+       }
+     },
   });
 
   const handleSubmit = (e) => {
@@ -252,18 +262,93 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
                    </SelectContent>
                  </Select>
                </div>
-               <div className="space-y-2">
-                 <Label>Precio mensual *</Label>
-                 <Input
-                   type="number"
-                   min="0"
-                   step="100"
-                   value={formData.precio}
-                   onChange={(e) => setFormData({ ...formData, precio: parseFloat(e.target.value) || 0 })}
-                   placeholder="Ej: 35000"
-                   required={formData.es_alumno}
-                 />
+               <div className="grid grid-cols-2 gap-4">
+                 <div className="space-y-2">
+                   <Label>Precio mensual *</Label>
+                   <Input
+                     type="number"
+                     min="0"
+                     step="100"
+                     value={formData.precio}
+                     onChange={(e) => setFormData({ ...formData, precio: parseFloat(e.target.value) || 0 })}
+                     placeholder="Ej: 35000"
+                     required={formData.es_alumno}
+                   />
+                 </div>
+                 <div className="space-y-2">
+                   <Label>Clases por mes</Label>
+                   <Select
+                     value={formData.clases_por_mes}
+                     onValueChange={(v) => setFormData({ ...formData, clases_por_mes: v })}
+                   >
+                     <SelectTrigger>
+                       <SelectValue />
+                     </SelectTrigger>
+                     <SelectContent>
+                       <SelectItem value="1">1 clase</SelectItem>
+                       <SelectItem value="2">2 clases</SelectItem>
+                       <SelectItem value="4">4 clases</SelectItem>
+                       <SelectItem value="8">8 clases</SelectItem>
+                       <SelectItem value="12">12 clases</SelectItem>
+                     </SelectContent>
+                   </Select>
+                 </div>
                </div>
+               <div className="grid grid-cols-2 gap-4">
+                 <div className="space-y-2">
+                   <Label>Sede preferida</Label>
+                   <Input
+                     value={formData.sede_preferida}
+                     onChange={(e) => setFormData({ ...formData, sede_preferida: e.target.value })}
+                     placeholder="Club Norte"
+                   />
+                 </div>
+                 <div className="space-y-2">
+                   <Label>Horario</Label>
+                   <Input
+                     type="time"
+                     value={formData.horario_preferido}
+                     onChange={(e) => setFormData({ ...formData, horario_preferido: e.target.value })}
+                   />
+                 </div>
+               </div>
+               <div className="space-y-2">
+                 <Label>Tipo de asistencia</Label>
+                 <Select
+                   value={formData.tipo_asistencia}
+                   onValueChange={(v) => setFormData({ ...formData, tipo_asistencia: v, dia_preferido: v === 'varios_dias' ? '' : formData.dia_preferido })}
+                 >
+                   <SelectTrigger>
+                     <SelectValue />
+                   </SelectTrigger>
+                   <SelectContent>
+                     <SelectItem value="un_dia">Un día a la semana</SelectItem>
+                     <SelectItem value="varios_dias">Varios días a la semana</SelectItem>
+                   </SelectContent>
+                 </Select>
+               </div>
+               {formData.tipo_asistencia === 'un_dia' && (
+                 <div className="space-y-2">
+                   <Label>Día preferido</Label>
+                   <Select
+                     value={formData.dia_preferido}
+                     onValueChange={(v) => setFormData({ ...formData, dia_preferido: v })}
+                   >
+                     <SelectTrigger>
+                       <SelectValue placeholder="Seleccionar" />
+                     </SelectTrigger>
+                     <SelectContent>
+                       <SelectItem value="lunes">Lunes</SelectItem>
+                       <SelectItem value="martes">Martes</SelectItem>
+                       <SelectItem value="miercoles">Miércoles</SelectItem>
+                       <SelectItem value="jueves">Jueves</SelectItem>
+                       <SelectItem value="viernes">Viernes</SelectItem>
+                       <SelectItem value="sabado">Sábado</SelectItem>
+                       <SelectItem value="domingo">Domingo</SelectItem>
+                     </SelectContent>
+                   </Select>
+                 </div>
+               )}
              </div>
             )}
 
