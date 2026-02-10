@@ -196,27 +196,36 @@ export default function RecuperoCanchas() {
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Recupero de Canchas</h1>
-          <p className="text-slate-600">Gestiona las cancelaciones y recuperos de canchas de abono</p>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">Recuperos</h1>
+          <p className="text-slate-600">Gestiona los recuperos de canchas y clases</p>
         </div>
 
-        {/* Filtros */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="space-y-2 sm:w-48">
-            <Label>Estado</Label>
-            <Select value={filterEstado} onValueChange={setFilterEstado}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pendiente">Pendiente de resolución</SelectItem>
-                <SelectItem value="recuperado">Recuperado</SelectItem>
-                <SelectItem value="descontado">Descontado</SelectItem>
-                <SelectItem value="rechazado">Rechazado</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        {/* Tabs */}
+        <Tabs value={tab} onValueChange={setTab}>
+          <TabsList className="grid w-full grid-cols-2 max-w-md">
+            <TabsTrigger value="canchas">Canchas</TabsTrigger>
+            <TabsTrigger value="clases">Clases</TabsTrigger>
+          </TabsList>
+
+          {/* TAB CANCHAS */}
+          <TabsContent value="canchas" className="space-y-6">
+            {/* Filtros */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="space-y-2 sm:w-48">
+                <Label>Estado</Label>
+                <Select value={filterEstado} onValueChange={setFilterEstado}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pendiente">Pendiente de resolución</SelectItem>
+                    <SelectItem value="recuperado">Recuperado</SelectItem>
+                    <SelectItem value="descontado">Descontado</SelectItem>
+                    <SelectItem value="rechazado">Rechazado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
 
         {/* Estadísticas */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
