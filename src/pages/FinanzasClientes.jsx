@@ -88,13 +88,6 @@ export default function FinanzasClientes() {
   });
 
   // Cálculos
-  const clientesFiltrados = useMemo(() => {
-    return clientes.filter(c => {
-      const matchBusqueda = c.nombre.toLowerCase().includes(busqueda.toLowerCase());
-      return matchBusqueda;
-    });
-  }, [clientes, busqueda]);
-
   const metricasClientes = useMemo(() => {
     const clientesConCobros = clientesFiltrados.map(cliente => {
       const cobrosDelCliente = cobrosClientes.filter(c => c.cliente_id === cliente.id);
