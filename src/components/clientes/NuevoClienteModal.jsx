@@ -29,6 +29,8 @@ export default function NuevoClienteModal({ open, onOpenChange, tipoCliente }) {
    const queryClient = useQueryClient();
    const [success, setSuccess] = useState(false);
    const [clienteCreado, setClienteCreado] = useState(null);
+   const [showNewProfesor, setShowNewProfesor] = useState(false);
+   const [newProfesorData, setNewProfesorData] = useState({ nombre: '', email: '', telefono: '' });
    const [formData, setFormData] = useState({
        nombre: '',
        telefono: '',
