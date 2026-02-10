@@ -67,6 +67,18 @@ export default function Agenda() {
     },
   });
 
+  const { data: clases = [] } = useQuery({
+    queryKey: ['clases', showCalendario ? mesStr : fechaStr],
+    queryFn: async () => {
+      if (showCalendario) {
+        // Cargar todas las clases del mes para el calendario
+        const allClases = await base44.entities.Clase.list('-fecha', 500);
+        return allClases.filter(c => c.estado !== 'cancelada_anticipada' && c.estado !== 'cancelada_tarde' && c.estado !== 'no_show');
+      }
+      return base44.entities.Clase.filter({ fecha: fechaStr });
+    },
+  });
+
   const { data: recordatorios = [] } = useQuery({
     queryKey: ['recordatorios-cancha', showCalendario ? mesStr : fechaStr],
     queryFn: () => {
@@ -294,17 +306,18 @@ export default function Agenda() {
 
         {/* Vista de calendario o día */}
          {showCalendario ? (
-           <CalendarioCompleto
-            turnos={turnos}
-            recordatorios={recordatorios}
-            selectedDate={selectedDate}
-            onDateSelect={setSelectedDate}
-            onCreateTurno={(fecha) => {
-              setSelectedDate(fecha);
-              setTurnoModal({ open: true, turno: null });
-            }}
-            onTurnoClick={(turno) => setCancelarTurnoModal({ open: true, turno })}
-          />
+            <CalendarioCompleto
+             turnos={turnos}
+             clases={clases}
+             recordatorios={recordatorios}
+             selectedDate={selectedDate}
+             onDateSelect={setSelectedDate}
+             onCreateTurno={(fecha) => {
+               setSelectedDate(fecha);
+               setTurnoModal({ open: true, turno: null });
+             }}
+             onTurnoClick={(turno) => turno.tipo_turno === 'clase' ? setClientesClaseModal({ open: true, turno }) : setCancelarTurnoModal({ open: true, turno })}
+           />
         ) : (
           <VistaCalendarioCancha
             turnos={turnosFiltrados}
