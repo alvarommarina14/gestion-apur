@@ -124,7 +124,24 @@ export default function ClasesAlumnosSection({ profesor }) {
   const eliminarClaseMutation = useMutation({
     mutationFn: async (claseId) => {
       try {
-        await base44.entities.Clase.delete(claseId);
+        const claseAEliminar = clases.find(c => c.id === claseId);
+        
+        if (!claseAEliminar) {
+          throw new Error('Clase no encontrada');
+        }
+
+        // Si la clase es parte de una serie recurrente, eliminar todas las del grupo
+        if (claseAEliminar.serie_recurrente_id) {
+          const clasesDelGrupo = clases.filter(c => c.serie_recurrente_id === claseAEliminar.serie_recurrente_id);
+          
+          // Eliminar todas las clases del grupo en paralelo
+          await Promise.all(
+            clasesDelGrupo.map(c => base44.entities.Clase.delete(c.id))
+          );
+        } else {
+          // Eliminar clase única
+          await base44.entities.Clase.delete(claseId);
+        }
       } catch (error) {
         console.error('Error eliminando clase:', error);
         throw error;
@@ -139,7 +156,7 @@ export default function ClasesAlumnosSection({ profesor }) {
     },
     onError: (error) => {
       console.error('Fallo al eliminar clase:', error);
-      alert('Error al eliminar la clase. Por favor intenta nuevamente.');
+      alert('Error al eliminar la clase. Intenta de nuevo o contacta soporte.');
     },
   });
 
