@@ -14,7 +14,7 @@ import {
   FileText,
   ArrowLeft
 } from 'lucide-react';
-import ClasesAlumnosSection from '@/components/profesor/ClasesAlumnosSection';
+import ProfesorClasesSection from '@/components/profesor/ProfesorClasesSection';
 
 const menuOptions = [
   {
@@ -174,8 +174,8 @@ export default function ProfesorMenuPage() {
           </Card>
         </div>
 
-        {/* Sección Clases y Alumnos */}
-        <ClasesAlumnosSection profesor={profesor} />
+        {/* Sección Clases */}
+        <ProfesorClasesSection profesor={profesor} />
 
         {/* Opciones del menú */}
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
