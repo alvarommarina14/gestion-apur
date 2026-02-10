@@ -66,8 +66,12 @@ const navigationProfesor = [
 ];
 
 const navigationRecuperos = [
-    { name: 'Recupero de Canchas y Clases', href: 'RecuperoCanchas', icon: RefreshCw, permissionKey: 'booking_canchas' },
-  ];
+  { name: 'Recupero de Canchas y Clases', href: 'RecuperoCanchas', icon: RefreshCw, permissionKey: 'booking_canchas' },
+];
+
+const navigationClientes = [
+  { name: 'Clientes', href: 'Clientes', icon: Users, adminOnly: true, permissionKey: 'booking_canchas' },
+];
 
 const navigationFinanzas = [];
 
@@ -311,8 +315,8 @@ export default function Layout({ children, currentPageName }) {
               </div>
             )}
 
-              {/* Recupero de Canchas */}
-              {!cargandoPermisos && navigationRecuperos.some(item => user?.rol === 'admin' || tieneAcceso(item.permissionKey)) && (
+              {/* Gestión de Reservas y Clientes */}
+              {!cargandoPermisos && (navigationRecuperos.some(item => user?.rol === 'admin' || tieneAcceso(item.permissionKey)) || navigationClientes.some(item => user?.rol === 'admin')) && (
                 <div className="pt-4 mt-4 border-t border-slate-200">
                   <p className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
                     Gestión de Reservas
@@ -320,6 +324,36 @@ export default function Layout({ children, currentPageName }) {
                   {navigationRecuperos.map((item) => {
                     // Verificar permisos
                     if (user?.rol !== 'admin' && !tieneAcceso(item.permissionKey)) return null;
+
+                    const isActive = currentPageName === item.href;
+                    const Icon = item.icon;
+
+                    return (
+                      <Link
+                        key={item.href}
+                        to={createPageUrl(item.href)}
+                        onClick={() => setSidebarOpen(false)}
+                        className={cn(
+                          'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
+                          isActive 
+                            ? 'bg-emerald-50 text-emerald-700' 
+                            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                        )}
+                      >
+                        <Icon className={cn(
+                          'w-5 h-5',
+                          isActive ? 'text-emerald-600' : 'text-slate-400'
+                        )} />
+                        {item.name}
+                        {isActive && (
+                          <ChevronRight className="w-4 h-4 ml-auto text-emerald-400" />
+                        )}
+                      </Link>
+                    );
+                  })}
+                  {navigationClientes.map((item) => {
+                    // Verificar permisos
+                    if (item.adminOnly && user?.rol !== 'admin') return null;
 
                     const isActive = currentPageName === item.href;
                     const Icon = item.icon;
