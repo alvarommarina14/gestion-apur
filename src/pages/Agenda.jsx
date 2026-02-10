@@ -325,6 +325,7 @@ export default function Agenda() {
           turno={turnoModal.turno}
           fecha={selectedDate}
           isProfesor={isProfesor}
+          type={turnoModal.type}
         />
       )}
 
