@@ -17,7 +17,6 @@ export default function NuevoAlquilerModal({ isOpen, onClose, initialDate }) {
   const [busquedaCliente, setBusquedaCliente] = useState('');
   const [clienteSeleccionado, setClienteSeleccionado] = useState('');
   const [showListaClientes, setShowListaClientes] = useState(false);
-  const [precio, setPrecio] = useState('');
   const [notas, setNotas] = useState('');
   const queryClient = useQueryClient();
 
@@ -51,7 +50,6 @@ export default function NuevoAlquilerModal({ isOpen, onClose, initialDate }) {
         cliente: clienteObj.nombre,
         tipo_turno: 'alquiler',
         modalidad_alquiler: modalidad,
-        monto: parseFloat(precio) || 0,
         pagado: false,
         estado: 'activo',
         empleados_asignados_ids: [],
@@ -78,7 +76,6 @@ export default function NuevoAlquilerModal({ isOpen, onClose, initialDate }) {
     setBusquedaCliente('');
     setClienteSeleccionado('');
     setShowListaClientes(false);
-    setPrecio('');
     setNotas('');
     onClose();
   };
@@ -197,34 +194,20 @@ export default function NuevoAlquilerModal({ isOpen, onClose, initialDate }) {
             )}
           </div>
 
-          {/* Modalidad y Precio */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-sm font-medium text-slate-700 block mb-2">
-                Modalidad
-              </label>
-              <Select value={modalidad} onValueChange={setModalidad}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="suelto">Suelto</SelectItem>
-                  <SelectItem value="abono">Abono</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-slate-700 block mb-2">
-                Precio
-              </label>
-              <input
-                type="number"
-                value={precio}
-                onChange={(e) => setPrecio(e.target.value)}
-                placeholder="0.00"
-                className="w-full px-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-            </div>
+          {/* Modalidad */}
+          <div>
+            <label className="text-sm font-medium text-slate-700 block mb-2">
+              Modalidad
+            </label>
+            <Select value={modalidad} onValueChange={setModalidad}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="suelto">Suelto</SelectItem>
+                <SelectItem value="abono">Abono</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Notas */}

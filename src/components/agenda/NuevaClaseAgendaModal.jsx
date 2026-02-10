@@ -20,7 +20,6 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
   const [alumnos, setAlumnos] = useState([]);
   const [busquedaAlumno, setBusquedaAlumno] = useState('');
   const [showListaAlumnos, setShowListaAlumnos] = useState(false);
-  const [precio, setPrecio] = useState('');
   const [notas, setNotas] = useState('');
   const queryClient = useQueryClient();
 
