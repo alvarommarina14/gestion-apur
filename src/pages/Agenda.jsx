@@ -17,6 +17,7 @@ import {
 import VistaCalendarioCancha from '@/components/agenda/VistaCalendarioCancha';
 import CalendarioCompleto from '@/components/agenda/CalendarioCompleto';
 import NuevoTurnoModal from '@/components/agenda/NuevoTurnoModal';
+import NuevaClaseModal from '@/components/modals/NuevaClaseModal';
 import EditarClaseProfesorModal from '@/components/agenda/EditarClaseProfesorModal';
 import NuevoBloqueoModal from '@/components/disponibilidad/NuevoBloqueoModal';
 import CancelarCanchaModal from '@/components/agenda/CancelarCanchaModal';
