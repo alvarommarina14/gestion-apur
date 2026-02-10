@@ -50,6 +50,7 @@
 import Agenda from './pages/Agenda';
 import Alumnos from './pages/Alumnos';
 import Clientes from './pages/Clientes';
+import ClientesManagement from './pages/ClientesManagement';
 import Configuracion from './pages/Configuracion';
 import Dashboard from './pages/Dashboard';
 import Empleados from './pages/Empleados';
@@ -71,7 +72,6 @@ import Recuperos from './pages/Recuperos';
 import Reportes from './pages/Reportes';
 import SeleccionRol from './pages/SeleccionRol';
 import Tareas from './pages/Tareas';
-import ClientesManagement from './pages/ClientesManagement';
 import __Layout from './Layout.jsx';
 
 
@@ -79,6 +79,7 @@ export const PAGES = {
     "Agenda": Agenda,
     "Alumnos": Alumnos,
     "Clientes": Clientes,
+    "ClientesManagement": ClientesManagement,
     "Configuracion": Configuracion,
     "Dashboard": Dashboard,
     "Empleados": Empleados,
@@ -100,7 +101,6 @@ export const PAGES = {
     "Reportes": Reportes,
     "SeleccionRol": SeleccionRol,
     "Tareas": Tareas,
-    "ClientesManagement": ClientesManagement,
 }
 
 export const pagesConfig = {

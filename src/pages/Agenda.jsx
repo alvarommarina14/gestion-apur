@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { format, addDays, subDays, startOfWeek, addWeeks, subWeeks } from 'date-fns';
+import { format, addDays, subDays, startOfWeek, addWeeks, subWeeks, eachDayOfInterval, endOfMonth, startOfMonth, isSameMonth, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Plus, ChevronLeft, ChevronRight, Calendar, Filter, Trash2, Ban, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -74,6 +74,16 @@ export default function Agenda() {
   const { data: bloqueos = [] } = useQuery({
     queryKey: ['disponibilidad-canchas'],
     queryFn: () => base44.entities.DisponibilidadCancha.filter({ estado: 'activo' }),
+  });
+
+  const { data: turnosCalendario = [] } = useQuery({
+    queryKey: ['turnos-calendario', format(selectedDate, 'yyyy-MM')],
+    queryFn: async () => {
+      if (vista !== 'calendario') return [];
+      const mes = format(selectedDate, 'yyyy-MM');
+      const todos = await base44.entities.TurnoCancha.list();
+      return todos.filter(t => t.fecha.startsWith(mes) && t.estado !== 'cancelado');
+    },
   });
 
   const isAdmin = user?.role === 'admin';
