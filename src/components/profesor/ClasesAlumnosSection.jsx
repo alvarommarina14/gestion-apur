@@ -14,7 +14,9 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { ChevronDown, ChevronUp, Edit2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Edit2, Plus, Trash2, X } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function ClasesAlumnosSection({ profesor }) {
   const queryClient = useQueryClient();
@@ -27,6 +29,10 @@ export default function ClasesAlumnosSection({ profesor }) {
     cancha: '',
     notas: '',
   });
+  const [agregarAlumnoModal, setAgregarAlumnoModal] = useState(false);
+  const [alumnoSeleccionadoAgregar, setAlumnoSeleccionadoAgregar] = useState('');
+  const [alumnoEliminar, setAlumnoEliminar] = useState(null);
+  const [claseEliminar, setClaseEliminar] = useState(null);
 
   const { data: alumnos = [] } = useQuery({
     queryKey: ['alumnos'],
@@ -72,6 +78,54 @@ export default function ClasesAlumnosSection({ profesor }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clases'] });
+      setEditModal(false);
+      setClaseEditando(null);
+    },
+  });
+
+  const agregarAlumnoMutation = useMutation({
+    mutationFn: async (alumnoId) => {
+      const alumnosActuales = claseEditando.alumnos_ids || [];
+      const nombresActuales = claseEditando.alumnos_nombres || [];
+      const alumno = alumnos.find(a => a.id === alumnoId);
+      
+      await base44.entities.Clase.update(claseEditando.id, {
+        alumnos_ids: [...alumnosActuales, alumnoId],
+        alumnos_nombres: [...nombresActuales, alumno.nombre],
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clases'] });
+      setAlumnoSeleccionadoAgregar('');
+      setAgregarAlumnoModal(false);
+      setClaseEditando(null);
+    },
+  });
+
+  const eliminarAlumnoMutation = useMutation({
+    mutationFn: async (alumnoId) => {
+      const alumnosActuales = claseEditando.alumnos_ids.filter(id => id !== alumnoId);
+      const nombresActuales = claseEditando.alumnos_nombres.filter((_, i) => claseEditando.alumnos_ids[i] !== alumnoId);
+      
+      await base44.entities.Clase.update(claseEditando.id, {
+        alumnos_ids: alumnosActuales,
+        alumnos_nombres: nombresActuales,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clases'] });
+      setAlumnoEliminar(null);
+      setClaseEditando(null);
+    },
+  });
+
+  const eliminarClaseMutation = useMutation({
+    mutationFn: async (claseId) => {
+      await base44.entities.Clase.delete(claseId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clases'] });
+      setClaseEliminar(null);
       setEditModal(false);
       setClaseEditando(null);
     },
@@ -144,12 +198,36 @@ export default function ClasesAlumnosSection({ profesor }) {
               {isExpanded && (
                 <CardContent className="border-t pt-4 space-y-4">
                   <div>
-                    <h4 className="font-medium text-slate-900 mb-2">Alumnos ({alumnosClase.length})</h4>
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-slate-900">Alumnos ({alumnosClase.length})</h4>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setClaseEditando(clase);
+                          setAgregarAlumnoModal(true);
+                        }}
+                      >
+                        <Plus className="w-3 h-3 mr-1" />
+                        Agregar
+                      </Button>
+                    </div>
                     {alumnosClase.length > 0 ? (
-                      <div className="space-y-1">
+                      <div className="space-y-2">
                         {alumnosClase.map((alumno) => (
-                          <div key={alumno.id} className="text-sm text-slate-600">
-                            • {alumno.nombre}
+                          <div key={alumno.id} className="flex items-center justify-between p-2 bg-slate-50 rounded">
+                            <span className="text-sm text-slate-600">{alumno.nombre}</span>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 w-6 p-0 text-destructive hover:bg-destructive/10"
+                              onClick={() => {
+                                setClaseEditando(clase);
+                                setAlumnoEliminar(alumno);
+                              }}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
                           </div>
                         ))}
                       </div>
@@ -165,13 +243,21 @@ export default function ClasesAlumnosSection({ profesor }) {
                     </div>
                   )}
 
-                  <Button
-                    className="w-full bg-emerald-600 hover:bg-emerald-700"
-                    onClick={() => handleAbrirEditModal(clase)}
-                  >
-                    <Edit2 className="w-4 h-4 mr-2" />
-                    Editar clase
-                  </Button>
+                  <div className="flex gap-2 pt-2">
+                    <Button
+                      className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                      onClick={() => handleAbrirEditModal(clase)}
+                    >
+                      <Edit2 className="w-4 h-4 mr-2" />
+                      Editar clase
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={() => setClaseEliminar(clase)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </CardContent>
               )}
             </Card>
@@ -239,6 +325,86 @@ export default function ClasesAlumnosSection({ profesor }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Modal Agregar Alumno */}
+      <Dialog open={agregarAlumnoModal} onOpenChange={setAgregarAlumnoModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Agregar alumno a la clase</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Seleccionar alumno *</Label>
+              <Select value={alumnoSeleccionadoAgregar} onValueChange={setAlumnoSeleccionadoAgregar}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Elige un alumno" />
+                </SelectTrigger>
+                <SelectContent>
+                  {alumnosProfesor
+                    .filter(a => !claseEditando?.alumnos_ids?.includes(a.id))
+                    .map((alumno) => (
+                      <SelectItem key={alumno.id} value={alumno.id}>
+                        {alumno.nombre}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAgregarAlumnoModal(false)}>
+              Cancelar
+            </Button>
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700"
+              onClick={() => agregarAlumnoMutation.mutate(alumnoSeleccionadoAgregar)}
+              disabled={!alumnoSeleccionadoAgregar || agregarAlumnoMutation.isPending}
+            >
+              Agregar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Alert Eliminar Alumno */}
+      <AlertDialog open={!!alumnoEliminar} onOpenChange={() => setAlumnoEliminar(null)}>
+        <AlertDialogContent>
+          <AlertDialogTitle>¿Eliminar alumno de la clase?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Se quitará a {alumnoEliminar?.nombre} de esta clase.
+          </AlertDialogDescription>
+          <div className="flex gap-2 justify-end">
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => eliminarAlumnoMutation.mutate(alumnoEliminar.id)}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Alert Eliminar Clase */}
+      <AlertDialog open={!!claseEliminar} onOpenChange={() => setClaseEliminar(null)}>
+        <AlertDialogContent>
+          <AlertDialogTitle>¿Eliminar clase grupal?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Se eliminará la clase a las {claseEliminar?.hora_inicio} en {claseEliminar?.sede}. Esta acción no se puede deshacer.
+          </AlertDialogDescription>
+          <div className="flex gap-2 justify-end">
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => eliminarClaseMutation.mutate(claseEliminar.id)}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
