@@ -54,8 +54,6 @@ import Configuracion from './pages/Configuracion';
 import Dashboard from './pages/Dashboard';
 import Empleados from './pages/Empleados';
 import Finanzas from './pages/Finanzas';
-import FinanzasClientes from './pages/FinanzasClientes';
-import GestionAccesoUnificada from './pages/GestionAccesoUnificada';
 import GestionDisponibilidad from './pages/GestionDisponibilidad';
 import GestionPermisosUsuarios from './pages/GestionPermisosUsuarios';
 import GestionRoles from './pages/GestionRoles';
@@ -85,8 +83,6 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "Empleados": Empleados,
     "Finanzas": Finanzas,
-    "FinanzasClientes": FinanzasClientes,
-    "GestionAccesoUnificada": GestionAccesoUnificada,
     "GestionDisponibilidad": GestionDisponibilidad,
     "GestionPermisosUsuarios": GestionPermisosUsuarios,
     "GestionRoles": GestionRoles,
