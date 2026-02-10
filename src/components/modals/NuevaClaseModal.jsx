@@ -30,30 +30,53 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 
-export default function NuevaClaseModal({ open, onOpenChange, recupero = null }) {
-  const queryClient = useQueryClient();
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+export default function NuevaClaseModal({ open, onOpenChange, recupero = null, clase = null }) {
+   const queryClient = useQueryClient();
+   const [loading, setLoading] = useState(false);
+   const [success, setSuccess] = useState(false);
 
-  const [formData, setFormData] = useState(() => ({
-    fecha: new Date(),
-    hora_inicio: '09:00',
-    duracion: 50,
-    tipo: 'individual',
-    sede: '',
-    cancha: '',
-    profesor_id: '',
-    alumnos_ids: recupero ? [recupero.alumno_id] : [],
-    precio: '',
-    pagado: false,
-    notas: recupero ? `Recupero de clase del ${recupero.fecha_original}` : '',
-    repeticion_semanal: false,
-    es_recupero: !!recupero,
-    clase_original_id: recupero?.clase_original_id || '',
-    es_recurrente: false,
-    recurrencia_tipo: 'semanal',
-    recurrencia_cantidad: 4,
-  }));
+   const [formData, setFormData] = useState(() => {
+     if (clase) {
+       return {
+         fecha: parseISO(clase.fecha),
+         hora_inicio: clase.hora_inicio,
+         duracion: clase.duracion || 50,
+         tipo: clase.tipo || 'individual',
+         sede: clase.sede || '',
+         cancha: clase.cancha || '',
+         profesor_id: clase.profesor_id || '',
+         alumnos_ids: clase.alumnos_ids || [],
+         precio: clase.precio || '',
+         pagado: false,
+         notas: clase.notas || '',
+         repeticion_semanal: false,
+         es_recupero: false,
+         clase_original_id: '',
+         es_recurrente: false,
+         recurrencia_tipo: 'semanal',
+         recurrencia_cantidad: 4,
+       };
+     }
+     return {
+       fecha: new Date(),
+       hora_inicio: '09:00',
+       duracion: 50,
+       tipo: 'individual',
+       sede: '',
+       cancha: '',
+       profesor_id: '',
+       alumnos_ids: recupero ? [recupero.alumno_id] : [],
+       precio: '',
+       pagado: false,
+       notas: recupero ? `Recupero de clase del ${recupero.fecha_original}` : '',
+       repeticion_semanal: false,
+       es_recupero: !!recupero,
+       clase_original_id: recupero?.clase_original_id || '',
+       es_recurrente: false,
+       recurrencia_tipo: 'semanal',
+       recurrencia_cantidad: 4,
+     };
+   });
 
   const { data: alumnos = [], isLoading: loadingAlumnos } = useQuery({
     queryKey: ['alumnos'],
@@ -74,17 +97,39 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
 
   useEffect(() => {
     if (open) {
-      setFormData(prev => ({
-        ...prev,
-        profesor_id: '',
-        alumnos_ids: recupero ? [recupero.alumno_id] : [],
-        es_recupero: !!recupero,
-        clase_original_id: recupero?.clase_original_id || '',
-        notas: recupero ? `Recupero de clase del ${recupero.fecha_original}` : '',
-        fecha: new Date(),
-      }));
+      if (clase) {
+        setFormData({
+          fecha: parseISO(clase.fecha),
+          hora_inicio: clase.hora_inicio,
+          duracion: clase.duracion || 50,
+          tipo: clase.tipo || 'individual',
+          sede: clase.sede || '',
+          cancha: clase.cancha || '',
+          profesor_id: clase.profesor_id || '',
+          alumnos_ids: clase.alumnos_ids || [],
+          precio: clase.precio || '',
+          pagado: false,
+          notas: clase.notas || '',
+          repeticion_semanal: false,
+          es_recupero: false,
+          clase_original_id: '',
+          es_recurrente: false,
+          recurrencia_tipo: 'semanal',
+          recurrencia_cantidad: 4,
+        });
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          profesor_id: '',
+          alumnos_ids: recupero ? [recupero.alumno_id] : [],
+          es_recupero: !!recupero,
+          clase_original_id: recupero?.clase_original_id || '',
+          notas: recupero ? `Recupero de clase del ${recupero.fecha_original}` : '',
+          fecha: new Date(),
+        }));
+      }
     }
-  }, [open]);
+  }, [open, clase]);
 
   const calcularHoraFin = (horaInicio, duracion) => {
     if (!horaInicio) return '00:00';
@@ -119,17 +164,47 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (formData.alumnos_ids.length === 0) {
       return;
     }
-    
+
     setLoading(true);
-    
+
     try {
       const alumnosSeleccionados = alumnosActivos.filter(a => formData.alumnos_ids.includes(a.id));
       const alumnosNombres = alumnosSeleccionados.map(a => a.nombre);
-      
+
+      // Si es edición de clase existente
+      if (clase) {
+        const claseData = {
+          fecha: format(formData.fecha, 'yyyy-MM-dd'),
+          hora_inicio: formData.hora_inicio,
+          duracion: Number(formData.duracion),
+          tipo: formData.tipo,
+          sede: formData.sede || 'Sistema',
+          cancha: formData.cancha || '',
+          alumnos_ids: formData.alumnos_ids,
+          alumnos_nombres: alumnosNombres,
+          precio: formData.precio ? Number(formData.precio) : null,
+          notas: formData.notas,
+        };
+
+        await base44.entities.Clase.update(clase.id, claseData);
+
+        setSuccess(true);
+        queryClient.invalidateQueries({ queryKey: ['clases'] });
+        queryClient.invalidateQueries({ queryKey: ['mis-clases'] });
+        queryClient.invalidateQueries({ queryKey: ['clases-profesor'] });
+        queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+
+        setTimeout(() => {
+          setSuccess(false);
+          onOpenChange(false);
+        }, 1500);
+        return;
+      }
+
       // Si es recurrente, llamar función backend para crear 52 clases en paralelo
       if (formData.repeticion_semanal) {
         await base44.functions.invoke('crearClasesRecurrentes', {
@@ -281,10 +356,10 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Plus className="w-5 h-5" />
-            {recupero ? 'Programar recupero' : 'Nueva clase'}
+            {clase ? 'Editar clase' : recupero ? 'Programar recupero' : 'Nueva clase'}
           </DialogTitle>
           <DialogDescription>
-            Completa los datos para crear una nueva clase
+            {clase ? 'Modifica los datos de la clase' : 'Completa los datos para crear una nueva clase'}
           </DialogDescription>
         </DialogHeader>
         
@@ -494,7 +569,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
               disabled={loading || formData.alumnos_ids.length === 0}
               className="bg-emerald-600 hover:bg-emerald-700"
             >
-              {loading ? 'Guardando...' : recupero ? 'Programar recupero' : 'Crear clase'}
+              {loading ? 'Guardando...' : clase ? 'Actualizar clase' : recupero ? 'Programar recupero' : 'Crear clase'}
             </Button>
           </DialogFooter>
         </form>
