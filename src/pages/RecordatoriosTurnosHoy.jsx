@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,11 +8,30 @@ import { es } from 'date-fns/locale';
 import { Clock, Users, DollarSign, CheckCircle, AlertCircle, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export default function RecordatoriosTurnosHoy() {
   const [user, setUser] = useState(null);
   const queryClient = useQueryClient();
   const hoy = format(new Date(), 'yyyy-MM-dd');
+  const [modalPagoGrupal, setModalPagoGrupal] = useState(false);
+  const [claseSeleccionada, setClaseSeleccionada] = useState(null);
+  const [pagosAlumnos, setPagosAlumnos] = useState({});
+  const [medioPago, setMedioPago] = useState('');
 
   // Fetch user
   useEffect(() => {
@@ -38,17 +57,38 @@ export default function RecordatoriosTurnosHoy() {
   });
 
   // Fetch clases de hoy
-  const { data: todayClases = [], isLoading: clasesLoading } = useQuery({
-    queryKey: ['clases-hoy'],
-    queryFn: async () => {
-      const allClases = await base44.entities.Clase.list();
-      return allClases.filter(c => 
-        c.fecha === hoy && 
-        (c.estado === 'programada' || c.estado === 'realizada')
-      );
-    },
-    refetchInterval: 60000,
-  });
+   const { data: todayClases = [], isLoading: clasesLoading } = useQuery({
+     queryKey: ['clases-hoy'],
+     queryFn: async () => {
+       const allClases = await base44.entities.Clase.list();
+       return allClases.filter(c => 
+         c.fecha === hoy && 
+         (c.estado === 'programada' || c.estado === 'realizada')
+       );
+     },
+     refetchInterval: 60000,
+   });
+
+   // Cargar alumnos cuando se abre modal grupal
+   const { data: alumnos = [] } = useQuery({
+     queryKey: ['alumnos-pagos', claseSeleccionada?.id],
+     queryFn: async () => {
+       if (!claseSeleccionada?.alumnos_ids || claseSeleccionada.alumnos_ids.length === 0) {
+         return [];
+       }
+       const alumnos = [];
+       for (const id of claseSeleccionada.alumnos_ids) {
+         try {
+           const alumno = await base44.entities.Alumno.read(id);
+           alumnos.push(alumno);
+         } catch (e) {
+           console.error('Error loading student:', e);
+         }
+       }
+       return alumnos;
+     },
+     enabled: modalPagoGrupal && claseSeleccionada?.tipo === 'grupal'
+   });
 
   // Combinar y ordenar turnos y clases
   const getAllItems = () => {
@@ -94,20 +134,61 @@ export default function RecordatoriosTurnosHoy() {
   };
 
   const handleEliminar = async (item) => {
-    if (!confirm('¿Eliminar este turno?')) return;
-    try {
-      if (item.type === 'turno') {
-        await base44.entities.TurnoCancha.delete(item.id);
-      } else if (item.type === 'clase') {
-        await base44.entities.Clase.delete(item.id);
-      }
-      queryClient.invalidateQueries({ queryKey: ['turnos-hoy'] });
-      queryClient.invalidateQueries({ queryKey: ['clases-hoy'] });
-      toast.success('Eliminado correctamente');
-    } catch (error) {
-      toast.error('Error: ' + error.message);
-    }
-  };
+     if (!confirm('¿Eliminar este turno?')) return;
+     try {
+       if (item.type === 'turno') {
+         await base44.entities.TurnoCancha.delete(item.id);
+       } else if (item.type === 'clase') {
+         await base44.entities.Clase.delete(item.id);
+       }
+       queryClient.invalidateQueries({ queryKey: ['turnos-hoy'] });
+       queryClient.invalidateQueries({ queryKey: ['clases-hoy'] });
+       toast.success('Eliminado correctamente');
+     } catch (error) {
+       toast.error('Error: ' + error.message);
+     }
+   };
+
+   const registrarPagoGrupalMutation = useMutation({
+     mutationFn: async ({ clase, pagosAlumnos, medio }) => {
+       const mes = format(new Date(clase.fecha), 'yyyy-MM');
+
+       // Procesar pago de cada alumno
+       for (const alumnoId in pagosAlumnos) {
+         const estado = pagosAlumnos[alumnoId];
+         const alumno = alumnos.find(a => a.id === alumnoId);
+         if (!alumno) continue;
+
+         if (estado === 'pagado') {
+           // Crear registro de pago
+           await base44.entities.Pago.create({
+             alumno_id: alumnoId,
+             alumno_nombre: alumno.nombre,
+             fecha: format(new Date(), 'yyyy-MM-dd'),
+             monto: alumno.precio_mensual,
+             medio_pago: medio,
+             mes_correspondiente: mes,
+           });
+         }
+       }
+     },
+     onSuccess: () => {
+       setModalPagoGrupal(false);
+       setClaseSeleccionada(null);
+       setPagosAlumnos({});
+       setMedioPago('');
+       queryClient.invalidateQueries({ queryKey: ['clases-hoy'] });
+       toast.success('Pagos registrados correctamente');
+     }
+   });
+
+   const formatMoney = (amount) => {
+     return new Intl.NumberFormat('es-AR', {
+       style: 'currency',
+       currency: 'ARS',
+       minimumFractionDigits: 0,
+     }).format(amount || 0);
+   };
 
   const getTypeLabel = (item) => {
     if (item.type === 'clase') return 'Clase';
@@ -240,30 +321,133 @@ export default function RecordatoriosTurnosHoy() {
                 </div>
 
                 <div className="flex gap-2 ml-4">
-                  <Button
-                    onClick={() => handleMarcarRealizado(item)}
-                    variant="outline"
-                    size="sm"
-                    className="gap-2 whitespace-nowrap"
-                  >
-                    <CheckCircle className="w-4 h-4" />
-                    Realizado
-                  </Button>
-                  <Button
-                    onClick={() => handleEliminar(item)}
-                    variant="outline"
-                    size="sm"
-                    className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    Eliminar
-                  </Button>
-                </div>
+                   {item.type === 'clase' && item.tipo === 'grupal' && (
+                     <Button
+                       onClick={() => {
+                         setClaseSeleccionada(item);
+                         setPagosAlumnos({});
+                         setMedioPago('');
+                         setModalPagoGrupal(true);
+                       }}
+                       variant="outline"
+                       size="sm"
+                       className="gap-2 whitespace-nowrap bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                     >
+                       <Users className="w-4 h-4" />
+                       Registrar Pagos
+                     </Button>
+                   )}
+                   <Button
+                     onClick={() => handleMarcarRealizado(item)}
+                     variant="outline"
+                     size="sm"
+                     className="gap-2 whitespace-nowrap"
+                   >
+                     <CheckCircle className="w-4 h-4" />
+                     Realizado
+                   </Button>
+                   <Button
+                     onClick={() => handleEliminar(item)}
+                     variant="outline"
+                     size="sm"
+                     className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                   >
+                     <Trash2 className="w-4 h-4" />
+                     Eliminar
+                   </Button>
+                 </div>
               </div>
             </Card>
           ))}
         </div>
-      )}
-    </div>
-  );
-}
+        )}
+
+        {/* Modal Pagos Grupales */}
+        <Dialog open={modalPagoGrupal} onOpenChange={setModalPagoGrupal}>
+         <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
+           <DialogHeader>
+             <DialogTitle className="flex items-center gap-2">
+               <Users className="w-5 h-5 text-emerald-600" />
+               Registrar Pagos - {claseSeleccionada?.alumnos_nombres?.[0] || 'Clase'}
+             </DialogTitle>
+           </DialogHeader>
+
+           <div className="space-y-4 py-4">
+             {/* Alumnos */}
+             <div className="space-y-3">
+               {alumnos.length === 0 ? (
+                 <p className="text-sm text-slate-500 text-center py-4">No hay alumnos registrados</p>
+               ) : (
+                 alumnos.map((alumno) => (
+                   <div key={alumno.id} className="border rounded-lg p-3 space-y-2">
+                     <div className="flex items-center justify-between">
+                       <div>
+                         <p className="font-semibold text-slate-900">{alumno.nombre}</p>
+                         <p className="text-sm text-slate-500">{formatMoney(alumno.precio_mensual)}/mes</p>
+                       </div>
+                       <Select 
+                         value={pagosAlumnos[alumno.id] || 'pendiente'}
+                         onValueChange={(value) => {
+                           setPagosAlumnos({
+                             ...pagosAlumnos,
+                             [alumno.id]: value === 'pendiente' ? undefined : value
+                           });
+                         }}
+                       >
+                         <SelectTrigger className="w-32">
+                           <SelectValue />
+                         </SelectTrigger>
+                         <SelectContent>
+                           <SelectItem value="pendiente">Pendiente</SelectItem>
+                           <SelectItem value="pagado">
+                             <span className="text-emerald-600">Pagó</span>
+                           </SelectItem>
+                         </SelectContent>
+                       </Select>
+                     </div>
+                   </div>
+                 ))
+               )}
+             </div>
+
+             {/* Medio de pago */}
+             <div className="space-y-2">
+               <Label>Medio de pago *</Label>
+               <Select value={medioPago} onValueChange={setMedioPago}>
+                 <SelectTrigger>
+                   <SelectValue placeholder="Seleccionar medio" />
+                 </SelectTrigger>
+                 <SelectContent>
+                   <SelectItem value="Efectivo">Efectivo</SelectItem>
+                   <SelectItem value="Transferencia">Transferencia</SelectItem>
+                   <SelectItem value="Mercado Pago">Mercado Pago</SelectItem>
+                   <SelectItem value="Débito">Débito</SelectItem>
+                   <SelectItem value="Crédito">Crédito</SelectItem>
+                 </SelectContent>
+               </Select>
+             </div>
+           </div>
+
+           <DialogFooter>
+             <Button variant="outline" onClick={() => setModalPagoGrupal(false)}>
+               Cancelar
+             </Button>
+             <Button
+               className="bg-emerald-600 hover:bg-emerald-700"
+               disabled={!medioPago || Object.keys(pagosAlumnos).length === 0 || registrarPagoGrupalMutation.isPending}
+               onClick={() => {
+                 registrarPagoGrupalMutation.mutate({
+                   clase: claseSeleccionada,
+                   pagosAlumnos,
+                   medio: medioPago,
+                 });
+               }}
+             >
+               {registrarPagoGrupalMutation.isPending ? 'Guardando...' : 'Registrar pagos'}
+             </Button>
+           </DialogFooter>
+         </DialogContent>
+        </Dialog>
+        </div>
+        );
+        }

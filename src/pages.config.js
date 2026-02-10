@@ -48,6 +48,7 @@
  * The mainPage value must match a key in the PAGES object exactly.
  */
 import Agenda from './pages/Agenda';
+import AgendaCanchas from './pages/AgendaCanchas';
 import Alumnos from './pages/Alumnos';
 import Clientes from './pages/Clientes';
 import ClientesManagement from './pages/ClientesManagement';
@@ -67,18 +68,18 @@ import Recordatorios from './pages/Recordatorios';
 import RecordatoriosCanchaAdmin from './pages/RecordatoriosCanchaAdmin';
 import RecordatoriosCanchaEmpleado from './pages/RecordatoriosCanchaEmpleado';
 import RecordatoriosCanchaHoy from './pages/RecordatoriosCanchaHoy';
+import RecordatoriosTurnosHoy from './pages/RecordatoriosTurnosHoy';
 import RecuperoCanchas from './pages/RecuperoCanchas';
 import Recuperos from './pages/Recuperos';
 import Reportes from './pages/Reportes';
 import SeleccionRol from './pages/SeleccionRol';
 import Tareas from './pages/Tareas';
-import AgendaCanchas from './pages/AgendaCanchas';
-import RecordatoriosTurnosHoy from './pages/RecordatoriosTurnosHoy';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "Agenda": Agenda,
+    "AgendaCanchas": AgendaCanchas,
     "Alumnos": Alumnos,
     "Clientes": Clientes,
     "ClientesManagement": ClientesManagement,
@@ -98,13 +99,12 @@ export const PAGES = {
     "RecordatoriosCanchaAdmin": RecordatoriosCanchaAdmin,
     "RecordatoriosCanchaEmpleado": RecordatoriosCanchaEmpleado,
     "RecordatoriosCanchaHoy": RecordatoriosCanchaHoy,
+    "RecordatoriosTurnosHoy": RecordatoriosTurnosHoy,
     "RecuperoCanchas": RecuperoCanchas,
     "Recuperos": Recuperos,
     "Reportes": Reportes,
     "SeleccionRol": SeleccionRol,
     "Tareas": Tareas,
-    "AgendaCanchas": AgendaCanchas,
-    "RecordatoriosTurnosHoy": RecordatoriosTurnosHoy,
 }
 
 export const pagesConfig = {
