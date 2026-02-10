@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, Plus, Download, Lock, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -14,6 +15,7 @@ import { toast } from 'sonner';
 
 export default function AgendaCanchas() {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [viewMode, setViewMode] = useState('planilla');
   const [showNuevoTurnoModal, setShowNuevoTurnoModal] = useState(false);
   const [showBloqueoModal, setShowBloqueoModal] = useState(false);
   const [nuevoTurnoType, setNuevoTurnoType] = useState('alquiler');
@@ -95,85 +97,121 @@ export default function AgendaCanchas() {
     <div className="p-4 lg:p-6 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-slate-900">Planilla de Turnos</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold text-slate-900">Gestión de Turnos</h1>
         <p className="text-slate-500 text-sm mt-1">
           {format(selectedDate, 'EEEE, d MMMM yyyy', { locale: es })}
         </p>
       </div>
 
-      {/* Botones de acciones */}
+      {/* Botones de acciones principales */}
       <div className="flex flex-wrap gap-3">
         <Button
-          onClick={() => setSelectedDate(new Date(selectedDate.getTime() - 86400000))}
-          variant="outline"
-          className="gap-2"
+          onClick={() => handleNuevoTurno('clase')}
+          className="gap-2 bg-blue-600 hover:bg-blue-700"
         >
-          ← Día anterior
+          <Plus className="w-4 h-4" />
+          Nueva Clase
         </Button>
         <Button
-          onClick={() => setSelectedDate(new Date())}
-          variant="outline"
-          className="gap-2"
+          onClick={() => handleNuevoTurno('alquiler')}
+          className="gap-2 bg-emerald-600 hover:bg-emerald-700"
         >
-          Hoy
+          <Plus className="w-4 h-4" />
+          Nuevo Alquiler
         </Button>
         <Button
-          onClick={() => setSelectedDate(new Date(selectedDate.getTime() + 86400000))}
+          onClick={() => setShowBloqueoModal(true)}
           variant="outline"
           className="gap-2"
         >
-          Día siguiente →
+          <Lock className="w-4 h-4" />
+          Bloquear
         </Button>
-
-        <div className="flex-1 flex flex-wrap gap-2 justify-end">
-          <Button
-            onClick={() => handleNuevoTurno('clase')}
-            className="gap-2 bg-blue-600 hover:bg-blue-700"
-          >
-            <Plus className="w-4 h-4" />
-            Nueva Clase
-          </Button>
-          <Button
-            onClick={() => handleNuevoTurno('alquiler')}
-            className="gap-2 bg-emerald-600 hover:bg-emerald-700"
-          >
-            <Plus className="w-4 h-4" />
-            Nuevo Alquiler
-          </Button>
-          <Button
-            onClick={() => setShowBloqueoModal(true)}
-            variant="outline"
-            className="gap-2"
-          >
-            <Lock className="w-4 h-4" />
-            Bloquear
-          </Button>
-          <Button
-            onClick={handleDescargarPDF}
-            variant="outline"
-            className="gap-2"
-          >
-            <Download className="w-4 h-4" />
-            PDF
-          </Button>
-        </div>
+        <Button
+          onClick={handleDescargarPDF}
+          variant="outline"
+          className="gap-2"
+        >
+          <Download className="w-4 h-4" />
+          PDF
+        </Button>
       </div>
 
-      {/* Planilla */}
-      <Card className="p-4">
-        {turnosLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+      {/* Tabs de vistas */}
+      <Tabs value={viewMode} onValueChange={setViewMode} className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="planilla">Planilla de Turnos</TabsTrigger>
+          <TabsTrigger value="calendario">Calendario</TabsTrigger>
+        </TabsList>
+
+        {/* Vista Planilla */}
+        <TabsContent value="planilla" className="space-y-4">
+          <div className="flex flex-wrap gap-3 mb-4">
+            <Button
+              onClick={() => setSelectedDate(new Date(selectedDate.getTime() - 86400000))}
+              variant="outline"
+              className="gap-2 text-sm"
+            >
+              ← Anterior
+            </Button>
+            <Button
+              onClick={() => setSelectedDate(new Date())}
+              variant="outline"
+              className="gap-2 text-sm"
+            >
+              Hoy
+            </Button>
+            <Button
+              onClick={() => setSelectedDate(new Date(selectedDate.getTime() + 86400000))}
+              variant="outline"
+              className="gap-2 text-sm"
+            >
+              Siguiente →
+            </Button>
           </div>
-        ) : (
-          <PlanillaCanchas
-            date={selectedDate}
-            turnos={turnosFecha}
-            onEdit={handleEditTurno}
-            onDelete={handleDeleteTurno}
-          />
-        )}
-      </Card>
+
+          <Card className="p-4">
+            {turnosLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+              </div>
+            ) : (
+              <PlanillaCanchas
+                date={selectedDate}
+                turnos={turnosFecha}
+                onEdit={handleEditTurno}
+                onDelete={handleDeleteTurno}
+              />
+            )}
+          </Card>
+        </TabsContent>
+
+        {/* Vista Calendario */}
+        <TabsContent value="calendario" className="space-y-4">
+          <Card className="p-4">
+            {turnosLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+              </div>
+            ) : (
+              <CalendarioMes
+                date={selectedDate}
+                turnos={turnos}
+                recordatorios={recordatorios}
+                bloqueos={bloqueos}
+                onDayClick={(date) => {
+                  setSelectedDate(date);
+                  setViewMode('planilla');
+                }}
+                onTurnoClick={(turno) => {
+                  setSelectedDate(new Date(turno.fecha));
+                  setViewMode('planilla');
+                }}
+              />
+            )}
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Modales */}
       {showNuevoTurnoModal && (
