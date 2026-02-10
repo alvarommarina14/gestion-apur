@@ -4,7 +4,8 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, Plus, Download, Lock, AlertCircle } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Calendar, Plus, Download, Lock, AlertCircle, ChevronDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import PlanillaCanchas from '@/components/agenda/PlanillaCanchas';
@@ -119,14 +120,28 @@ export default function AgendaCanchas() {
           <Plus className="w-4 h-4" />
           Nuevo Alquiler
         </Button>
-        <Button
-          onClick={() => setShowBloqueoModal(true)}
-          variant="outline"
-          className="gap-2"
-        >
-          <Lock className="w-4 h-4" />
-          Bloquear
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              className="gap-2"
+            >
+              <Lock className="w-4 h-4" />
+              Bloquear
+              <ChevronDown className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {motivosBloqueo.map(motivo => (
+              <DropdownMenuItem
+                key={motivo.value}
+                onClick={() => handleBloquear(motivo.value)}
+              >
+                {motivo.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
         <Button
           onClick={handleDescargarPDF}
           variant="outline"
