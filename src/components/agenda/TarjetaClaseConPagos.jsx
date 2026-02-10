@@ -43,23 +43,11 @@ export default function TarjetaClaseConPagos({ turno, isAdmin, onTurnoClick }) {
         </p>
       </div>
 
-      {/* Profesor */}
+      {/* Profesor a cargo */}
       {(turno.profesor || profesor?.nombre) && (
-        <div className="flex items-center gap-1 text-xs bg-indigo-50 border border-indigo-200 text-indigo-700 px-2 py-0.5 rounded mb-2 w-fit">
-          <User className="w-3 h-3" />
-          <span>Prof. {turno.profesor || profesor?.nombre}</span>
-        </div>
-      )}
-
-      {/* Alumnos */}
-      {turno.alumnos_nombres?.length > 0 && (
         <div className="mb-2 pt-2 border-t border-slate-200">
-          <p className="text-xs font-semibold text-slate-700 mb-1">Alumnos:</p>
-          <ul className="space-y-0.5">
-            {turno.alumnos_nombres.map((nombre, idx) => (
-              <li key={idx} className="text-xs text-slate-600">• {nombre}</li>
-            ))}
-          </ul>
+          <p className="text-xs font-semibold text-slate-700 mb-1">Prof. a cargo:</p>
+          <p className="text-sm font-medium text-slate-900">{turno.profesor || profesor?.nombre}</p>
         </div>
       )}
 
