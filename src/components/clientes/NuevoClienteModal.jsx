@@ -178,13 +178,28 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
    }
 
    return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      if (!isOpen) {
+        setTipoRegistro(null);
+        onOpenChange(false);
+      }
+    }}>
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <UserPlus className="w-5 h-5 text-emerald-600" />
-            Nuevo Cliente
-          </DialogTitle>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTipoRegistro(null)}
+              className="h-8 w-8 -ml-2"
+            >
+              <span className="text-xl">←</span>
+            </Button>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-emerald-600" />
+              {tipoRegistro === 'abono' ? 'Nuevo Abono de Cancha' : 'Nuevo Alumno'}
+            </DialogTitle>
+          </div>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
