@@ -5,6 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { 
   LayoutDashboard, 
   Users, 
@@ -94,6 +96,7 @@ export default function ProfesorMenuPage() {
   // Clases del mes actual
   const today = new Date();
   const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+  const nombreMes = format(today, 'MMMM', { locale: es });
   const clasesMesActual = clasesProfesor.filter(c => 
     c.fecha?.startsWith(currentMonth) && c.estado === 'programada'
   ).length;
@@ -138,7 +141,7 @@ export default function ProfesorMenuPage() {
 
           <Card className="border-l-4 border-l-blue-500">
             <CardHeader className="pb-2">
-              <CardDescription>Clases programadas</CardDescription>
+              <CardDescription>Clases programadas - {nombreMes}</CardDescription>
               <CardTitle className="text-2xl">{clasesMesActual}</CardTitle>
             </CardHeader>
           </Card>
