@@ -31,12 +31,18 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
   const [showPagoModal, setShowPagoModal] = useState(false);
   const queryClient = useQueryClient();
   const { mutate: updatePago } = useMutation({
-    mutationFn: async ({ turnoId, pagado }) => {
-      return await base44.entities.TurnoCancha.update(turnoId, { pagado });
+    mutationFn: async ({ turnoId, pagado, tipo_turno, modalidad_alquiler }) => {
+      return await base44.functions.invoke('sincronizarPagosTurnos', {
+        turnoId,
+        pagado,
+        tipo_turno,
+        modalidad_alquiler
+      });
     },
     onSuccess: () => {
       setActualizandoId(null);
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
     }
   });
   
