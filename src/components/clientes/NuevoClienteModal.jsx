@@ -79,6 +79,18 @@ export default function NuevoClienteModal({ open, onOpenChange, tipoCliente }) {
      }
   }, [open, tipoCliente]);
 
+  const createProfesorMutation = useMutation({
+    mutationFn: async (data) => {
+      return await base44.entities.Profesor.create(data);
+    },
+    onSuccess: (newProfesor) => {
+      queryClient.invalidateQueries({ queryKey: ['profesores-list'] });
+      setFormData({ ...formData, profesor_id: newProfesor.id, profesor_nombre: newProfesor.nombre });
+      setNewProfesorData({ nombre: '', email: '', telefono: '' });
+      setShowNewProfesor(false);
+    },
+  });
+
   const createMutation = useMutation({
     mutationFn: async (data) => {
       const newCliente = await base44.entities.Cliente.create(data);
