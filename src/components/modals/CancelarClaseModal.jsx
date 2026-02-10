@@ -107,8 +107,8 @@ export default function CancelarClaseModal({ open, onOpenChange, clase }) {
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
-        onOpenChange(false);
         setDeleteMode(null);
+        onOpenChange(false);
       }, 1500);
     } catch (error) {
       console.error('Error eliminando clase:', error);
@@ -147,8 +147,8 @@ export default function CancelarClaseModal({ open, onOpenChange, clase }) {
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
-        onOpenChange(false);
         setDeleteMode(null);
+        onOpenChange(false);
       }, 1500);
     } catch (error) {
       console.error('Error eliminando serie:', error);
