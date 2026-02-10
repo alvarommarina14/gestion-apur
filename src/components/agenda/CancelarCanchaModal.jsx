@@ -50,8 +50,8 @@ export default function CancelarCanchaModal({ open, onOpenChange, turno, onSucce
         fecha: turno.fecha,
         hora_inicio: turno.hora_inicio,
         monto: turno.monto || 0,
-        motivo_cancelacion: esmenDe24h ? 'menos_24h' : motivoMas24h,
-        estado: 'cancelado',
+        motivo_cancelacion: esmenDe24h ? 'cliente_solicita' : motivoMas24h,
+        estado_recupero: 'pendiente',
       };
 
       await base44.entities.CancelacionCancha.create(cancelacionData);
