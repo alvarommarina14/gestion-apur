@@ -16,6 +16,21 @@ import { cn } from '@/lib/utils';
 import TarjetaClaseConPagos from './TarjetaClaseConPagos';
 import PagoRapidoModal from './PagoRapidoModal';
 
+// Función para verificar si un cliente pagó su abono en el mes
+const verificarClientePagadoEnMes = async (clienteId, mesVerificar) => {
+  try {
+    const cobros = await base44.entities.CobroCliente.filter({
+      cliente_id: clienteId,
+      mes: mesVerificar,
+      estado: 'pagado'
+    });
+    return cobros.length > 0;
+  } catch (error) {
+    console.error('Error verificando cobro cliente:', error);
+    return false;
+  }
+};
+
 const HORARIOS = [];
 for (let h = 8; h <= 21; h++) {
   HORARIOS.push(`${h.toString().padStart(2, '0')}:00`);
