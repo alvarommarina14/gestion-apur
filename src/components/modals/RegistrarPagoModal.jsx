@@ -58,17 +58,18 @@ export default function RegistrarPagoModal({ open, onOpenChange, alumno }) {
         notas: formData.notas,
       });
       
-      // Actualizar estado del alumno
-      const nuevaDeuda = Math.max(0, (alumno.deuda_total || 0) - Number(formData.monto));
-      await base44.entities.Alumno.update(alumno.id, {
-        estado: nuevaDeuda > 0 ? 'moroso' : 'activo',
-        estado_mes_actual: 'pagado',
-        deuda_total: nuevaDeuda,
-        ultimo_pago_fecha: format(new Date(), 'yyyy-MM-dd'),
-        ultimo_pago_nota: formData.notas || `Pago ${formData.medio_pago}`,
+      // Sincronizar con CobroCliente y actualizar estado
+      await base44.functions.invoke('sincronizarPagosCompleto', {
+        tipo_evento: 'alumno_pago',
+        alumnoId: alumno.id,
+        monto: Number(formData.monto),
+        fecha: format(new Date(), 'yyyy-MM-dd'),
+        mes: formData.mes_correspondiente,
+        medio_pago: formData.medio_pago
       });
       
       // Log de auditoría
+      const nuevaDeuda = Math.max(0, (alumno.deuda_total || 0) - Number(formData.monto));
       await base44.entities.LogAuditoria.create({
         entidad: 'Pago',
         entidad_id: alumno.id,
@@ -84,6 +85,7 @@ export default function RegistrarPagoModal({ open, onOpenChange, alumno }) {
       setSuccess(true);
       queryClient.invalidateQueries({ queryKey: ['alumnos'] });
       queryClient.invalidateQueries({ queryKey: ['pagos'] });
+      queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
       
       setTimeout(() => {
         setSuccess(false);
