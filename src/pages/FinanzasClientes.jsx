@@ -459,7 +459,6 @@ export default function FinanzasClientes() {
                       <AlertDialog open={eliminandoCliente?.id === cliente.id} onOpenChange={(open) => {
                         if (!open) setEliminandoCliente(null);
                       }}>
-                        <AlertDialogCancel style={{ display: 'none' }} />
                         <Button
                           size="sm"
                           variant="ghost"
