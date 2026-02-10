@@ -196,14 +196,21 @@ export default function Agenda() {
                </Button>
              )}
              {canEdit && (
-               <>
-                 <Button
-                   onClick={() => setTurnoModal({ open: true, turno: null })}
-                   className="bg-emerald-600 hover:bg-emerald-700 h-11 lg:h-10 text-base lg:text-sm active:scale-95 touch-manipulation w-full sm:w-auto"
-                 >
-                   <Plus className="w-5 h-5 mr-2" />
-                   Nuevo turno
-                 </Button>
+                 <>
+                   <Button
+                     onClick={() => setTurnoModal({ open: true, turno: null, type: 'clase' })}
+                     className="bg-emerald-600 hover:bg-emerald-700 h-11 lg:h-10 text-base lg:text-sm active:scale-95 touch-manipulation w-full sm:w-auto"
+                   >
+                     <Plus className="w-5 h-5 mr-2" />
+                     Crear clase
+                   </Button>
+                   <Button
+                     onClick={() => setTurnoModal({ open: true, turno: null, type: 'cancha' })}
+                     className="bg-blue-600 hover:bg-blue-700 h-11 lg:h-10 text-base lg:text-sm active:scale-95 touch-manipulation w-full sm:w-auto"
+                   >
+                     <Plus className="w-5 h-5 mr-2" />
+                     Nuevo turno cancha
+                   </Button>
                  {isAdmin && (
                    <Button
                      onClick={() => setBloqueoModal(true)}
