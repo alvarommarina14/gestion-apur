@@ -416,16 +416,12 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
           </div>
           
           {/* Selección de alumnos */}
-          <div className="space-y-2">
-            <Label>
-              {formData.tipo === 'individual' ? 'Alumno' : 'Alumnos'}
-              {!formData.profesor_id && <span className="text-rose-500 ml-1">*</span>}
-            </Label>
-            {!formData.profesor_id ? (
-              <p className="text-xs text-slate-500 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                Selecciona un profesor primero
-              </p>
-            ) : loadingAlumnos ? (
+           <div className="space-y-2">
+             <Label>
+               {formData.tipo === 'individual' ? 'Alumno' : 'Alumnos'}
+               <span className="text-rose-500 ml-1">*</span>
+             </Label>
+             {loadingAlumnos ? (
               <p className="text-xs text-slate-500 p-3 bg-slate-50 rounded-lg border border-slate-200">
                 Cargando alumnos...
               </p>
