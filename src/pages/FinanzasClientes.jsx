@@ -15,14 +15,8 @@ import { DollarSign, TrendingUp, AlertCircle, CheckCircle, RefreshCw } from 'luc
 
 export default function FinanzasClientes() {
    const [mesSeleccionado, setMesSeleccionado] = useState(new Date());
-   const [busqueda, setBusqueda] = useState('');
-   const [filtroEstado, setFiltroEstado] = useState('todos');
    const [sincronizando, setSincronizando] = useState(false);
-   const [editandoCobro, setEditandoCobro] = useState(null);
-   const [montoPago, setMontoPago] = useState('');
-   const [editandoCliente, setEditandoCliente] = useState(null);
-   const [eliminandoCliente, setEliminandoCliente] = useState(null);
-   const [modalDetalle, setModalDetalle] = useState({ open: false, cliente: null });
+   const [filtroEstado, setFiltroEstado] = useState('todos');
    const queryClient = useQueryClient();
 
   const mesStr = format(mesSeleccionado, 'yyyy-MM');
