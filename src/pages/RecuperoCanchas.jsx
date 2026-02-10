@@ -34,8 +34,7 @@ export default function RecuperoCanchas() {
   const [tab, setTab] = useState('canchas');
   const [filterEstado, setFilterEstado] = useState('pendiente');
   const [filterEstadoClases, setFilterEstadoClases] = useState('pendiente');
-  const [tipoClaseFilter, setTipoClaseFilter] = useState('todas');
-  const [selectedCancelacion, setSelectedCancelacion] = useState(null);
+   const [selectedCancelacion, setSelectedCancelacion] = useState(null);
   const [selectedRecupero, setSelectedRecupero] = useState(null);
   const [accion, setAccion] = useState(null);
   const [nuevaClaseModal, setNuevaClaseModal] = useState({ open: false, recupero: null });
