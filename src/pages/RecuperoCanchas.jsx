@@ -356,50 +356,49 @@ export default function RecuperoCanchas() {
 
           {/* Clases Individuales */}
           {(tipoClaseFilter === 'todas' || tipoClaseFilter === 'individuales') && (
-          <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-slate-900">Clases Individuales</h3>
-            {recuperosFiltrados.length === 0 ? (
-              <Card className="shadow-sm border-dashed">
-                <CardContent className="py-8 text-center">
-                  <p className="text-slate-500">No hay recuperos de clases individuales</p>
+          <h3 className="text-lg font-semibold text-slate-900">Clases Individuales</h3>
+          {recuperosFiltrados.length === 0 ? (
+            <Card className="shadow-sm border-dashed">
+              <CardContent className="py-8 text-center">
+                <p className="text-slate-500">No hay recuperos de clases individuales</p>
+              </CardContent>
+            </Card>
+          ) : (
+            recuperosFiltrados.map((recupero) => (
+              <Card key={recupero.id} className="shadow-sm">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-slate-900">{recupero.alumno_nombre}</h3>
+                      <p className="text-sm text-slate-500 mt-1">
+                        Clase original: {recupero.fecha_original && format(parseISO(recupero.fecha_original), "d 'de' MMM", { locale: es })}
+                      </p>
+                      <Badge className="mt-2">{recupero.estado}</Badge>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        className="bg-emerald-600 hover:bg-emerald-700"
+                        onClick={() => setNuevaClaseModal({ open: true, recupero })}
+                      >
+                        <Calendar className="w-4 h-4 mr-1" />
+                        Programar
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-rose-600 border-rose-200 hover:bg-rose-50"
+                        onClick={() => handleEliminarRecupero(recupero)}
+                        disabled={deleteRecuperoMutation.isPending}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
-            ) : (
-              recuperosFiltrados.map((recupero) => (
-                <Card key={recupero.id} className="shadow-sm">
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-slate-900">{recupero.alumno_nombre}</h3>
-                        <p className="text-sm text-slate-500 mt-1">
-                          Clase original: {recupero.fecha_original && format(parseISO(recupero.fecha_original), "d 'de' MMM", { locale: es })}
-                        </p>
-                        <Badge className="mt-2">{recupero.estado}</Badge>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          className="bg-emerald-600 hover:bg-emerald-700"
-                          onClick={() => setNuevaClaseModal({ open: true, recupero })}
-                        >
-                          <Calendar className="w-4 h-4 mr-1" />
-                          Programar
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-rose-600 border-rose-200 hover:bg-rose-50"
-                          onClick={() => handleEliminarRecupero(recupero)}
-                          disabled={deleteRecuperoMutation.isPending}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
+            ))
+          )}
           </div>
           )}
 
