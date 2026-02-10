@@ -129,7 +129,7 @@ export default function ClientesPage() {
                   ? 'No se encontraron resultados con los filtros aplicados'
                   : 'Comienza agregando tu primer cliente'}
               </p>
-              <Button variant="outline" onClick={() => setModalNuevo(true)}>
+              <Button variant="outline" onClick={() => setModalSeleccion(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Agregar cliente
               </Button>
