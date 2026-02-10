@@ -69,6 +69,11 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
     queryFn: () => base44.auth.me(),
   });
 
+  const { data: cobrosClientes = [] } = useQuery({
+    queryKey: ['cobros-clientes'],
+    queryFn: () => base44.entities.CobroCliente.list(),
+  });
+
   useEffect(() => {
     if (user?.profesor_id) {
       const turnosProfsor = turnos
