@@ -74,10 +74,15 @@ export default function TarjetaClaseConPagos({ turno, isAdmin, onTurnoClick }) {
     e.stopPropagation();
     setIsUpdating(true);
     try {
-      await base44.entities.TurnoCancha.update(turno.id, {
-        pagado: !turno.pagado
+      const nuevoEstado = !turno.pagado;
+      await base44.functions.invoke('sincronizarPagosTurnos', {
+        turnoId: turno.id,
+        pagado: nuevoEstado,
+        tipo_turno: turno.tipo_turno,
+        modalidad_alquiler: turno.modalidad_alquiler
       });
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
     } catch (error) {
       console.error('Error updating pago:', error);
     } finally {
