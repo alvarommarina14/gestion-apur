@@ -132,6 +132,64 @@ export default function NuevoClienteModal({ open, onOpenChange, tipoCliente }) {
      );
    }
 
+   if (showNewProfesor) {
+     return (
+       <Dialog open={true} onOpenChange={setShowNewProfesor}>
+         <DialogContent className="sm:max-w-md">
+           <DialogHeader>
+             <DialogTitle>Crear nuevo profesor</DialogTitle>
+           </DialogHeader>
+           <form 
+             onSubmit={(e) => {
+               e.preventDefault();
+               createProfesorMutation.mutate(newProfesorData);
+             }}
+             className="space-y-4"
+           >
+             <div className="space-y-2">
+               <Label>Nombre *</Label>
+               <Input
+                 value={newProfesorData.nombre}
+                 onChange={(e) => setNewProfesorData({ ...newProfesorData, nombre: e.target.value })}
+                 placeholder="Nombre del profesor"
+                 required
+               />
+             </div>
+             <div className="space-y-2">
+               <Label>Email</Label>
+               <Input
+                 type="email"
+                 value={newProfesorData.email}
+                 onChange={(e) => setNewProfesorData({ ...newProfesorData, email: e.target.value })}
+                 placeholder="profesor@email.com"
+               />
+             </div>
+             <div className="space-y-2">
+               <Label>Teléfono</Label>
+               <Input
+                 value={newProfesorData.telefono}
+                 onChange={(e) => setNewProfesorData({ ...newProfesorData, telefono: e.target.value })}
+                 placeholder="+54 9 ..."
+               />
+             </div>
+             <DialogFooter>
+               <Button type="button" variant="outline" onClick={() => setShowNewProfesor(false)}>
+                 Cancelar
+               </Button>
+               <Button 
+                 type="submit"
+                 disabled={createProfesorMutation.isPending}
+                 className="bg-emerald-600 hover:bg-emerald-700"
+               >
+                 {createProfesorMutation.isPending ? 'Creando...' : 'Crear'}
+               </Button>
+             </DialogFooter>
+           </form>
+         </DialogContent>
+       </Dialog>
+     );
+   }
+
    if (clienteCreado) {
      return (
        <NuevoAlumnoModal 
