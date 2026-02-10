@@ -56,18 +56,19 @@ export default function CancelarCanchaModal({ open, onOpenChange, turno, onSucce
 
       await base44.entities.CancelacionCancha.create(cancelacionData);
 
-      // Si es más de 24h, crear registro en Recupero
-      if (!esmenDe24h && motivoMas24h) {
-        await base44.entities.Recupero.create({
-          alumno_id: '',
-          alumno_nombre: turno.cliente,
-          clase_original_id: '',
-          fecha_original: turno.fecha,
-          motivo: motivoMas24h,
-          estado: 'pendiente',
-          notas: `Cancha ${turno.cancha} - ${turno.hora_inicio}`,
-        });
-      }
+      // Si es más de 24h, crear registro de recupero en la sección de recuperos
+       if (!esmenDe24h && motivoMas24h) {
+         await base44.entities.Recupero.create({
+           alumno_id: turno.cliente, // Usar cliente como identificador
+           alumno_nombre: turno.cliente,
+           clase_original_id: turno.id, // ID del turno original
+           fecha_original: turno.fecha,
+           motivo: motivoMas24h,
+           estado: 'pendiente',
+           notas: `Cancha ${turno.cancha} - ${turno.hora_inicio}h - Monto: $${turno.monto || 0}`,
+           vencimiento: new Date(new Date(turno.fecha).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 días
+         });
+       }
 
       // Actualizar estado del turno en BD
       await base44.entities.TurnoCancha.update(turno.id, {
