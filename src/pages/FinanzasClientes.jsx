@@ -11,8 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { DollarSign, TrendingUp, AlertCircle, CheckCircle, Search, RefreshCw, Plus, Edit, Check, Trash2 } from 'lucide-react';
+import { DollarSign, TrendingUp, AlertCircle, CheckCircle, Search, RefreshCw, Plus, Edit, Check, Trash2, Eye } from 'lucide-react';
 import EditarClienteForm from '@/components/finanzas/EditarClienteForm';
+import DetalleClienteModal from '@/components/clientes/DetalleClienteModal';
 import { cn } from '@/lib/utils';
 
 export default function FinanzasClientes() {
