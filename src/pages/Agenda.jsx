@@ -336,11 +336,6 @@ export default function Agenda() {
 
       {isAdmin && (
         <>
-          <EditarClaseProfesorModal
-            open={claseModal.open}
-            onOpenChange={(open) => setClaseModal({ ...claseModal, open })}
-            turno={claseModal.turno}
-          />
           <NuevoBloqueoModal
             open={bloqueoModal}
             onOpenChange={setBloqueoModal}
