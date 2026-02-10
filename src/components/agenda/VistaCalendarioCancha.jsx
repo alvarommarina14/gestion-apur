@@ -372,12 +372,22 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
                                       </p>
                                     </div>
 
-                                     {/* Tipo de turno */}
-                                     <div className="flex items-center gap-1.5">
-                                       <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs font-semibold">
-                                         Alquiler - {turno.modalidad_alquiler === 'abono' ? 'Abono' : 'Suelto'}
-                                       </span>
-                                     </div>
+                                    {/* Tipo de turno y Profesor */}
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs font-semibold">
+                                        Alquiler - {turno.modalidad_alquiler === 'abono' ? 'Abono' : 'Suelto'}
+                                      </span>
+                                      {turno.modalidad_alquiler === 'abono' && (
+                                        <Badge variant="outline" className="text-xs bg-emerald-50 border-emerald-200 text-emerald-700">
+                                          Abono pagado
+                                        </Badge>
+                                      )}
+                                      {turno.modalidad_alquiler === 'suelto' && turno.pagado && (
+                                        <Badge variant="outline" className="text-xs bg-emerald-50 border-emerald-200 text-emerald-700">
+                                          Cancha pagada
+                                        </Badge>
+                                      )}
+                                    </div>
 
                                      {/* Precio y botón de pago */}
                                      <div className="flex items-center justify-between gap-2 p-2 bg-white/50 rounded border border-slate-200">
