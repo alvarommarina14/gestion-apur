@@ -171,8 +171,12 @@ export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null, pr
             nombre: data.nombre,
             telefono: data.whatsapp || '',
             email: '',
+            precio: data.precio_mensual,
             clasificacion: 'recurrente',
             tipo_cliente: 'clase',
+            es_alumno: true,
+            profesor_id: data.profesor_id,
+            profesor_nombre: profesorNombre,
             notas: `Alumno sincronizado - Profesor: ${profesorNombre}`,
             activo: true,
           });
