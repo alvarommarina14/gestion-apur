@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Clock, Bell, MoreVertical, Ban } from 'lucide-react';
+import { Clock, Bell, MoreVertical, Ban, Edit } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,7 +23,7 @@ for (let h = 8; h <= 21; h++) {
 
 const CANCHAS = ['1', '2', '3', '4'];
 
-export default function VistaCalendarioCancha({ turnos = [], recordatorios = [], bloqueos = [], selectedDate, selectedCancha, fecha, isAdmin, onTurnoClick, onEditarClase, onCancelarCancha, isLoading }) {
+export default function VistaCalendarioCancha({ turnos = [], recordatorios = [], bloqueos = [], selectedDate, selectedCancha, fecha, isAdmin, onTurnoClick, onEditarClase, onEditarTurno, onCancelarCancha, isLoading }) {
   const [profesorTurnos, setProfesorTurnos] = useState(new Set());
   const [actualizandoId, setActualizandoId] = useState(null);
 
@@ -294,6 +294,7 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
                                   turno={turno} 
                                   isAdmin={isAdmin}
                                   onTurnoClick={onTurnoClick}
+                                  onEditarClase={onEditarClase}
                                 />
                               ) : (
                                <div className="h-full rounded-lg border-2 border-purple-300 bg-purple-50 p-3 transition-all">
@@ -302,29 +303,38 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
                                     <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs font-semibold">
                                       Alquiler - {turno.modalidad_alquiler === 'abono' ? 'Abono' : 'Suelto'}
                                     </span>
-                                    <span className="text-xs font-semibold text-slate-500">
-                                      {turno.duracion} min
-                                    </span>
-                                     {isAdmin && (
-                                       <DropdownMenu>
-                                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                                           <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
-                                             <MoreVertical className="w-3 h-3" />
-                                           </Button>
-                                         </DropdownMenuTrigger>
-                                         <DropdownMenuContent align="end">
-                                           {turno.tipo_turno === 'alquiler' && turno.modalidad_alquiler === 'abono' && (
-                                             <DropdownMenuItem onClick={(e) => {
-                                               e.stopPropagation();
-                                               onCancelarCancha?.(turno);
-                                             }} className="text-rose-600">
-                                               <Ban className="w-4 h-4 mr-2" />
-                                               Cancelar cancha
-                                             </DropdownMenuItem>
-                                           )}
-                                         </DropdownMenuContent>
-                                       </DropdownMenu>
-                                     )}
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs font-semibold text-slate-500">
+                                        {turno.duracion} min
+                                      </span>
+                                      {isAdmin && (
+                                        <DropdownMenu>
+                                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
+                                              <MoreVertical className="w-3 h-3" />
+                                            </Button>
+                                          </DropdownMenuTrigger>
+                                          <DropdownMenuContent align="end">
+                                            <DropdownMenuItem onClick={(e) => {
+                                              e.stopPropagation();
+                                              onEditarTurno?.(turno);
+                                            }}>
+                                              <Edit className="w-4 h-4 mr-2" />
+                                              Editar turno
+                                            </DropdownMenuItem>
+                                            {turno.tipo_turno === 'alquiler' && turno.modalidad_alquiler === 'abono' && (
+                                              <DropdownMenuItem onClick={(e) => {
+                                                e.stopPropagation();
+                                                onCancelarCancha?.(turno);
+                                              }} className="text-rose-600">
+                                                <Ban className="w-4 h-4 mr-2" />
+                                                Cancelar cancha
+                                              </DropdownMenuItem>
+                                            )}
+                                          </DropdownMenuContent>
+                                        </DropdownMenu>
+                                      )}
+                                    </div>
                                    </div>
 
                                   {/* Contenido principal */}
