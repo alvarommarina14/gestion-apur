@@ -22,6 +22,7 @@ import EditarClaseProfesorModal from '@/components/agenda/EditarClaseProfesorMod
 import NuevoBloqueoModal from '@/components/disponibilidad/NuevoBloqueoModal';
 import CancelarCanchaModal from '@/components/agenda/CancelarCanchaModal';
 import ModalCancelarTurno from '@/components/agenda/ModalCancelarTurno';
+import RecordatoriosCanchaHoySection from '@/components/agenda/RecordatoriosCanchaHoySection';
 import { cn } from '@/lib/utils';
 
 export default function Agenda() {
