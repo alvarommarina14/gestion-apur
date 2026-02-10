@@ -42,13 +42,17 @@ export default function CancelarCanchaModal({ open, onOpenChange, turno, onSucce
 
   const cancelarMutation = useMutation({
     mutationFn: async (esmenDe24h) => {
+      if (!turno.fecha || !turno.hora_inicio) {
+        throw new Error('Faltan datos requeridos del turno (fecha u hora)');
+      }
+
       // Crear registro de cancelación
       const cancelacionData = {
         turno_cancha_id: turno.id,
         cliente: turno.cliente,
         cancha: turno.cancha,
-        fecha: turno.fecha,
-        hora_inicio: turno.hora_inicio,
+        fecha: turno.fecha.toString(),
+        hora_inicio: turno.hora_inicio.toString(),
         monto: turno.monto || 0,
         motivo_cancelacion: esmenDe24h ? 'cliente_solicita' : motivoMas24h,
         estado_recupero: 'pendiente',
