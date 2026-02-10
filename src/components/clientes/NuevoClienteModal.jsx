@@ -100,7 +100,12 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    createMutation.mutate(formData);
+    const dataToSubmit = {
+      ...formData,
+      tipo_cliente: tipoRegistro === 'abono' ? 'abono' : 'clase',
+      es_alumno: tipoRegistro === 'alumno',
+    };
+    createMutation.mutate(dataToSubmit);
   };
 
   // Mostrar selector de tipo de registro
