@@ -11,7 +11,6 @@ export default function BottomTabNavigation({ currentPageName, userRole }) {
       href: userRole === 'profesor' ? 'ProfesorMenu' : 'Dashboard', 
       icon: LayoutDashboard 
     },
-    { name: 'Agenda', href: 'Agenda', icon: Calendar },
     { name: 'Alumnos', href: 'Alumnos', icon: Users },
   ];
 
