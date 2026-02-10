@@ -220,7 +220,7 @@ export default function NuevoClienteModal({ open, onOpenChange, tipoCliente }) {
             )}
             </div>
 
-            {formData.es_alumno && (
+            {tipoCliente === 'alumno' && formData.es_alumno && (
              <div className="space-y-4">
                <div className="space-y-2">
                  <Label>Profesor *</Label>
