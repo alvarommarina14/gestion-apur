@@ -136,7 +136,7 @@ export default function RecuperoCanchas() {
     });
   };
 
-  const deleteMutation = useMutation({
+  const deleteCancelacionMutation = useMutation({
     mutationFn: async (id) => {
       await base44.entities.CancelacionCancha.delete(id);
     },
@@ -146,12 +146,47 @@ export default function RecuperoCanchas() {
     },
   });
 
-  const handleEliminar = async () => {
+  const deleteRecuperoMutation = useMutation({
+    mutationFn: async (id) => {
+      const recupero = recuperos.find(r => r.id === id);
+      // Revertir clases a recuperar del alumno
+      if (recupero?.alumno_id) {
+        const alumnos = await base44.entities.Alumno.filter({ id: recupero.alumno_id });
+        if (alumnos.length > 0) {
+          await base44.entities.Alumno.update(recupero.alumno_id, {
+            clases_a_recuperar: (alumnos[0].clases_a_recuperar || 0) + 1,
+          });
+        }
+      }
+      await base44.entities.Recupero.delete(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['recuperos'] });
+      queryClient.invalidateQueries({ queryKey: ['alumnos'] });
+      setSelectedRecupero(null);
+    },
+  });
+
+  const handleEliminarCancelacion = async () => {
     if (!selectedCancelacion) return;
     if (confirm('¿Estás seguro de que querés eliminar esta cancelación?')) {
-      await deleteMutation.mutateAsync(selectedCancelacion.id);
+      await deleteCancelacionMutation.mutateAsync(selectedCancelacion.id);
     }
   };
+
+  const handleEliminarRecupero = async (recupero) => {
+    if (confirm(`¿Eliminar el recupero de ${recupero.alumno_nombre}?`)) {
+      await deleteRecuperoMutation.mutateAsync(recupero.id);
+    }
+  };
+
+  // Filtrar clases individuales y grupales
+  const clasesIndividuales = clases.filter(c => c.tipo === 'individual');
+  const clasesGrupales = clases.filter(c => c.tipo === 'grupal');
+
+  const recuperosFiltrados = useMemo(() => {
+    return recuperos.filter(r => r.estado === filterEstadoClases);
+  }, [recuperos, filterEstadoClases]);
 
   const estadoActual = selectedCancelacion ? estadoConfig[selectedCancelacion.estado_recupero] : null;
   const IconoEstado = estadoActual?.icon;
