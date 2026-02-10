@@ -11,7 +11,7 @@ import { es } from 'date-fns/locale';
 import PlanillaCanchas from '@/components/agenda/PlanillaCanchas';
 import CalendarioVistasTurnos from '@/components/agenda/CalendarioVistasTurnos';
 import NuevoTurnoModal from '@/components/agenda/NuevoTurnoModal';
-import NuevoBloqueoModal from '@/components/disponibilidad/NuevoBloqueoModal';
+import BloquearTurnoModal from '@/components/agenda/BloquearTurnoModal';
 import { toast } from 'sonner';
 
 export default function AgendaCanchas() {
@@ -246,11 +246,10 @@ export default function AgendaCanchas() {
       )}
 
       {showBloqueoModal && (
-        <NuevoBloqueoModal
+        <BloquearTurnoModal
           isOpen={showBloqueoModal}
           onClose={handleCloseBloqueoModal}
           initialDate={selectedDate}
-          motivoBloqueo="otro"
         />
       )}
     </div>
