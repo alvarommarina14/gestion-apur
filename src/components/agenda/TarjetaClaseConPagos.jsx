@@ -70,6 +70,13 @@ export default function TarjetaClaseConPagos({ turno, isAdmin, onTurnoClick, onE
         </p>
       </div>
 
+      {/* Profesor */}
+      {(profesor?.nombre || turno.profesor) && (
+        <div className="flex items-center gap-1 text-xs text-slate-600 border-t pt-2">
+          <User className="w-3 h-3 text-slate-400" />
+          <span className="font-medium">{profesor?.nombre || turno.profesor}</span>
+        </div>
+      )}
 
     </div>
   );
