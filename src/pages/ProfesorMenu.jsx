@@ -104,11 +104,11 @@ export default function ProfesorMenuPage() {
     c.fecha?.startsWith(currentMonth) && c.estado === 'programada'
   ).length;
   
-  // Clases que quedan por hacer (desde hoy en adelante)
+  // Clases que quedan por hacer (solo futuras, no del pasado)
   const clasesPorHacer = clasesProfesor.filter(c => 
     c.fecha?.startsWith(currentMonth) && 
     c.estado === 'programada' &&
-    c.fecha >= todayStr
+    c.fecha > todayStr
   ).length;
 
   const deudaTotal = alumnosProfesor.reduce((sum, a) => sum + (a.deuda_total || 0), 0);
