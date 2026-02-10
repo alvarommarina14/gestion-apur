@@ -100,14 +100,9 @@ export default function ModalClientesClase({
   }, [open, turno]);
 
   const handleAusenciaConAviso = (cliente) => {
-    if (esMas24Horas) {
-      // Si es más de 24h, mostrar modal de motivos
-      setClienteAusente(cliente);
-      setMostrarMotivos(true);
-    } else {
-      // Si es menos de 24h, simplemente marcar como ausente con aviso
-      handleEstadoChange(cliente, 'ausente_con_aviso');
-    }
+    // Siempre mostrar modal de motivos cuando se marca "Ausente con aviso"
+    setClienteAusente(cliente);
+    setMostrarMotivos(true);
   };
 
   const handleGuardarAusenciaConMotivo = async () => {
@@ -196,7 +191,7 @@ export default function ModalClientesClase({
             </div>
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-700">
-              ℹ️ Se creará una clase a recuperar con este motivo.
+              ℹ️ Se creará una clase a recuperar con este motivo en Recupero de Canchas.
             </div>
           </div>
 
@@ -259,7 +254,7 @@ export default function ModalClientesClase({
                       key={opcion.value}
                       type="button"
                       onClick={() => {
-                        if (opcion.requiresMotivo && esMas24Horas) {
+                        if (opcion.requiresMotivo) {
                           handleAusenciaConAviso(cliente);
                         } else {
                           handleEstadoChange(cliente, opcion.value);
