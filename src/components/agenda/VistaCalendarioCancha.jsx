@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, XCircle, Clock, User, DollarSign, Bell, MoreVertical, Ban } from 'lucide-react';
+import { Clock, Bell, MoreVertical, Ban } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import TarjetaClaseConPagos from './TarjetaClaseConPagos';
-import PagoRapidoModal from './PagoRapidoModal';
 
 const HORARIOS = [];
 for (let h = 8; h <= 21; h++) {
@@ -27,27 +26,8 @@ const CANCHAS = ['1', '2', '3', '4'];
 export default function VistaCalendarioCancha({ turnos = [], recordatorios = [], bloqueos = [], selectedDate, selectedCancha, fecha, isAdmin, onTurnoClick, onEditarClase, onCancelarCancha, isLoading }) {
   const [profesorTurnos, setProfesorTurnos] = useState(new Set());
   const [actualizandoId, setActualizandoId] = useState(null);
-  const [turnoParaPago, setTurnoParaPago] = useState(null);
-  const [showPagoModal, setShowPagoModal] = useState(false);
+
   const queryClient = useQueryClient();
-  const { mutate: updatePago } = useMutation({
-    mutationFn: async ({ turnoId, pagado }) => {
-      if (pagado) {
-        return await base44.functions.invoke('sincronizarPagosCompleto', {
-          tipo_evento: 'turno_pagado',
-          turnoId
-        });
-      } else {
-        return await base44.entities.TurnoCancha.update(turnoId, { pagado: false });
-      }
-    },
-    onSuccess: () => {
-      setActualizandoId(null);
-      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
-      queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
-      queryClient.invalidateQueries({ queryKey: ['alumnos'] });
-    }
-  });
   
   const { data: user } = useQuery({
     queryKey: ['me'],
@@ -411,13 +391,7 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
       </CardContent>
     </Card>
     
-    {turnoParaPago && (
-      <PagoRapidoModal
-        open={showPagoModal}
-        onOpenChange={setShowPagoModal}
-        turno={turnoParaPago}
-      />
-    )}
+
     </>
   );
 }
