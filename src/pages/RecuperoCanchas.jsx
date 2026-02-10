@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -24,8 +25,9 @@ import {
   DialogFooter,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Trash2, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Trash2, CheckCircle, Clock, AlertCircle, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import NuevaClaseModal from '@/components/modals/NuevaClaseModal';
 
 export default function RecuperoCanchas() {
   const queryClient = useQueryClient();
