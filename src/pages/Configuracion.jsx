@@ -41,7 +41,13 @@ import { Trash } from 'lucide-react';
 export default function Configuracion() {
   const queryClient = useQueryClient();
   const [editModal, setEditModal] = useState({ open: false, config: null });
+  const [deleteModal, setDeleteModal] = useState({ open: false, confirm: false });
   
+  const { data: user } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => base44.auth.me(),
+  });
+
   const { data: configuraciones = [], isLoading } = useQuery({
     queryKey: ['configuraciones'],
     queryFn: () => base44.entities.ConfiguracionRecordatorios.list(),
@@ -58,6 +64,15 @@ export default function Configuracion() {
     mutationFn: (id) => base44.entities.ConfiguracionRecordatorios.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['configuraciones'] });
+    },
+  });
+
+  const deleteAccountMutation = useMutation({
+    mutationFn: async () => {
+      await base44.functions.invoke('deleteUserAccount');
+    },
+    onSuccess: () => {
+      base44.auth.logout();
     },
   });
   
