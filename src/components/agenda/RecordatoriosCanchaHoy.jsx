@@ -41,6 +41,7 @@ export default function RecordatoriosCanchaHoy({ turnos = [], fecha }) {
 
   const eliminarRecordatorioMutation = useMutation({
      mutationFn: async (turnoId) => {
+       // Borrar recordatorios asociados
        const recordatorios = await base44.entities.RecordatorioCancha.filter({ 
          turno_cancha_id: turnoId 
        });
@@ -48,6 +49,9 @@ export default function RecordatoriosCanchaHoy({ turnos = [], fecha }) {
        for (const rec of recordatorios) {
          await base44.entities.RecordatorioCancha.delete(rec.id);
        }
+
+       // Borrar el turno
+       await base44.entities.TurnoCancha.delete(turnoId);
      },
      onSuccess: () => {
        queryClient.invalidateQueries({ 
@@ -57,8 +61,8 @@ export default function RecordatoriosCanchaHoy({ turnos = [], fecha }) {
        queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
      },
      onError: (error) => {
-       console.error('Error al eliminar recordatorio:', error);
-       alert('Error al eliminar el recordatorio');
+       console.error('Error al eliminar:', error);
+       alert('Error al eliminar');
      }
    });
 
