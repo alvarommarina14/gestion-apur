@@ -66,8 +66,8 @@ const navigationProfesor = [
 ];
 
 const navigationRecuperos = [
-  { name: 'Recupero de Canchas', href: 'RecuperoCanchas', icon: RefreshCw, permissionKey: 'booking_canchas' },
-];
+    { name: 'Recupero de Canchas y Clases', href: 'RecuperoCanchas', icon: RefreshCw, permissionKey: 'booking_canchas' },
+  ];
 
 const navigationFinanzas = [];
 
