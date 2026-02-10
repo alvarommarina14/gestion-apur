@@ -404,29 +404,46 @@ export default function RecordatoriosCanchaHoy({ turnos = [], fecha }) {
                 <div className="flex flex-col gap-2 items-end">
                   {!turno.pagado && (
                     <>
-                      <Button
-                        size="sm"
-                        className="bg-emerald-600 hover:bg-emerald-700 w-full"
-                        onClick={() => {
-                          setTurnoSeleccionado(turno);
-                          setModalPago(true);
-                        }}
-                      >
-                        <CheckCircle className="w-4 h-4 mr-1" />
-                        Pagó
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="border-rose-300 text-rose-600 hover:bg-rose-50 w-full"
-                        onClick={() => {
-                          setTurnoSeleccionado(turno);
-                          setModalNoPago(true);
-                        }}
-                      >
-                        <XCircle className="w-4 h-4 mr-1" />
-                        No pagó
-                      </Button>
+                      {turno.tipo_turno === 'clase' && turno.tipo === 'grupal' ? (
+                        <Button
+                          size="sm"
+                          className="bg-emerald-600 hover:bg-emerald-700 w-full"
+                          onClick={() => {
+                            setTurnoSeleccionado(turno);
+                            setPagosAlumnos({});
+                            setModalPagoGrupal(true);
+                          }}
+                        >
+                          <Users className="w-4 h-4 mr-1" />
+                          Pagos Alumnos
+                        </Button>
+                      ) : (
+                        <>
+                          <Button
+                            size="sm"
+                            className="bg-emerald-600 hover:bg-emerald-700 w-full"
+                            onClick={() => {
+                              setTurnoSeleccionado(turno);
+                              setModalPago(true);
+                            }}
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Pagó
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-rose-300 text-rose-600 hover:bg-rose-50 w-full"
+                            onClick={() => {
+                              setTurnoSeleccionado(turno);
+                              setModalNoPago(true);
+                            }}
+                          >
+                            <XCircle className="w-4 h-4 mr-1" />
+                            No pagó
+                          </Button>
+                        </>
+                      )}
                     </>
                   )}
                   <Button
