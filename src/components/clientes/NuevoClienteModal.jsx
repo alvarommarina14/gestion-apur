@@ -197,12 +197,13 @@ export default function NuevoClienteModal({ open, onOpenChange, tipoCliente }) {
                 </SelectTrigger>
                 <SelectContent>
                      <SelectItem value="recurrente">Recurrente</SelectItem>
-                     <SelectItem value="suelto">Suelto</SelectItem>
+                     <SelectItem value="ocasional">Ocasional</SelectItem>
                    </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-               <Label>Tipo</Label>
+            {tipoCliente === 'abono_cancha' && (
+             <div className="space-y-2">
+               <Label>Modalidad</Label>
                <Select
                  value={formData.tipo_cliente}
                  onValueChange={(v) => setFormData({ ...formData, tipo_cliente: v })}
@@ -211,31 +212,13 @@ export default function NuevoClienteModal({ open, onOpenChange, tipoCliente }) {
                    <SelectValue />
                  </SelectTrigger>
                  <SelectContent>
-                   <SelectItem value="clase">Clase</SelectItem>
-                   <SelectItem value="abono">Abono</SelectItem>
-                   <SelectItem value="suelto">Suelto</SelectItem>
+                   <SelectItem value="abono">Abono Mensual</SelectItem>
+                   <SelectItem value="suelto">Cancha Suelta</SelectItem>
                  </SelectContent>
                </Select>
              </div>
-            </div>
-
-            {formData.tipo_cliente === 'clase' && (
-            <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-              <Checkbox
-                id="es-alumno"
-                checked={formData.es_alumno}
-                onCheckedChange={(checked) => setFormData({
-                  ...formData,
-                  es_alumno: checked,
-                  profesor_id: checked ? formData.profesor_id : '',
-                  profesor_nombre: checked ? formData.profesor_nombre : '',
-                })}
-              />
-              <Label htmlFor="es-alumno" className="font-medium cursor-pointer">
-                Es alumno
-              </Label>
-            </div>
             )}
+            </div>
 
             {formData.es_alumno && (
              <div className="space-y-4">
