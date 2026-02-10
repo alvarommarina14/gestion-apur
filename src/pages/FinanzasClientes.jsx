@@ -66,28 +66,7 @@ export default function FinanzasClientes() {
     },
   });
 
-  // Editar cliente
-  const editarClienteMutation = useMutation({
-    mutationFn: async (data) => {
-      return await base44.entities.Cliente.update(editandoCliente.id, data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clientes'] });
-      setEditandoCliente(null);
-    },
-  });
 
-  // Eliminar cliente
-  const eliminarClienteMutation = useMutation({
-    mutationFn: async (clienteId) => {
-      return await base44.entities.Cliente.delete(clienteId);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clientes'] });
-      queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
-      setEliminandoCliente(null);
-    },
-  });
 
   // Sincronizar estados (cambiar a moroso después del día 15)
   const sincronizarMutation = useMutation({
