@@ -126,7 +126,7 @@ export default function FinanzasClientes() {
     };
 
     return { clientesConCobros, ...totales };
-  }, [clientesFiltrados, cobrosClientes, mesStr]);
+    }, [clientes, cobrosClientes, mesStr]);
 
   const clientesFiltradosPorEstado = useMemo(() => {
     if (filtroEstado === 'todos') return metricasClientes.clientesConCobros;
