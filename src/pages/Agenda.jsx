@@ -99,11 +99,14 @@ export default function Agenda() {
   const stats = useMemo(() => {
     if (!isAdmin) return null;
     
-    const total = turnosFiltrados.length;
-    const pagados = turnosFiltrados.filter(t => t.pagado).length;
+    // Filtrar solo turnos activos (no cancelados)
+    const turnosActivos = turnosFiltrados.filter(t => t.estado !== 'cancelado');
+    
+    const total = turnosActivos.length;
+    const pagados = turnosActivos.filter(t => t.pagado).length;
     const pendientes = total - pagados;
-    const montoPagado = turnosFiltrados.filter(t => t.pagado).reduce((sum, t) => sum + (t.monto || 0), 0);
-    const montoPendiente = turnosFiltrados.filter(t => !t.pagado).reduce((sum, t) => sum + (t.monto || 0), 0);
+    const montoPagado = turnosActivos.filter(t => t.pagado).reduce((sum, t) => sum + (t.monto || 0), 0);
+    const montoPendiente = turnosActivos.filter(t => !t.pagado).reduce((sum, t) => sum + (t.monto || 0), 0);
     
     return { total, pagados, pendientes, montoPagado, montoPendiente };
   }, [turnosFiltrados, isAdmin]);
