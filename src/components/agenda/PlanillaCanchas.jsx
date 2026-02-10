@@ -165,9 +165,9 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEd
                             <p className="text-xs text-slate-600">
                               {turno.hora_inicio} - {turno.hora_fin}
                             </p>
-                            <p className={`text-xs ${getPagoColor(turno.pagado)}`}>
-                              ${turno.monto} {turno.pagado ? '✓' : '(Pendiente)'}
-                            </p>
+                            {turno.pagado && (
+                              <p className="text-xs text-emerald-600 font-semibold">✓ Pagado</p>
+                            )}
                             {turno.tipo_turno === 'clase' && turno.profesor && (
                               <p className="text-xs text-blue-600">Prof: {turno.profesor}</p>
                             )}
@@ -199,18 +199,26 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEd
                             <Button
                               size="icon"
                               variant="ghost"
-                              className="h-6 w-6"
-                              onClick={() => onEdit(turno)}
+                              className="h-6 w-6 hover:bg-blue-200"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onEdit?.(turno);
+                              }}
                             >
-                              <Edit2 className="w-3 h-3" />
+                              <Edit2 className="w-3 h-3 text-blue-600" />
                             </Button>
                             <Button
                               size="icon"
                               variant="ghost"
-                              className="h-6 w-6 text-red-600 hover:text-red-700"
-                              onClick={() => onDelete(turno)}
+                              className="h-6 w-6 hover:bg-red-200"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onDelete?.(turno);
+                              }}
                             >
-                              <Trash2 className="w-3 h-3" />
+                              <Trash2 className="w-3 h-3 text-red-600" />
                             </Button>
                           </div>
                         </div>
