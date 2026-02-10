@@ -1026,48 +1026,22 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
             </Select>
           </div>
 
-          {formData.tipo_turno === 'alquiler' && formData.modalidad_alquiler === 'suelto' && (
-            <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
-              <div>
-                <Label className="font-medium text-slate-800">Pagado</Label>
-                <p className="text-xs text-slate-500 mt-0.5">Marcar si el turno ya está pago</p>
-              </div>
-              <Switch
-                checked={formData.pagado}
-                onCheckedChange={(checked) => setFormData({ ...formData, pagado: checked })}
-              />
-            </div>
-          )}
 
-          {formData.tipo_turno === 'alquiler' && !formData.pagado && (
-            <div className="space-y-2">
-              <Label>Monto</Label>
-              <Input
-                type="number"
-                value={formData.monto}
-                onChange={(e) => setFormData({ ...formData, monto: e.target.value })}
-                placeholder="0"
-                required
-              />
-            </div>
-          )}
 
-          {formData.modalidad_alquiler === 'abono' && (
-            <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div>
-                <Label className="font-medium text-slate-800">Repetición semanal</Label>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Se creará automáticamente el mismo turno cada semana
-                </p>
-              </div>
-              <Switch
-                checked={formData.repeticion_semanal}
-                onCheckedChange={(checked) =>
-                  setFormData({ ...formData, repeticion_semanal: checked })
-                }
-              />
+          <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div>
+              <Label className="font-medium text-slate-800">Repetición semanal</Label>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Se creará automáticamente el mismo turno cada semana
+              </p>
             </div>
-          )}
+            <Switch
+              checked={formData.repeticion_semanal}
+              onCheckedChange={(checked) =>
+                setFormData({ ...formData, repeticion_semanal: checked })
+              }
+            />
+          </div>
 
           <div className="space-y-2">
             <Label>Notas (opcional)</Label>
