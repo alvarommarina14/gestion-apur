@@ -255,7 +255,7 @@ export default function RecuperoCanchas() {
         </div>
 
         {/* Lista de cancelaciones */}
-        <div className="space-y-3">
+        <div className="space-y-3 pb-6">
           {cancelacionesFiltradas.length === 0 ? (
             <Card className="shadow-sm border-dashed">
               <CardContent className="py-12 text-center">
