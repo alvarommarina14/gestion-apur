@@ -219,6 +219,7 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
   }, [cobrosClientes, pagosAlumnos]);
 
   const handleGuardar = () => {
+    console.log('Guardando cliente con datos:', formData);
     updateMutation.mutate({
       id: cliente.id,
       data: formData,
