@@ -70,20 +70,7 @@ export default function TarjetaClaseConPagos({ turno, isAdmin, onTurnoClick, onE
         </p>
       </div>
 
-      {/* Profesor a cargo */}
-      {(turno.profesor || profesor?.nombre) && (
-        <div className="mb-2 pt-2 border-t border-slate-200">
-          <p className="text-xs font-semibold text-slate-700 mb-1">Prof. a cargo:</p>
-          <p className="text-sm font-medium text-slate-900">{turno.profesor || profesor?.nombre}</p>
-        </div>
-      )}
 
-      {/* Notas */}
-      {turno.notas && (
-        <p className="text-xs text-slate-500 italic mt-2 border-t border-slate-200 pt-2">
-          {turno.notas}
-        </p>
-      )}
     </div>
   );
 }
