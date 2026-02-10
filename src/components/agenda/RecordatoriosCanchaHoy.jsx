@@ -20,19 +20,42 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Bell, DollarSign, Trash2, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { Bell, DollarSign, Trash2, CheckCircle, XCircle, AlertTriangle, Users } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 
 export default function RecordatoriosCanchaHoy({ turnos = [], fecha }) {
   const queryClient = useQueryClient();
   const [modalNoPago, setModalNoPago] = useState(false);
   const [modalPago, setModalPago] = useState(false);
+  const [modalPagoGrupal, setModalPagoGrupal] = useState(false);
   const [turnoSeleccionado, setTurnoSeleccionado] = useState(null);
   const [motivo, setMotivo] = useState('');
   const [medioPago, setMedioPago] = useState('');
   const [notasPago, setNotasPago] = useState('');
+  const [pagosAlumnos, setPagosAlumnos] = useState({});
+
+  // Cargar alumnos cuando se abre modal grupal
+  const { data: alumnos = [] } = useQuery({
+    queryKey: ['alumnos', turnoSeleccionado?.id],
+    queryFn: async () => {
+      if (!turnoSeleccionado?.alumnos_ids || turnoSeleccionado.alumnos_ids.length === 0) {
+        return [];
+      }
+      const alumnos = [];
+      for (const id of turnoSeleccionado.alumnos_ids) {
+        try {
+          const alumno = await base44.entities.Alumno.read(id);
+          alumnos.push(alumno);
+        } catch (e) {
+          console.error('Error loading student:', e);
+        }
+      }
+      return alumnos;
+    },
+    enabled: modalPagoGrupal && turnoSeleccionado?.tipo_turno === 'clase' && turnoSeleccionado?.tipo === 'grupal'
+  });
 
   const turnosHoy = turnos.filter(t => 
     t.fecha === format(fecha, 'yyyy-MM-dd') && 
