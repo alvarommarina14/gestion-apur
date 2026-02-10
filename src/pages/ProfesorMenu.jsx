@@ -95,10 +95,20 @@ export default function ProfesorMenuPage() {
   
   // Clases del mes actual
   const today = new Date();
+  const todayStr = format(today, 'yyyy-MM-dd');
   const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
   const nombreMes = format(today, 'MMMM', { locale: es });
-  const clasesMesActual = clasesProfesor.filter(c => 
+  
+  // Total de clases programadas del mes
+  const clasesMesTotal = clasesProfesor.filter(c => 
     c.fecha?.startsWith(currentMonth) && c.estado === 'programada'
+  ).length;
+  
+  // Clases que quedan por hacer (desde hoy en adelante)
+  const clasesPorHacer = clasesProfesor.filter(c => 
+    c.fecha?.startsWith(currentMonth) && 
+    c.estado === 'programada' &&
+    c.fecha >= todayStr
   ).length;
 
   const deudaTotal = alumnosProfesor.reduce((sum, a) => sum + (a.deuda_total || 0), 0);
@@ -142,7 +152,7 @@ export default function ProfesorMenuPage() {
           <Card className="border-l-4 border-l-blue-500">
             <CardHeader className="pb-2">
               <CardDescription>Clases programadas - {nombreMes}</CardDescription>
-              <CardTitle className="text-2xl">{clasesMesActual}</CardTitle>
+              <CardTitle className="text-2xl">{clasesPorHacer} de {clasesMesTotal}</CardTitle>
             </CardHeader>
           </Card>
 
