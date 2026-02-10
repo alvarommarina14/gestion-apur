@@ -157,7 +157,7 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
      );
    }
 
-   if (clienteCreado) {
+   if (clienteCreado && tipoRegistro === 'alumno') {
      return (
        <NuevoAlumnoModal 
          open={true}
@@ -167,6 +167,7 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
              queryClient.invalidateQueries({ queryKey: ['clientes'] });
              queryClient.invalidateQueries({ queryKey: ['alumnos'] });
              setClienteCreado(null);
+             setTipoRegistro(null);
              onOpenChange(false);
            }
          }}
