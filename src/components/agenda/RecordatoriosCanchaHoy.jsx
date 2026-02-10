@@ -50,9 +50,7 @@ export default function RecordatoriosCanchaHoy({ turnos = [], fecha }) {
       }
     },
     onSuccess: () => {
-      const fechaHoy = new Date();
-      const fechaStr = format(fechaHoy, 'yyyy-MM-dd');
-      queryClient.invalidateQueries({ queryKey: ['turnos-cancha', fechaStr] });
+      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha-push'] });
     }
