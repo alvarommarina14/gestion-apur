@@ -8,7 +8,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -24,9 +23,19 @@ export default function ModalCancelarTurno({ open, onOpenChange, turno }) {
   const [motivo, setMotivo] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const motivosOpciones = [
+    'Lluvia',
+    'Cliente canceló',
+    'Enfermedad',
+    'Imprevisto personal',
+    'Falta de jugadores',
+    'Problema en la cancha',
+    'Otro'
+  ];
+
   const handleCancelarSoloEste = async () => {
-    if (!motivo.trim()) {
-      alert('Por favor, ingresá un motivo para la cancelación');
+    if (!motivo) {
+      alert('Por favor, seleccioná un motivo para la cancelación');
       return;
     }
 
@@ -49,6 +58,20 @@ export default function ModalCancelarTurno({ open, onOpenChange, turno }) {
         });
       }
 
+      // Crear registro de recupero si corresponde
+      if (anticipacion === 'mas_24h' && turno.tipo_turno === 'alquiler' && turno.modalidad_alquiler === 'abono') {
+        await base44.entities.CancelacionCancha.create({
+          turno_cancha_id: turno.id,
+          cliente: turno.cliente,
+          fecha_original: turno.fecha,
+          hora_original: turno.hora_inicio,
+          cancha: turno.cancha,
+          motivo_cancelacion: motivo,
+          anticipacion: 'mas_24h',
+          estado: 'pendiente_recupero'
+        });
+      }
+
       // Eliminar de Google Calendar si existe
       if (turno.gcal_event_id) {
         try {
@@ -62,14 +85,17 @@ export default function ModalCancelarTurno({ open, onOpenChange, turno }) {
 
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['cancelaciones-cancha'] });
       
       alert(
         anticipacion === 'mas_24h' 
-          ? '✅ Turno cancelado. Se descontará/recuperará según corresponda.'
-          : '✅ Turno cancelado. No se descuenta ni recupera.'
+          ? '✅ Turno cancelado. Se generó registro de recupero.'
+          : '✅ Turno cancelado. No se genera recupero.'
       );
       
       onOpenChange(false);
+      setMotivo('');
+      setAnticipacion('mas_24h');
     } catch (error) {
       alert('❌ Error al cancelar el turno: ' + error.message);
     } finally {
@@ -79,11 +105,6 @@ export default function ModalCancelarTurno({ open, onOpenChange, turno }) {
 
   const handleEliminarRecurrencia = async () => {
     if (!confirm('⚠️ Esto eliminará TODOS los turnos de la recurrencia semanal. ¿Estás seguro?')) {
-      return;
-    }
-
-    if (!motivo.trim()) {
-      alert('Por favor, ingresá un motivo para la cancelación');
       return;
     }
 
@@ -119,7 +140,7 @@ export default function ModalCancelarTurno({ open, onOpenChange, turno }) {
       for (const turnoId of turnosIds) {
         await base44.entities.TurnoCancha.update(turnoId, {
           estado: 'cancelado',
-          notas: `CANCELACIÓN RECURRENCIA: ${motivo}`
+          notas: `CANCELACIÓN RECURRENCIA SEMANAL`
         });
       }
 
@@ -146,6 +167,8 @@ export default function ModalCancelarTurno({ open, onOpenChange, turno }) {
       
       alert(`✅ Se cancelaron ${turnosIds.length} turnos de la recurrencia semanal`);
       onOpenChange(false);
+      setMotivo('');
+      setAnticipacion('mas_24h');
     } catch (error) {
       alert('❌ Error al eliminar la recurrencia: ' + error.message);
     } finally {
@@ -196,35 +219,49 @@ export default function ModalCancelarTurno({ open, onOpenChange, turno }) {
             <label className="text-sm font-medium mb-2 block">
               Motivo de la cancelación
             </label>
-            <Textarea
-              value={motivo}
-              onChange={(e) => setMotivo(e.target.value)}
-              placeholder="Ej: Lluvia, enfermedad, imprevisto, etc."
-              rows={3}
-            />
+            <Select value={motivo} onValueChange={setMotivo}>
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccioná un motivo" />
+              </SelectTrigger>
+              <SelectContent>
+                {motivosOpciones.map(m => (
+                  <SelectItem key={m} value={m}>{m}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          {/* Botones */}
-          <div className="space-y-2">
-            <Button
-              onClick={handleCancelarSoloEste}
-              disabled={loading || !motivo.trim()}
-              className="w-full bg-rose-600 hover:bg-rose-700"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Cancelar solo este turno
-            </Button>
+          {/* Botón cancelar turno */}
+          <Button
+            onClick={handleCancelarSoloEste}
+            disabled={loading || !motivo}
+            className="w-full bg-rose-600 hover:bg-rose-700"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Cancelar este turno
+          </Button>
 
-            <Button
-              onClick={handleEliminarRecurrencia}
-              disabled={loading || !motivo.trim()}
-              variant="outline"
-              className="w-full border-orange-300 text-orange-700 hover:bg-orange-50"
-            >
-              <CalendarX className="w-4 h-4 mr-2" />
-              Borrar recurrencia semanal completa
-            </Button>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-slate-500">
+                Acción independiente
+              </span>
+            </div>
           </div>
+
+          {/* Botón eliminar recurrencia (independiente) */}
+          <Button
+            onClick={handleEliminarRecurrencia}
+            disabled={loading}
+            variant="outline"
+            className="w-full border-orange-300 text-orange-700 hover:bg-orange-50"
+          >
+            <CalendarX className="w-4 h-4 mr-2" />
+            Borrar recurrencia semanal completa
+          </Button>
 
           <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg text-sm text-blue-900">
             <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
