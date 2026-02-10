@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import VistaCalendarioCancha from '@/components/agenda/VistaCalendarioCancha';
+import CalendarioMes from '@/components/agenda/CalendarioMes';
 import NuevoTurnoModal from '@/components/agenda/NuevoTurnoModal';
 import NuevaClaseModal from '@/components/modals/NuevaClaseModal';
 import EditarClaseProfesorModal from '@/components/agenda/EditarClaseProfesorModal';
