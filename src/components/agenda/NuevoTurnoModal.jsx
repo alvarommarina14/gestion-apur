@@ -243,6 +243,29 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
       // Cancelar mutaciones anteriores para evitar duplicados
       await queryClient.cancelQueries({ queryKey: ['turnos-cancha'] });
       
+      // Si es abono, sincronizar el monto con el cliente
+      if (data.tipo_turno === 'alquiler' && data.modalidad_alquiler === 'abono' && data.monto) {
+        const clienteExistente = clientes.find(c => c.nombre === data.cliente);
+        
+        if (clienteExistente) {
+          // Actualizar el precio del cliente existente
+          await base44.entities.Cliente.update(clienteExistente.id, {
+            precio: Number(data.monto),
+            tipo_cliente: 'abono'
+          });
+        } else {
+          // Crear nuevo cliente con el precio del abono
+          await base44.entities.Cliente.create({
+            nombre: data.cliente,
+            telefono: '',
+            precio: Number(data.monto),
+            tipo_cliente: 'abono',
+            clasificacion: 'recurrente',
+            notas: 'Cliente creado automáticamente desde turno de abono'
+          });
+        }
+      }
+      
       const turnoCreado = await base44.entities.TurnoCancha.create(turnoData);
       
       // Si es una clase, crear también en entidad Clase y sincronizar
@@ -330,6 +353,8 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha-push'] });
+      queryClient.invalidateQueries({ queryKey: ['clientes-list'] });
+      queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
       onOpenChange(false);
     },
   });
@@ -602,6 +627,27 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
                });
              }
 
+             // Si es abono, sincronizar el monto con el cliente primero
+             if (data.tipo_turno === 'alquiler' && data.modalidad_alquiler === 'abono' && data.monto) {
+               const clienteExistente = clientes.find(c => c.nombre === data.cliente);
+
+               if (clienteExistente) {
+                 await base44.entities.Cliente.update(clienteExistente.id, {
+                   precio: Number(data.monto),
+                   tipo_cliente: 'abono'
+                 });
+               } else {
+                 await base44.entities.Cliente.create({
+                   nombre: data.cliente,
+                   telefono: '',
+                   precio: Number(data.monto),
+                   tipo_cliente: 'abono',
+                   clasificacion: 'recurrente',
+                   notas: 'Cliente creado automáticamente desde turno de abono recurrente'
+                 });
+               }
+             }
+
              // Crear todos los turnos de una vez
              console.log('📝 Creando 52 turnos en batch...');
              const turnosCreados = await base44.entities.TurnoCancha.bulkCreate(turnosACrear);
@@ -642,6 +688,8 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
              await queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
              await queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
              await queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha-push'] });
+             await queryClient.invalidateQueries({ queryKey: ['clientes-list'] });
+             await queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
              
              console.log('✅ Proceso completado, cerrando modal...');
              setIsSubmitting(false);
