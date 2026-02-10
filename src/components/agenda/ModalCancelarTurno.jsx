@@ -58,8 +58,8 @@ export default function ModalCancelarTurno({ open, onOpenChange, turno }) {
         });
       }
 
-      // Crear registro de recupero si corresponde
-      if (anticipacion === 'mas_24h' && turno.tipo_turno === 'alquiler' && turno.modalidad_alquiler === 'abono') {
+      // Crear registro de recupero SOLO si no está pagado
+      if (!turno.pagado && anticipacion === 'mas_24h' && turno.tipo_turno === 'alquiler' && turno.modalidad_alquiler === 'abono') {
         await base44.entities.CancelacionCancha.create({
           turno_cancha_id: turno.id,
           cliente: turno.cliente,
@@ -87,11 +87,13 @@ export default function ModalCancelarTurno({ open, onOpenChange, turno }) {
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['cancelaciones-cancha'] });
       
-      alert(
-        anticipacion === 'mas_24h' 
+      const mensaje = turno.pagado 
+        ? '✅ Turno cancelado. Ya estaba pagado, no afecta finanzas.'
+        : anticipacion === 'mas_24h' 
           ? '✅ Turno cancelado. Se generó registro de recupero.'
-          : '✅ Turno cancelado. No se genera recupero.'
-      );
+          : '✅ Turno cancelado. No se genera recupero.';
+      
+      alert(mensaje);
       
       onOpenChange(false);
       setMotivo('');
@@ -137,9 +139,10 @@ export default function ModalCancelarTurno({ open, onOpenChange, turno }) {
 
       // Cancelar todos los turnos
       for (const t of turnosRecurrentes) {
+        // Solo actualizar el estado del turno
         await base44.entities.TurnoCancha.update(t.id, {
           estado: 'cancelado',
-          notas: `${t.notas || ''}\n\nCANCELACIÓN RECURRENCIA SEMANAL`.trim()
+          notas: `${t.notas || ''}\n\nCANCELACIÓN RECURRENCIA SEMANAL${t.pagado ? ' (YA PAGADO - NO AFECTA FINANZAS)' : ''}`.trim()
         });
 
         // Cancelar recordatorio si existe
@@ -152,6 +155,9 @@ export default function ModalCancelarTurno({ open, onOpenChange, turno }) {
             estado: 'cancelado'
           });
         }
+
+        // NO crear registros de recupero ni afectar cobros si el turno ya está pagado
+        // Los turnos pagados no generan recuperos ni afectan KPIs al cancelarse
 
         // Eliminar de Google Calendar si existe
         if (t.gcal_event_id) {
