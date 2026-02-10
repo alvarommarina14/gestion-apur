@@ -206,6 +206,7 @@ export default function AgendaCanchas() {
               <PlanillaCanchas
                 date={selectedDate}
                 turnos={turnosFecha}
+                bloqueos={bloqueos}
                 onEdit={handleEditTurno}
                 onDelete={handleDeleteTurno}
               />
