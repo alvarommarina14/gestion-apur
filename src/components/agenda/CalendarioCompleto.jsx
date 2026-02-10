@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
-export default function CalendarioCompleto({ turnos = [], recordatorios = [], selectedDate, onDateSelect, onCreateTurno, onTurnoClick }) {
+export default function CalendarioCompleto({ turnos = [], clases = [], recordatorios = [], selectedDate, onDateSelect, onCreateTurno, onTurnoClick }) {
   const [currentMonth, setCurrentMonth] = useState(selectedDate || new Date());
 
   const monthStart = startOfMonth(currentMonth);
@@ -20,10 +20,14 @@ export default function CalendarioCompleto({ turnos = [], recordatorios = [], se
     const map = {};
     turnos.forEach(turno => {
       if (!map[turno.fecha]) map[turno.fecha] = [];
-      map[turno.fecha].push(turno);
+      map[turno.fecha].push({ ...turno, tipo_evento: 'turno' });
+    });
+    clases.forEach(clase => {
+      if (!map[clase.fecha]) map[clase.fecha] = [];
+      map[clase.fecha].push({ ...clase, tipo_evento: 'clase' });
     });
     return map;
-  }, [turnos]);
+  }, [turnos, clases]);
 
   const recordatoriosPorFecha = useMemo(() => {
     const map = {};
@@ -38,9 +42,9 @@ export default function CalendarioCompleto({ turnos = [], recordatorios = [], se
 
   const getEventosDelDia = (fecha) => {
     const fechaStr = format(fecha, 'yyyy-MM-dd');
-    const turnosDelDia = turnosPorFecha[fechaStr] || [];
+    const eventosDelDia = turnosPorFecha[fechaStr] || [];
     const recordatoriosDelDia = recordatoriosPorFecha[fechaStr] || [];
-    return { turnos: turnosDelDia, recordatorios: recordatoriosDelDia };
+    return { eventos: eventosDelDia, recordatorios: recordatoriosDelDia };
   };
 
   const formatMoney = (amount) => {
@@ -100,8 +104,8 @@ export default function CalendarioCompleto({ turnos = [], recordatorios = [], se
       {/* Días del calendario */}
       <div className="grid grid-cols-7 gap-2">
         {calendarDays.map((dia, idx) => {
-          const { turnos: turnosDelDia, recordatorios: recordatoriosDelDia } = getEventosDelDia(dia);
-          const totalEventos = turnosDelDia.length + recordatoriosDelDia.length;
+          const { eventos: eventosDelDia, recordatorios: recordatoriosDelDia } = getEventosDelDia(dia);
+          const totalEventos = eventosDelDia.length + recordatoriosDelDia.length;
           const esHoy = isToday(dia);
           const esMesActual = isSameMonth(dia, currentMonth);
           const estaSeleccionado = isSameDay(dia, selectedDate);
@@ -143,30 +147,38 @@ export default function CalendarioCompleto({ turnos = [], recordatorios = [], se
 
               {/* Eventos del día */}
               <div className="space-y-1">
-                {turnosDelDia.slice(0, 3).map((turno, i) => (
-                  <div
-                    key={`t-${i}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onTurnoClick(turno);
-                    }}
-                    className={cn(
-                      'text-xs p-1.5 rounded border-l-2 cursor-pointer hover:bg-slate-50 transition-colors',
-                      turno.pagado 
-                        ? 'bg-emerald-50 border-emerald-400' 
-                        : 'bg-rose-50 border-rose-400'
-                    )}
-                  >
-                    <div className="font-medium truncate text-slate-800">
-                      {turno.hora_inicio} - C{turno.cancha}
+                {eventosDelDia.slice(0, 3).map((evento, i) => {
+                  const esClase = evento.tipo_evento === 'clase';
+                  const cliente = esClase ? (evento.alumnos_nombres?.[0] || 'Clase') : evento.cliente;
+                  const cancha = esClase ? evento.cancha : evento.cancha;
+                  
+                  return (
+                    <div
+                      key={`e-${i}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onTurnoClick(evento);
+                      }}
+                      className={cn(
+                        'text-xs p-1.5 rounded border-l-2 cursor-pointer hover:bg-slate-50 transition-colors',
+                        esClase
+                          ? 'bg-blue-50 border-blue-400'
+                          : evento.pagado
+                            ? 'bg-emerald-50 border-emerald-400'
+                            : 'bg-rose-50 border-rose-400'
+                      )}
+                    >
+                      <div className="font-medium truncate text-slate-800">
+                        {evento.hora_inicio} - {esClase ? 'Clase' : `C${cancha}`}
+                      </div>
+                      <div className="truncate text-slate-600">
+                        {cliente}
+                      </div>
                     </div>
-                    <div className="truncate text-slate-600">
-                      {turno.cliente}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
 
-                {recordatoriosDelDia.slice(0, 3 - turnosDelDia.length).map((rec, i) => (
+                {recordatoriosDelDia.slice(0, 3 - eventosDelDia.length).map((rec, i) => (
                   <div
                     key={`r-${i}`}
                     className="text-xs p-1.5 rounded bg-amber-50 border-l-2 border-amber-400"
@@ -192,7 +204,11 @@ export default function CalendarioCompleto({ turnos = [], recordatorios = [], se
       </div>
 
       {/* Leyenda */}
-      <div className="flex items-center justify-center gap-4 mt-6 pt-4 border-t text-xs">
+      <div className="flex items-center justify-center gap-4 mt-6 pt-4 border-t text-xs flex-wrap">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded bg-blue-50 border-l-2 border-blue-400"></div>
+          <span className="text-slate-600">Clase</span>
+        </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded bg-emerald-50 border-l-2 border-emerald-400"></div>
           <span className="text-slate-600">Pagado</span>
