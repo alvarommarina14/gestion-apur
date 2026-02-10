@@ -112,6 +112,18 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
     enabled: !!cliente?.es_alumno && alumnos.length > 0,
   });
 
+  const { data: asistencias = [] } = useQuery({
+    queryKey: ['asistencia', cliente?.id],
+    queryFn: async () => {
+      if (!cliente?.nombre) return [];
+      const asistenciasEncontradas = await base44.entities.Asistencia.filter({ 
+        alumno_nombre: cliente.nombre 
+      });
+      return asistenciasEncontradas.sort((a, b) => b.fecha.localeCompare(a.fecha));
+    },
+    enabled: !!cliente?.nombre,
+  });
+
   React.useEffect(() => {
     if (cliente && open) {
       setFormData({
