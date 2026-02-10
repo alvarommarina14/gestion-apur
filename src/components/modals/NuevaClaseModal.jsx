@@ -263,6 +263,8 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null, c
               cancha: formData.cancha,
               cliente: alumnosNombres.join(', ') || 'Clase',
               tipo_turno: 'clase',
+              profesor: profesores.find(p => p.id === formData.profesor_id)?.nombre || 'Sin asignar',
+              profesor_id: formData.profesor_id || user?.id,
               monto: formData.precio ? Number(formData.precio) : 0,
               pagado: formData.pagado,
               empleados_asignados_ids: empleadosIds,
