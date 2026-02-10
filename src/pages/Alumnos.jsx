@@ -229,14 +229,10 @@ export default function Alumnos() {
                         )}
                       </TableCell>
                       <TableCell className="text-right">
-                        {alumno.deuda_total > 0 ? (
-                          <span className="text-rose-600 font-medium">
-                            {formatMoney(alumno.deuda_total)}
-                          </span>
-                        ) : (
-                          <span className="text-emerald-600">-</span>
-                        )}
-                      </TableCell>
+                         <span className="text-slate-600 font-medium">
+                           {formatMoney(alumno.precio_mensual)}
+                         </span>
+                       </TableCell>
                       <TableCell>
                         {alumno.ultimo_pago_fecha ? (
                           <span className="text-sm text-slate-600">
