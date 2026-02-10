@@ -211,15 +211,29 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
     const totalPagosAlumnos = pagosAlumnos.reduce((sum, p) => sum + (p.monto || 0), 0);
     const cantidadPagosAlumnos = pagosAlumnos.length;
 
-    // Deudas de cobros pendientes
+    // Deudas de cobros pendientes y morosos
     const deudaCobros = cobrosClientes
       .filter(c => c.estado === 'pendiente' || c.estado === 'moroso')
       .reduce((sum, c) => sum + (c.monto || 0), 0);
 
+    // Estado general del cliente
+    const cobrosActuales = cobrosClientes.filter(c => {
+      const mesActual = format(new Date(), 'yyyy-MM');
+      return c.mes === mesActual;
+    });
+    
+    let estadoGeneral = 'pagado';
+    if (cobrosActuales.some(c => c.estado === 'moroso')) {
+      estadoGeneral = 'moroso';
+    } else if (cobrosActuales.some(c => c.estado === 'pendiente')) {
+      estadoGeneral = 'pendiente';
+    }
+
     return { 
       deudaCobros,
       totalPagosAlumnos,
-      cantidadPagosAlumnos
+      cantidadPagosAlumnos,
+      estadoGeneral
     };
   }, [cobrosClientes, pagosAlumnos]);
 
