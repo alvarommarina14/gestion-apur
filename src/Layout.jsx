@@ -74,7 +74,7 @@ const navigationRecuperos = [
 ];
 
 const navigationFinanzas = [
-  { name: 'Finanzas', href: 'Finanzas', icon: DollarSign, adminOnly: true, permissionKey: 'configuracion' },
+  { name: 'Finanzas & Clientes', href: 'FinanzasClientes', icon: DollarSign, adminOnly: true, permissionKey: 'configuracion' },
 ];
 
 const navigationConfiguracion = [
