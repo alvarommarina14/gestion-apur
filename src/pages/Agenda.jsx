@@ -15,7 +15,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import VistaCalendarioCancha from '@/components/agenda/VistaCalendarioCancha';
-import CalendarioCompleto from '@/components/agenda/CalendarioCompleto';
 import NuevoTurnoModal from '@/components/agenda/NuevoTurnoModal';
 import NuevaClaseModal from '@/components/modals/NuevaClaseModal';
 import EditarClaseProfesorModal from '@/components/agenda/EditarClaseProfesorModal';
@@ -41,7 +40,6 @@ export default function Agenda() {
     const [editarClaseAgendaModal, setEditarClaseAgendaModal] = useState({ open: false, turno: null });
      const [clientesClaseModal, setClientesClaseModal] = useState({ open: false, turno: null });
      const [accionesClaseModal, setAccionesClaseModal] = useState({ open: false, turno: null });
-     const [showCalendario, setShowCalendario] = useState(false);
      const [limpiadoLoading, setLimpiadoLoading] = useState(false);
 
   const { data: user } = useQuery({
@@ -51,43 +49,24 @@ export default function Agenda() {
 
   const fechaStr = format(selectedDate, 'yyyy-MM-dd');
 
-  // Para vista de calendario, cargar todos los turnos del mes
-  const mesStr = format(selectedDate, 'yyyy-MM');
-  
   const { data: turnos = [], isLoading } = useQuery({
-    queryKey: ['turnos-cancha', showCalendario ? mesStr : fechaStr],
+    queryKey: ['turnos-cancha', fechaStr],
     queryFn: async () => {
-      if (showCalendario) {
-        // Cargar todos los turnos del mes para el calendario
-        const allTurnos = await base44.entities.TurnoCancha.list('-fecha', 500);
-        // Filtrar cancelados
-        return allTurnos.filter(t => t.estado !== 'cancelado');
-      }
       const dayTurnos = await base44.entities.TurnoCancha.filter({ fecha: fechaStr });
-      // Filtrar cancelados
       return dayTurnos.filter(t => t.estado !== 'cancelado');
     },
   });
 
   const { data: clases = [] } = useQuery({
-    queryKey: ['clases', showCalendario ? mesStr : fechaStr],
+    queryKey: ['clases', fechaStr],
     queryFn: async () => {
-      if (showCalendario) {
-        // Cargar todas las clases del mes para el calendario
-        const allClases = await base44.entities.Clase.list('-fecha', 500);
-        return allClases.filter(c => c.estado !== 'cancelada_anticipada' && c.estado !== 'cancelada_tarde' && c.estado !== 'no_show');
-      }
       return base44.entities.Clase.filter({ fecha: fechaStr });
     },
   });
 
   const { data: recordatorios = [] } = useQuery({
-    queryKey: ['recordatorios-cancha', showCalendario ? mesStr : fechaStr],
+    queryKey: ['recordatorios-cancha', fechaStr],
     queryFn: () => {
-      if (showCalendario) {
-        // Cargar todos los recordatorios del mes para el calendario
-        return base44.entities.RecordatorioCancha.list('-fecha', 500);
-      }
       return base44.entities.RecordatorioCancha.filter({ fecha: fechaStr });
     },
   });
@@ -280,65 +259,40 @@ export default function Agenda() {
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
-            <Tabs value={showCalendario ? 'calendario' : 'lista'} onValueChange={(v) => setShowCalendario(v === 'calendario')} className="w-full sm:w-auto">
-              <TabsList className="grid w-full grid-cols-2 h-10">
-                <TabsTrigger value="lista" className="text-sm">Vista Día</TabsTrigger>
-                <TabsTrigger value="calendario" className="text-sm">Calendario</TabsTrigger>
-              </TabsList>
-            </Tabs>
-
-            {!showCalendario && (
-              <Select value={selectedCancha} onValueChange={setSelectedCancha}>
-                <SelectTrigger className="w-full sm:w-40 h-10">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todas">Todas</SelectItem>
-                  <SelectItem value="1">Cancha 1</SelectItem>
-                  <SelectItem value="2">Cancha 2</SelectItem>
-                  <SelectItem value="3">Cancha 3</SelectItem>
-                  <SelectItem value="4">Cancha 4</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
+            <Select value={selectedCancha} onValueChange={setSelectedCancha}>
+              <SelectTrigger className="w-full sm:w-40 h-10">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todas">Todas</SelectItem>
+                <SelectItem value="1">Cancha 1</SelectItem>
+                <SelectItem value="2">Cancha 2</SelectItem>
+                <SelectItem value="3">Cancha 3</SelectItem>
+                <SelectItem value="4">Cancha 4</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
 
 
-        {/* Vista de calendario o día */}
-         {showCalendario ? (
-             <CalendarioCompleto
-              turnos={turnosFiltrados}
-              clases={clases}
-              recordatorios={recordatorios}
-              selectedDate={selectedDate}
-              onDateSelect={setSelectedDate}
-              onCreateTurno={(fecha) => {
-                setSelectedDate(fecha);
-                setTurnoModal({ open: true, turno: null });
-              }}
-              onTurnoClick={(turno) => turno.tipo_turno === 'clase' ? setAccionesClaseModal({ open: true, turno }) : setCancelarTurnoModal({ open: true, turno })}
-            />
-        ) : (
-          <VistaCalendarioCancha
-            turnos={turnosFiltrados}
-            recordatorios={recordatorios}
-            bloqueos={bloqueos}
-            selectedDate={selectedDate}
-            selectedCancha={selectedCancha}
-            fecha={selectedDate}
-            isAdmin={isAdmin}
-            onTurnoClick={(turno) => turno.tipo_turno === 'clase' ? setAccionesClaseModal({ open: true, turno }) : setCancelarTurnoModal({ open: true, turno })}
-            onEditarClase={(clase) => {
-              // Abrir modal específico para editar clase en agenda
-              setEditarClaseAgendaModal({ open: true, turno: clase });
-            }}
-            onEditarTurno={(turno) => setTurnoModal({ open: true, turno })}
-            onCancelarCancha={(turno) => isAdmin && turno.modalidad_alquiler === 'abono' && setCancelarModal({ open: true, turno })}
-            isLoading={isLoading}
-          />
-        )}
+        {/* Vista de día */}
+         <VistaCalendarioCancha
+           turnos={turnosFiltrados}
+           recordatorios={recordatorios}
+           bloqueos={bloqueos}
+           selectedDate={selectedDate}
+           selectedCancha={selectedCancha}
+           fecha={selectedDate}
+           isAdmin={isAdmin}
+           onTurnoClick={(turno) => turno.tipo_turno === 'clase' ? setAccionesClaseModal({ open: true, turno }) : setCancelarTurnoModal({ open: true, turno })}
+           onEditarClase={(clase) => {
+             setEditarClaseAgendaModal({ open: true, turno: clase });
+           }}
+           onEditarTurno={(turno) => setTurnoModal({ open: true, turno })}
+           onCancelarCancha={(turno) => isAdmin && turno.modalidad_alquiler === 'abono' && setCancelarModal({ open: true, turno })}
+           isLoading={isLoading}
+         />
       </div>
 
       {/* Modales */}
