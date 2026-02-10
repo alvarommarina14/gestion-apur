@@ -22,6 +22,7 @@ import EditarClaseProfesorModal from '@/components/agenda/EditarClaseProfesorMod
 import NuevoBloqueoModal from '@/components/disponibilidad/NuevoBloqueoModal';
 import CancelarCanchaModal from '@/components/agenda/CancelarCanchaModal';
 import ModalCancelarTurno from '@/components/agenda/ModalCancelarTurno';
+import EditarClaseEnAgendaModal from '@/components/agenda/EditarClaseEnAgendaModal';
 
 import { cn } from '@/lib/utils';
 
@@ -35,8 +36,9 @@ export default function Agenda() {
    const [bloqueoModal, setBloqueoModal] = useState(false);
    const [cancelarModal, setCancelarModal] = useState({ open: false, turno: null });
    const [cancelarTurnoModal, setCancelarTurnoModal] = useState({ open: false, turno: null });
-   const [showCalendario, setShowCalendario] = useState(false);
-   const [limpiadoLoading, setLimpiadoLoading] = useState(false);
+    const [editarClaseAgendaModal, setEditarClaseAgendaModal] = useState({ open: false, turno: null });
+    const [showCalendario, setShowCalendario] = useState(false);
+    const [limpiadoLoading, setLimpiadoLoading] = useState(false);
 
   const { data: user } = useQuery({
     queryKey: ['me'],
@@ -312,12 +314,8 @@ export default function Agenda() {
             isAdmin={isAdmin}
             onTurnoClick={(turno) => setCancelarTurnoModal({ open: true, turno })}
             onEditarClase={(clase) => {
-              // Diferenciamos: si es una clase (tiene profesor_id), abrimos el modal de clase
-              if (clase.tipo_turno === 'clase' || clase.profesor_id) {
-                setClaseModal({ open: true, clase });
-              } else {
-                setTurnoModal({ open: true, turno: clase });
-              }
+              // Abrir modal específico para editar clase en agenda
+              setEditarClaseAgendaModal({ open: true, turno: clase });
             }}
             onEditarTurno={(turno) => setTurnoModal({ open: true, turno })}
             onCancelarCancha={(turno) => isAdmin && turno.modalidad_alquiler === 'abono' && setCancelarModal({ open: true, turno })}
@@ -365,6 +363,12 @@ export default function Agenda() {
           open={cancelarTurnoModal.open}
           onOpenChange={(open) => setCancelarTurnoModal({ ...cancelarTurnoModal, open })}
           turno={cancelarTurnoModal.turno}
+          />
+
+          <EditarClaseEnAgendaModal
+          open={editarClaseAgendaModal.open}
+          onOpenChange={(open) => setEditarClaseAgendaModal({ ...editarClaseAgendaModal, open })}
+          turno={editarClaseAgendaModal.turno}
           />
           </div>
           );
