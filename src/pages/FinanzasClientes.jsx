@@ -362,35 +362,45 @@ export default function FinanzasClientes() {
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                      <Dialog open={editandoCobro?.id === cliente.id} onOpenChange={(open) => {
-                        if (!open) {
-                          setEditandoCobro(null);
-                          setMontoPago('');
-                        }
-                      }}>
-                        <DialogTrigger asChild>
-                          <Button
-                            size="sm"
-                            variant={cliente.estado === 'pagado' ? 'outline' : 'default'}
-                            onClick={() => {
-                              setEditandoCobro(cliente);
-                              setMontoPago(String(cliente.montoPendiente || cliente.montoMoroso || cliente.montoEsperado));
-                            }}
-                            className="w-full sm:w-auto"
-                          >
-                            {cliente.estado === 'pagado' ? (
-                              <>
-                                <Check className="w-4 h-4 mr-2" />
-                                Pagado
-                              </>
-                            ) : (
-                              <>
-                                <DollarSign className="w-4 h-4 mr-2" />
-                                Pagar
-                              </>
-                            )}
-                          </Button>
-                        </DialogTrigger>
+                       <Button
+                         size="sm"
+                         variant="outline"
+                         onClick={() => setModalDetalle({ open: true, cliente })}
+                         className="w-full sm:w-auto"
+                       >
+                         <Eye className="w-4 h-4 mr-2" />
+                         Ver ficha
+                       </Button>
+
+                       <Dialog open={editandoCobro?.id === cliente.id} onOpenChange={(open) => {
+                         if (!open) {
+                           setEditandoCobro(null);
+                           setMontoPago('');
+                         }
+                       }}>
+                         <DialogTrigger asChild>
+                           <Button
+                             size="sm"
+                             variant={cliente.estado === 'pagado' ? 'outline' : 'default'}
+                             onClick={() => {
+                               setEditandoCobro(cliente);
+                               setMontoPago(String(cliente.montoPendiente || cliente.montoMoroso || cliente.montoEsperado));
+                             }}
+                             className="w-full sm:w-auto"
+                           >
+                             {cliente.estado === 'pagado' ? (
+                               <>
+                                 <Check className="w-4 h-4 mr-2" />
+                                 Pagado
+                               </>
+                             ) : (
+                               <>
+                                 <DollarSign className="w-4 h-4 mr-2" />
+                                 Pagar
+                               </>
+                             )}
+                           </Button>
+                         </DialogTrigger>
                         <DialogContent>
                           <DialogHeader>
                             <DialogTitle>Registrar Pago - {cliente.nombre}</DialogTitle>
