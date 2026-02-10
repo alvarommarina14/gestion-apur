@@ -662,6 +662,8 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
 
   const [tieneRepeticionSemanal, setTieneRepeticionSemanal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [busquedaCliente, setBusquedaCliente] = useState('');
+  const [showListaClientes, setShowListaClientes] = useState(false);
 
   useEffect(() => {
     const verificarRepeticion = async () => {
@@ -981,30 +983,50 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
 
           <div className="space-y-2">
             <Label>Cliente / Nombre</Label>
-            <Select
-              value={formData.cliente}
-              onValueChange={(v) => setFormData({ ...formData, cliente: v })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar cliente o ingresar nombre" />
-              </SelectTrigger>
-              <SelectContent>
-                {clientes.length > 0 && (
-                  <>
-                    {clientes.map(cliente => (
-                      <SelectItem key={cliente.id} value={cliente.nombre}>
-                        {cliente.nombre}
-                      </SelectItem>
-                    ))}
-                  </>
-                )}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-slate-500 mt-1">O ingresa un nombre nuevo manualmente</p>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Buscar cliente..."
+                value={busquedaCliente}
+                onChange={(e) => setBusquedaCliente(e.target.value)}
+                onFocus={() => setShowListaClientes(true)}
+                className="w-full px-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+              />
+              {showListaClientes && busquedaCliente.length > 0 && (
+                <>
+                  <div className="absolute z-10 w-full bg-white border border-slate-200 rounded-md shadow-lg max-h-48 overflow-y-auto mt-1">
+                    {clientes.filter(c => c.nombre.toLowerCase().includes(busquedaCliente.toLowerCase())).length > 0 ? (
+                      clientes.filter(c => c.nombre.toLowerCase().includes(busquedaCliente.toLowerCase())).map(c => (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => {
+                            setFormData({ ...formData, cliente: c.nombre });
+                            setBusquedaCliente('');
+                            setShowListaClientes(false);
+                          }}
+                          className="w-full text-left px-3 py-2 hover:bg-slate-50 border-b border-slate-100 last:border-b-0 text-sm text-slate-700"
+                        >
+                          {c.nombre}
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-3 py-2 text-sm text-slate-500">
+                        No hay clientes. Escribe un nombre para crear uno nuevo
+                      </div>
+                    )}
+                  </div>
+                  <div
+                    className="fixed inset-0 z-0"
+                    onClick={() => setShowListaClientes(false)}
+                  />
+                </>
+              )}
+            </div>
             <Input
               value={formData.cliente}
               onChange={(e) => setFormData({ ...formData, cliente: e.target.value })}
-              placeholder="Nombre del cliente"
+              placeholder="O ingresa un nombre nuevo manualmente"
               required
               className="mt-2"
             />
