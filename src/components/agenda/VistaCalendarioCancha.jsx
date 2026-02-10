@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import TarjetaClaseConPagos from './TarjetaClaseConPagos';
+import PagoRapidoModal from './PagoRapidoModal';
 
 const HORARIOS = [];
 for (let h = 8; h <= 21; h++) {
@@ -25,6 +26,8 @@ const CANCHAS = ['1', '2', '3', '4'];
 export default function VistaCalendarioCancha({ turnos = [], recordatorios = [], bloqueos = [], selectedDate, selectedCancha, fecha, isAdmin, onTurnoClick, onEditarClase, onCancelarCancha, isLoading }) {
   const [profesorTurnos, setProfesorTurnos] = useState(new Set());
   const [actualizandoId, setActualizandoId] = useState(null);
+  const [turnoParaPago, setTurnoParaPago] = useState(null);
+  const [showPagoModal, setShowPagoModal] = useState(false);
   const queryClient = useQueryClient();
   const { mutate: updatePago } = useMutation({
     mutationFn: async ({ turnoId, pagado }) => {
@@ -311,33 +314,35 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
                                    )}
                                  >
                                   {/* Header con estado de pago */}
-                                   <div className="flex items-center justify-between mb-2">
-                                     <button
-                                       onClick={(e) => {
-                                         e.stopPropagation();
-                                         setActualizandoId(turno.id);
-                                         updatePago({ turnoId: turno.id, pagado: !turno.pagado });
-                                       }}
-                                       disabled={actualizandoId === turno.id}
-                                       className={cn(
-                                         'px-2 py-1 rounded-md text-xs font-bold flex items-center gap-1 transition-all cursor-pointer hover:opacity-80 disabled:opacity-50',
-                                         turno.pagado
-                                           ? 'bg-emerald-100 text-emerald-700'
-                                           : 'bg-rose-100 text-rose-700'
-                                       )}
-                                     >
-                                       {turno.pagado ? (
-                                         <>
-                                           <CheckCircle className="w-3 h-3" />
-                                           PAGADO
-                                         </>
-                                       ) : (
-                                         <>
-                                           <XCircle className="w-3 h-3" />
-                                           PENDIENTE
-                                         </>
-                                       )}
-                                     </button>
+                                  <div className="flex items-center justify-between mb-2">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (!turno.pagado) {
+                                          setTurnoParaPago(turno);
+                                          setShowPagoModal(true);
+                                        }
+                                      }}
+                                      disabled={turno.pagado}
+                                      className={cn(
+                                        'px-2 py-1 rounded-md text-xs font-bold flex items-center gap-1 transition-all disabled:opacity-50',
+                                        turno.pagado
+                                          ? 'bg-emerald-100 text-emerald-700 cursor-default'
+                                          : 'bg-rose-100 text-rose-700 cursor-pointer hover:opacity-80'
+                                      )}
+                                    >
+                                      {turno.pagado ? (
+                                        <>
+                                          <CheckCircle className="w-3 h-3" />
+                                          PAGADO
+                                        </>
+                                      ) : (
+                                        <>
+                                          <XCircle className="w-3 h-3" />
+                                          PENDIENTE
+                                        </>
+                                      )}
+                                    </button>
                                      <span className="text-xs font-semibold text-slate-500">
                                        {turno.duracion} min
                                      </span>
@@ -465,5 +470,14 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
         </div>
       </CardContent>
     </Card>
+    
+    {turnoParaPago && (
+      <PagoRapidoModal
+        open={showPagoModal}
+        onOpenChange={setShowPagoModal}
+        turno={turnoParaPago}
+      />
+    )}
+  </div>
   );
 }
