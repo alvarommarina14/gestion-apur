@@ -356,8 +356,9 @@ export default function RecuperoCanchas() {
 
           {/* Clases Individuales */}
           {(tipoClaseFilter === 'todas' || tipoClaseFilter === 'individuales') && (
-          <h3 className="text-lg font-semibold text-slate-900">Clases Individuales</h3>
-          {recuperosFiltrados.length === 0 ? (
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold text-slate-900">Clases Individuales</h3>
+              {recuperosFiltrados.length === 0 ? (
             <Card className="shadow-sm border-dashed">
               <CardContent className="py-8 text-center">
                 <p className="text-slate-500">No hay recuperos de clases individuales</p>
