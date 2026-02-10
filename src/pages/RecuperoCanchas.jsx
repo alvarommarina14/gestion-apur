@@ -560,8 +560,8 @@ export default function RecuperoCanchas() {
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={handleEliminar}
-                  disabled={deleteMutation.isPending}
+                  onClick={handleEliminarCancelacion}
+                  disabled={deleteCancelacionMutation.isPending}
                 >
                   <Trash2 className="w-4 h-4 mr-1" />
                   Eliminar
