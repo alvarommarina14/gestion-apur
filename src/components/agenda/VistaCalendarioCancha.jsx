@@ -151,6 +151,7 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
   }
 
   return (
+    <>
     <Card className="shadow-sm overflow-hidden">
       <CardContent className="p-0">
         <div className="overflow-x-auto">
@@ -478,6 +479,6 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
         turno={turnoParaPago}
       />
     )}
-  </div>
+    </>
   );
 }
