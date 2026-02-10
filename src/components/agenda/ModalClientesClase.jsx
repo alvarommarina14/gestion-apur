@@ -114,6 +114,9 @@ export default function ModalClientesClase({
       handleEstadoChange(clienteAusente, 'ausente_con_aviso');
       
       // Crear recupero con motivo
+      // Incluir tipo de clase en las notas
+      const tipoClase = turno.tipo === 'grupal' ? 'Clase Grupal' : 'Clase Individual';
+      
       await base44.entities.Recupero.create({
         alumno_id: clienteAusente,
         alumno_nombre: clienteAusente,
@@ -121,7 +124,7 @@ export default function ModalClientesClase({
         fecha_original: turno.fecha,
         motivo: motivoAusencia,
         estado: 'pendiente',
-        notas: `Clase a las ${turno.hora_inicio}h - Avisó con más de 24h`,
+        notas: `${tipoClase} - ${turno.hora_inicio}h - Avisó con más de 24h`,
         vencimiento: new Date(new Date(turno.fecha).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       });
 
