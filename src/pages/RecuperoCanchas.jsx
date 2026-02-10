@@ -184,25 +184,10 @@ export default function RecuperoCanchas() {
     }
   };
 
-  // Filtrar recuperos por tipo de clase (basándose en la clase original)
-  const recuperosFiltrados = useMemo(() => {
-    let filtered = recuperos.filter(r => r.estado === filterEstadoClases);
-    
-    if (tipoClaseFilter === 'individuales' || tipoClaseFilter === 'grupales') {
-      filtered = filtered.filter(recupero => {
-        const claseOriginal = clases.find(c => c.id === recupero.clase_original_id);
-        if (!claseOriginal) return false;
-        
-        if (tipoClaseFilter === 'individuales') {
-          return claseOriginal.tipo === 'individual';
-        } else {
-          return claseOriginal.tipo === 'grupal';
-        }
-      });
-    }
-    
-    return filtered;
-  }, [recuperos, filterEstadoClases, tipoClaseFilter, clases]);
+  // Filtrar recuperos por estado
+   const recuperosFiltrados = useMemo(() => {
+     return recuperos.filter(r => r.estado === filterEstadoClases);
+   }, [recuperos, filterEstadoClases]);
 
   const estadoActual = selectedCancelacion ? estadoConfig[selectedCancelacion.estado_recupero] : null;
   const IconoEstado = estadoActual?.icon;
