@@ -25,6 +25,17 @@ import { registrarCreacion } from '@/components/utils/auditLog';
 import { useQuery } from '@tanstack/react-query';
 import NuevoAlumnoModal from '@/components/modals/NuevoAlumnoModal';
 
+const diasDispoonibles = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+const diasLabels = {
+  lunes: 'Lunes',
+  martes: 'Martes',
+  miercoles: 'Miércoles',
+  jueves: 'Jueves',
+  viernes: 'Viernes',
+  sabado: 'Sábado',
+  domingo: 'Domingo',
+};
+
 export default function NuevoClienteModal({ open, onOpenChange, tipoCliente }) {
    const queryClient = useQueryClient();
    const [success, setSuccess] = useState(false);
