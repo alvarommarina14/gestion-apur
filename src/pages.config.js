@@ -73,6 +73,7 @@ import Reportes from './pages/Reportes';
 import SeleccionRol from './pages/SeleccionRol';
 import Tareas from './pages/Tareas';
 import AgendaCanchas from './pages/AgendaCanchas';
+import RecordatoriosTurnosHoy from './pages/RecordatoriosTurnosHoy';
 import __Layout from './Layout.jsx';
 
 
@@ -103,6 +104,7 @@ export const PAGES = {
     "SeleccionRol": SeleccionRol,
     "Tareas": Tareas,
     "AgendaCanchas": AgendaCanchas,
+    "RecordatoriosTurnosHoy": RecordatoriosTurnosHoy,
 }
 
 export const pagesConfig = {
