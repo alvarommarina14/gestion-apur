@@ -29,7 +29,7 @@ const getPagoColor = (pagado) => {
   return pagado ? 'text-emerald-600 font-semibold' : 'text-orange-600 font-semibold';
 };
 
-export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEdit, onDelete }) {
+export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEdit, onDelete, onEditBloqueo, onDeleteBloqueo }) {
   // Organizar turnos por cancha y horario
   const turnosPorCancha = useMemo(() => {
     const mapa = {};
@@ -142,13 +142,16 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEd
                        className="border border-slate-200 p-2 h-24 align-top"
                      >
                        {bloqueo ? (
-                         <div className="rounded p-2 h-full bg-red-100 border-l-4 border-red-500 flex flex-col items-center justify-center">
+                         <button
+                           onClick={() => onEditBloqueo?.(bloqueo)}
+                           className="rounded p-2 h-full bg-red-100 border-l-4 border-red-500 flex flex-col items-center justify-center cursor-pointer hover:bg-red-200 transition-colors w-full"
+                         >
                            <Badge className="bg-red-600 mb-1">Bloqueado</Badge>
                            <p className="text-xs text-red-700 font-semibold">{bloqueo.motivo}</p>
                            {bloqueo.descripcion && (
                              <p className="text-xs text-red-600 text-center mt-1">{bloqueo.descripcion}</p>
                            )}
-                         </div>
+                         </button>
                        ) : turno ? (
                          <div className={`rounded p-2 h-full space-y-1 ${getStatusColor(turno.tipo_turno)}`}>
                           {/* Turno principal */}
