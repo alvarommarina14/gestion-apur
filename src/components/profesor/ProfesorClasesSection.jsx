@@ -41,25 +41,25 @@ export default function ProfesorClasesSection({ profesor }) {
     queryFn: () => base44.entities.Alumno.list(),
   });
 
-  // Filtrar clases del profesor (únicas, sin repetir recurrencias)
+  // Filtrar clases del profesor (únicas por día + hora)
   const alumnosProfesor = alumnos.filter(a => a.profesor_id === profesor?.id);
   const alumnosIds = alumnosProfesor.map(a => a.id);
   
-  // Agrupar por serie_recurrente_id para mostrar solo una por serie
+  // Agrupar por hora_inicio para mostrar solo una por horario
   const clasesMap = new Map();
   clases
     .filter(c => c.alumnos_ids?.some(id => alumnosIds.includes(id)))
     .forEach(c => {
-      const key = c.serie_recurrente_id || c.id;
+      const key = `${c.hora_inicio}`;
       if (!clasesMap.has(key)) {
         clasesMap.set(key, c);
       }
     });
 
   const clasesProfesor = Array.from(clasesMap.values()).sort((a, b) => {
-    const dayA = a.fecha || '9999-12-31';
-    const dayB = b.fecha || '9999-12-31';
-    return dayB.localeCompare(dayA);
+    const timeA = a.hora_inicio || '23:59';
+    const timeB = b.hora_inicio || '23:59';
+    return timeA.localeCompare(timeB);
   });
 
   const editarClaseMutation = useMutation({
@@ -124,9 +124,9 @@ export default function ProfesorClasesSection({ profesor }) {
                       <Badge variant="outline">{clase.tipo}</Badge>
                       <Badge variant="secondary">{alumnosClase.length} alumnos</Badge>
                     </div>
-                    <CardTitle className="text-lg mb-2">{clase.sede}</CardTitle>
+                    <CardTitle className="text-lg mb-2">{clase.hora_inicio} hs • {clase.sede}</CardTitle>
                     <CardDescription className="text-sm">
-                      {clase.hora_inicio} • {clase.duracion}min • Cancha {clase.cancha}
+                      Cancha {clase.cancha} • {clase.duracion}min
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
