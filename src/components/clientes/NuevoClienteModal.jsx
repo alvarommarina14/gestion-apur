@@ -145,15 +145,15 @@ export default function NuevoClienteModal({ open, onOpenChange, tipoCliente }) {
 
    return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <UserPlus className="w-5 h-5 text-emerald-600" />
-            Nuevo Cliente
-          </DialogTitle>
-        </DialogHeader>
+       <DialogContent className="sm:max-w-xl max-h-[90vh] flex flex-col">
+         <DialogHeader>
+           <DialogTitle className="flex items-center gap-2">
+             <UserPlus className="w-5 h-5 text-emerald-600" />
+             Nuevo Cliente
+           </DialogTitle>
+         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+         <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto flex-1 pr-4">
           <div className="space-y-2">
             <Label>Nombre *</Label>
             <Input
