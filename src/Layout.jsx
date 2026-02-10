@@ -48,11 +48,7 @@ const PAGE_TO_PERMISSION = {
 
 
 
-const navigationAgenda = [
-  { name: 'Agenda', href: 'Agenda', icon: Calendar, permissionKey: 'booking_canchas' },
-  { name: 'Recordatorios Hoy', href: 'RecordatoriosCanchaHoy', icon: Bell, adminOnly: true, permissionKey: 'booking_canchas' },
-  { name: 'Mis Recordatorios', href: 'RecordatoriosCanchaEmpleado', icon: Calendar, empleadoOnly: true, permissionKey: 'recordatorios_cancha_empleado' },
-];
+const navigationAgenda = [];
 
 const navigationEmpleados = [
   { name: 'Tareas', href: 'Tareas', icon: CheckCircle, permissionKey: 'empleados' },
@@ -274,46 +270,7 @@ export default function Layout({ children, currentPageName }) {
               </div>
             )}
 
-            {/* Booking de Canchas - Admin y Empleados */}
-            {!cargandoPermisos && user?.rol !== 'profesor' && navigationAgenda.some(item => user?.rol === 'admin' || tieneAcceso(item.permissionKey)) && (
-              <div className={cn(user?.rol === 'admin' && 'pt-4 mt-4 border-t border-slate-200')}>
-                <p className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                  Booking de Canchas
-                </p>
-                {navigationAgenda.map((item) => {
-                  // Verificar permisos
-                  if (item.adminOnly && user?.rol !== 'admin') return null;
-                  if (item.empleadoOnly && user?.rol === 'admin') return null;
-                  if (user?.rol !== 'admin' && !tieneAcceso(item.permissionKey)) return null;
 
-                  const isActive = currentPageName === item.href;
-                  const Icon = item.icon;
-
-                  return (
-                    <Link
-                      key={item.href}
-                      to={createPageUrl(item.href)}
-                      onClick={() => setSidebarOpen(false)}
-                      className={cn(
-                        'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
-                        isActive 
-                          ? 'bg-emerald-50 text-emerald-700' 
-                          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                      )}
-                    >
-                      <Icon className={cn(
-                        'w-5 h-5',
-                        isActive ? 'text-emerald-600' : 'text-slate-400'
-                      )} />
-                      {item.name}
-                      {isActive && (
-                        <ChevronRight className="w-4 h-4 ml-auto text-emerald-400" />
-                      )}
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
 
               {/* Gestión de Reservas y Clientes */}
               {!cargandoPermisos && (navigationRecuperos.some(item => user?.rol === 'admin' || tieneAcceso(item.permissionKey)) || navigationClientes.some(item => user?.rol === 'admin')) && (
