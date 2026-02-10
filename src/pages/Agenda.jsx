@@ -23,6 +23,7 @@ import NuevoBloqueoModal from '@/components/disponibilidad/NuevoBloqueoModal';
 import CancelarCanchaModal from '@/components/agenda/CancelarCanchaModal';
 import ModalCancelarTurno from '@/components/agenda/ModalCancelarTurno';
 import EditarClaseEnAgendaModal from '@/components/agenda/EditarClaseEnAgendaModal';
+import ModalClientesClase from '@/components/agenda/ModalClientesClase';
 
 import { cn } from '@/lib/utils';
 
@@ -37,6 +38,7 @@ export default function Agenda() {
    const [cancelarModal, setCancelarModal] = useState({ open: false, turno: null });
    const [cancelarTurnoModal, setCancelarTurnoModal] = useState({ open: false, turno: null });
     const [editarClaseAgendaModal, setEditarClaseAgendaModal] = useState({ open: false, turno: null });
+    const [clientesClaseModal, setClientesClaseModal] = useState({ open: false, turno: null });
     const [showCalendario, setShowCalendario] = useState(false);
     const [limpiadoLoading, setLimpiadoLoading] = useState(false);
 
@@ -369,6 +371,15 @@ export default function Agenda() {
           open={editarClaseAgendaModal.open}
           onOpenChange={(open) => setEditarClaseAgendaModal({ ...editarClaseAgendaModal, open })}
           turno={editarClaseAgendaModal.turno}
+          />
+
+          <ModalClientesClase
+          open={clientesClaseModal.open}
+          onOpenChange={(open) => setClientesClaseModal({ ...clientesClaseModal, open })}
+          turno={clientesClaseModal.turno}
+          onCancelarTurno={(turno) => {
+            setCancelarModal({ open: true, turno });
+          }}
           />
           </div>
           );
