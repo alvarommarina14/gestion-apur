@@ -23,7 +23,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
 
-export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null, profesorId = null }) {
+export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null, profesorId = null, clienteData = null }) {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -70,6 +70,20 @@ export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null, pr
         tipo_asistencia: alumno.tipo_asistencia || 'un_dia',
         dias_semana: alumno.dias_semana || [],
       });
+    } else if (clienteData) {
+      setFormData({
+        nombre: clienteData.nombre || '',
+        whatsapp: clienteData.whatsapp || '',
+        observaciones: clienteData.observaciones || '',
+        estado: 'activo',
+        precio_mensual: clienteData.precio_mensual?.toString() || '',
+        clases_por_mes: '4',
+        sede_preferida: '',
+        horario_preferido: '',
+        dia_preferido: '',
+        tipo_asistencia: 'un_dia',
+        dias_semana: [],
+      });
     } else {
       setFormData({
         nombre: '',
@@ -85,7 +99,7 @@ export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null, pr
         dias_semana: [],
       });
     }
-  }, [alumno, open]);
+  }, [alumno, clienteData, open]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -132,14 +146,17 @@ export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null, pr
       data.estado_mes_actual = 'pendiente';
       data.total_clases_asistidas = 0;
 
-      // Buscar profesor_id en orden: prop > localStorage > user
-      let idProfesor = profesorId;
+      // Buscar profesor_id en orden: clienteData > prop > localStorage > user
+      let idProfesor = clienteData?.profesor_id || profesorId;
+      let nombreProfesor = clienteData?.profesor_nombre || '';
+
       if (!idProfesor) {
         const profesorGuardado = localStorage.getItem('profesor_seleccionado');
         if (profesorGuardado) {
           try {
             const profesorObj = JSON.parse(profesorGuardado);
             idProfesor = profesorObj.id;
+            nombreProfesor = profesorObj.nombre;
           } catch (e) {
             console.error('Error parsing profesor', e);
           }
@@ -151,15 +168,19 @@ export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null, pr
 
       if (idProfesor) {
          data.profesor_id = idProfesor;
-         // Obtener nombre del profesor
-         try {
-           const profesor = await base44.entities.Profesor.read(idProfesor);
-           if (profesor?.nombre) {
-             data.profesor_nombre = profesor.nombre;
+         if (nombreProfesor) {
+           data.profesor_nombre = nombreProfesor;
+         } else {
+           // Obtener nombre del profesor
+           try {
+             const profesor = await base44.entities.Profesor.read(idProfesor);
+             if (profesor?.nombre) {
+               data.profesor_nombre = profesor.nombre;
+             }
+           } catch (err) {
+             console.log('Error obteniendo profesor:', err);
+             data.profesor_nombre = 'Sin asignar';
            }
-         } catch (err) {
-           console.log('Error obteniendo profesor:', err);
-           data.profesor_nombre = 'Sin asignar';
          }
        }
 
