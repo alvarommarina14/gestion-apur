@@ -113,12 +113,16 @@ export default function ModalClientesClase({
       // Marcar estado en el componente
       handleEstadoChange(clienteAusente, 'ausente_con_aviso');
       
+      // Buscar el ID correcto del alumno
+      const alumnoIndex = turno.alumnos_nombres?.indexOf(clienteAusente) ?? -1;
+      const alumnoId = alumnoIndex >= 0 && turno.alumnos_ids ? turno.alumnos_ids[alumnoIndex] : clienteAusente;
+      
       // Crear recupero con motivo
       // Incluir tipo de clase en las notas
       const tipoClase = turno.tipo === 'grupal' ? 'Clase Grupal' : 'Clase Individual';
       
       await base44.entities.Recupero.create({
-        alumno_id: clienteAusente,
+        alumno_id: alumnoId,
         alumno_nombre: clienteAusente,
         clase_original_id: turno.id,
         fecha_original: turno.fecha,
