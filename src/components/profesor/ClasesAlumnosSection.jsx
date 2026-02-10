@@ -123,13 +123,23 @@ export default function ClasesAlumnosSection({ profesor }) {
 
   const eliminarClaseMutation = useMutation({
     mutationFn: async (claseId) => {
-      await base44.entities.Clase.delete(claseId);
+      try {
+        await base44.entities.Clase.delete(claseId);
+      } catch (error) {
+        console.error('Error eliminando clase:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clases'] });
       setClaseEliminar(null);
       setEditModal(false);
       setClaseEditando(null);
+      setExpandedClase(null);
+    },
+    onError: (error) => {
+      console.error('Fallo al eliminar clase:', error);
+      alert('Error al eliminar la clase. Por favor intenta nuevamente.');
     },
   });
 
@@ -392,19 +402,20 @@ export default function ClasesAlumnosSection({ profesor }) {
       </AlertDialog>
 
       {/* Alert Eliminar Clase */}
-      <AlertDialog open={!!claseEliminar} onOpenChange={() => setClaseEliminar(null)}>
+      <AlertDialog open={!!claseEliminar} onOpenChange={() => !eliminarClaseMutation.isPending && setClaseEliminar(null)}>
         <AlertDialogContent>
           <AlertDialogTitle>¿Eliminar clase grupal?</AlertDialogTitle>
           <AlertDialogDescription>
             Se eliminará la clase a las {claseEliminar?.hora_inicio} en {claseEliminar?.sede}. Esta acción no se puede deshacer.
           </AlertDialogDescription>
           <div className="flex gap-2 justify-end">
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={eliminarClaseMutation.isPending}>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => eliminarClaseMutation.mutate(claseEliminar.id)}
-              className="bg-destructive hover:bg-destructive/90"
+              className="bg-destructive hover:bg-destructive/90 disabled:opacity-50"
+              disabled={eliminarClaseMutation.isPending}
             >
-              Eliminar
+              {eliminarClaseMutation.isPending ? 'Eliminando...' : 'Eliminar'}
             </AlertDialogAction>
           </div>
         </AlertDialogContent>
