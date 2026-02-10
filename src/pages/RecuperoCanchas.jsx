@@ -409,12 +409,12 @@ export default function RecuperoCanchas() {
               <h3 className="text-lg font-semibold text-slate-900">Clases Grupales (Recuperos por alumno)</h3>
               {recuperosFiltrados.length === 0 ? (
                 <Card className="shadow-sm border-dashed">
-              <CardContent className="py-8 text-center">
-                <p className="text-slate-500">No hay recuperos de clases grupales</p>
-              </CardContent>
-            </Card>
-          ) : (
-            recuperosFiltrados.map((recupero) => (
+                  <CardContent className="py-8 text-center">
+                    <p className="text-slate-500">No hay recuperos de clases grupales</p>
+                  </CardContent>
+                </Card>
+                ) : (
+                recuperosFiltrados.map((recupero) => (
               <Card key={recupero.id} className="shadow-sm">
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between gap-4">
