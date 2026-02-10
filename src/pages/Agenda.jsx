@@ -21,6 +21,7 @@ import EditarClaseProfesorModal from '@/components/agenda/EditarClaseProfesorMod
 import NuevoBloqueoModal from '@/components/disponibilidad/NuevoBloqueoModal';
 import CancelarCanchaModal from '@/components/agenda/CancelarCanchaModal';
 import ModalCancelarTurno from '@/components/agenda/ModalCancelarTurno';
+import RecordatoriosCanchaHoy from '@/components/agenda/RecordatoriosCanchaHoy';
 import { cn } from '@/lib/utils';
 
 export default function Agenda() {
@@ -274,22 +275,9 @@ export default function Agenda() {
           </div>
         </div>
 
-        {/* Alerta de pagos pendientes - Solo para Admin */}
-        {isAdmin && turnosPendientesPago.length > 0 && (
-          <Card className="shadow-sm border-rose-200 bg-rose-50">
-            <CardContent className="py-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-semibold text-rose-900">
-                    ⚠️ {turnosPendientesPago.length} turno(s) pendiente(s) de pago hoy
-                  </p>
-                  <p className="text-sm text-rose-700 mt-0.5">
-                    Total a cobrar: {formatMoney(turnosPendientesPago.reduce((sum, t) => sum + (t.monto || 0), 0))}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Recordatorios Canchas Hoy - Solo para Admin */}
+        {isAdmin && !showCalendario && (
+          <RecordatoriosCanchaHoy turnos={turnos} fecha={selectedDate} />
         )}
 
         {/* Vista de calendario o día */}
