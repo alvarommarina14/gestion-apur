@@ -29,7 +29,7 @@ const getPagoColor = (pagado) => {
   return pagado ? 'text-emerald-600 font-semibold' : 'text-orange-600 font-semibold';
 };
 
-export default function PlanillaCanchas({ date, turnos = [], onEdit, onDelete }) {
+export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEdit, onDelete }) {
   // Organizar turnos por cancha y horario
   const turnosPorCancha = useMemo(() => {
     const mapa = {};
@@ -59,6 +59,38 @@ export default function PlanillaCanchas({ date, turnos = [], onEdit, onDelete })
 
     return mapa;
   }, [turnos]);
+
+  // Verificar si hay bloqueos para una cancha y hora
+  const tieneBloqueo = (cancha, hora) => {
+    const fechaStr = format(date, 'yyyy-MM-dd');
+    return bloqueos.some(bloqueo => {
+      if (bloqueo.cancha !== cancha && bloqueo.cancha !== 'todas') return false;
+      if (bloqueo.fecha_inicio !== fechaStr || bloqueo.fecha_fin !== fechaStr) return false;
+      if (!bloqueo.hora_inicio || !bloqueo.hora_fin) return false;
+      
+      const horaNum = parseInt(hora.split(':')[0]);
+      const minNum = parseInt(hora.split(':')[1]);
+      const bloqueInicio = parseInt(bloqueo.hora_inicio.split(':')[0]);
+      const bloqueFin = parseInt(bloqueo.hora_fin.split(':')[0]);
+      
+      return horaNum >= bloqueInicio && horaNum < bloqueFin;
+    });
+  };
+
+  const obtenerBloqueo = (cancha, hora) => {
+    const fechaStr = format(date, 'yyyy-MM-dd');
+    return bloqueos.find(bloqueo => {
+      if (bloqueo.cancha !== cancha && bloqueo.cancha !== 'todas') return false;
+      if (bloqueo.fecha_inicio !== fechaStr || bloqueo.fecha_fin !== fechaStr) return false;
+      if (!bloqueo.hora_inicio || !bloqueo.hora_fin) return false;
+      
+      const horaNum = parseInt(hora.split(':')[0]);
+      const bloqueInicio = parseInt(bloqueo.hora_inicio.split(':')[0]);
+      const bloqueFin = parseInt(bloqueo.hora_fin.split(':')[0]);
+      
+      return horaNum >= bloqueInicio && horaNum < bloqueFin;
+    });
+  };
 
   const fechaFormato = format(date, 'cccc, d MMMM yyyy', { locale: es });
 
@@ -100,16 +132,25 @@ export default function PlanillaCanchas({ date, turnos = [], onEdit, onDelete })
 
                 {/* Celdas por cancha */}
                 {CANCHAS.map(cancha => {
-                  const turno = turnosPorCancha[cancha]?.[hora];
-                  const secundarios = turno?.secundario || [];
+                   const turno = turnosPorCancha[cancha]?.[hora];
+                   const secundarios = turno?.secundario || [];
+                   const bloqueo = obtenerBloqueo(cancha, hora);
 
-                  return (
-                    <td
-                      key={`${cancha}-${hora}`}
-                      className="border border-slate-200 p-2 h-24 align-top"
-                    >
-                      {turno ? (
-                        <div className={`rounded p-2 h-full space-y-1 ${getStatusColor(turno.tipo_turno)}`}>
+                   return (
+                     <td
+                       key={`${cancha}-${hora}`}
+                       className="border border-slate-200 p-2 h-24 align-top"
+                     >
+                       {bloqueo ? (
+                         <div className="rounded p-2 h-full bg-red-100 border-l-4 border-red-500 flex flex-col items-center justify-center">
+                           <Badge className="bg-red-600 mb-1">Bloqueado</Badge>
+                           <p className="text-xs text-red-700 font-semibold">{bloqueo.motivo}</p>
+                           {bloqueo.descripcion && (
+                             <p className="text-xs text-red-600 text-center mt-1">{bloqueo.descripcion}</p>
+                           )}
+                         </div>
+                       ) : turno ? (
+                         <div className={`rounded p-2 h-full space-y-1 ${getStatusColor(turno.tipo_turno)}`}>
                           {/* Turno principal */}
                           <div>
                             <div className="flex items-center gap-1 mb-1">
@@ -193,6 +234,10 @@ export default function PlanillaCanchas({ date, turnos = [], onEdit, onDelete })
         <div className="flex items-center gap-2">
           <Badge className="bg-emerald-600">Alquiler</Badge>
           <span className="text-slate-600">Alquileres de cancha</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge className="bg-red-600">Bloqueado</Badge>
+          <span className="text-slate-600">Cancha no disponible</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-emerald-600 font-semibold">✓</span>
