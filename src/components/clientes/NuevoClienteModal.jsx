@@ -73,6 +73,7 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
          notas: '',
        });
        setSuccess(false);
+       setTipoRegistro(null);
      }
   }, [open]);
 
