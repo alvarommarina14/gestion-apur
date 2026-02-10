@@ -40,19 +40,24 @@ export default function TarjetaClaseConPagos({ turno, isAdmin, onTurnoClick }) {
   const alumnosConPago = useMemo(() => {
     return (turno.alumnos_ids || []).map(alumnoId => {
       const alumno = alumnos.find(a => a.id === alumnoId);
+      
+      // Buscar cobros del alumno (cliente asociado)
       const cobrosAlumno = cobros.filter(c => {
         const alumnoEsCliente = alumnos.find(a => a.id === alumnoId);
         return c.cliente_id === alumnoEsCliente?.cliente_id;
       });
       
-      const ultimoCobro = cobrosAlumno?.[0];
-      const estado = ultimoCobro?.estado || 'sin-datos';
-      const monto = ultimoCobro?.monto || 0;
+      // Determinar estado de pago mensual (abono/clase)
+      const mesActual = new Date().toISOString().substring(0, 7); // YYYY-MM
+      const cobroMensual = cobrosAlumno.find(c => 
+        c.tipo_cobro === 'abono_mensual' && c.mes === mesActual
+      );
+      
+      const tienePagoMensual = cobroMensual?.estado === 'pagado';
       
       return {
         nombre: alumno?.nombre || 'Sin nombre',
-        estado,
-        monto,
+        tienePagoMensual,
       };
     });
   }, [turno.alumnos_ids, alumnos, cobros]);
@@ -145,10 +150,22 @@ export default function TarjetaClaseConPagos({ turno, isAdmin, onTurnoClick }) {
         </div>
       </div>
 
-      {/* Profesor */}
-      <div className="flex items-center gap-1 text-sm text-slate-600 mb-2">
-        <User className="w-3.5 h-3.5" />
-        <span>{turno.profesor || profesor?.nombre || 'No asignado'}</span>
+      {/* Tipo y Profesor */}
+      <div className="flex items-center gap-1.5 flex-wrap mb-2">
+        <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-semibold">
+          Clase
+        </span>
+        {(turno.profesor || profesor?.nombre) && (
+          <div className="flex items-center gap-1 text-xs bg-indigo-50 border border-indigo-200 text-indigo-700 px-2 py-0.5 rounded">
+            <User className="w-3 h-3" />
+            <span>Prof. {turno.profesor || profesor?.nombre}</span>
+          </div>
+        )}
+        {turno.pagado && (
+          <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded text-xs font-semibold">
+            Clase pagada
+          </span>
+        )}
       </div>
 
       {/* Precio de la clase */}
@@ -172,27 +189,26 @@ export default function TarjetaClaseConPagos({ turno, isAdmin, onTurnoClick }) {
         <div className="mt-3 pt-2 border-t border-slate-300 space-y-1.5">
           <p className="text-xs font-semibold text-slate-700 mb-2">Alumnos:</p>
           {alumnosConPago.map((alumno, idx) => (
-            <div key={idx} className="text-xs space-y-0.5">
-              <div className="flex items-center justify-between">
-                <span className="text-slate-700 font-medium">{alumno.nombre}</span>
-                <span className={cn(
-                  'px-1.5 py-0.5 rounded text-[10px] font-bold flex items-center gap-0.5',
-                  alumno.estado === 'pagado'
-                    ? 'bg-emerald-100 text-emerald-700'
-                    : alumno.estado === 'moroso'
-                      ? 'bg-rose-100 text-rose-700'
-                      : 'bg-amber-100 text-amber-700'
-                )}>
-                  {alumno.estado === 'pagado' && <CheckCircle className="w-2.5 h-2.5" />}
-                  {alumno.estado === 'moroso' && <XCircle className="w-2.5 h-2.5" />}
-                  {alumno.estado.charAt(0).toUpperCase() + alumno.estado.slice(1)}
-                </span>
-              </div>
-              {alumno.monto > 0 && (
-                <div className="text-slate-600">
-                  Monto: <span className="font-semibold">{formatMoney(alumno.monto)}</span>
-                </div>
-              )}
+            <div key={idx} className="flex items-center justify-between">
+              <span className="text-slate-700 font-medium text-xs">{alumno.nombre}</span>
+              <span className={cn(
+                'px-1.5 py-0.5 rounded text-[10px] font-bold flex items-center gap-0.5',
+                alumno.tienePagoMensual
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-rose-100 text-rose-700'
+              )}>
+                {alumno.tienePagoMensual ? (
+                  <>
+                    <CheckCircle className="w-2.5 h-2.5" />
+                    Mensual pagado
+                  </>
+                ) : (
+                  <>
+                    <XCircle className="w-2.5 h-2.5" />
+                    Deuda mensual
+                  </>
+                )}
+              </span>
             </div>
           ))}
         </div>
