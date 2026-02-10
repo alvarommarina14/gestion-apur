@@ -90,8 +90,12 @@ export default function ProfesorMenuPage() {
   const clasesProfesor = clases.filter(c => 
     c.alumnos_ids?.some(id => alumnosIds.includes(id))
   );
-  const clasesPendientes = clasesProfesor.filter(c => 
-    c.estado === 'programada' && new Date(c.fecha) >= new Date()
+  
+  // Clases del mes actual
+  const today = new Date();
+  const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+  const clasesMesActual = clasesProfesor.filter(c => 
+    c.fecha?.startsWith(currentMonth) && c.estado === 'programada'
   ).length;
 
   const deudaTotal = alumnosProfesor.reduce((sum, a) => sum + (a.deuda_total || 0), 0);
@@ -135,7 +139,7 @@ export default function ProfesorMenuPage() {
           <Card className="border-l-4 border-l-blue-500">
             <CardHeader className="pb-2">
               <CardDescription>Clases programadas</CardDescription>
-              <CardTitle className="text-2xl">{clasesPendientes}</CardTitle>
+              <CardTitle className="text-2xl">{clasesMesActual}</CardTitle>
             </CardHeader>
           </Card>
 

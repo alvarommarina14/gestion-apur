@@ -158,6 +158,7 @@ export default function Dashboard() {
       clasesMes = clasesMes.filter(c => c.profesor_id === profesorSeleccionado.id);
     }
     
+    const programadas = clasesMes.filter(c => c.estado === 'programada').length;
     const realizadas = clasesMes.filter(c => c.estado === 'realizada').length;
     const canceladas = clasesMes.filter(c => 
       ['cancelada_anticipada', 'cancelada_tarde', 'no_show', 'suspendida'].includes(c.estado)
@@ -179,6 +180,7 @@ export default function Dashboard() {
       cantidadMorosos: morosos.length,
       clasesHoy: clasesHoy.length,
       clasesPendientesHoy: clasesPendientesHoy.length,
+      programadas,
       realizadas,
       canceladas,
       recuperadas,
