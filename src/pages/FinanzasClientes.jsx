@@ -133,6 +133,15 @@ export default function FinanzasClientes() {
     return metricasClientes.clientesConCobros.filter(c => c.estado === filtroEstado);
   }, [metricasClientes, filtroEstado]);
 
+  const getEstadoBadgeClientes = (estado) => {
+    const config = {
+      pagado: { bg: 'bg-emerald-100', text: 'text-emerald-700', label: 'Pagado', icon: CheckCircle },
+      moroso: { bg: 'bg-rose-100', text: 'text-rose-700', label: 'Moroso', icon: AlertCircle },
+      pendiente: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Pendiente', icon: AlertCircle },
+    };
+    return config[estado] || config.pendiente;
+  };
+
   const formatMoney = (amount) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
