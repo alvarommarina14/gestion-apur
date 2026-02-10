@@ -188,11 +188,6 @@ export default function ClasesAlumnosSection({ profesor }) {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h2 className="text-2xl font-bold text-slate-900">Clases Grupales</h2>
-        <p className="text-slate-500 mt-1">Gestiona tus clases grupales</p>
-      </div>
-
       <div className="grid gap-4">
         {clasesGrupalesUnicas.map((clase) => {
           const alumnosClase = alumnos.filter(a => clase.alumnos_ids?.includes(a.id));
