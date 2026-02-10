@@ -114,7 +114,7 @@ export default function ProfesorMenuPage() {
 
   const deudaTotal = alumnosProfesor
     .filter(a => a.estado === 'activo' || a.estado === 'moroso')
-    .reduce((sum, a) => sum + (a.deuda_total || 0), 0);
+    .reduce((sum, a) => sum + (a.precio_mensual || 0), 0);
 
   if (!profesor) {
     return null;
