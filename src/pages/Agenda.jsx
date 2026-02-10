@@ -248,19 +248,29 @@ export default function Agenda() {
          </div>
         )}
 
+        {/* Tabs Vista */}
+        <Tabs value={vista} onValueChange={setVista} className="w-full">
+          <TabsList className="grid w-fit">
+            <TabsTrigger value="dia">Vista Día</TabsTrigger>
+            <TabsTrigger value="calendario">Calendario</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
         {/* Controles */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
           <div className="flex items-center gap-2 overflow-x-auto pb-1">
-            <Button variant="outline" size="icon" onClick={handlePrevDay} className="h-10 w-10 shrink-0 active:scale-95 touch-manipulation">
+            <Button variant="outline" size="icon" onClick={vista === 'calendario' ? () => setSelectedDate(subDays(selectedDate, 7)) : handlePrevDay} className="h-10 w-10 shrink-0 active:scale-95 touch-manipulation">
               <ChevronLeft className="w-5 h-5" />
             </Button>
             <div className="min-w-[180px] text-center px-2">
               <p className="font-semibold text-slate-900 text-sm sm:text-base">
-                {format(selectedDate, "EEEE d 'de' MMMM", { locale: es })}
+                {vista === 'calendario' 
+                  ? format(selectedDate, "MMMM 'de' yyyy", { locale: es })
+                  : format(selectedDate, "EEEE d 'de' MMMM", { locale: es })}
               </p>
               <p className="text-xs text-slate-500">{format(selectedDate, 'yyyy')}</p>
             </div>
-            <Button variant="outline" size="icon" onClick={handleNextDay} className="h-10 w-10 shrink-0 active:scale-95 touch-manipulation">
+            <Button variant="outline" size="icon" onClick={vista === 'calendario' ? () => setSelectedDate(addDays(selectedDate, 7)) : handleNextDay} className="h-10 w-10 shrink-0 active:scale-95 touch-manipulation">
               <ChevronRight className="w-5 h-5" />
             </Button>
             <Button variant="outline" onClick={handleToday} className="h-10 px-4 shrink-0 active:scale-95 touch-manipulation">
@@ -268,20 +278,22 @@ export default function Agenda() {
             </Button>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
-            <Select value={selectedCancha} onValueChange={setSelectedCancha}>
-              <SelectTrigger className="w-full sm:w-40 h-10">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todas">Todas</SelectItem>
-                <SelectItem value="1">Cancha 1</SelectItem>
-                <SelectItem value="2">Cancha 2</SelectItem>
-                <SelectItem value="3">Cancha 3</SelectItem>
-                <SelectItem value="4">Cancha 4</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {vista === 'dia' && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <Select value={selectedCancha} onValueChange={setSelectedCancha}>
+                <SelectTrigger className="w-full sm:w-40 h-10">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todas">Todas</SelectItem>
+                  <SelectItem value="1">Cancha 1</SelectItem>
+                  <SelectItem value="2">Cancha 2</SelectItem>
+                  <SelectItem value="3">Cancha 3</SelectItem>
+                  <SelectItem value="4">Cancha 4</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
 
 
