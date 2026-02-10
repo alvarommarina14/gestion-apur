@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, Plus, Download, Lock, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import VistaCalendarioCancha from '@/components/agenda/VistaCalendarioCancha';
 import CalendarioMes from '@/components/agenda/CalendarioMes';
 import NuevoTurnoModal from '@/components/agenda/NuevoTurnoModal';
@@ -79,7 +80,7 @@ export default function AgendaCanchas() {
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold text-slate-900">Agenda de Canchas</h1>
             <p className="text-slate-500 text-sm mt-1">
-              {format(selectedDate, 'EEEE, d MMMM yyyy', { locale: require('date-fns/locale/es') })}
+              {format(selectedDate, 'EEEE, d MMMM yyyy', { locale: es })}
             </p>
           </div>
         </div>
