@@ -18,6 +18,8 @@ const MOTIVOS = [
 
 export default function BloquearTurnoModal({ isOpen, onClose, initialDate }) {
   const [cancha, setCancha] = useState('1');
+  const [horaInicio, setHoraInicio] = useState('08:00');
+  const [horaFin, setHoraFin] = useState('09:00');
   const [motivo, setMotivo] = useState('mantenimiento');
   const [descripcion, setDescripcion] = useState('');
   const queryClient = useQueryClient();
@@ -31,9 +33,11 @@ export default function BloquearTurnoModal({ isOpen, onClose, initialDate }) {
         cancha,
         fecha_inicio: fechaInicio,
         fecha_fin: fechaFin,
+        hora_inicio: horaInicio,
+        hora_fin: horaFin,
         motivo,
         descripcion,
-        todo_el_dia: true,
+        todo_el_dia: false,
         estado: 'activo'
       });
     },
@@ -50,6 +54,8 @@ export default function BloquearTurnoModal({ isOpen, onClose, initialDate }) {
 
   const handleClose = () => {
     setCancha('1');
+    setHoraInicio('08:00');
+    setHoraFin('09:00');
     setMotivo('mantenimiento');
     setDescripcion('');
     onClose();
@@ -78,6 +84,31 @@ export default function BloquearTurnoModal({ isOpen, onClose, initialDate }) {
                 <SelectItem value="4">Cancha 4</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-sm font-medium text-slate-700 block mb-2">
+                Hora inicio
+              </label>
+              <input
+                type="time"
+                value={horaInicio}
+                onChange={(e) => setHoraInicio(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-slate-700 block mb-2">
+                Hora fin
+              </label>
+              <input
+                type="time"
+                value={horaFin}
+                onChange={(e) => setHoraFin(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
           </div>
 
           <div>
