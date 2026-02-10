@@ -312,8 +312,8 @@ export default function Agenda() {
             selectedCancha={selectedCancha}
             fecha={selectedDate}
             isAdmin={isAdmin}
-            onTurnoClick={(turno) => canEdit && setTurnoModal({ open: true, turno })}
-            onEditarClase={(turno) => isAdmin && setClaseModal({ open: true, turno })}
+            onTurnoClick={() => {}}
+            onEditarClase={() => {}}
             onCancelarCancha={(turno) => isAdmin && turno.modalidad_alquiler === 'abono' && setCancelarModal({ open: true, turno })}
             isLoading={isLoading}
           />
