@@ -435,6 +435,34 @@ export default function NuevoClienteModal({ open, onOpenChange, tipoCliente }) {
                    </Select>
                  </div>
                )}
+               {formData.tipo_asistencia === 'varios_dias' && (
+                 <div className="space-y-3">
+                   <Label>Selecciona los días</Label>
+                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                     {diasDispoonibles.map(dia => (
+                       <label key={dia} className="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-slate-50 transition">
+                         <Checkbox
+                           checked={formData.dias_semana.includes(dia)}
+                           onCheckedChange={(checked) => {
+                             if (checked) {
+                               setFormData({
+                                 ...formData,
+                                 dias_semana: [...formData.dias_semana, dia]
+                               });
+                             } else {
+                               setFormData({
+                                 ...formData,
+                                 dias_semana: formData.dias_semana.filter(d => d !== dia)
+                               });
+                             }
+                           }}
+                         />
+                         <span className="text-sm font-medium text-slate-700">{diasLabels[dia]}</span>
+                       </label>
+                     ))}
+                   </div>
+                 </div>
+               )}
              </div>
             )}
 
