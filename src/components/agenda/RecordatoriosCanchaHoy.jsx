@@ -155,6 +155,81 @@ export default function RecordatoriosCanchaHoy({ turnos = [], fecha }) {
     }
   });
 
+  const registrarPagoGrupalMutation = useMutation({
+    mutationFn: async ({ turno, pagosAlumnos, medio, notas }) => {
+      const user = await base44.auth.me();
+      const mes = format(new Date(turno.fecha), 'yyyy-MM');
+
+      // Procesar pago de cada alumno
+      for (const alumnoId in pagosAlumnos) {
+        const estado = pagosAlumnos[alumnoId];
+        const alumno = alumnos.find(a => a.id === alumnoId);
+        if (!alumno) continue;
+
+        if (estado === 'pagado') {
+          // Crear registro de pago
+          await base44.entities.Pago.create({
+            alumno_id: alumnoId,
+            alumno_nombre: alumno.nombre,
+            fecha: format(new Date(), 'yyyy-MM-dd'),
+            monto: alumno.precio_mensual,
+            medio_pago: medio,
+            mes_correspondiente: mes,
+            notas: notas || `Pagado vía ${medio}`,
+          });
+        } else if (estado === 'no_pagado') {
+          // Crear registro de no pago si no existe
+          const cobros = await base44.entities.CobroCliente.filter({
+            cliente_id: alumnoId,
+            mes: mes,
+          });
+          
+          if (cobros.length === 0) {
+            await base44.entities.CobroCliente.create({
+              cliente_id: alumnoId,
+              cliente_nombre: alumno.nombre,
+              tipo_cobro: 'abono_mensual',
+              mes: mes,
+              monto: alumno.precio_mensual,
+              estado: 'moroso',
+              notas: notas || 'Pendiente de pago',
+            });
+          }
+        }
+      }
+
+      // Actualizar turno como completado
+      await base44.entities.TurnoCancha.update(turno.id, {
+        pagado: true,
+        notas_pago: 'Pagos procesados de forma individual',
+        cobrado_por: user?.full_name || 'Desconocido',
+        hora_cobro: new Date().toISOString(),
+      });
+
+      // Actualizar recordatorio
+      const recordatorios = await base44.entities.RecordatorioCancha.filter({ 
+        turno_cancha_id: turno.id 
+      });
+      
+      if (recordatorios.length > 0) {
+        await base44.entities.RecordatorioCancha.update(recordatorios[0].id, {
+          estado: 'hecho'
+        });
+      }
+    },
+    onSuccess: () => {
+      setModalPagoGrupal(false);
+      setTurnoSeleccionado(null);
+      setPagosAlumnos({});
+      setMedioPago('');
+      setNotasPago('');
+      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
+      queryClient.invalidateQueries({ queryKey: ['pagos'] });
+    }
+  });
+
   const registrarNoPagoMutation = useMutation({
     mutationFn: async ({ turno, motivoNoPago }) => {
       // Actualizar turno con nota de no pago
