@@ -73,6 +73,7 @@ import Recuperos from './pages/Recuperos';
 import Reportes from './pages/Reportes';
 import SeleccionRol from './pages/SeleccionRol';
 import Tareas from './pages/Tareas';
+import ClientesManagement from './pages/ClientesManagement';
 import __Layout from './Layout.jsx';
 
 
@@ -103,6 +104,7 @@ export const PAGES = {
     "Reportes": Reportes,
     "SeleccionRol": SeleccionRol,
     "Tareas": Tareas,
+    "ClientesManagement": ClientesManagement,
 }
 
 export const pagesConfig = {
