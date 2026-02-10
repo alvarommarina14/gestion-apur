@@ -260,6 +260,15 @@ export default function NuevoClienteModal({ open, onOpenChange, tipoCliente }) {
                      ))}
                    </SelectContent>
                  </Select>
+                 <Button 
+                   type="button"
+                   variant="outline"
+                   size="sm"
+                   onClick={() => setShowNewProfesor(true)}
+                   className="w-full"
+                 >
+                   + Crear nuevo profesor
+                 </Button>
                </div>
                <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-2">
