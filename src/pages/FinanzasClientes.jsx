@@ -17,15 +17,16 @@ import DetalleClienteModal from '@/components/clientes/DetalleClienteModal';
 import { cn } from '@/lib/utils';
 
 export default function FinanzasClientes() {
-  const [mesSeleccionado, setMesSeleccionado] = useState(new Date());
-  const [busqueda, setBusqueda] = useState('');
-  const [filtroEstado, setFiltroEstado] = useState('todos');
-  const [sincronizando, setSincronizando] = useState(false);
-  const [editandoCobro, setEditandoCobro] = useState(null);
-  const [montoPago, setMontoPago] = useState('');
-  const [editandoCliente, setEditandoCliente] = useState(null);
-  const [eliminandoCliente, setEliminandoCliente] = useState(null);
-  const queryClient = useQueryClient();
+   const [mesSeleccionado, setMesSeleccionado] = useState(new Date());
+   const [busqueda, setBusqueda] = useState('');
+   const [filtroEstado, setFiltroEstado] = useState('todos');
+   const [sincronizando, setSincronizando] = useState(false);
+   const [editandoCobro, setEditandoCobro] = useState(null);
+   const [montoPago, setMontoPago] = useState('');
+   const [editandoCliente, setEditandoCliente] = useState(null);
+   const [eliminandoCliente, setEliminandoCliente] = useState(null);
+   const [modalDetalle, setModalDetalle] = useState({ open: false, cliente: null });
+   const queryClient = useQueryClient();
 
   const mesStr = format(mesSeleccionado, 'yyyy-MM');
   const hoy = new Date();
