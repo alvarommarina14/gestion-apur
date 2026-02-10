@@ -175,7 +175,7 @@ export default function Finanzas() {
     
     return turnos.filter(t => {
       const fecha = parseISO(t.fecha);
-      return fecha >= inicio && fecha <= fin;
+      return fecha >= inicio && fecha <= fin && t.estado !== 'cancelado';
     });
   }, [turnos, mesSeleccionado]);
 
