@@ -13,6 +13,7 @@ import CalendarioVistasTurnos from '@/components/agenda/CalendarioVistasTurnos';
 import NuevoTurnoModal from '@/components/agenda/NuevoTurnoModal';
 import BloquearTurnoModal from '@/components/agenda/BloquearTurnoModal';
 import NuevaClaseAgendaModal from '@/components/agenda/NuevaClaseAgendaModal';
+import NuevoAlquilerModal from '@/components/agenda/NuevoAlquilerModal';
 import { toast } from 'sonner';
 
 export default function AgendaCanchas() {
@@ -21,6 +22,7 @@ export default function AgendaCanchas() {
   const [showNuevoTurnoModal, setShowNuevoTurnoModal] = useState(false);
   const [showBloqueoModal, setShowBloqueoModal] = useState(false);
   const [showNuevaClaseModal, setShowNuevaClaseModal] = useState(false);
+  const [showNuevoAlquilerModal, setShowNuevoAlquilerModal] = useState(false);
   const [nuevoTurnoType, setNuevoTurnoType] = useState('alquiler');
   const [turnoEditando, setTurnoEditando] = useState(null);
   const [bloqueoEditando, setBloqueoEditando] = useState(null);
@@ -153,7 +155,7 @@ export default function AgendaCanchas() {
           Nueva Clase
         </Button>
         <Button
-          onClick={() => handleNuevoTurno('alquiler')}
+          onClick={() => setShowNuevoAlquilerModal(true)}
           className="gap-2 bg-emerald-600 hover:bg-emerald-700"
         >
           <Plus className="w-4 h-4" />
@@ -292,6 +294,14 @@ export default function AgendaCanchas() {
             queryClient.invalidateQueries({ queryKey: ['clases'] });
             queryClient.invalidateQueries({ queryKey: ['turnos'] });
           }}
+          initialDate={selectedDate}
+        />
+      )}
+
+      {showNuevoAlquilerModal && (
+        <NuevoAlquilerModal
+          isOpen={showNuevoAlquilerModal}
+          onClose={() => setShowNuevoAlquilerModal(false)}
           initialDate={selectedDate}
         />
       )}
