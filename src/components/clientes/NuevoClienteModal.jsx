@@ -234,59 +234,55 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Clasificación</Label>
-              <Select
-                value={formData.clasificacion}
-                onValueChange={(v) => setFormData({ ...formData, clasificacion: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                     <SelectItem value="recurrente">Recurrente</SelectItem>
-                     <SelectItem value="suelto">Suelto</SelectItem>
-                   </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-               <Label>Tipo</Label>
-               <Select
-                 value={formData.tipo_cliente}
-                 onValueChange={(v) => setFormData({ ...formData, tipo_cliente: v })}
-               >
-                 <SelectTrigger>
-                   <SelectValue />
-                 </SelectTrigger>
-                 <SelectContent>
-                   <SelectItem value="clase">Clase</SelectItem>
-                   <SelectItem value="abono">Abono</SelectItem>
-                   <SelectItem value="suelto">Suelto</SelectItem>
-                 </SelectContent>
-               </Select>
-             </div>
-            </div>
+          {tipoRegistro === 'abono' ? (
+            // Flujo para Abono de Cancha
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Clasificación</Label>
+                  <Select
+                    value={formData.clasificacion}
+                    onValueChange={(v) => setFormData({ ...formData, clasificacion: v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="recurrente">Recurrente</SelectItem>
+                      <SelectItem value="suelto">Suelto</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
 
-            {formData.tipo_cliente === 'clase' && (
-            <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-              <Checkbox
-                id="es-alumno"
-                checked={formData.es_alumno}
-                onCheckedChange={(checked) => setFormData({
-                  ...formData,
-                  es_alumno: checked,
-                  profesor_id: checked ? formData.profesor_id : '',
-                  profesor_nombre: checked ? formData.profesor_nombre : '',
-                })}
-              />
-              <Label htmlFor="es-alumno" className="font-medium cursor-pointer">
-                Es alumno
-              </Label>
-            </div>
-            )}
+              <div className="space-y-2">
+                <Label>Precio mensual *</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  step="100"
+                  value={formData.precio}
+                  onChange={(e) => setFormData({ ...formData, precio: parseFloat(e.target.value) || 0 })}
+                  placeholder="Ej: 120000"
+                  required
+                />
+              </div>
+            </>
+          ) : (
+            // Flujo para Alumno
+            <>
+              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                <Checkbox
+                  id="es-alumno"
+                  checked={true}
+                  disabled
+                />
+                <Label htmlFor="es-alumno" className="font-medium cursor-pointer">
+                  Es alumno
+                </Label>
+              </div>
 
-            {formData.es_alumno && (
+              {true && (
              <div className="space-y-4">
                <div className="space-y-2">
                  <Label>Profesor *</Label>
