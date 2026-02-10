@@ -288,15 +288,6 @@ export default function Agenda() {
 
 
 
-        {/* Recordatorios Hoy - Solo vista día */}
-        {!showCalendario && (
-          <RecordatoriosCanchaHoySection
-            fechaHoy={selectedDate}
-            onEditarTurno={(turno) => setCancelarTurnoModal({ open: true, turno })}
-            onEditarRecordatorio={(rec) => {}}
-          />
-        )}
-
         {/* Vista de calendario o día */}
          {showCalendario ? (
            <CalendarioCompleto
