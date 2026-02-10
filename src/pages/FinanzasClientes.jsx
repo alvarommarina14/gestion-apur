@@ -198,7 +198,11 @@ export default function FinanzasClientes() {
 
         <DetalleClienteModal
           open={modalDetalle.open}
-          onOpenChange={(open) => !open && setModalDetalle({ open: false, cliente: null })}
+          onOpenChange={(open) => {
+            if (!open) {
+              setModalDetalle({ open: false, cliente: null });
+            }
+          }}
           cliente={modalDetalle.cliente}
         />
         </div>
