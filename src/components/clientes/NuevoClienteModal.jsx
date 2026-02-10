@@ -29,23 +29,24 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
    const queryClient = useQueryClient();
    const [success, setSuccess] = useState(false);
    const [clienteCreado, setClienteCreado] = useState(null);
+   const [tipoRegistro, setTipoRegistro] = useState(null); // 'abono' o 'alumno'
    const [formData, setFormData] = useState({
-       nombre: '',
-       telefono: '',
-       email: '',
-       clasificacion: 'recurrente',
-       tipo_cliente: 'clase',
-       precio: 0,
-       es_alumno: false,
-       profesor_id: '',
-       profesor_nombre: '',
-       clases_por_mes: '4',
-       horario_preferido: '',
-       sede_preferida: '',
-       tipo_asistencia: 'un_dia',
-       dia_preferido: '',
-       notas: '',
-     });
+        nombre: '',
+        telefono: '',
+        email: '',
+        clasificacion: 'recurrente',
+        tipo_cliente: 'clase',
+        precio: 0,
+        es_alumno: false,
+        profesor_id: '',
+        profesor_nombre: '',
+        clases_por_mes: '4',
+        horario_preferido: '',
+        sede_preferida: '',
+        tipo_asistencia: 'un_dia',
+        dia_preferido: '',
+        notas: '',
+      });
 
    const { data: profesores = [] } = useQuery({
      queryKey: ['profesores-list'],
