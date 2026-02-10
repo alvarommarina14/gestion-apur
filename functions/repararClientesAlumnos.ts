@@ -5,77 +5,77 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
-    if (user?.role !== 'admin') {
-      return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+    if (!user || user.role !== 'admin') {
+      return Response.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    // Obtener o crear profesor "Santiago Galla"
-    const profesores = await base44.asServiceRole.entities.Profesor.list();
-    let profesor = profesores.find(p => p.nombre.toLowerCase() === 'santiago galla');
+    // Obtener todos los alumnos
+    const alumnos = await base44.asServiceRole.entities.Alumno.list();
+    console.log(`📊 Encontrados ${alumnos.length} alumnos`);
 
-    if (!profesor) {
-      profesor = await base44.asServiceRole.entities.Profesor.create({
-        nombre: 'Santiago Galla',
-        email: 'santiago@example.com',
-        telefono: '',
-        especialidad: '',
-        activo: true,
-      });
-    }
-
-    // Obtener clientes con profesor inválido
+    // Obtener todos los clientes
     const clientes = await base44.asServiceRole.entities.Cliente.list();
-    const clientesAActualizar = clientes.filter(c => 
-      c.es_alumno && 
-      (c.profesor_nombre === 'Santiago Galla' || c.nombre === 'Jorge Regules' || c.nombre === 'Florentino Gascon')
-    );
+    console.log(`📊 Encontrados ${clientes.length} clientes`);
 
     let actualizados = 0;
-    for (const cliente of clientesAActualizar) {
-      await base44.asServiceRole.entities.Cliente.update(cliente.id, {
-        profesor_id: profesor.id,
-        profesor_nombre: profesor.nombre,
-      });
-      actualizados++;
-    }
+    let creados = 0;
+    let errores = 0;
 
-    // Ahora sincronizar alumnos
-    const alumnosExistentes = await base44.asServiceRole.entities.Alumno.list();
-    const alumnosMap = new Map(alumnosExistentes.map(a => [a.nombre.toLowerCase(), a]));
+    for (const alumno of alumnos) {
+      try {
+        // Buscar cliente por nombre
+        const clienteExistente = clientes.find(c => 
+          c.nombre.toLowerCase().trim() === alumno.nombre.toLowerCase().trim()
+        );
 
-    let sincronizados = 0;
-    for (const cliente of clientesAActualizar) {
-      const nombreLower = cliente.nombre.toLowerCase();
-      
-      if (alumnosMap.has(nombreLower)) {
-        continue;
+        if (clienteExistente) {
+          // Actualizar cliente existente
+          await base44.asServiceRole.entities.Cliente.update(clienteExistente.id, {
+            tipo_cliente: 'clase',
+            precio: alumno.precio_mensual || 0,
+            es_alumno: true,
+            profesor_id: alumno.profesor_id || '',
+            profesor_nombre: alumno.profesor_nombre || 'Sin asignar',
+            clasificacion: 'recurrente',
+            notas: clienteExistente.notas || `Alumno sincronizado - Profesor: ${alumno.profesor_nombre || 'Sin asignar'}`,
+            activo: alumno.estado === 'activo'
+          });
+          actualizados++;
+          console.log(`✅ Cliente actualizado: ${alumno.nombre}`);
+        } else {
+          // Crear nuevo cliente si no existe
+          await base44.asServiceRole.entities.Cliente.create({
+            nombre: alumno.nombre,
+            telefono: alumno.whatsapp || '',
+            email: '',
+            precio: alumno.precio_mensual || 0,
+            tipo_cliente: 'clase',
+            es_alumno: true,
+            profesor_id: alumno.profesor_id || '',
+            profesor_nombre: alumno.profesor_nombre || 'Sin asignar',
+            clasificacion: 'recurrente',
+            notas: `Alumno sincronizado - Profesor: ${alumno.profesor_nombre || 'Sin asignar'}`,
+            activo: alumno.estado === 'activo'
+          });
+          creados++;
+          console.log(`➕ Cliente creado: ${alumno.nombre}`);
+        }
+      } catch (err) {
+        console.error(`❌ Error con alumno ${alumno.nombre}:`, err);
+        errores++;
       }
-
-      const nuevoAlumno = await base44.asServiceRole.entities.Alumno.create({
-        profesor_id: profesor.id,
-        profesor_nombre: profesor.nombre,
-        nombre: cliente.nombre,
-        whatsapp: cliente.telefono || '',
-        observaciones: cliente.notas || '',
-        estado: 'activo',
-        precio_mensual: cliente.precio || 0,
-        clases_por_mes: 0,
-        clases_a_recuperar: 0,
-        deuda_total: 0,
-        total_clases_asistidas: 0,
-      });
-      
-      sincronizados++;
     }
 
-    return Response.json({ 
-      message: 'Reparación completada',
-      profesor: profesor.nombre,
-      clientesActualizados: actualizados,
-      alumnosCreados: sincronizados,
+    return Response.json({
+      success: true,
+      actualizados,
+      creados,
+      errores,
+      total: alumnos.length
     });
 
   } catch (error) {
+    console.error('Error en reparación:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
