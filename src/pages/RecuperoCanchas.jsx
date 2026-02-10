@@ -149,13 +149,18 @@ export default function RecuperoCanchas() {
   const deleteRecuperoMutation = useMutation({
     mutationFn: async (id) => {
       const recupero = recuperos.find(r => r.id === id);
-      // Revertir clases a recuperar del alumno
-      if (recupero?.alumno_id) {
-        const alumnos = await base44.entities.Alumno.filter({ id: recupero.alumno_id });
-        if (alumnos.length > 0) {
-          await base44.entities.Alumno.update(recupero.alumno_id, {
-            clases_a_recuperar: (alumnos[0].clases_a_recuperar || 0) + 1,
-          });
+      // Revertir clases a recuperar del alumno solo si tiene un ID válido
+      if (recupero?.alumno_id && recupero.alumno_id !== recupero.alumno_nombre) {
+        try {
+          const alumnos = await base44.entities.Alumno.filter({ id: recupero.alumno_id });
+          if (alumnos.length > 0) {
+            await base44.entities.Alumno.update(recupero.alumno_id, {
+              clases_a_recuperar: (alumnos[0].clases_a_recuperar || 0) + 1,
+            });
+          }
+        } catch (e) {
+          console.error('Error actualizando alumno:', e);
+          // Continuar con la eliminación del recupero aunque falle la actualización
         }
       }
       await base44.entities.Recupero.delete(id);
