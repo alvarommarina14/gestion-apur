@@ -40,21 +40,27 @@ export default function RecordatoriosCanchaHoy({ turnos = [], fecha }) {
   ).sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio));
 
   const eliminarRecordatorioMutation = useMutation({
-    mutationFn: async (turnoId) => {
-      const recordatorios = await base44.entities.RecordatorioCancha.filter({ 
-        turno_cancha_id: turnoId 
-      });
+     mutationFn: async (turnoId) => {
+       const recordatorios = await base44.entities.RecordatorioCancha.filter({ 
+         turno_cancha_id: turnoId 
+       });
 
-      for (const rec of recordatorios) {
-        await base44.entities.RecordatorioCancha.delete(rec.id);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
-      queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
-      queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha-push'] });
-    }
-  });
+       for (const rec of recordatorios) {
+         await base44.entities.RecordatorioCancha.delete(rec.id);
+       }
+     },
+     onSuccess: () => {
+       queryClient.invalidateQueries({ 
+         queryKey: ['turnos-cancha'],
+         exact: false
+       });
+       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+     },
+     onError: (error) => {
+       console.error('Error al eliminar recordatorio:', error);
+       alert('Error al eliminar el recordatorio');
+     }
+   });
 
   const registrarPagoMutation = useMutation({
     mutationFn: async ({ turno, medio, notas }) => {
