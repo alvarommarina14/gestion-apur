@@ -6,12 +6,17 @@ import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ChevronRight, DollarSign, Users, CheckCircle, Clock } from 'lucide-react';
+import { ChevronRight, DollarSign, Users, CheckCircle, Clock, FileText, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import RegistrarAsistenciaModal from '@/components/modals/RegistrarAsistenciaModal';
+import CancelarClaseModal from '@/components/modals/CancelarClaseModal';
 
 export default function ClasesConAlumnos({ profesorSeleccionado, onRegistrarPago }) {
   const [claseSeleccionada, setClaseSeleccionada] = useState(null);
   const [alumnoSeleccionado, setAlumnoSeleccionado] = useState(null);
+  const [claseAsistencia, setClaseAsistencia] = useState(null);
+  const [alumnoAsistencia, setAlumnoAsistencia] = useState(null);
+  const [claseCancelar, setClaseCancelar] = useState(null);
 
   const { data: turnos = [] } = useQuery({
     queryKey: ['turnos-profesor'],
@@ -121,14 +126,29 @@ export default function ClasesConAlumnos({ profesorSeleccionado, onRegistrarPago
                           {alumnosClase.length}
                         </Badge>
                         <ChevronRight
-                          className={cn(
-                            'w-5 h-5 text-slate-400 transition-transform',
-                            claseSeleccionada?.id === clase.id && 'rotate-90'
-                          )}
-                        />
-                      </div>
-                    </div>
-                  </div>
+                            className={cn(
+                              'w-5 h-5 text-slate-400 transition-transform',
+                              claseSeleccionada?.id === clase.id && 'rotate-90'
+                            )}
+                          />
+                        </div>
+                        </div>
+
+                        {/* Botón cancelar clase (siempre visible) */}
+                        {claseSeleccionada?.id !== clase.id && (
+                        <div className="p-2 border-t flex gap-2 justify-end">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setClaseCancelar(clase)}
+                            className="gap-1 text-rose-600 border-rose-300 hover:bg-rose-50"
+                          >
+                            <XCircle className="w-3 h-3" />
+                            Cancelar
+                          </Button>
+                        </div>
+                        )}
+                        </div>
 
                   {/* Lista de alumnos (expandible) */}
                   {claseSeleccionada?.id === clase.id && (
@@ -160,26 +180,40 @@ export default function ClasesConAlumnos({ profesorSeleccionado, onRegistrarPago
                                 </div>
                               </div>
 
-                              {/* Estado de pago */}
+                              {/* Botones de acciones */}
                               {alumnoSeleccionado?.id === alumno.id && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => {
-                                    onRegistrarPago({ ...alumno, clase, turnoId: clase.id });
-                                    setAlumnoSeleccionado(null);
-                                    setClaseSeleccionada(null);
-                                  }}
-                                  disabled={clase.pagado}
-                                  className={cn(
-                                    "gap-1",
-                                    clase.pagado 
-                                      ? "bg-emerald-100 text-emerald-700 cursor-not-allowed"
-                                      : "bg-emerald-600 hover:bg-emerald-700"
-                                  )}
-                                >
-                                  <DollarSign className="w-3 h-3" />
-                                  {clase.pagado ? 'Pagado' : 'Cobrar'}
-                                </Button>
+                                <div className="flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    onClick={() => {
+                                      setClaseAsistencia(clase);
+                                      setAlumnoAsistencia(alumno);
+                                    }}
+                                    variant="outline"
+                                    className="gap-1 text-blue-600 border-blue-300 hover:bg-blue-50"
+                                  >
+                                    <FileText className="w-3 h-3" />
+                                    Asistencia
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => {
+                                      onRegistrarPago({ ...alumno, clase, turnoId: clase.id });
+                                      setAlumnoSeleccionado(null);
+                                      setClaseSeleccionada(null);
+                                    }}
+                                    disabled={clase.pagado}
+                                    className={cn(
+                                      "gap-1",
+                                      clase.pagado 
+                                        ? "bg-emerald-100 text-emerald-700 cursor-not-allowed"
+                                        : "bg-emerald-600 hover:bg-emerald-700"
+                                    )}
+                                  >
+                                    <DollarSign className="w-3 h-3" />
+                                    {clase.pagado ? 'Pagado' : 'Cobrar'}
+                                  </Button>
+                                </div>
                               )}
                             </div>
                           </div>
@@ -193,6 +227,23 @@ export default function ClasesConAlumnos({ profesorSeleccionado, onRegistrarPago
           </div>
         ))
       )}
+
+      {/* Modales */}
+      <RegistrarAsistenciaModal 
+        open={!!claseAsistencia && !!alumnoAsistencia}
+        onOpenChange={() => {
+          setClaseAsistencia(null);
+          setAlumnoAsistencia(null);
+        }}
+        clase={claseAsistencia}
+        alumno={alumnoAsistencia}
+      />
+      
+      <CancelarClaseModal 
+        open={!!claseCancelar}
+        onOpenChange={() => setClaseCancelar(null)}
+        clase={claseCancelar}
+      />
     </div>
   );
 }
