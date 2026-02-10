@@ -80,7 +80,7 @@ export default function ClientesPage() {
             <p className="text-slate-500 text-sm">Historial, clasificación y seguimiento</p>
           </div>
           <Button 
-            onClick={() => setModalNuevo(true)}
+            onClick={() => setModalSeleccion(true)}
             className="bg-emerald-600 hover:bg-emerald-700"
           >
             <Plus className="w-4 h-4 mr-2" />
