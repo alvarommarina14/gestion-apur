@@ -1,10 +1,17 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { User } from 'lucide-react';
+import { User, Edit } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
-export default function TarjetaClaseConPagos({ turno, isAdmin, onTurnoClick }) {
+export default function TarjetaClaseConPagos({ turno, isAdmin, onTurnoClick, onEditarClase }) {
   const { data: profesor } = useQuery({
     queryKey: ['profesor', turno.profesor_id],
     queryFn: async () => {
@@ -23,14 +30,34 @@ export default function TarjetaClaseConPagos({ turno, isAdmin, onTurnoClick }) {
       className="h-full rounded-lg border-2 border-blue-300 bg-blue-50 p-3 transition-all"
       onClick={() => onTurnoClick?.(turno)}
     >
-      {/* Header con duración */}
+      {/* Header con duración y menú */}
       <div className="flex items-center justify-between mb-2">
         <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-semibold">
           Clase
         </span>
-        <span className="text-xs font-semibold text-slate-500">
-          {turno.duracion} min
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold text-slate-500">
+            {turno.duracion} min
+          </span>
+          {isAdmin && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
+                  <Edit className="w-3 h-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation();
+                  onEditarClase?.(turno);
+                }}>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Editar clase
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
       </div>
 
       {/* Cliente y horario */}
