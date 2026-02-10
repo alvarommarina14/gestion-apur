@@ -30,6 +30,7 @@ import { cn } from '@/lib/utils';
 import FormularioClaseAdmin from '@/components/agenda/FormularioClaseAdmin';
 import BotonesCancelacion from '@/components/agenda/BotonesCancelacion';
 import ModalEditarTurno from '@/components/agenda/ModalEditarTurno';
+import ModalConfirmarCancelacionRecurrencia from '@/components/agenda/ModalConfirmarCancelacionRecurrencia';
 
 export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isProfesor = false }) {
   const queryClient = useQueryClient();
@@ -664,6 +665,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
   const [showEditModal, setShowEditModal] = useState(false);
   const [busquedaCliente, setBusquedaCliente] = useState('');
   const [showListaClientes, setShowListaClientes] = useState(false);
+  const [showConfirmarCancelacion, setShowConfirmarCancelacion] = useState(false);
 
   useEffect(() => {
     const verificarRepeticion = async () => {
@@ -692,9 +694,12 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
   };
 
   const handleDeleteSerie = () => {
-    if (confirm('¿Eliminar TODA la serie de turnos recurrentes (hasta 52 semanas)?')) {
-      deleteMutation.mutate({ id: turno.id, eliminarSerie: true });
-    }
+    setShowConfirmarCancelacion(true);
+  };
+
+  const handleConfirmarCancelacion = () => {
+    setShowConfirmarCancelacion(false);
+    deleteMutation.mutate({ id: turno.id, eliminarSerie: true });
   };
 
   if (success) {
@@ -1193,6 +1198,17 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
           isOpen={showEditModal}
           onClose={() => setShowEditModal(false)}
           turno={turno}
+        />
+      )}
+
+      {/** Modal de confirmación para cancelación de recurrencia */}
+      {turno && (
+        <ModalConfirmarCancelacionRecurrencia
+          isOpen={showConfirmarCancelacion}
+          onClose={() => setShowConfirmarCancelacion(false)}
+          onConfirm={handleConfirmarCancelacion}
+          turno={turno}
+          isPending={deleteMutation.isPending}
         />
       )}
     </>
