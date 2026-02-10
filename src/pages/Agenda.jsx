@@ -314,7 +314,7 @@ export default function Agenda() {
             selectedCancha={selectedCancha}
             fecha={selectedDate}
             isAdmin={isAdmin}
-            onTurnoClick={(turno) => setCancelarTurnoModal({ open: true, turno })}
+            onTurnoClick={(turno) => turno.tipo_turno === 'clase' ? setClientesClaseModal({ open: true, turno }) : setCancelarTurnoModal({ open: true, turno })}
             onEditarClase={(clase) => {
               // Abrir modal específico para editar clase en agenda
               setEditarClaseAgendaModal({ open: true, turno: clase });
