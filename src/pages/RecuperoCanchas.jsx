@@ -582,16 +582,23 @@ export default function RecuperoCanchas() {
              {accion && (
                <Button
                  onClick={accion === 'recuperar' ? handleRecuperar : handleDescontar}
-                 disabled={updateMutation.isPending || deleteMutation.isPending}
+                 disabled={updateMutation.isPending || deleteCancelacionMutation.isPending}
                  className={accion === 'recuperar' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-blue-600 hover:bg-blue-700'}
                >
                  {updateMutation.isPending ? 'Guardando...' : `${accion === 'recuperar' ? 'Recuperar' : 'Descontar'}`}
                </Button>
              )}
-           </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
+             </div>
+             </DialogFooter>
+             </DialogContent>
+             </Dialog>
+
+             {/* Modal para programar clase */}
+             <NuevaClaseModal 
+             open={nuevaClaseModal.open}
+             onOpenChange={(open) => setNuevaClaseModal({ ...nuevaClaseModal, open })}
+             recupero={nuevaClaseModal.recupero}
+             />
+             </div>
+             );
+             }
