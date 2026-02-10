@@ -56,12 +56,8 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
   }));
 
   const { data: alumnos = [], isLoading: loadingAlumnos } = useQuery({
-    queryKey: ['alumnos', formData.profesor_id],
-    queryFn: () => {
-      if (!formData.profesor_id) return [];
-      return base44.entities.Alumno.filter({ profesor_id: formData.profesor_id });
-    },
-    enabled: !!formData.profesor_id,
+    queryKey: ['alumnos'],
+    queryFn: () => base44.entities.Alumno.list('-nombre', 500),
   });
   
   const { data: profesores = [] } = useQuery({
