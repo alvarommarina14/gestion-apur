@@ -337,31 +337,16 @@ export default function NuevoClienteModal({ open, onOpenChange, tipoCliente }) {
              </div>
             )}
 
-            {formData.tipo_cliente === 'abono' && (
+            {tipoCliente === 'abono_cancha' && (formData.tipo_cliente === 'abono' || formData.tipo_cliente === 'suelto') && (
              <div className="space-y-2">
-               <Label>Precio mensual *</Label>
+               <Label>{formData.tipo_cliente === 'abono' ? 'Precio mensual *' : 'Precio por turno *'}</Label>
                <Input
                  type="number"
                  min="0"
                  step="100"
                  value={formData.precio}
                  onChange={(e) => setFormData({ ...formData, precio: parseFloat(e.target.value) || 0 })}
-                 placeholder="Ej: 120000"
-                 required
-               />
-             </div>
-            )}
-
-            {formData.tipo_cliente === 'suelto' && (
-             <div className="space-y-2">
-               <Label>Precio *</Label>
-               <Input
-                 type="number"
-                 min="0"
-                 step="100"
-                 value={formData.precio}
-                 onChange={(e) => setFormData({ ...formData, precio: parseFloat(e.target.value) || 0 })}
-                 placeholder="Ej: 50000"
+                 placeholder={formData.tipo_cliente === 'abono' ? 'Ej: 120000' : 'Ej: 50000'}
                  required
                />
              </div>
