@@ -388,7 +388,7 @@ export default function CancelarClaseModal({ open, onOpenChange, clase }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-2xl w-[95vw] max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-rose-600">
             <XCircle className="w-5 h-5" />
@@ -399,7 +399,7 @@ export default function CancelarClaseModal({ open, onOpenChange, clase }) {
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 py-4 overflow-y-auto flex-1">
           <div className="space-y-2">
             <Label>Motivo de cancelación</Label>
             <div className="grid grid-cols-1 gap-2">
