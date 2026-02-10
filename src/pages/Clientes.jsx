@@ -152,9 +152,15 @@ export default function ClientesPage() {
                           'text-xs',
                           cliente.es_alumno 
                             ? 'bg-purple-100 text-purple-700' 
+                            : cliente.tipo_cliente === 'abono'
+                            ? 'bg-emerald-100 text-emerald-700'
                             : 'bg-blue-100 text-blue-700'
                         )}>
-                          {cliente.es_alumno ? 'Clase' : 'Alquiler'}
+                          {cliente.es_alumno 
+                            ? 'Clase' 
+                            : cliente.tipo_cliente === 'abono'
+                            ? 'Abono Cancha'
+                            : 'Cancha Suelta'}
                         </Badge>
                       </div>
                     </div>
@@ -175,7 +181,10 @@ export default function ClientesPage() {
                       {cliente.precio > 0 && (
                         <div className="flex items-center gap-2 text-blue-600 font-semibold">
                           <DollarSign className="w-4 h-4" />
-                          <span>${(cliente.precio || 0).toLocaleString('es-AR')}/mes</span>
+                          <span>
+                            ${(cliente.precio || 0).toLocaleString('es-AR')}
+                            {cliente.tipo_cliente === 'abono' && '/mes'}
+                          </span>
                         </div>
                       )}
                       <div className="flex items-center gap-2 text-emerald-600 font-semibold">
