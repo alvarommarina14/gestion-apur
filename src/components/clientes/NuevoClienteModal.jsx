@@ -25,7 +25,7 @@ import { registrarCreacion } from '@/components/utils/auditLog';
 import { useQuery } from '@tanstack/react-query';
 import NuevoAlumnoModal from '@/components/modals/NuevoAlumnoModal';
 
-export default function NuevoClienteModal({ open, onOpenChange }) {
+export default function NuevoClienteModal({ open, onOpenChange, tipoCliente }) {
    const queryClient = useQueryClient();
    const [success, setSuccess] = useState(false);
    const [clienteCreado, setClienteCreado] = useState(null);
@@ -54,14 +54,16 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
 
   React.useEffect(() => {
     if (open) {
+       const tipoInicial = tipoCliente === 'alumno' ? 'clase' : 'abono';
+       const esAlumno = tipoCliente === 'alumno';
        setFormData({
          nombre: '',
          telefono: '',
          email: '',
          clasificacion: 'recurrente',
-         tipo_cliente: 'clase',
+         tipo_cliente: tipoInicial,
          precio: 0,
-         es_alumno: false,
+         es_alumno: esAlumno,
          profesor_id: '',
          profesor_nombre: '',
          clases_por_mes: '4',
@@ -73,7 +75,7 @@ export default function NuevoClienteModal({ open, onOpenChange }) {
        });
        setSuccess(false);
      }
-  }, [open]);
+  }, [open, tipoCliente]);
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
