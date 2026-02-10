@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
@@ -13,21 +14,18 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Plus, Trash2, Edit2, ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Edit2 } from 'lucide-react';
 
 export default function ClasesAlumnosSection({ profesor }) {
   const queryClient = useQueryClient();
   const [expandedClase, setExpandedClase] = useState(null);
-  const [modalAbierto, setModalAbierto] = useState(false);
-  const [claseSeleccionada, setClaseSeleccionada] = useState(null);
-  const [alumnoModal, setAlumnoModal] = useState(false);
-  const [alumnoEditando, setAlumnoEditando] = useState(null);
-  const [alumnoEliminar, setAlumnoEliminar] = useState(null);
-  const [formAlumno, setFormAlumno] = useState({
-    nombre: '',
-    whatsapp: '',
-    observaciones: '',
+  const [editModal, setEditModal] = useState(false);
+  const [claseEditando, setClaseEditando] = useState(null);
+  const [formClase, setFormClase] = useState({
+    hora_inicio: '',
+    sede: '',
+    cancha: '',
+    notas: '',
   });
 
   const { data: alumnos = [] } = useQuery({
@@ -42,118 +40,64 @@ export default function ClasesAlumnosSection({ profesor }) {
 
   const alumnosProfesor = alumnos.filter(a => a.profesor_id === profesor?.id);
   const alumnosIds = alumnosProfesor.map(a => a.id);
-  const clasesProfesor = clases.filter(c => 
-    c.alumnos_ids?.some(id => alumnosIds.includes(id))
-  ).sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-
-  const crearAlumnoMutation = useMutation({
-    mutationFn: async (data) => {
-      const nuevoAlumno = await base44.entities.Alumno.create({
-        ...data,
-        profesor_id: profesor.id,
-        profesor_nombre: profesor.nombre,
-        estado: 'activo',
-        precio_mensual: 0,
-        clases_por_mes: 0,
-        clases_a_recuperar: 0,
-        deuda_total: 0,
-        total_clases_asistidas: 0,
-        fecha_inicio: new Date().toISOString().split('T')[0],
-      });
-      
-      // Agregar alumno a la clase
-      if (claseSeleccionada) {
-        const alumnosActuales = claseSeleccionada.alumnos_ids || [];
-        const nombresActuales = claseSeleccionada.alumnos_nombres || [];
-        
-        await base44.entities.Clase.update(claseSeleccionada.id, {
-          alumnos_ids: [...alumnosActuales, nuevoAlumno.id],
-          alumnos_nombres: [...nombresActuales, nuevoAlumno.nombre],
-        });
+  
+  // Obtener clases grupales únicas (sin duplicar por recurrencia)
+  const clasesGrupalesUnicas = clases
+    .filter(c => c.tipo === 'grupal' && c.alumnos_ids?.some(id => alumnosIds.includes(id)))
+    .reduce((acc, clase) => {
+      const existente = acc.find(c => 
+        c.hora_inicio === clase.hora_inicio && 
+        c.sede === clase.sede && 
+        c.cancha === clase.cancha
+      );
+      if (!existente) {
+        acc.push(clase);
       }
-      
-      return nuevoAlumno;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['alumnos'] });
-      queryClient.invalidateQueries({ queryKey: ['clases'] });
-      setFormAlumno({ nombre: '', whatsapp: '', observaciones: '' });
-      setAlumnoModal(false);
-    },
-  });
+      return acc;
+    }, [])
+    .sort((a, b) => {
+      const timeA = a.hora_inicio.split(':');
+      const timeB = b.hora_inicio.split(':');
+      return parseInt(timeA[0]) - parseInt(timeB[0]) || parseInt(timeA[1]) - parseInt(timeB[1]);
+    });
 
-  const editarAlumnoMutation = useMutation({
+  const editarClaseMutation = useMutation({
     mutationFn: async (data) => {
-      await base44.entities.Alumno.update(alumnoEditando.id, {
-        nombre: data.nombre,
-        whatsapp: data.whatsapp,
-        observaciones: data.observaciones,
+      await base44.entities.Clase.update(claseEditando.id, {
+        hora_inicio: data.hora_inicio,
+        sede: data.sede,
+        cancha: data.cancha,
+        notas: data.notas,
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['alumnos'] });
       queryClient.invalidateQueries({ queryKey: ['clases'] });
-      setFormAlumno({ nombre: '', whatsapp: '', observaciones: '' });
-      setAlumnoModal(false);
-      setAlumnoEditando(null);
+      setEditModal(false);
+      setClaseEditando(null);
     },
   });
 
-  const eliminarAlumnoMutation = useMutation({
-    mutationFn: async (alumno) => {
-      // Eliminar de la clase
-      if (claseSeleccionada) {
-        const alumnosActuales = claseSeleccionada.alumnos_ids.filter(id => id !== alumno.id);
-        const nombresActuales = claseSeleccionada.alumnos_nombres.filter((_, i) => claseSeleccionada.alumnos_ids[i] !== alumno.id);
-        
-        await base44.entities.Clase.update(claseSeleccionada.id, {
-          alumnos_ids: alumnosActuales,
-          alumnos_nombres: nombresActuales,
-        });
-      }
-      
-      // Eliminar alumno
-      await base44.entities.Alumno.delete(alumno.id);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['alumnos'] });
-      queryClient.invalidateQueries({ queryKey: ['clases'] });
-      setAlumnoEliminar(null);
-    },
-  });
-
-  const handleAbrirAlumnoModal = (clase, alumno = null) => {
-    setClaseSeleccionada(clase);
-    if (alumno) {
-      setAlumnoEditando(alumno);
-      setFormAlumno({
-        nombre: alumno.nombre,
-        whatsapp: alumno.whatsapp,
-        observaciones: alumno.observaciones,
-      });
-    } else {
-      setAlumnoEditando(null);
-      setFormAlumno({ nombre: '', whatsapp: '', observaciones: '' });
-    }
-    setAlumnoModal(true);
+  const handleAbrirEditModal = (clase) => {
+    setClaseEditando(clase);
+    setFormClase({
+      hora_inicio: clase.hora_inicio,
+      sede: clase.sede,
+      cancha: clase.cancha,
+      notas: clase.notas || '',
+    });
+    setEditModal(true);
   };
 
-  const handleGuardarAlumno = async () => {
-    if (!formAlumno.nombre.trim()) return;
-    
-    if (alumnoEditando) {
-      await editarAlumnoMutation.mutateAsync(formAlumno);
-    } else {
-      await crearAlumnoMutation.mutateAsync(formAlumno);
-    }
+  const handleGuardarClase = async () => {
+    await editarClaseMutation.mutateAsync(formClase);
   };
 
-  if (clasesProfesor.length === 0) {
+  if (clasesGrupalesUnicas.length === 0) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Clases y Alumnos</CardTitle>
-          <CardDescription>No hay clases configuradas</CardDescription>
+          <CardTitle>Clases Grupales</CardTitle>
+          <CardDescription>No hay clases grupales configuradas</CardDescription>
         </CardHeader>
       </Card>
     );
@@ -162,12 +106,12 @@ export default function ClasesAlumnosSection({ profesor }) {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-2xl font-bold text-slate-900">Clases y Alumnos</h2>
-        <p className="text-slate-500 mt-1">Gestiona alumnos por clase</p>
+        <h2 className="text-2xl font-bold text-slate-900">Clases Grupales</h2>
+        <p className="text-slate-500 mt-1">Gestiona tus clases grupales</p>
       </div>
 
       <div className="grid gap-4">
-        {clasesProfesor.map((clase) => {
+        {clasesGrupalesUnicas.map((clase) => {
           const alumnosClase = alumnos.filter(a => clase.alumnos_ids?.includes(a.id));
           const isExpanded = expandedClase === clase.id;
 
@@ -175,16 +119,18 @@ export default function ClasesAlumnosSection({ profesor }) {
             <Card key={clase.id} className="overflow-hidden">
               <button
                 onClick={() => setExpandedClase(isExpanded ? null : clase.id)}
-                className="w-full"
+                className="w-full text-left"
               >
                 <CardHeader className="cursor-pointer hover:bg-slate-50 transition-colors">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4 flex-1">
-                      <div>
-                        <CardTitle className="text-lg">{clase.sede}</CardTitle>
-                        <CardDescription>
-                          {clase.fecha} • {clase.hora_inicio} • {clase.tipo}
-                        </CardDescription>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3">
+                        <div>
+                          <CardTitle className="text-lg">{clase.hora_inicio}</CardTitle>
+                          <CardDescription className="mt-1">
+                            {clase.sede} • Cancha {clase.cancha}
+                          </CardDescription>
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -197,49 +143,34 @@ export default function ClasesAlumnosSection({ profesor }) {
 
               {isExpanded && (
                 <CardContent className="border-t pt-4 space-y-4">
-                  {alumnosClase.length > 0 ? (
-                    <div className="space-y-2">
-                      {alumnosClase.map((alumno) => (
-                        <div
-                          key={alumno.id}
-                          className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
-                        >
-                          <div>
-                            <p className="font-medium text-slate-900">{alumno.nombre}</p>
-                            <p className="text-sm text-slate-500">{alumno.whatsapp}</p>
+                  <div>
+                    <h4 className="font-medium text-slate-900 mb-2">Alumnos ({alumnosClase.length})</h4>
+                    {alumnosClase.length > 0 ? (
+                      <div className="space-y-1">
+                        {alumnosClase.map((alumno) => (
+                          <div key={alumno.id} className="text-sm text-slate-600">
+                            • {alumno.nombre}
                           </div>
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleAbrirAlumnoModal(clase, alumno)}
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => {
-                                setClaseSeleccionada(clase);
-                                setAlumnoEliminar(alumno);
-                              }}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-slate-500">Sin alumnos asignados</p>
+                    )}
+                  </div>
+
+                  {clase.notas && (
+                    <div>
+                      <h4 className="font-medium text-slate-900 mb-1">Notas</h4>
+                      <p className="text-sm text-slate-600">{clase.notas}</p>
                     </div>
-                  ) : (
-                    <p className="text-slate-500 text-center py-4">Sin alumnos asignados</p>
                   )}
 
                   <Button
                     className="w-full bg-emerald-600 hover:bg-emerald-700"
-                    onClick={() => handleAbrirAlumnoModal(clase)}
+                    onClick={() => handleAbrirEditModal(clase)}
                   >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Agregar alumno
+                    <Edit2 className="w-4 h-4 mr-2" />
+                    Editar clase
                   </Button>
                 </CardContent>
               )}
@@ -248,77 +179,66 @@ export default function ClasesAlumnosSection({ profesor }) {
         })}
       </div>
 
-      {/* Modal Alumno */}
-      <Dialog open={alumnoModal} onOpenChange={setAlumnoModal}>
+      {/* Modal Editar Clase */}
+      <Dialog open={editModal} onOpenChange={setEditModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {alumnoEditando ? 'Editar alumno' : 'Nuevo alumno'}
-            </DialogTitle>
+            <DialogTitle>Editar clase grupal</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Nombre *</Label>
+              <Label>Hora de inicio *</Label>
               <Input
-                value={formAlumno.nombre}
-                onChange={(e) => setFormAlumno({ ...formAlumno, nombre: e.target.value })}
-                placeholder="Nombre completo"
+                type="time"
+                value={formClase.hora_inicio}
+                onChange={(e) => setFormClase({ ...formClase, hora_inicio: e.target.value })}
               />
             </div>
 
             <div className="space-y-2">
-              <Label>WhatsApp</Label>
+              <Label>Sede *</Label>
               <Input
-                value={formAlumno.whatsapp}
-                onChange={(e) => setFormAlumno({ ...formAlumno, whatsapp: e.target.value })}
-                placeholder="+54 9 ..."
+                value={formClase.sede}
+                onChange={(e) => setFormClase({ ...formClase, sede: e.target.value })}
+                placeholder="Club Norte"
               />
             </div>
 
             <div className="space-y-2">
-              <Label>Observaciones</Label>
+              <Label>Cancha *</Label>
               <Input
-                value={formAlumno.observaciones}
-                onChange={(e) => setFormAlumno({ ...formAlumno, observaciones: e.target.value })}
-                placeholder="Notas adicionales"
+                value={formClase.cancha}
+                onChange={(e) => setFormClase({ ...formClase, cancha: e.target.value })}
+                placeholder="1"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Notas</Label>
+              <Textarea
+                value={formClase.notas}
+                onChange={(e) => setFormClase({ ...formClase, notas: e.target.value })}
+                placeholder="Observaciones adicionales..."
+                rows={3}
               />
             </div>
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAlumnoModal(false)}>
+            <Button variant="outline" onClick={() => setEditModal(false)}>
               Cancelar
             </Button>
             <Button
               className="bg-emerald-600 hover:bg-emerald-700"
-              onClick={handleGuardarAlumno}
-              disabled={crearAlumnoMutation.isPending || editarAlumnoMutation.isPending}
+              onClick={handleGuardarClase}
+              disabled={editarClaseMutation.isPending}
             >
-              {alumnoEditando ? 'Actualizar' : 'Crear'}
+              Guardar cambios
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Alert Eliminar */}
-      <AlertDialog open={!!alumnoEliminar} onOpenChange={() => setAlumnoEliminar(null)}>
-        <AlertDialogContent>
-          <AlertDialogTitle>¿Eliminar alumno?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Se eliminará a {alumnoEliminar?.nombre} de la clase. Esta acción no se puede deshacer.
-          </AlertDialogDescription>
-          <div className="flex gap-2 justify-end">
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => eliminarAlumnoMutation.mutate(alumnoEliminar)}
-              className="bg-destructive hover:bg-destructive/90"
-            >
-              Eliminar
-            </AlertDialogAction>
-          </div>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
