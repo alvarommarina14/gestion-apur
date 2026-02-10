@@ -176,31 +176,33 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null })
 
         const claseCreada = await base44.entities.Clase.create(claseData);
 
-        // Crear TurnoCancha y sincronizar con Google Calendar (tanto admin como profesor)
-        const empleados = await base44.entities.User.list();
-        const empleadosIds = empleados.map(e => e.id);
-        const empleadosEmails = empleados.map(e => e.email);
-        const empleadosNombres = empleados.map(e => e.full_name);
+        // Crear TurnoCancha solo si se especificó una cancha
+        if (formData.cancha) {
+          try {
+            const empleados = await base44.entities.User.list();
+            const empleadosIds = empleados.map(e => e.id);
+            const empleadosEmails = empleados.map(e => e.email);
+            const empleadosNombres = empleados.map(e => e.full_name);
 
-        try {
-          await base44.entities.TurnoCancha.create({
-            fecha: format(formData.fecha, 'yyyy-MM-dd'),
-            hora_inicio: formData.hora_inicio,
-            hora_fin: horaFin,
-            duracion: Number(formData.duracion),
-            cancha: formData.cancha || '',
-            cliente: alumnosNombres.join(', ') || 'Clase',
-            tipo_turno: 'clase',
-            monto: formData.precio ? Number(formData.precio) : 0,
-            pagado: formData.pagado,
-            empleados_asignados_ids: empleadosIds,
-            empleados_asignados_emails: empleadosEmails,
-            empleados_asignados_nombres: empleadosNombres,
-            estado: 'activo',
-            notas: formData.notas || `Clase - ${alumnosNombres.join(', ')}`,
-          });
-        } catch (err) {
-          console.error('Error creando TurnoCancha:', err);
+            await base44.entities.TurnoCancha.create({
+              fecha: format(formData.fecha, 'yyyy-MM-dd'),
+              hora_inicio: formData.hora_inicio,
+              hora_fin: horaFin,
+              duracion: Number(formData.duracion),
+              cancha: formData.cancha,
+              cliente: alumnosNombres.join(', ') || 'Clase',
+              tipo_turno: 'clase',
+              monto: formData.precio ? Number(formData.precio) : 0,
+              pagado: formData.pagado,
+              empleados_asignados_ids: empleadosIds,
+              empleados_asignados_emails: empleadosEmails,
+              empleados_asignados_nombres: empleadosNombres,
+              estado: 'activo',
+              notas: formData.notas || `Clase - ${alumnosNombres.join(', ')}`,
+            });
+          } catch (err) {
+            console.error('Error creando TurnoCancha:', err);
+          }
         }
 
         // Sincronizar con Google Calendar
