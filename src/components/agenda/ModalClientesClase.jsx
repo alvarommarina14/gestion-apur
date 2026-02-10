@@ -302,28 +302,67 @@ export default function ModalClientesClase({
         </div>
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => onOpenChange(false)}
-          >
-            Cerrar
-          </Button>
-          {turno.modalidad_alquiler === 'abono' && (
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={() => {
-                onOpenChange(false);
-                onCancelarTurno?.(turno);
-              }}
-              className="bg-rose-600 hover:bg-rose-700"
-            >
-              <Ban className="w-4 h-4 mr-2" />
-              Cancelar turno
-            </Button>
-          )}
-        </DialogFooter>
+           <Button 
+             type="button" 
+             variant="outline" 
+             onClick={() => onOpenChange(false)}
+           >
+             Cerrar
+           </Button>
+           <Button
+             type="button"
+             className="bg-emerald-600 hover:bg-emerald-700"
+             onClick={async () => {
+               setLoading(true);
+               try {
+                 // Guardar asistencia para cada cliente
+                 for (const [cliente, estado] of Object.entries(clientesEstado)) {
+                   if (estado.estado) {
+                     // Buscar ID del alumno
+                     const alumnoIndex = turno.alumnos_nombres?.indexOf(cliente) ?? -1;
+                     const alumnoId = alumnoIndex >= 0 && turno.alumnos_ids ? turno.alumnos_ids[alumnoIndex] : cliente;
+
+                     // Crear registro de asistencia
+                     await base44.entities.Asistencia.create({
+                       clase_id: turno.id,
+                       alumno_id: alumnoId,
+                       alumno_nombre: cliente,
+                       fecha: turno.fecha,
+                       estado: estado.estado,
+                       notas: estado.notas || '',
+                       genera_recupero: estado.estado !== 'presente',
+                     });
+                   }
+                 }
+
+                 queryClient.invalidateQueries({ queryKey: ['asistencia'] });
+                 queryClient.invalidateQueries({ queryKey: ['clientes'] });
+                 onOpenChange(false);
+               } catch (error) {
+                 console.error('Error al guardar asistencia:', error);
+               } finally {
+                 setLoading(false);
+               }
+             }}
+             disabled={loading || !Object.values(clientesEstado).some(e => e.estado)}
+           >
+             {loading ? 'Guardando...' : 'Guardar asistencia'}
+           </Button>
+           {turno.modalidad_alquiler === 'abono' && (
+             <Button
+               type="button"
+               variant="destructive"
+               onClick={() => {
+                 onOpenChange(false);
+                 onCancelarTurno?.(turno);
+               }}
+               className="bg-rose-600 hover:bg-rose-700"
+             >
+               <Ban className="w-4 h-4 mr-2" />
+               Cancelar turno
+             </Button>
+           )}
+         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
