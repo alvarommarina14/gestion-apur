@@ -169,7 +169,7 @@ export default function VistaCalendarioCancha({ turnos = [], recordatorios = [],
     });
     
     return map;
-  }, [turnos, recordatorios, bloqueos, selectedDate, selectedCancha]);
+  }, [turnos, recordatorios, bloqueos, selectedDate, selectedCancha, cobrosClientes]);
 
   const calcularFilas = (turno) => {
     if (!turno) return 1;
