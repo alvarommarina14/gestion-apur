@@ -61,12 +61,7 @@ const navigationEmpleados = [
   { name: 'Tareas', href: 'Tareas', icon: CheckCircle, permissionKey: 'empleados' },
 ];
 
-const navigationProfesor = [
-  { name: 'Dashboard', href: 'Dashboard', icon: LayoutDashboard, permissionKey: 'dashboard' },
-  { name: 'Alumnos', href: 'Alumnos', icon: Users, permissionKey: 'alumnos' },
-  { name: 'Pagos', href: 'Pagos', icon: DollarSign, permissionKey: 'pagos' },
-  { name: 'Reportes', href: 'Reportes', icon: FileText, permissionKey: 'reportes' },
-];
+const navigationProfesor = [];
 
 const navigationClientes = [
   { name: 'Clientes', href: 'Clientes', icon: Users, permissionKey: 'gestion_clientes' },
