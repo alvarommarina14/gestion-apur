@@ -46,16 +46,18 @@ export default function TarjetaClase({ turno, estadosPago = {} }) {
       {esGrupal && (
         <div className="space-y-1.5">
           <div className="space-y-1">
-            {turno.alumnos_nombres.map((alumno, idx) => (
-              <div key={idx} className="flex items-center justify-between gap-1">
-                <p className="text-xs font-semibold text-slate-900 truncate">
-                  {alumno}
-                </p>
-                {/* Badge de pago individual por alumno */}
-                {/* Nota: Si necesitas traer data de pago por alumno, debes pasarla como prop */}
-                {getPagoBadge(turno.pagado)}
-              </div>
-            ))}
+            {turno.alumnos_nombres.map((alumno, idx) => {
+              const alumnoId = turno.alumnos_ids?.[idx];
+              const estadoPago = estadosPago[alumnoId] || 'pendiente';
+              return (
+                <div key={idx} className="flex items-center justify-between gap-1">
+                  <p className="text-xs font-semibold text-slate-900 truncate">
+                    {alumno}
+                  </p>
+                  {getPagoBadge(estadoPago)}
+                </div>
+              );
+            })}
           </div>
           <p className="text-xs text-slate-600">
             {turno.hora_inicio} - {turno.hora_fin}
