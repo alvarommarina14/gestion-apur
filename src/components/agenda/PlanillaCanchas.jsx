@@ -33,8 +33,15 @@ const getPagoColor = (pagado) => {
    return pagado ? 'text-emerald-600 font-semibold' : 'text-orange-600 font-semibold';
 };
 
-const getEstadoPagoCliente = (clienteId, fecha, pagosClientesMap = {}) => {
-  const estadoPago = pagosClientesMap[clienteId];
+const getEstadoPagoCliente = (clienteId, clienteNombre, pagosClientesMap = {}) => {
+  // Primero intentar con cliente_id
+  let estadoPago = pagosClientesMap[clienteId];
+  
+  // Si no existe, intentar con el nombre del cliente
+  if (!estadoPago && clienteNombre) {
+    estadoPago = pagosClientesMap[clienteNombre];
+  }
+  
   if (!estadoPago) return { estado: 'pendiente', fuera_de_termino: false };
 
   return estadoPago;
@@ -256,7 +263,7 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pago
                                     <p className="text-xs font-semibold text-slate-900 truncate flex-1">
                                       {turno.cliente}
                                     </p>
-                                    {getPagoBadgeCliente(getEstadoPagoCliente(turno.cliente_id, date, pagosClientes))}
+                                    {getPagoBadgeCliente(getEstadoPagoCliente(turno.cliente_id, turno.cliente, pagosClientes))}
                                   </div>
                                   <p className="text-xs text-slate-600">
                                     {turno.hora_inicio} - {turno.hora_fin}
