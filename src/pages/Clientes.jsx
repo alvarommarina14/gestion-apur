@@ -285,22 +285,27 @@ export default function ClientesPage() {
                   estadoPago = 'moroso';
                 } else if (alumno.estado_mes_actual === 'debe' || alumno.estado_mes_actual === 'pendiente') {
                   estadoPago = 'debe';
-                } else if (alumno.estado_mes_actual === 'pagado' || alumno.estado === 'activo') {
+                } else if (alumno.estado_mes_actual === 'pagado') {
                   estadoPago = 'al_dia';
                 }
               }
             } else if (cliente.tipo_cliente === 'abono' || cliente.tipo_cliente === 'suelto') {
               // Calcular estados dinámicamente
               const cobrosCliente = cobros.filter(c => c.cliente_id === cliente.id);
-              const cobrosMoroso = cobrosCliente.filter(c => getEstadoDinamicoCobro(c) === 'moroso');
-              const cobrosPendientes = cobrosCliente.filter(c => getEstadoDinamicoCobro(c) === 'pendiente');
 
-              if (cobrosMoroso.length > 0) {
-                estadoPago = 'moroso';
-              } else if (cobrosPendientes.length > 0) {
-                estadoPago = 'debe';
-              } else if (cobrosCliente.length > 0) {
-                estadoPago = 'al_dia';
+              // Solo calcular estado si hay cobros registrados
+              if (cobrosCliente.length > 0) {
+                const cobrosMoroso = cobrosCliente.filter(c => getEstadoDinamicoCobro(c) === 'moroso');
+                const cobrosPendientes = cobrosCliente.filter(c => getEstadoDinamicoCobro(c) === 'pendiente');
+                const cobrosPagados = cobrosCliente.filter(c => getEstadoDinamicoCobro(c) === 'pagado');
+
+                if (cobrosMoroso.length > 0) {
+                  estadoPago = 'moroso';
+                } else if (cobrosPendientes.length > 0) {
+                  estadoPago = 'debe';
+                } else if (cobrosPagados.length > 0 && cobrosPendientes.length === 0 && cobrosMoroso.length === 0) {
+                  estadoPago = 'al_dia';
+                }
               }
             }
 

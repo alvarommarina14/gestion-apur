@@ -258,7 +258,7 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
       .reduce((sum, c) => sum + (c.monto || 0), 0);
 
     // Estado general del cliente
-    let estadoGeneral = 'pagado';
+    let estadoGeneral = null;
     
     // Para clientes alumnos, usar el estado del alumno
     if (cliente.es_alumno && alumnoCliente) {
@@ -266,22 +266,29 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
         estadoGeneral = 'moroso';
       } else if (alumnoCliente.estado_mes_actual === 'debe' || alumnoCliente.estado_mes_actual === 'pendiente') {
         estadoGeneral = 'pendiente';
-      } else if (alumnoCliente.estado_mes_actual === 'pagado' || alumnoCliente.estado === 'activo') {
+      } else if (alumnoCliente.estado_mes_actual === 'pagado') {
         estadoGeneral = 'pagado';
       }
-    } else {
+    } else if (cliente.tipo_cliente === 'abono' || cliente.tipo_cliente === 'suelto') {
       // Para clientes de alquiler, usar cobros del mes actual con estado dinámico
       const cobrosActuales = cobrosClientes.filter(c => {
         const mesActual = format(new Date(), 'yyyy-MM');
         return c.mes === mesActual;
       });
       
-      if (cobrosActuales.some(c => getEstadoDinamicoCobro(c) === 'moroso')) {
-        estadoGeneral = 'moroso';
-      } else if (cobrosActuales.some(c => getEstadoDinamicoCobro(c) === 'pendiente')) {
-        estadoGeneral = 'pendiente';
-      } else if (cobrosActuales.length > 0) {
-        estadoGeneral = 'pagado';
+      // Solo calcular estado si hay cobros del mes actual
+      if (cobrosActuales.length > 0) {
+        const hayMoroso = cobrosActuales.some(c => getEstadoDinamicoCobro(c) === 'moroso');
+        const hayPendiente = cobrosActuales.some(c => getEstadoDinamicoCobro(c) === 'pendiente');
+        const todosPagados = cobrosActuales.every(c => getEstadoDinamicoCobro(c) === 'pagado');
+        
+        if (hayMoroso) {
+          estadoGeneral = 'moroso';
+        } else if (hayPendiente) {
+          estadoGeneral = 'pendiente';
+        } else if (todosPagados) {
+          estadoGeneral = 'pagado';
+        }
       }
     }
 
