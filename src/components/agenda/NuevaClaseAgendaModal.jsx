@@ -142,10 +142,12 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
         pagado: false,
         estado: 'activo',
         empleados_asignados_ids: [],
-        alumnos_ids: alumnos,
-        alumnos_nombres: alumnosNombres,
+        alumnos_ids: [...alumnos],
+        alumnos_nombres: [...alumnosNombres],
         notas
       };
+
+      console.log('📌 Datos que se van a guardar:', { alumnos, alumnosNombres, datosTurno });
 
       if (recurrenciaSemanal) {
         // Crear 52 clases (un año de repeticiones semanales)
