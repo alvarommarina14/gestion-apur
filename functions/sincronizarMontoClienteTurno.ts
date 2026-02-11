@@ -18,9 +18,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Obtener el cliente usando filter
-    const clientes = await base44.asServiceRole.entities.Cliente.filter({ id: cliente_id });
-    const cliente = clientes[0];
+    // Obtener el cliente
+    const cliente = await base44.entities.Cliente.read(cliente_id);
     
     if (!cliente) {
       return Response.json({ error: 'Cliente no encontrado' }, { status: 404 });
