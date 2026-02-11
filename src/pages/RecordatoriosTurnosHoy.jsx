@@ -73,15 +73,16 @@ export default function RecordatoriosTurnosHoy() {
        // Cargar profesores para enriquecer datos
        const profesores = await base44.entities.Profesor.list();
 
-       // Cargar nombres de profesores si no existen
+       // Siempre asegurar que tengan el nombre del profesor
        return clasesFiltered.map(clase => {
-         if (!clase.profesor_nombre && clase.profesor_id) {
+         let profesor_nombre = clase.profesor_nombre;
+         if (!profesor_nombre && clase.profesor_id) {
            const profesor = profesores.find(p => p.id === clase.profesor_id);
            if (profesor) {
-             return { ...clase, profesor_nombre: profesor.nombre };
+             profesor_nombre = profesor.nombre;
            }
          }
-         return clase;
+         return { ...clase, profesor_nombre };
        });
      },
      refetchInterval: 60000,
