@@ -153,14 +153,21 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEd
 
                 {/* Celdas por cancha */}
                 {CANCHAS.map(cancha => {
-                   const turno = turnosPorCancha[cancha]?.[hora];
+                   // Si esta celda está ocupada por un turno anterior (rowSpan), no renderizar
+                   if (turnosPorCancha.ocupadas[cancha]?.[hora]) {
+                     return null;
+                   }
+
+                   const turno = turnosPorCancha.mapa[cancha]?.[hora];
                    const secundarios = turno?.secundario || [];
                    const bloqueo = obtenerBloqueo(cancha, hora);
+                   const rowSpan = turno?.rowSpan || 1;
 
                    return (
                      <td
                        key={`${cancha}-${hora}`}
-                       className="border border-slate-200 p-2 h-24 align-top"
+                       className="border border-slate-200 p-2 align-top"
+                       rowSpan={rowSpan}
                      >
                        {bloqueo ? (
                          <button
