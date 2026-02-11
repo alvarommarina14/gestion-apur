@@ -100,6 +100,7 @@ export default function RecordatoriosTurnosHoy() {
        // Procesar clases con alumnos
        const resultado = [];
        for (const clase of todayClases) {
+         // Si la clase tiene alumnos_ids, usar esos (de la entidad Clase)
          if (clase.alumnos_ids && clase.alumnos_ids.length > 0) {
            for (const id of clase.alumnos_ids) {
              try {
