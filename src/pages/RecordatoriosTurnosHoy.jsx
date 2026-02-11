@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Clock, Users, DollarSign, CheckCircle, AlertCircle, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Clock, Users, DollarSign, CheckCircle, AlertCircle, Trash2, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import { addDays, subDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
