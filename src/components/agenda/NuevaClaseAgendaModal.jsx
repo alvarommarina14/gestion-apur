@@ -7,25 +7,25 @@ import { Textarea } from '@/components/ui/textarea';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { X, Search, AlertTriangle } from 'lucide-react';
+import { X, Search, AlertTriangle, ChevronDown } from 'lucide-react';
 
 export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) {
-   const [cancha, setCancha] = useState('1');
-   const [horaInicio, setHoraInicio] = useState('09:00');
-   const [duracion, setDuracion] = useState(50);
-   const [tipo, setTipo] = useState('individual');
-   const [profesor, setProfesor] = useState('');
-   const [nuevoProfesor, setNuevoProfesor] = useState('');
-   const [showNuevoProfesor, setShowNuevoProfesor] = useState(false);
-   const [alumnos, setAlumnos] = useState([]);
-   const [busquedaAlumno, setBusquedaAlumno] = useState('');
-   const [showListaAlumnos, setShowListaAlumnos] = useState(false);
-   const [busquedaProfesor, setBusquedaProfesor] = useState('');
-   const [showListaProfesores, setShowListaProfesores] = useState(false);
-   const [notas, setNotas] = useState('');
-   const [recurrenciaSemanal, setRecurrenciaSemanal] = useState(false);
-   const [error, setError] = useState('');
-   const queryClient = useQueryClient();
+  const [cancha, setCancha] = useState('1');
+  const [horaInicio, setHoraInicio] = useState('09:00');
+  const [duracion, setDuracion] = useState(50);
+  const [tipo, setTipo] = useState('individual');
+  const [profesor, setProfesor] = useState('');
+  const [nuevoProfesor, setNuevoProfesor] = useState('');
+  const [showNuevoProfesor, setShowNuevoProfesor] = useState(false);
+  const [alumnos, setAlumnos] = useState([]);
+  const [busquedaAlumno, setBusquedaAlumno] = useState('');
+  const [showListaAlumnos, setShowListaAlumnos] = useState(false);
+  const [busquedaProfesor, setBusquedaProfesor] = useState('');
+  const [showListaProfesores, setShowListaProfesores] = useState(false);
+  const [notas, setNotas] = useState('');
+  const [recurrenciaSemanal, setRecurrenciaSemanal] = useState(false);
+  const [error, setError] = useState('');
+  const queryClient = useQueryClient();
 
   // Fetch profesores
   const { data: profesores = [] } = useQuery({
@@ -34,10 +34,10 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
   });
 
   // Fetch alumnos
-    const { data: alumnosDisponibles = [] } = useQuery({
-      queryKey: ['alumnos-disponibles'],
-      queryFn: () => base44.entities.Alumno.list(),
-    });
+  const { data: alumnosDisponibles = [] } = useQuery({
+    queryKey: ['alumnos-disponibles'],
+    queryFn: () => base44.entities.Alumno.list(),
+  });
 
   // Fetch turnos existentes
   const { data: turnosExistentes = [] } = useQuery({
@@ -72,18 +72,18 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
     return null;
   };
 
-   const mutation = useMutation({
-     mutationFn: async () => {
-       // Validar disponibilidad antes de crear
-       const validacion = validarDisponibilidad(format(initialDate, 'yyyy-MM-dd'), horaInicio, duracion, cancha);
-       if (validacion) {
-         throw new Error(validacion.error);
-       }
+  const mutation = useMutation({
+    mutationFn: async () => {
+      // Validar disponibilidad antes de crear
+      const validacion = validarDisponibilidad(format(initialDate, 'yyyy-MM-dd'), horaInicio, duracion, cancha);
+      if (validacion) {
+        throw new Error(validacion.error);
+      }
 
-       let profesorId = profesor;
+      let profesorId = profesor;
 
-       // Crear profesor si es necesario
-       if (showNuevoProfesor && nuevoProfesor) {
+      // Crear profesor si es necesario
+      if (showNuevoProfesor && nuevoProfesor) {
         const nuevoProf = await base44.entities.Profesor.create({
           nombre: nuevoProfesor,
           activo: true
@@ -95,7 +95,7 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
         throw new Error('Selecciona o crea un profesor');
       }
 
-      if (tipo === 'individual' && alumnos.length === 0) {
+      if (alumnos.length === 0) {
         throw new Error('Selecciona al menos un alumno');
       }
 
@@ -106,25 +106,28 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
         ? nuevoProfesor 
         : profesores.find(p => p.id === profesorId)?.nombre || '';
 
+      // Construir nombres de alumnos
+      const alumnosNombres = alumnos.map(aId => {
+        const a = alumnosDisponibles.find(x => x.id === aId);
+        return a?.nombre || '';
+      }).filter(Boolean);
+
       const datosClase = {
-         fecha: format(initialDate, 'yyyy-MM-dd'),
-         hora_inicio: horaInicio,
-         duracion,
-         tipo,
-         sede: 'Sede Principal',
-         cancha,
-         alumnos_ids: alumnos,
-         alumnos_nombres: alumnos.map(aId => {
-           const a = alumnosDisponibles.find(x => x.id === aId);
-           return a?.nombre || '';
-         }).filter(Boolean),
-         estado: 'programada',
-         profesor_id: profesorId,
-         profesor_nombre: nombreProfesor,
-         precio: tipo === 'individual' && alumnos.length > 0 
-           ? alumnosDisponibles.find(a => a.id === alumnos[0])?.precio_mensual || 0
-           : 0
-       };
+        fecha: format(initialDate, 'yyyy-MM-dd'),
+        hora_inicio: horaInicio,
+        duracion,
+        tipo,
+        sede: 'Sede Principal',
+        cancha,
+        alumnos_ids: alumnos,
+        alumnos_nombres: alumnosNombres,
+        estado: 'programada',
+        profesor_id: profesorId,
+        profesor_nombre: nombreProfesor,
+        precio: tipo === 'individual' && alumnos.length > 0 
+          ? alumnosDisponibles.find(a => a.id === alumnos[0])?.precio_mensual || 0
+          : 0
+      };
 
       const datosTurno = {
         fecha: format(initialDate, 'yyyy-MM-dd'),
@@ -132,7 +135,7 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
         hora_fin: horaFinStr,
         duracion: duracion === 80 ? 80 : 60,
         cancha,
-        cliente: alumnosDisponibles.find(x => x.id === alumnos[0])?.nombre || 'Clase',
+        cliente: alumnosNombres[0] || 'Clase',
         tipo_turno: 'clase',
         profesor: nombreProfesor,
         monto: datosClase.precio,
@@ -140,49 +143,47 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
         estado: 'activo',
         empleados_asignados_ids: [],
         alumnos_ids: alumnos,
-        alumnos_nombres: datosClase.alumnos_nombres,
+        alumnos_nombres: alumnosNombres,
         notas
       };
 
       if (recurrenciaSemanal) {
-         // Crear 52 clases (un año de repeticiones semanales)
-         for (let i = 0; i < 52; i++) {
-           const fecha = new Date(initialDate);
-           fecha.setDate(fecha.getDate() + (i * 7));
-           const horaFin = new Date(new Date(`2000-01-01 ${horaInicio}`).getTime() + duracion * 60000);
-           const horaFinStr = `${String(horaFin.getHours()).padStart(2, '0')}:${String(horaFin.getMinutes()).padStart(2, '0')}`;
+        // Crear 52 clases (un año de repeticiones semanales)
+        for (let i = 0; i < 52; i++) {
+          const fecha = new Date(initialDate);
+          fecha.setDate(fecha.getDate() + (i * 7));
+          const horaFin = new Date(new Date(`2000-01-01 ${horaInicio}`).getTime() + duracion * 60000);
+          const horaFinStr = `${String(horaFin.getHours()).padStart(2, '0')}:${String(horaFin.getMinutes()).padStart(2, '0')}`;
 
-           await base44.entities.Clase.create({
-             ...datosClase,
-             fecha: format(fecha, 'yyyy-MM-dd')
-           });
+          await base44.entities.Clase.create({
+            ...datosClase,
+            fecha: format(fecha, 'yyyy-MM-dd')
+          });
 
-           await base44.entities.TurnoCancha.create({
-             ...datosTurno,
-             fecha: format(fecha, 'yyyy-MM-dd'),
-             hora_fin: horaFinStr
-           });
-         }
-       } else {
-         const clase = await base44.entities.Clase.create(datosClase);
-         // Crear turno asociado
-         await base44.entities.TurnoCancha.create(datosTurno);
-         return clase;
-       }
+          await base44.entities.TurnoCancha.create({
+            ...datosTurno,
+            fecha: format(fecha, 'yyyy-MM-dd'),
+            hora_fin: horaFinStr
+          });
+        }
+      } else {
+        await base44.entities.Clase.create(datosClase);
+        await base44.entities.TurnoCancha.create(datosTurno);
+      }
     },
     onSuccess: () => {
-       toast.success('Clase creada correctamente');
-       queryClient.invalidateQueries({ queryKey: ['clases'] });
-       queryClient.invalidateQueries({ queryKey: ['clases-hoy'] });
-       queryClient.invalidateQueries({ queryKey: ['turnos'] });
-       queryClient.invalidateQueries({ queryKey: ['turnos-cancha-validacion'] });
-       queryClient.invalidateQueries({ queryKey: ['turnos-hoy'] });
-       handleClose();
-     },
+      toast.success('Clase creada correctamente');
+      queryClient.invalidateQueries({ queryKey: ['clases'] });
+      queryClient.invalidateQueries({ queryKey: ['clases-hoy'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos-cancha-validacion'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos-hoy'] });
+      handleClose();
+    },
     onError: (error) => {
-       setError(error.message);
-       toast.error(error.message);
-     }
+      setError(error.message);
+      toast.error(error.message);
+    }
   });
 
   const handleClose = () => {
@@ -203,19 +204,27 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
   };
 
   const toggleAlumno = (alumnoId) => {
-    if (tipo === 'individual' && alumnos.length > 0 && !alumnos.includes(alumnoId)) {
-      setAlumnos([alumnoId]);
-    } else if (alumnos.includes(alumnoId)) {
+    console.log('Toggle alumno:', alumnoId, 'tipo:', tipo, 'alumnos actuales:', alumnos);
+    
+    if (alumnos.includes(alumnoId)) {
+      // Deseleccionar
       setAlumnos(alumnos.filter(id => id !== alumnoId));
     } else {
-      setAlumnos([...alumnos, alumnoId]);
+      // Seleccionar
+      if (tipo === 'individual') {
+        setAlumnos([alumnoId]);
+      } else {
+        setAlumnos([...alumnos, alumnoId]);
+      }
     }
   };
 
-  const alumnosFiltrados = alumnosDisponibles.filter(a =>
-     a.profesor_id === profesor && 
-     a.nombre.toLowerCase().includes(busquedaAlumno.toLowerCase())
-   );
+  const alumnosFiltrados = profesor
+    ? alumnosDisponibles.filter(a =>
+        a.profesor_id === profesor && 
+        a.nombre.toLowerCase().includes(busquedaAlumno.toLowerCase())
+      )
+    : [];
 
   const profesoresFiltrados = profesores.filter(p =>
     p.activo && p.nombre.toLowerCase().includes(busquedaProfesor.toLowerCase())
@@ -233,15 +242,15 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
         </DialogHeader>
 
         <div className="space-y-4">
-           {error && (
-             <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg flex items-start gap-2">
-               <AlertTriangle className="w-5 h-5 text-rose-600 mt-0.5" />
-               <p className="text-sm text-rose-700">{error}</p>
-             </div>
-           )}
+          {error && (
+            <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg flex items-start gap-2">
+              <AlertTriangle className="w-5 h-5 text-rose-600 mt-0.5" />
+              <p className="text-sm text-rose-700">{error}</p>
+            </div>
+          )}
 
-           {/* Cancha y Horario */}
-           <div className="grid grid-cols-3 gap-3">
+          {/* Cancha y Horario */}
+          <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="text-sm font-medium text-slate-700 block mb-2">
                 Cancha
@@ -283,6 +292,22 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          {/* Tipo de clase */}
+          <div>
+            <label className="text-sm font-medium text-slate-700 block mb-2">
+              Tipo de clase
+            </label>
+            <Select value={tipo} onValueChange={setTipo}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="individual">Individual</SelectItem>
+                <SelectItem value="grupal">Grupal</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Profesor con búsqueda */}
@@ -367,22 +392,6 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
             )}
           </div>
 
-          {/* Tipo de clase */}
-          <div>
-            <label className="text-sm font-medium text-slate-700 block mb-2">
-              Tipo de clase
-            </label>
-            <Select value={tipo} onValueChange={setTipo}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="individual">Individual</SelectItem>
-                <SelectItem value="grupal">Grupal</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
           {/* Alumnos */}
           <div>
             <label className="text-sm font-medium text-slate-700 block mb-2">
@@ -403,36 +412,34 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
 
               {/* Lista de alumnos con checkboxes */}
               {showListaAlumnos && (
-                <div className="absolute z-10 w-full bg-white border border-slate-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
-                  {alumnosFiltrados.length > 0 ? (
-                    alumnosFiltrados.map(a => (
-                      <label
-                        key={a.id}
-                        className="flex items-center gap-3 px-3 py-2 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-b-0"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={alumnos.includes(a.id)}
-                          onChange={() => toggleAlumno(a.id)}
-                          className="w-4 h-4 rounded"
-                        />
-                        <span className="text-sm text-slate-700">{a.nombre}</span>
-                      </label>
-                    ))
-                  ) : (
-                    <div className="px-3 py-2 text-sm text-slate-500">
-                      No hay alumnos disponibles
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Cerrar lista al hacer click afuera */}
-              {showListaAlumnos && (
-                <div
-                  className="fixed inset-0 z-0"
-                  onClick={() => setShowListaAlumnos(false)}
-                />
+                <>
+                  <div className="absolute z-50 w-full bg-white border border-slate-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                    {alumnosFiltrados.length > 0 ? (
+                      alumnosFiltrados.map(a => (
+                        <label
+                          key={a.id}
+                          className="flex items-center gap-3 px-3 py-2 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-b-0"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={alumnos.includes(a.id)}
+                            onChange={() => toggleAlumno(a.id)}
+                            className="w-4 h-4 rounded"
+                          />
+                          <span className="text-sm text-slate-700">{a.nombre}</span>
+                        </label>
+                      ))
+                    ) : (
+                      <div className="px-3 py-2 text-sm text-slate-500">
+                        {profesor ? 'No hay alumnos disponibles' : 'Selecciona un profesor primero'}
+                      </div>
+                    )}
+                  </div>
+                  <div
+                    className="fixed inset-0 z-0"
+                    onClick={() => setShowListaAlumnos(false)}
+                  />
+                </>
               )}
             </div>
 
@@ -446,6 +453,7 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
                   >
                     {a.nombre}
                     <button
+                      type="button"
                       onClick={() => toggleAlumno(a.id)}
                       className="hover:text-blue-900"
                     >
