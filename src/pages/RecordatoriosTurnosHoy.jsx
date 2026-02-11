@@ -92,11 +92,17 @@ export default function RecordatoriosTurnosHoy() {
        const alquileresNoPagados = turnos.filter(t => t.tipo_turno === 'alquiler' && !t.pagado);
        for (const alquiler of alquileresNoPagados) {
          if (!resultado.some(r => r.id === alquiler.id && r.type === 'turno')) {
+           // Determinar estado según fecha
+           let estado = 'pendiente';
+           if (diaDelMes > 15) {
+             estado = 'moroso';
+           }
+
            resultado.push({
              type: 'turno',
              id: alquiler.id,
              nombre: alquiler.cliente,
-             estado: 'pendiente',
+             estado,
              monto: alquiler.monto
            });
          }
