@@ -10,21 +10,22 @@ import { format } from 'date-fns';
 import { X, Search } from 'lucide-react';
 
 export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) {
-  const [cancha, setCancha] = useState('1');
-  const [horaInicio, setHoraInicio] = useState('09:00');
-  const [duracion, setDuracion] = useState(50);
-  const [tipo, setTipo] = useState('individual');
-  const [profesor, setProfesor] = useState('');
-  const [nuevoProfesor, setNuevoProfesor] = useState('');
-  const [showNuevoProfesor, setShowNuevoProfesor] = useState(false);
-  const [alumnos, setAlumnos] = useState([]);
-  const [busquedaAlumno, setBusquedaAlumno] = useState('');
-  const [showListaAlumnos, setShowListaAlumnos] = useState(false);
-  const [busquedaProfesor, setBusquedaProfesor] = useState('');
-  const [showListaProfesores, setShowListaProfesores] = useState(false);
-  const [notas, setNotas] = useState('');
-  const [recurrenciaSemanal, setRecurrenciaSemanal] = useState(false);
-  const queryClient = useQueryClient();
+   const [cancha, setCancha] = useState('1');
+   const [horaInicio, setHoraInicio] = useState('09:00');
+   const [duracion, setDuracion] = useState(50);
+   const [tipo, setTipo] = useState('individual');
+   const [profesor, setProfesor] = useState('');
+   const [nuevoProfesor, setNuevoProfesor] = useState('');
+   const [showNuevoProfesor, setShowNuevoProfesor] = useState(false);
+   const [alumnos, setAlumnos] = useState([]);
+   const [busquedaAlumno, setBusquedaAlumno] = useState('');
+   const [showListaAlumnos, setShowListaAlumnos] = useState(false);
+   const [busquedaProfesor, setBusquedaProfesor] = useState('');
+   const [showListaProfesores, setShowListaProfesores] = useState(false);
+   const [notas, setNotas] = useState('');
+   const [recurrenciaSemanal, setRecurrenciaSemanal] = useState(false);
+   const [error, setError] = useState('');
+   const queryClient = useQueryClient();
 
   // Fetch profesores
   const { data: profesores = [] } = useQuery({
