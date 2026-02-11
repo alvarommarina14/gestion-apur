@@ -102,89 +102,90 @@ export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null, pr
   }, [alumno, clienteData, open]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    try {
-      const user = await base44.auth.me();
-      
-      const data = {
-        nombre: formData.nombre,
-        whatsapp: formData.whatsapp,
-        observaciones: formData.observaciones,
-        estado: formData.estado,
-        precio_mensual: Number(formData.precio_mensual),
-        clases_por_mes: Number(formData.clases_por_mes),
-        sede_preferida: formData.sede_preferida,
-        horario_preferido: formData.horario_preferido,
-        dia_preferido: formData.tipo_asistencia === 'un_dia' ? formData.dia_preferido : '',
-        tipo_asistencia: formData.tipo_asistencia,
-        dias_semana: formData.tipo_asistencia === 'varios_dias' ? formData.dias_semana : [],
-      };
-      
-      if (isEditing) {
-        // Log de auditoría para cambios importantes
-        if (alumno.precio_mensual !== data.precio_mensual) {
-          await base44.entities.LogAuditoria.create({
-            entidad: 'Alumno',
-            entidad_id: alumno.id,
-            entidad_nombre: alumno.nombre,
-            accion: 'editar',
-            campo_modificado: 'precio_mensual',
-            valor_anterior: alumno.precio_mensual?.toString(),
-            valor_nuevo: data.precio_mensual.toString(),
-            motivo: 'Actualización de precio mensual',
-            fecha: new Date().toISOString(),
-          });
-        }
-        
-        await base44.entities.Alumno.update(alumno.id, data);
-      } else {
-      data.fecha_inicio = format(new Date(), 'yyyy-MM-dd');
-      data.clases_a_recuperar = 0;
-      data.deuda_total = 0;
-      data.estado_mes_actual = 'pendiente';
-      data.total_clases_asistidas = 0;
+     e.preventDefault();
+     setLoading(true);
 
-      // Buscar profesor_id en orden: clienteData > prop > localStorage > user
-      let idProfesor = clienteData?.profesor_id || profesorId;
-      let nombreProfesor = clienteData?.profesor_nombre || '';
+     try {
+       const user = await base44.auth.me();
 
-      if (!idProfesor) {
-        const profesorGuardado = localStorage.getItem('profesor_seleccionado');
-        if (profesorGuardado) {
-          try {
-            const profesorObj = JSON.parse(profesorGuardado);
-            idProfesor = profesorObj.id;
-            nombreProfesor = profesorObj.nombre;
-          } catch (e) {
-            console.error('Error parsing profesor', e);
-          }
-        }
-      }
-      if (!idProfesor && user?.rol === 'profesor' && user?.profesor_id) {
-        idProfesor = user.profesor_id;
-      }
+       const data = {
+         nombre: formData.nombre,
+         whatsapp: formData.whatsapp,
+         observaciones: formData.observaciones,
+         estado: formData.estado,
+         precio_mensual: Number(formData.precio_mensual),
+         clases_por_mes: Number(formData.clases_por_mes),
+         sede_preferida: formData.sede_preferida,
+         horario_preferido: formData.horario_preferido,
+         dia_preferido: formData.tipo_asistencia === 'un_dia' ? formData.dia_preferido : '',
+         tipo_asistencia: formData.tipo_asistencia,
+         dias_semana: formData.tipo_asistencia === 'varios_dias' ? formData.dias_semana : [],
+       };
 
-      if (idProfesor) {
-         data.profesor_id = idProfesor;
-         if (nombreProfesor) {
-           data.profesor_nombre = nombreProfesor;
-         } else {
-           // Obtener nombre del profesor
+       if (isEditing) {
+         // Log de auditoría para cambios importantes
+         if (alumno.precio_mensual !== data.precio_mensual) {
+           await base44.entities.LogAuditoria.create({
+             entidad: 'Alumno',
+             entidad_id: alumno.id,
+             entidad_nombre: alumno.nombre,
+             accion: 'editar',
+             campo_modificado: 'precio_mensual',
+             valor_anterior: alumno.precio_mensual?.toString(),
+             valor_nuevo: data.precio_mensual.toString(),
+             motivo: 'Actualización de precio mensual',
+             fecha: new Date().toISOString(),
+           });
+         }
+
+         await base44.entities.Alumno.update(alumno.id, data);
+         setSuccess(true);
+       } else {
+       data.fecha_inicio = format(new Date(), 'yyyy-MM-dd');
+       data.clases_a_recuperar = 0;
+       data.deuda_total = 0;
+       data.estado_mes_actual = 'pendiente';
+       data.total_clases_asistidas = 0;
+
+       // Buscar profesor_id en orden: clienteData > prop > localStorage > user
+       let idProfesor = clienteData?.profesor_id || profesorId;
+       let nombreProfesor = clienteData?.profesor_nombre || '';
+
+       if (!idProfesor) {
+         const profesorGuardado = localStorage.getItem('profesor_seleccionado');
+         if (profesorGuardado) {
            try {
-             const profesor = await base44.entities.Profesor.read(idProfesor);
-             if (profesor?.nombre) {
-               data.profesor_nombre = profesor.nombre;
-             }
-           } catch (err) {
-             console.log('Error obteniendo profesor:', err);
-             data.profesor_nombre = 'Sin asignar';
+             const profesorObj = JSON.parse(profesorGuardado);
+             idProfesor = profesorObj.id;
+             nombreProfesor = profesorObj.nombre;
+           } catch (e) {
+             console.error('Error parsing profesor', e);
            }
          }
        }
+       if (!idProfesor && user?.rol === 'profesor' && user?.profesor_id) {
+         idProfesor = user.profesor_id;
+       }
 
-        const alumnoCreado = await base44.entities.Alumno.create(data);
+       if (idProfesor) {
+          data.profesor_id = idProfesor;
+          if (nombreProfesor) {
+            data.profesor_nombre = nombreProfesor;
+          } else {
+            // Obtener nombre del profesor
+            try {
+              const profesor = await base44.entities.Profesor.read(idProfesor);
+              if (profesor?.nombre) {
+                data.profesor_nombre = profesor.nombre;
+              }
+            } catch (err) {
+              console.log('Error obteniendo profesor:', err);
+              data.profesor_nombre = 'Sin asignar';
+            }
+          }
+        }
+
+         const alumnoCreado = await base44.entities.Alumno.create(data);
 
          // Sincronizar alumno con gestión de clientes SOLO si viene de clienteData vacío
          // Si viene de clienteData, el cliente ya fue creado en NuevoClienteModal
@@ -207,23 +208,22 @@ export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null, pr
              console.log('Error sincronizando alumno con clientes:', err);
            }
          }
-      }
-      
-      setSuccess(true);
-      queryClient.invalidateQueries({ queryKey: ['alumnos'] });
-      queryClient.invalidateQueries({ queryKey: ['clientes'] });
+         setSuccess(true);
+       }
 
-      setTimeout(() => {
-        setSuccess(false);
-        onOpenChange(false);
-      }, 1500);
-      
-    } catch (error) {
-      console.error('Error guardando alumno:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+       queryClient.invalidateQueries({ queryKey: ['alumnos'] });
+       queryClient.invalidateQueries({ queryKey: ['clientes'] });
+
+       // Esperar a que se vea la pantalla de éxito, luego cerrar
+       await new Promise(resolve => setTimeout(resolve, 1500));
+       setSuccess(false);
+       onOpenChange(false);
+
+     } catch (error) {
+       console.error('Error guardando alumno:', error);
+       setLoading(false);
+     }
+   };
 
   if (success) {
     return (
