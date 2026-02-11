@@ -133,7 +133,41 @@ export default function RecordatoriosTurnosHoy() {
        }
 
        return resultado;
-     }
+     },
+     refetchInterval: 30000, // Actualizar cada 30 segundos
+   });
+
+   // Cargar pendientes y morosos de todo el mes
+   const { data: pendientesYMorosos = [] } = useQuery({
+     queryKey: ['pendientes-morosos'],
+     queryFn: async () => {
+       const mesActual = format(new Date(), 'yyyy-MM');
+       const alumnos = await base44.entities.Alumno.list();
+       const pagos = await base44.entities.Pago.list();
+       const pagosDelMes = pagos.filter(p => p.mes_correspondiente === mesActual);
+
+       const resultado = [];
+       for (const alumno of alumnos) {
+         if (alumno.estado === 'activo') {
+           const pagado = pagosDelMes.some(p => p.alumno_id === alumno.id);
+           const estado = pagado ? 'pagado' : alumno.deuda_total > 0 ? 'moroso' : 'pendiente';
+
+           if (estado !== 'pagado') {
+             resultado.push({
+               type: 'alumno',
+               alumno_id: alumno.id,
+               nombre: alumno.nombre,
+               profesor_nombre: alumno.profesor_nombre,
+               estado_pago: estado,
+               monto: alumno.precio_mensual,
+               deuda_total: alumno.deuda_total
+             });
+           }
+         }
+       }
+       return resultado;
+     },
+     refetchInterval: 30000, // Actualizar cada 30 segundos
    });
 
    // Cargar alumnos cuando se abre modal grupal
