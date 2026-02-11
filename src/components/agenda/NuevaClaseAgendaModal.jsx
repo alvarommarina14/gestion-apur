@@ -169,6 +169,8 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
           });
         }
       } else {
+        console.log('🔵 Antes de guardar Clase:', datosClase);
+        console.log('🔵 Antes de guardar TurnoCancha:', datosTurno);
         await base44.entities.Clase.create(datosClase);
         await base44.entities.TurnoCancha.create(datosTurno);
       }
