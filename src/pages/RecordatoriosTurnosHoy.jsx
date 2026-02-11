@@ -88,29 +88,69 @@ export default function RecordatoriosTurnosHoy() {
      refetchInterval: 60000,
    });
 
+   // Cargar alumnos y pagos para mostrar estado
+   const { data: alumnosConPagos = [] } = useQuery({
+     queryKey: ['alumnos-con-pagos', todayClases, todayTurnos],
+     queryFn: async () => {
+       // Obtener todos los pagos del mes actual
+       const mesActual = format(new Date(), 'yyyy-MM');
+       const pagos = await base44.entities.Pago.list();
+       const pagosDelMes = pagos.filter(p => p.mes_correspondiente === mesActual);
+
+       // Procesar clases con alumnos
+       const resultado = [];
+       for (const clase of todayClases) {
+         if (clase.alumnos_ids && clase.alumnos_ids.length > 0) {
+           for (const id of clase.alumnos_ids) {
+             try {
+               const alumno = await base44.entities.Alumno.read(id);
+               const pagado = pagosDelMes.some(p => p.alumno_id === id);
+               resultado.push({
+                 type: 'alumno',
+                 clase_id: clase.id,
+                 alumno_id: alumno.id,
+                 nombre: alumno.nombre,
+                 estado_pago: pagado ? 'pagado' : alumno.deuda_total > 0 ? 'moroso' : 'pendiente',
+                 monto: alumno.precio_mensual
+               });
+             } catch (e) {
+               console.error('Error loading student:', id, e);
+             }
+           }
+         }
+       }
+
+       // Procesar alquileres
+       for (const turno of todayTurnos) {
+         resultado.push({
+           type: 'cliente',
+           turno_id: turno.id,
+           nombre: turno.cliente,
+           estado_pago: turno.pagado ? 'pagado' : 'pendiente',
+           monto: turno.monto
+         });
+       }
+
+       return resultado;
+     }
+   });
+
    // Cargar alumnos cuando se abre modal grupal
    const { data: alumnos = [], isLoading: alumnosLoading } = useQuery({
      queryKey: ['alumnos-pagos', claseSeleccionada?.id],
      queryFn: async () => {
-       console.log('Clase seleccionada:', claseSeleccionada);
-       console.log('Alumnos IDs:', claseSeleccionada?.alumnos_ids);
-
        if (!claseSeleccionada?.alumnos_ids || claseSeleccionada.alumnos_ids.length === 0) {
-         console.log('Sin alumnos_ids - retornando array vacío');
          return [];
        }
        const alumnos = [];
        for (const id of claseSeleccionada.alumnos_ids) {
          try {
-           console.log('Intentando cargar alumno con ID:', id);
            const alumno = await base44.entities.Alumno.read(id);
-           console.log('Alumno cargado:', alumno);
            alumnos.push(alumno);
          } catch (e) {
            console.error('Error loading student:', id, e);
          }
        }
-       console.log('Total alumnos cargados:', alumnos.length);
        return alumnos;
      },
      enabled: modalPagoGrupal && !!claseSeleccionada?.id
