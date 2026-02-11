@@ -807,6 +807,6 @@ export default function RecordatoriosTurnosHoy() {
            </DialogFooter>
          </DialogContent>
         </Dialog>
-        </div>
+        </>
         );
         }
