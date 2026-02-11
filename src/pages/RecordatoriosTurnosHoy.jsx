@@ -154,7 +154,7 @@ export default function RecordatoriosTurnosHoy() {
       alquileres: alquileres.sort((a, b) => a.horaInicio.localeCompare(b.horaInicio)),
       clases: clases.sort((a, b) => a.horaInicio.localeCompare(b.horaInicio)),
     };
-  }, [turnos, clientes, alumnos, cobrosClientes, today]);
+  }, [turnos, clientes, alumnos, cobrosClientes, today, buscarCliente]);
 
   const getEstadoBadge = (estado) => {
     if (estado === 'pagado') return <Badge className="bg-green-100 text-green-800">✓ Al día</Badge>;
