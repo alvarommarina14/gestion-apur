@@ -162,17 +162,18 @@ export default function RecordatoriosPendientes({ compact = false }) {
           const clientesMorosos = clientes.filter(c => 
             c.activo && 
             (c.tipo_cliente === 'abono' || c.tipo_cliente === 'suelto') &&
-            c.precio > 0
+            c.precio && c.precio > 0
           );
-          
+
           clientesMorosos.forEach(cliente => {
             const yaExiste = recordatorios.some(r => 
               r.alumno_id === cliente.id && 
               r.tipo === 'moroso' && 
               r.mes_correspondiente === currentMonth
             );
-            
+
             if (!yaExiste && cliente.telefono) {
+              const montoPrecio = cliente.precio || 0;
               pendientes.push({
                 _nuevo: true,
                 alumno_id: cliente.id,
@@ -180,10 +181,10 @@ export default function RecordatoriosPendientes({ compact = false }) {
                 tipo: 'moroso',
                 fecha_programada: todayStr,
                 estado: 'pendiente',
-                mensaje: reemplazarVariables(config.mensaje_template, { ...cliente, precio_mensual: cliente.precio }, currentMonth),
+                mensaje: reemplazarVariables(config.mensaje_template, { ...cliente, precio_mensual: montoPrecio }, currentMonth),
                 canal: config.canal,
                 whatsapp: cliente.telefono,
-                monto_recordado: cliente.precio,
+                monto_recordado: montoPrecio,
                 mes_correspondiente: currentMonth,
               });
             }
