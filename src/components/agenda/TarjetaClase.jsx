@@ -1,5 +1,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Edit2 } from 'lucide-react';
 
 const getPagoBadge = (estado) => {
   if (estado === 'pagado') {
@@ -11,14 +13,27 @@ const getPagoBadge = (estado) => {
   return <Badge className="bg-orange-600 text-xs">Pendiente</Badge>;
 };
 
-export default function TarjetaClase({ turno, estadosPago = {} }) {
+export default function TarjetaClase({ turno, estadosPago = {}, onEdit }) {
   return (
     <div className="space-y-2.5">
-      {/* Profesor - Título */}
-      <div>
+      {/* Profesor - Título y botón editar */}
+      <div className="flex items-center justify-between gap-2">
         <p className="text-sm font-bold text-blue-700">
           {turno.profesor || 'Sin profesor'}
         </p>
+        {onEdit && (
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(turno);
+            }}
+            className="h-6 w-6 hover:bg-blue-100 hover:text-blue-600"
+          >
+            <Edit2 className="w-3 h-3" />
+          </Button>
+        )}
       </div>
 
       {/* Horario */}
