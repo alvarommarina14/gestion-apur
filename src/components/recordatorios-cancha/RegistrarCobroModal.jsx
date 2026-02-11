@@ -84,6 +84,8 @@ export default function RegistrarCobroModal({ open, onOpenChange, recordatorio, 
        queryClient.invalidateQueries({ queryKey: ['turnos-cancha-all'] });
        queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
        queryClient.invalidateQueries({ queryKey: ['clientes'] });
+       queryClient.invalidateQueries({ queryKey: ['alumnos'] });
+       queryClient.invalidateQueries({ queryKey: ['pagos'] });
        queryClient.invalidateQueries({ queryKey: ['pagos-alumnos'] });
        onOpenChange(false);
      },

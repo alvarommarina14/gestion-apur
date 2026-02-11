@@ -169,16 +169,6 @@ export default function RecordatoriosTurnosHoy() {
              medio_pago: medio,
              mes_correspondiente: mes,
            });
-
-           // Sincronizar con CobroCliente
-           await base44.functions.invoke('sincronizarPagosCompleto', {
-             tipo_evento: 'alumno_pago',
-             alumnoId: alumnoId,
-             monto: alumno.precio_mensual,
-             fecha: format(new Date(), 'yyyy-MM-dd'),
-             mes: mes,
-             medio_pago: medio
-           });
          }
        }
      },
