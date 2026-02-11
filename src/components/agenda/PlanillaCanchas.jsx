@@ -47,7 +47,7 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEd
   const turnosPorCancha = useMemo(() => {
     const mapa = {};
     const ocupadas = {}; // Para marcar celdas ocupadas por rowSpan
-    
+
     CANCHAS.forEach(cancha => {
       mapa[cancha] = {};
       ocupadas[cancha] = {};
@@ -57,7 +57,7 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEd
       });
     });
 
-    // Llenar con turnos existentes
+    // Llenar con turnos existentes (incluyendo cancelados para mostrarlos tachados)
     turnos.forEach(turno => {
       if (mapa[turno.cancha]) {
         const horaInicio = turno.hora_inicio;
