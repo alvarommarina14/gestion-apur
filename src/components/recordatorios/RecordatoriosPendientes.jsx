@@ -28,6 +28,11 @@ export default function RecordatoriosPendientes({ compact = false }) {
     queryKey: ['alumnos'],
     queryFn: () => base44.entities.Alumno.list(),
   });
+
+  const { data: clientes = [] } = useQuery({
+    queryKey: ['clientes'],
+    queryFn: () => base44.entities.Cliente.list(),
+  });
   
   const { data: configuraciones = [] } = useQuery({
     queryKey: ['configuraciones'],
@@ -76,7 +81,6 @@ export default function RecordatoriosPendientes({ compact = false }) {
             );
             
             if (!yaExiste) {
-              // Marcar para generación (en el componente padre deberían crearse)
               pendientes.push({
                 _nuevo: true,
                 alumno_id: alumno.id,
@@ -88,6 +92,37 @@ export default function RecordatoriosPendientes({ compact = false }) {
                 canal: config.canal,
                 whatsapp: alumno.whatsapp,
                 monto_recordado: alumno.precio_mensual,
+                mes_correspondiente: currentMonth,
+              });
+            }
+          });
+
+          // Agregar clientes de abono y cancha suelta
+          const clientesActivos = clientes.filter(c => 
+            c.activo && 
+            (c.tipo_cliente === 'abono' || c.tipo_cliente === 'suelto') &&
+            c.precio > 0
+          );
+          
+          clientesActivos.forEach(cliente => {
+            const yaExiste = recordatorios.some(r => 
+              r.alumno_id === cliente.id && 
+              r.tipo === 'pre_cobro' && 
+              r.mes_correspondiente === currentMonth
+            );
+            
+            if (!yaExiste && cliente.telefono) {
+              pendientes.push({
+                _nuevo: true,
+                alumno_id: cliente.id,
+                alumno_nombre: cliente.nombre,
+                tipo: 'pre_cobro',
+                fecha_programada: todayStr,
+                estado: 'pendiente',
+                mensaje: reemplazarVariables(config.mensaje_template, { ...cliente, precio_mensual: cliente.precio }, currentMonth),
+                canal: config.canal,
+                whatsapp: cliente.telefono,
+                monto_recordado: cliente.precio,
                 mes_correspondiente: currentMonth,
               });
             }
@@ -121,12 +156,43 @@ export default function RecordatoriosPendientes({ compact = false }) {
               });
             }
           });
+
+          // Agregar clientes de abono y cancha suelta morosos
+          const clientesMorosos = clientes.filter(c => 
+            c.activo && 
+            (c.tipo_cliente === 'abono' || c.tipo_cliente === 'suelto') &&
+            c.precio > 0
+          );
+          
+          clientesMorosos.forEach(cliente => {
+            const yaExiste = recordatorios.some(r => 
+              r.alumno_id === cliente.id && 
+              r.tipo === 'moroso' && 
+              r.mes_correspondiente === currentMonth
+            );
+            
+            if (!yaExiste && cliente.telefono) {
+              pendientes.push({
+                _nuevo: true,
+                alumno_id: cliente.id,
+                alumno_nombre: cliente.nombre,
+                tipo: 'moroso',
+                fecha_programada: todayStr,
+                estado: 'pendiente',
+                mensaje: reemplazarVariables(config.mensaje_template, { ...cliente, precio_mensual: cliente.precio }, currentMonth),
+                canal: config.canal,
+                whatsapp: cliente.telefono,
+                monto_recordado: cliente.precio,
+                mes_correspondiente: currentMonth,
+              });
+            }
+          });
         }
       }
     });
     
     return pendientes.slice(0, compact ? 5 : 50);
-  }, [recordatorios, alumnos, configuraciones, compact]);
+  }, [recordatorios, alumnos, clientes, configuraciones, compact]);
   
   const handleEnviar = async (recordatorio) => {
     // Crear recordatorio si es nuevo
