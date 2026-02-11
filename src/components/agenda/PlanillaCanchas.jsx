@@ -321,12 +321,21 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pago
         />
       )}
 
-      {/* Modal de edición */}
+      {/* Modal de edición de alquiler */}
       {turnoAEditar && (
         <EditarAlquilerModal
           open={showModalEditar}
           onOpenChange={setShowModalEditar}
           turno={turnoAEditar}
+        />
+      )}
+
+      {/* Modal de edición de clase */}
+      {claseAEditar && (
+        <EditarClaseEnAgendaModal
+          open={showModalEditarClase}
+          onOpenChange={setShowModalEditarClase}
+          turno={claseAEditar}
         />
       )}
     </div>
