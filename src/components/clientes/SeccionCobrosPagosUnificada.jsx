@@ -200,8 +200,9 @@ export default function SeccionCobrosPagosUnificada({ cliente }) {
 
       {/* Cobros y Pagos Unificados */}
       {(() => {
+        // Mostrar todos los cobros (pendientes, morosos y pagados reales), pero ocultar virtuales ya pagadas
         const movimientosFiltrados = [
-          ...cobrosConVirtual.filter(c => getEstadoDinamicoCobro(c) !== 'pagado' || !c.virtual),
+          ...cobrosConVirtual.filter(c => !c.virtual || getEstadoDinamicoCobro(c) !== 'pagado'),
           ...pagosAlumnos
         ];
         return (
