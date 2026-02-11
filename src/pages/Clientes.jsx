@@ -320,20 +320,33 @@ export default function ClientesPage() {
             };
 
             // Calcular estado de pago del cliente
-            let estadoPago = null;
-            if (cliente.es_alumno) {
-              const alumno = alumnos.find(a => 
-                a.nombre.toLowerCase() === cliente.nombre.toLowerCase()
-              );
-              if (alumno) {
-                if (alumno.estado === 'moroso' || alumno.estado_mes_actual === 'moroso') {
-                  estadoPago = 'moroso';
-                } else if (alumno.estado_mes_actual === 'debe' || alumno.estado_mes_actual === 'pendiente') {
-                  estadoPago = 'debe';
-                } else if (alumno.estado_mes_actual === 'pagado') {
-                  estadoPago = 'al_dia';
-                }
-              }
+             let estadoPago = null;
+             if (cliente.es_alumno) {
+               const alumno = alumnos.find(a => 
+                 a.nombre.toLowerCase() === cliente.nombre.toLowerCase()
+               );
+               if (alumno) {
+                 const hoy = new Date();
+                 const mesActual = format(hoy, 'yyyy-MM');
+                 const diaActual = hoy.getDate();
+                 const fechaVencimiento = new Date(parseInt(mesActual.split('-')[0]), parseInt(mesActual.split('-')[1]) - 1, 15);
+
+                 // Verificar si hay pagos del mes actual
+                 const pagosDelMes = pagos.filter(p => {
+                   const mesDelPago = p.mes_correspondiente || format(parseISO(p.fecha), 'yyyy-MM');
+                   return mesDelPago === mesActual && p.alumno_id === alumno.id;
+                 });
+
+                 if (pagosDelMes.length > 0) {
+                   estadoPago = 'al_dia';
+                 } else if (hoy > fechaVencimiento) {
+                   estadoPago = 'moroso';
+                 } else if (alumno.estado === 'moroso') {
+                   estadoPago = 'moroso';
+                 } else {
+                   estadoPago = 'debe';
+                 }
+               }
             } else if (cliente.tipo_cliente === 'abono' || cliente.tipo_cliente === 'suelto') {
               // Generar cobro virtual para el mes actual si no existe
               const hoy = new Date();
