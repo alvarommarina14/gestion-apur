@@ -78,9 +78,9 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
 
   const [formData, setFormData] = useState({
     fecha: format(fecha || new Date(), 'yyyy-MM-dd'),
-    hora_inicio: '09:00',
+    hora_inicio: initialData.hora_inicio || '09:00',
     duracion: 60,
-    cancha: '1',
+    cancha: initialData.cancha || '1',
     cliente: '',
     tipo_turno: 'alquiler',
     profesor_id: '',
