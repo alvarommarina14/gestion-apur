@@ -37,19 +37,19 @@ export default function RecordatoriosTurnosHoy() {
     queryFn: () => base44.entities.CobroCliente.list(),
   });
 
+  // Helper para buscar cliente (case-insensitive)
+  const buscarCliente = (nombreTurno) => {
+    return clientes.find(c => 
+      c.nombre.toLowerCase().trim() === nombreTurno.toLowerCase().trim()
+    );
+  };
+
   // Procesar turnos
   const { alquileres, clases } = useMemo(() => {
     const mesActual = today.substring(0, 7);
 
     const alquileres = [];
     const clases = [];
-
-    // Helper para buscar cliente (case-insensitive)
-    const buscarCliente = (nombreTurno) => {
-      return clientes.find(c => 
-        c.nombre.toLowerCase().trim() === nombreTurno.toLowerCase().trim()
-      );
-    };
 
     turnos.forEach(turno => {
       if (turno.tipo_turno === 'alquiler') {
