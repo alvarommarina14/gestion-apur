@@ -30,6 +30,7 @@ export default function RecordatoriosTurnosHoy() {
    const queryClient = useQueryClient();
    const [fechaSeleccionada, setFechaSeleccionada] = useState(new Date());
    const fechaFormato = format(fechaSeleccionada, 'yyyy-MM-dd');
+   const [filtro, setFiltro] = useState('todos');
    const [modalPagoGrupal, setModalPagoGrupal] = useState(false);
    const [claseSeleccionada, setClaseSeleccionada] = useState(null);
    const [pagosAlumnos, setPagosAlumnos] = useState({});
@@ -92,11 +93,12 @@ export default function RecordatoriosTurnosHoy() {
      enabled: modalPagoGrupal && claseSeleccionada?.tipo === 'grupal'
    });
 
-  // Combinar y ordenar turnos y clases (sin duplicar turnos de tipo clase)
+  // Combinar y ordenar turnos y clases con filtro
   const getAllItems = () => {
-    const items = [
-      // Solo turnos de alquiler (no incluir clases que ya están abajo)
-      ...todayTurnos
+    let items = [];
+
+    if (filtro === 'todos' || filtro === 'alquileres') {
+      items.push(...todayTurnos
         .filter(t => t.tipo_turno === 'alquiler')
         .map(t => ({
           ...t,
@@ -104,16 +106,18 @@ export default function RecordatoriosTurnosHoy() {
           hora: t.hora_inicio,
           titulo: t.cliente,
           icon: '🎾',
-        })),
-      // Clases
-      ...todayClases.map(c => ({
+        })));
+    }
+
+    if (filtro === 'todos' || filtro === 'clases') {
+      items.push(...todayClases.map(c => ({
         ...c,
         type: 'clase',
         hora: c.hora_inicio,
         titulo: c.alumnos_nombres?.[0] || 'Clase',
         icon: '👥',
-      }))
-    ];
+      })));
+    }
 
     return items.sort((a, b) => a.hora.localeCompare(b.hora));
   };
@@ -239,6 +243,31 @@ export default function RecordatoriosTurnosHoy() {
             <ChevronRight className="w-5 h-5" />
           </Button>
         </div>
+      </div>
+
+      {/* Filtros */}
+      <div className="flex gap-2">
+        <Button
+          variant={filtro === 'todos' ? 'default' : 'outline'}
+          onClick={() => setFiltro('todos')}
+          className={filtro === 'todos' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+        >
+          Todos ({allItems.length})
+        </Button>
+        <Button
+          variant={filtro === 'clases' ? 'default' : 'outline'}
+          onClick={() => setFiltro('clases')}
+          className={filtro === 'clases' ? 'bg-blue-600 hover:bg-blue-700' : ''}
+        >
+          Clases ({todayClases.length})
+        </Button>
+        <Button
+          variant={filtro === 'alquileres' ? 'default' : 'outline'}
+          onClick={() => setFiltro('alquileres')}
+          className={filtro === 'alquileres' ? 'bg-purple-600 hover:bg-purple-700' : ''}
+        >
+          Alquileres ({todayTurnos.filter(t => t.tipo_turno === 'alquiler').length})
+        </Button>
       </div>
 
       {/* Stats */}
