@@ -149,6 +149,24 @@ export default function EditarClaseEnAgendaModal({ open, onOpenChange, turno }) 
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
+              <Label>Cancha</Label>
+              <Select
+                value={formData.cancha}
+                onValueChange={(v) => setFormData({ ...formData, cancha: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">Cancha 1</SelectItem>
+                  <SelectItem value="2">Cancha 2</SelectItem>
+                  <SelectItem value="3">Cancha 3</SelectItem>
+                  <SelectItem value="4">Cancha 4</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
               <Label>Hora inicio</Label>
               <Select
                 value={formData.hora_inicio}
@@ -173,23 +191,23 @@ export default function EditarClaseEnAgendaModal({ open, onOpenChange, turno }) 
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
-            <div className="space-y-2">
-              <Label>Duración</Label>
-              <Select
-                value={formData.duracion.toString()}
-                onValueChange={(v) => setFormData({ ...formData, duracion: Number(v) })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="50">50 min</SelectItem>
-                  <SelectItem value="60">60 min</SelectItem>
-                  <SelectItem value="90">90 min</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-2">
+            <Label>Duración</Label>
+            <Select
+              value={formData.duracion.toString()}
+              onValueChange={(v) => setFormData({ ...formData, duracion: Number(v) })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="50">50 min</SelectItem>
+                <SelectItem value="60">60 min</SelectItem>
+                <SelectItem value="90">90 min</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
