@@ -193,37 +193,36 @@ export default function SeccionCobrosPagosUnificada({ cliente }) {
       </div>
 
       {/* Cobros y Pagos Unificados */}
-      <div className="space-y-2">
-        {(() => {
-          const movimientosFiltrados = [
-            ...cobrosConVirtual.filter(c => getEstadoDinamicoCobro(c) !== 'pagado' || !c.virtual),
-            ...pagosAlumnos
-          ];
-          return (
-            <>
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-semibold text-slate-900 text-sm">Movimientos ({movimientosFiltrados.length})</h4>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setModalRegistrar({ 
-              open: true, 
-              cobro: cobrosConVirtual.find(c => c.mes === format(new Date(), 'yyyy-MM')) 
-            })}
-            className="h-7"
-          >
-            <Plus className="w-3 h-3 mr-1" />
-            Cobrar
-          </Button>
-        </div>
+      {(() => {
+        const movimientosFiltrados = [
+          ...cobrosConVirtual.filter(c => getEstadoDinamicoCobro(c) !== 'pagado' || !c.virtual),
+          ...pagosAlumnos
+        ];
+        return (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="font-semibold text-slate-900 text-sm">Movimientos ({movimientosFiltrados.length})</h4>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setModalRegistrar({ 
+                  open: true, 
+                  cobro: cobrosConVirtual.find(c => c.mes === format(new Date(), 'yyyy-MM')) 
+                })}
+                className="h-7"
+              >
+                <Plus className="w-3 h-3 mr-1" />
+                Cobrar
+              </Button>
+            </div>
 
-              {movimientosFiltrados.length === 0 ? (
-                <div className="text-center py-6 text-slate-500">
-                  <DollarSign className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                  <p className="text-sm">No hay movimientos registrados</p>
-                </div>
-              ) : (
-          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {movimientosFiltrados.length === 0 ? (
+              <div className="text-center py-6 text-slate-500">
+                <DollarSign className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                <p className="text-sm">No hay movimientos registrados</p>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-96 overflow-y-auto">
             {/* Combinar y ordenar cobros y pagos por fecha */}
             {[
               ...cobrosConVirtual
