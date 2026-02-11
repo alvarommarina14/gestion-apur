@@ -200,8 +200,8 @@ export default function RecordatoriosTurnosHoy() {
                     </div>
                   </div>
                 </Card>
-              ))}
-            </div>
+                ))}
+                </div>
           )}
           </div>
           )}
