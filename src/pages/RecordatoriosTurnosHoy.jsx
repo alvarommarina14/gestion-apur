@@ -430,29 +430,34 @@ export default function RecordatoriosTurnosHoy() {
                         )}
                       </div>
 
-                      {/* Detalles adicionales */}
-                      {item.type === 'clase' && item.alumnos_nombres && (
-                        <div className="flex items-center gap-2 text-sm text-slate-600 mt-2">
-                          <Users className="w-4 h-4" />
-                          <span>{item.alumnos_nombres.join(', ')}</span>
-                        </div>
-                      )}
+                      {/* Alumnos/clientes con estado de pago */}
+                       <div className="mt-3 space-y-2">
+                         {alumnosConPagos
+                           .filter(a => 
+                             (item.type === 'clase' && a.clase_id === item.id) ||
+                             (item.type === 'turno' && a.turno_id === item.id)
+                           )
+                           .map((alumno) => (
+                             <div key={alumno.alumno_id || alumno.turno_id} className="flex items-center justify-between bg-slate-50 rounded px-3 py-2">
+                               <span className="text-sm font-medium text-slate-700">{alumno.nombre}</span>
+                               <div className="flex items-center gap-2">
+                                 <span className="text-xs text-slate-500">{formatMoney(alumno.monto)}</span>
+                                 <span className={cn(
+                                   'text-xs font-semibold px-2 py-1 rounded border',
+                                   getEstadoPagoColor(alumno.estado_pago)
+                                 )}>
+                                   {getEstadoPagoLabel(alumno.estado_pago)}
+                                 </span>
+                               </div>
+                             </div>
+                           ))}
+                       </div>
 
-                      {item.type === 'turno' && item.monto && (
-                        <div className="flex items-center gap-2 text-sm text-slate-600 mt-2">
-                          <DollarSign className="w-4 h-4" />
-                          <span>${item.monto}</span>
-                          {item.pagado && (
-                            <span className="text-green-600 font-medium">✓ Pagado</span>
-                          )}
-                        </div>
-                      )}
-
-                      {item.notas && (
-                        <p className="text-sm text-slate-600 mt-2 italic">
-                          "{item.notas}"
-                        </p>
-                      )}
+                       {item.notas && (
+                         <p className="text-sm text-slate-600 mt-2 italic">
+                           "{item.notas}"
+                         </p>
+                       )}
                     </div>
                   </div>
                 </div>
