@@ -228,8 +228,15 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pago
                               )}
                             </div>
                             {turno.tipo_turno === 'clase' ? (
-                               <TarjetaClase turno={turno} estadosPago={pagosAlumnos} />
-                             ) : (
+                                <TarjetaClase 
+                                  turno={turno} 
+                                  estadosPago={pagosAlumnos}
+                                  onEdit={(clase) => {
+                                    setClaseAEditar(clase);
+                                    setShowModalEditarClase(true);
+                                  }}
+                                />
+                              ) : (
                                <div className="space-y-1">
                                  <p className="text-xs font-semibold text-slate-900 truncate">
                                    {turno.cliente}
