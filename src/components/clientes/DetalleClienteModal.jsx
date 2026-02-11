@@ -157,7 +157,7 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
           cambios.push({ campo, valorAnterior, valorNuevo });
         }
       }
-      
+
       // Si es alumno y cambió el profesor, actualizar también el alumno sincronizado PRIMERO
       if (cliente.es_alumno && (data.profesor_id || data.profesor_nombre)) {
         const alumnoSincronizado = alumnos.find(a => 
@@ -172,17 +172,23 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
           }
         }
       }
-      
+
       // Ahora actualizar el cliente
       await base44.entities.Cliente.update(id, data);
-      
-      // Si cambió el precio, actualizar total_gastado
+
+      // Si cambió el precio, sincronizar con TurnoCancha
       if (data.precio !== undefined && data.precio !== cliente.precio) {
+        await base44.functions.invoke('sincronizarMontoClienteTurno', {
+          cliente_id: id,
+          nuevo_monto: data.precio
+        });
+
+        // Actualizar total_gastado
         await base44.entities.Cliente.update(id, {
           total_gastado: (cliente.total_gastado || 0) + (data.precio || 0) - (cliente.precio || 0)
         });
       }
-      
+
       // Registrar auditoría para cada cambio
       for (const cambio of cambios) {
         await registrarCambioCliente(
@@ -193,7 +199,7 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
           cambio.valorNuevo
         );
       }
-      
+
       return data;
     },
     onSuccess: (updatedData) => {
@@ -201,6 +207,9 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
       setFormData(prev => ({ ...prev, ...updatedData }));
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
       queryClient.invalidateQueries({ queryKey: ['alumnos'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos-hoy'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos'] });
       setEditando(false);
     },
   });
