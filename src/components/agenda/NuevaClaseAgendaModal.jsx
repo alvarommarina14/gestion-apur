@@ -240,7 +240,7 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-screen overflow-y-auto p-4">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nueva Clase</DialogTitle>
         </DialogHeader>
