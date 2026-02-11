@@ -140,11 +140,39 @@ export default function RecordatoriosTurnosHoy() {
       {clientesPendientes.length > 0 && (
       <div className="pt-6">
           <div className="mb-4 space-y-3">
-            <h2 className="text-xl lg:text-2xl font-bold text-slate-900 flex items-center gap-2">
-              <AlertTriangle className="w-6 h-6 text-amber-600" />
-              Recordatorios de Pagos
-            </h2>
-            <p className="text-sm text-slate-500 mt-1">Alumnos y clientes con pagos pendientes o morosos</p>
+            <div>
+              <h2 className="text-xl lg:text-2xl font-bold text-slate-900 flex items-center gap-2">
+                <AlertTriangle className="w-6 h-6 text-amber-600" />
+                Recordatorios de Pagos
+              </h2>
+              <p className="text-sm text-slate-500 mt-1">Alumnos y clientes con pagos pendientes o morosos</p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant={filtroTipo === 'todos' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFiltroTipo('todos')}
+                className={filtroTipo === 'todos' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+              >
+                Todos
+              </Button>
+              <Button
+                variant={filtroTipo === 'clases' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFiltroTipo('clases')}
+                className={filtroTipo === 'clases' ? 'bg-blue-600 hover:bg-blue-700' : ''}
+              >
+                Clases
+              </Button>
+              <Button
+                variant={filtroTipo === 'alquileres' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFiltroTipo('alquileres')}
+                className={filtroTipo === 'alquileres' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+              >
+                Alquileres
+              </Button>
+            </div>
           </div>
 
           {clientesPendientes.length === 0 ? (
