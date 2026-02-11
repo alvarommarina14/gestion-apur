@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit2 } from 'lucide-react';
+import { Edit2, Trash2 } from 'lucide-react';
+import GestionarClaseModal from './GestionarClaseModal';
 
 const getPagoBadge = (estado) => {
   if (estado === 'pagado') {
