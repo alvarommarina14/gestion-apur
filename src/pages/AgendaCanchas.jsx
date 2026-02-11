@@ -319,7 +319,10 @@ export default function AgendaCanchas() {
       {showNuevoAlquilerModal && (
         <NuevoAlquilerModal
           isOpen={showNuevoAlquilerModal}
-          onClose={() => setShowNuevoAlquilerModal(false)}
+          onClose={() => {
+            setShowNuevoAlquilerModal(false);
+            queryClient.invalidateQueries({ queryKey: ['turnos'] });
+          }}
           initialDate={selectedDate}
         />
       )}
