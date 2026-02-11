@@ -91,7 +91,7 @@ export default function TarjetaClase({ turno, estadosPago = {}, onEdit }) {
       <GestionarClaseModal 
         isOpen={mostrarGestionar} 
         onClose={() => setMostrarGestionar(false)} 
-        clase={turno} 
+        clase={{...turno, turno_cancha_id: turno.id}}
       />
     </div>
   );
