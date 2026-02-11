@@ -43,6 +43,23 @@ export default function AgendaCanchas() {
     queryFn: () => base44.entities.DisponibilidadCancha.list(),
   });
 
+  // Query para traer estados de pago del mes seleccionado
+  const mesActual = format(selectedDate, 'yyyy-MM');
+  const { data: cobrosPago = [] } = useQuery({
+    queryKey: ['cobros', mesActual],
+    queryFn: async () => {
+      const cobros = await base44.entities.CobroCliente.filter({ mes: mesActual });
+      // Transformar a objeto con alumno_id => estado
+      const estadosPago = {};
+      cobros.forEach(cobro => {
+        if (cobro.cliente_id) {
+          estadosPago[cobro.cliente_id] = cobro.estado;
+        }
+      });
+      return estadosPago;
+    },
+  });
+
   const handleDescargarPDF = async () => {
     try {
       const response = await base44.functions.invoke('generarPDFAgenda', {
