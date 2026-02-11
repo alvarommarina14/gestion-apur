@@ -99,7 +99,6 @@ export default function EditarAlquilerModal({ open, onOpenChange, turno }) {
         hora_fin: horaFin,
         duracion: formData.duracion,
         cliente: formData.cliente,
-        monto: formData.monto,
         notas: formData.notas,
       });
 
