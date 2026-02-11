@@ -124,6 +124,12 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
     enabled: !!cliente?.nombre,
   });
 
+  const { data: logs = [] } = useQuery({
+    queryKey: ['logs', cliente?.id],
+    queryFn: () => base44.entities.LogAuditoria.filter({ entidad_id: cliente?.id }, '-fecha'),
+    enabled: !!cliente?.id,
+  });
+
   React.useEffect(() => {
     if (cliente && open) {
       setFormData({
@@ -294,11 +300,12 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
         </DialogHeader>
 
         <Tabs defaultValue="info" className="flex-1 flex flex-col overflow-hidden">
-           <TabsList className="grid w-full grid-cols-4">
+           <TabsList className="grid w-full grid-cols-5">
              <TabsTrigger value="info">Info</TabsTrigger>
              <TabsTrigger value="asistencia">Asistencia</TabsTrigger>
              <TabsTrigger value="cobros">Cobros</TabsTrigger>
              <TabsTrigger value="pagos">Pagos</TabsTrigger>
+             <TabsTrigger value="historial">Historial</TabsTrigger>
            </TabsList>
 
           <TabsContent value="info" className="flex-1 overflow-y-auto space-y-4 px-1">
@@ -626,6 +633,37 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
             )}
           </TabsContent>
 
+          <TabsContent value="historial" className="flex-1 overflow-y-auto px-1">
+            <div className="space-y-2">
+              {logs.length === 0 ? (
+                <div className="py-12 text-center text-slate-500">
+                  <FileText className="w-12 h-12 mx-auto mb-3 opacity-40" />
+                  <p>No hay historial de cambios</p>
+                </div>
+              ) : (
+                logs.map((log) => (
+                  <Card key={log.id} className="shadow-sm">
+                    <CardContent className="p-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-medium text-slate-800 text-sm">{log.accion}</span>
+                        <span className="text-xs text-slate-500">
+                          {log.fecha && format(parseISO(log.fecha), "d MMM HH:mm", { locale: es })}
+                        </span>
+                      </div>
+                      {log.campo_modificado && (
+                        <p className="text-sm text-slate-600">
+                          {log.campo_modificado}: <span className="text-slate-400">{log.valor_anterior}</span> → <span className="text-slate-800">{log.valor_nuevo}</span>
+                        </p>
+                      )}
+                      {log.motivo && (
+                        <p className="text-xs text-slate-500 mt-1">Motivo: {log.motivo}</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+          </TabsContent>
 
           </Tabs>
 
