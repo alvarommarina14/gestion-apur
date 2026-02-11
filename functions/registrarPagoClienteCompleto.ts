@@ -46,10 +46,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 5. Actualizar Cliente a estado "pagado"
-    await base44.entities.Cliente.update(cliente_id, {
-      estado: 'pagado'
-    });
+    // 5. Actualizar Cliente a estado "pagado" (solo si campo existe en schema)
+    // No actualizar si no existe el campo en el schema del Cliente
 
     return Response.json({ 
       success: true, 
