@@ -31,15 +31,16 @@ export default function RegistrarCobroModal({ open, onOpenChange, recordatorio, 
   const [error, setError] = useState(null);
 
   useEffect(() => {
-     if (open && recordatorio) {
-       setMontoPago(recordatorio.monto?.toString() || '');
+     if (open && cliente) {
+       // Usar el precio del cliente, no el monto del recordatorio
+       setMontoPago(cliente.precio?.toString() || '');
        setTipo('pago');
        setMedioPago('');
        setMotivo('');
        setNotas('');
        setError(null);
      }
-   }, [recordatorio, open]);
+   }, [cliente, open]);
 
   const registrarCobroMutation = useMutation({
      mutationFn: async (data) => {
@@ -68,7 +69,7 @@ export default function RegistrarCobroModal({ open, onOpenChange, recordatorio, 
          cliente_nombre: cliente.nombre,
          tipo_cobro: recordatorio.turno?.modalidad_alquiler || recordatorio.turno?.tipo_turno,
          mes: recordatorio.fecha.substring(0, 7),
-         monto: Number(data.tipo === 'pago' ? data.montoPago : recordatorio.monto),
+         monto: Number(data.tipo === 'pago' ? data.montoPago : cliente.precio),
          estado: data.tipo === 'pago' ? 'pagado' : 'pendiente',
          fecha_pago: data.tipo === 'pago' ? new Date().toISOString().split('T')[0] : null,
          medio_pago: data.tipo === 'pago' ? data.medioPago : null,
@@ -142,7 +143,7 @@ export default function RegistrarCobroModal({ open, onOpenChange, recordatorio, 
             <span className="font-semibold">Cancha {recordatorio.cancha}</span> - {recordatorio.hora}
           </p>
           <p>
-            <span className="font-semibold">Monto:</span> ${Number(recordatorio.monto).toLocaleString('es-AR')}
+            <span className="font-semibold">Monto:</span> ${Number(cliente.precio || 0).toLocaleString('es-AR')}
           </p>
         </div>
 
