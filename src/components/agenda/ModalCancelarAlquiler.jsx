@@ -229,10 +229,10 @@ export default function ModalCancelarAlquiler({ open, onOpenChange, turno }) {
                     <SelectValue placeholder="Seleccionar motivo" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="cliente">Cancelación por cliente</SelectItem>
+                    <SelectItem value="cliente_solicita">Cancelación por cliente</SelectItem>
                     <SelectItem value="clima">Mal clima</SelectItem>
                     <SelectItem value="mantenimiento">Mantenimiento de cancha</SelectItem>
-                    <SelectItem value="otro">Otro motivo</SelectItem>
+                    <SelectItem value="falta_clientes">Falta de clientes</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
