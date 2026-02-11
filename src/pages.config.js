@@ -50,7 +50,6 @@
 import AgendaCanchas from './pages/AgendaCanchas';
 import Alumnos from './pages/Alumnos';
 import Clientes from './pages/Clientes';
-import ClientesManagement from './pages/ClientesManagement';
 import Configuracion from './pages/Configuracion';
 import Dashboard from './pages/Dashboard';
 import Empleados from './pages/Empleados';
@@ -77,7 +76,6 @@ export const PAGES = {
     "AgendaCanchas": AgendaCanchas,
     "Alumnos": Alumnos,
     "Clientes": Clientes,
-    "ClientesManagement": ClientesManagement,
     "Configuracion": Configuracion,
     "Dashboard": Dashboard,
     "Empleados": Empleados,

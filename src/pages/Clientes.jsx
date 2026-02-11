@@ -16,16 +16,21 @@ import {
   DollarSign,
   FileText,
   Edit,
-  TrendingUp
+  TrendingUp,
+  Trash2,
+  Eye
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import DetalleClienteModal from '@/components/clientes/DetalleClienteModal';
 import NuevoClienteModal from '@/components/clientes/NuevoClienteModal';
 import SeleccionTipoClienteModal from '@/components/clientes/SeleccionTipoClienteModal';
+import EditarClienteForm from '@/components/finanzas/EditarClienteForm';
 import { cn } from '@/lib/utils';
 
 export default function ClientesPage() {
@@ -36,10 +41,35 @@ export default function ClientesPage() {
   const [modalNuevo, setModalNuevo] = useState(false);
   const [modalSeleccion, setModalSeleccion] = useState(false);
   const [tipoClienteSeleccionado, setTipoClienteSeleccionado] = useState(null);
+  const [editandoCliente, setEditandoCliente] = useState(null);
+  const [eliminandoCliente, setEliminandoCliente] = useState(null);
 
   const { data: clientes = [], isLoading } = useQuery({
     queryKey: ['clientes'],
     queryFn: () => base44.entities.Cliente.list('-total_gastado'),
+  });
+
+  // Editar cliente
+  const editarClienteMutation = useMutation({
+    mutationFn: async (data) => {
+      return await base44.entities.Cliente.update(editandoCliente.id, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clientes'] });
+      setEditandoCliente(null);
+    },
+  });
+
+  // Eliminar cliente
+  const eliminarClienteMutation = useMutation({
+    mutationFn: async (clienteId) => {
+      await base44.functions.invoke('limpiarAlEliminarCliente', { clienteId });
+      return await base44.entities.Cliente.delete(clienteId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clientes'] });
+      setEliminandoCliente(null);
+    },
   });
 
   // Filtrar clientes
@@ -144,31 +174,35 @@ export default function ClientesPage() {
                return (
                 <Card 
                   key={cliente.id} 
-                  className="shadow-sm hover:shadow-md transition-all cursor-pointer"
-                  onClick={() => setModalDetalle({ open: true, cliente })}
+                  className="shadow-sm hover:shadow-md transition-all"
                 >
                   <CardContent className="p-5">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
                         <h3 className="font-semibold text-slate-900 mb-1">{cliente.nombre}</h3>
-                        <Badge className={cn(
-                          'text-xs',
-                          cliente.es_alumno 
-                            ? 'bg-purple-100 text-purple-700' 
-                            : cliente.tipo_cliente === 'abono'
-                            ? 'bg-emerald-100 text-emerald-700'
-                            : 'bg-blue-100 text-blue-700'
-                        )}>
-                          {cliente.es_alumno 
-                            ? 'Clase' 
-                            : cliente.tipo_cliente === 'abono'
-                            ? 'Abono Cancha'
-                            : 'Cancha Suelta'}
-                        </Badge>
+                        <div className="flex gap-2 flex-wrap">
+                          <Badge className={cn(
+                            'text-xs',
+                            cliente.es_alumno 
+                              ? 'bg-purple-100 text-purple-700' 
+                              : cliente.tipo_cliente === 'abono'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : 'bg-blue-100 text-blue-700'
+                          )}>
+                            {cliente.es_alumno 
+                              ? 'Clase' 
+                              : cliente.tipo_cliente === 'abono'
+                              ? 'Abono Cancha'
+                              : 'Cancha Suelta'}
+                          </Badge>
+                          {!cliente.activo && (
+                            <Badge variant="outline" className="text-xs">Inactivo</Badge>
+                          )}
+                        </div>
                       </div>
                     </div>
 
-                    <div className="space-y-2 text-sm">
+                    <div className="space-y-2 text-sm mb-3">
                       {cliente.telefono && (
                         <div className="flex items-center gap-2 text-slate-600">
                           <Phone className="w-4 h-4" />
@@ -197,11 +231,41 @@ export default function ClientesPage() {
                     </div>
 
                     {cliente.notas && (
-                      <div className="mt-3 p-2 bg-slate-50 rounded text-xs text-slate-600 line-clamp-2">
+                      <div className="mb-3 p-2 bg-slate-50 rounded text-xs text-slate-600 line-clamp-2">
                         <FileText className="w-3 h-3 inline mr-1" />
                         {cliente.notas}
                       </div>
                     )}
+
+                    {/* Acciones */}
+                    <div className="flex gap-2 pt-3 border-t border-slate-100">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setModalDetalle({ open: true, cliente })}
+                        className="flex-1"
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        Ver
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setEditandoCliente(cliente)}
+                        className="flex-1"
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Editar
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setEliminandoCliente(cliente)}
+                        className="text-rose-600 hover:text-rose-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               );
@@ -233,6 +297,44 @@ export default function ClientesPage() {
         }}
         tipoCliente={tipoClienteSeleccionado}
       />
+
+      {/* Modal Editar Cliente */}
+      <Dialog open={!!editandoCliente} onOpenChange={(open) => {
+        if (!open) setEditandoCliente(null);
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Cliente - {editandoCliente?.nombre}</DialogTitle>
+          </DialogHeader>
+          {editandoCliente && (
+            <EditarClienteForm 
+              cliente={editandoCliente} 
+              onSave={(data) => editarClienteMutation.mutate(data)} 
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal Eliminar Cliente */}
+      <AlertDialog open={!!eliminandoCliente} onOpenChange={(open) => {
+        if (!open) setEliminandoCliente(null);
+      }}>
+        <AlertDialogContent>
+          <AlertDialogTitle>Eliminar cliente</AlertDialogTitle>
+          <AlertDialogDescription>
+            ¿Estás seguro de que deseas eliminar a {eliminandoCliente?.nombre}? Esta acción eliminará también todos sus turnos, cobros y datos relacionados.
+          </AlertDialogDescription>
+          <div className="flex gap-2 justify-end">
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => eliminarClienteMutation.mutate(eliminandoCliente.id)}
+              className="bg-rose-600 hover:bg-rose-700"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
