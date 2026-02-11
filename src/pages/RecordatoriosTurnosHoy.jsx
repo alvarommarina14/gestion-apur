@@ -92,16 +92,20 @@ export default function RecordatoriosTurnosHoy() {
      enabled: modalPagoGrupal && claseSeleccionada?.tipo === 'grupal'
    });
 
-  // Combinar y ordenar turnos y clases
+  // Combinar y ordenar turnos y clases (sin duplicar turnos de tipo clase)
   const getAllItems = () => {
     const items = [
-      ...todayTurnos.map(t => ({
-        ...t,
-        type: 'turno',
-        hora: t.hora_inicio,
-        titulo: t.cliente,
-        icon: t.tipo_turno === 'clase' ? '📚' : '🎾',
-      })),
+      // Solo turnos de alquiler (no incluir clases que ya están abajo)
+      ...todayTurnos
+        .filter(t => t.tipo_turno === 'alquiler')
+        .map(t => ({
+          ...t,
+          type: 'turno',
+          hora: t.hora_inicio,
+          titulo: t.cliente,
+          icon: '🎾',
+        })),
+      // Clases
       ...todayClases.map(c => ({
         ...c,
         type: 'clase',
