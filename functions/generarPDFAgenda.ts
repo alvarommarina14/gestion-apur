@@ -68,10 +68,10 @@ Deno.serve(async (req) => {
       .sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio))
       .flatMap(turno => {
         // Si es clase grupal con alumnos, crear una fila por alumno
-        if (turno.tipo_turno === 'clase' && turno.alumnos_ids && turno.alumnos_ids.length > 0) {
-          return turno.alumnos_ids.map((alumnoId, idx) => {
-            const alumno = alumnos.find(a => a.id === alumnoId);
-            const estado = turno.pagado ? '✓ Pagado' : (alumno ? 'Pendiente' : 'Pendiente');
+         if (turno.tipo_turno === 'clase' && turno.alumnos_ids && turno.alumnos_ids.length > 0) {
+           return turno.alumnos_ids.map((alumnoId, idx) => {
+             const alumno = alumnos.find(a => a.id === alumnoId);
+             const estado = turno.pagado ? '✓ Pagado' : '';
 
             return [
               turno.hora_inicio,
