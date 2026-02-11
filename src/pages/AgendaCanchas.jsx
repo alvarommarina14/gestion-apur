@@ -217,14 +217,7 @@ export default function AgendaCanchas() {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button
-          onClick={handleDescargarPDF}
-          variant="outline"
-          className="gap-2"
-        >
-          <Download className="w-4 h-4" />
-          PDF
-        </Button>
+
       </div>
 
       {/* Tabs de vistas */}
