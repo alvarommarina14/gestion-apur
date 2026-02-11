@@ -436,6 +436,10 @@ export default function ClientesPage() {
                               <FileText className="w-4 h-4 mr-2" />
                               Reporte detallado
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setPagoModal({ open: true, alumno: clienteComoAlumno })}>
+                              <DollarSign className="w-4 h-4 mr-2" />
+                              Registrar pago
+                            </DropdownMenuItem>
                             <DropdownMenuItem asChild>
                               <div className="w-full">
                                 <EnviarRecordatorioBtn 
