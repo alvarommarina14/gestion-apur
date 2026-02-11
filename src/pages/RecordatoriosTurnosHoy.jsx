@@ -32,6 +32,7 @@ export default function RecordatoriosTurnosHoy() {
    const fechaFormato = format(fechaSeleccionada, 'yyyy-MM-dd');
    const [filtro, setFiltro] = useState('todos');
    const [modalPagoGrupal, setModalPagoGrupal] = useState(false);
+   const [modalPagoIndividual, setModalPagoIndividual] = useState(false);
    const [claseSeleccionada, setClaseSeleccionada] = useState(null);
    const [pagosAlumnos, setPagosAlumnos] = useState({});
    const [medioPago, setMedioPago] = useState('');
@@ -377,22 +378,37 @@ export default function RecordatoriosTurnosHoy() {
                 </div>
 
                 <div className="flex gap-2 ml-4">
-                   {item.type === 'clase' && item.tipo === 'grupal' && (
-                     <Button
-                       onClick={() => {
-                         setClaseSeleccionada(item);
-                         setPagosAlumnos({});
-                         setMedioPago('');
-                         setModalPagoGrupal(true);
-                       }}
-                       variant="outline"
-                       size="sm"
-                       className="gap-2 whitespace-nowrap bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                     >
-                       <Users className="w-4 h-4" />
-                       Registrar Pagos
-                     </Button>
-                   )}
+                   {item.type === 'clase' && (
+                      item.tipo === 'grupal' ? (
+                        <Button
+                          onClick={() => {
+                            setClaseSeleccionada(item);
+                            setPagosAlumnos({});
+                            setMedioPago('');
+                            setModalPagoGrupal(true);
+                          }}
+                          variant="outline"
+                          size="sm"
+                          className="gap-2 whitespace-nowrap bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                        >
+                          <Users className="w-4 h-4" />
+                          Registrar Pagos
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() => {
+                            setClaseSeleccionada(item);
+                            setModalPagoIndividual(true);
+                          }}
+                          variant="outline"
+                          size="sm"
+                          className="gap-2 whitespace-nowrap bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                        >
+                          <DollarSign className="w-4 h-4" />
+                          Registrar Pago
+                        </Button>
+                      )
+                    )}
                    <Button
                      onClick={() => handleMarcarRealizado(item)}
                      variant="outline"
@@ -416,6 +432,98 @@ export default function RecordatoriosTurnosHoy() {
             </Card>
           ))}
         </div>
+        )}
+
+        {/* Modal Pago Individual */}
+        {modalPagoIndividual && claseSeleccionada?.alumnos_ids?.[0] && (
+          <Dialog open={modalPagoIndividual} onOpenChange={setModalPagoIndividual}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <DollarSign className="w-5 h-5 text-emerald-600" />
+                  Registrar pago - {claseSeleccionada?.alumnos_nombres?.[0]}
+                </DialogTitle>
+              </DialogHeader>
+
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                try {
+                  const alumnoId = claseSeleccionada.alumnos_ids[0];
+                  const alumno = alumnos[0];
+
+                  if (!alumno) {
+                    toast.error('Error: No se encontró el alumno');
+                    return;
+                  }
+
+                  const mes = format(new Date(claseSeleccionada.fecha), 'yyyy-MM');
+
+                  await base44.entities.Pago.create({
+                    alumno_id: alumnoId,
+                    alumno_nombre: alumno.nombre,
+                    fecha: format(new Date(), 'yyyy-MM-dd'),
+                    monto: Number(pagosAlumnos.monto || alumno.precio_mensual),
+                    medio_pago: medioPago,
+                    mes_correspondiente: mes,
+                  });
+
+                  setModalPagoIndividual(false);
+                  setClaseSeleccionada(null);
+                  setPagosAlumnos({});
+                  setMedioPago('');
+                  queryClient.invalidateQueries({ queryKey: ['clases-hoy'] });
+                  queryClient.invalidateQueries({ queryKey: ['alumnos'] });
+                  queryClient.invalidateQueries({ queryKey: ['pagos'] });
+                  toast.success('Pago registrado correctamente');
+                } catch (error) {
+                  toast.error('Error: ' + error.message);
+                }
+              }} className="space-y-4">
+                <div className="bg-slate-50 rounded-lg p-4">
+                  <p className="font-semibold text-slate-800">{claseSeleccionada?.alumnos_nombres?.[0]}</p>
+                  <div className="flex items-center justify-between mt-2 text-sm">
+                    <span className="text-slate-500">Precio mensual</span>
+                    <span className="font-medium">{formatMoney(alumnos[0]?.precio_mensual)}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Monto</Label>
+                  <Input
+                    type="number"
+                    defaultValue={alumnos[0]?.precio_mensual}
+                    onChange={(e) => setPagosAlumnos({ ...pagosAlumnos, monto: e.target.value })}
+                    placeholder="0"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Medio de pago</Label>
+                  <Select value={medioPago} onValueChange={setMedioPago}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="efectivo">Efectivo</SelectItem>
+                      <SelectItem value="transferencia">Transferencia</SelectItem>
+                      <SelectItem value="mercadopago">MercadoPago</SelectItem>
+                      <SelectItem value="otro">Otro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setModalPagoIndividual(false)}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700">
+                    Registrar pago
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         )}
 
         {/* Modal Pagos Grupales */}
