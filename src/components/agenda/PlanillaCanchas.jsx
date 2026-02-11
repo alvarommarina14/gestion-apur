@@ -32,7 +32,7 @@ const getPagoColor = (pagado) => {
   return pagado ? 'text-emerald-600 font-semibold' : 'text-orange-600 font-semibold';
 };
 
-export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEdit, onDelete, onEditBloqueo, onDeleteBloqueo }) {
+export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pagosAlumnos = {}, onEdit, onDelete, onEditBloqueo, onDeleteBloqueo }) {
   const [turnoACancelar, setTurnoACancelar] = useState(null);
   const [showModalCancelar, setShowModalCancelar] = useState(false);
   const [turnoAEditar, setTurnoAEditar] = useState(null);
