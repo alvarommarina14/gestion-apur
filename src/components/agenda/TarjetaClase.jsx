@@ -34,7 +34,7 @@ const getPagoBadge = (estado) => {
   if (estado === 'moroso') {
     return <Badge className="bg-rose-600 text-xs">Moroso</Badge>;
   }
-  return <Badge className="bg-orange-600 text-xs">Pendiente</Badge>;
+  return null;
 };
 
 export default function TarjetaClase({ turno, estadosPago = {}, onEdit }) {
