@@ -62,6 +62,10 @@ export default function RecordatoriosTurnosHoy() {
        const resultado = [];
 
        // Alumnos pendientes/morosos
+       const hoy = new Date();
+       const diaDelMes = hoy.getDate();
+       const esMoroso = diaDelMes > 15; // Después del día 15 es moroso
+
        for (const alumno of alumnos) {
          const pagado = pagosDelMes.some(p => p.alumno_id === alumno.id);
          if (!pagado) {
@@ -70,7 +74,7 @@ export default function RecordatoriosTurnosHoy() {
              id: alumno.id,
              nombre: alumno.nombre,
              profesor_nombre: alumno.profesor_nombre,
-             estado: alumno.deuda_total > 0 ? 'moroso' : 'pendiente',
+             estado: esMoroso ? 'moroso' : 'pendiente',
              monto: alumno.precio_mensual
            });
          }
