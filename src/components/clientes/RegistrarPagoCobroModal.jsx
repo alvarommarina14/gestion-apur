@@ -46,12 +46,15 @@ export default function RegistrarPagoCobroModal({ open, onOpenChange, cobro, cli
     onSuccess: () => {
       // Invalidar todos los queries relevantes para actualizar UI en todas partes
       queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
+      queryClient.invalidateQueries({ queryKey: ['cobros-clientes', cliente?.id] });
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
       queryClient.invalidateQueries({ queryKey: ['alumnos'] });
       queryClient.invalidateQueries({ queryKey: ['cobros-cliente'] });
       queryClient.invalidateQueries({ queryKey: ['turnos-hoy'] });
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
-      queryClient.invalidateQueries({ queryKey: ['pagos-alumnos'] });
+      queryClient.invalidateQueries({ queryKey: ['pagos-alumnos', cliente?.id] });
+      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['recordatorios-turnos-hoy'] });
       onOpenChange(false);
       setFormData({
         fecha_pago: format(new Date(), 'yyyy-MM-dd'),
