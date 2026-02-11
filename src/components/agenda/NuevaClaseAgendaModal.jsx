@@ -73,11 +73,17 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
   };
 
    const mutation = useMutation({
-    mutationFn: async () => {
-      let profesorId = profesor;
+     mutationFn: async () => {
+       // Validar disponibilidad antes de crear
+       const validacion = validarDisponibilidad(format(initialDate, 'yyyy-MM-dd'), horaInicio, duracion, cancha);
+       if (validacion) {
+         throw new Error(validacion.error);
+       }
 
-      // Crear profesor si es necesario
-      if (showNuevoProfesor && nuevoProfesor) {
+       let profesorId = profesor;
+
+       // Crear profesor si es necesario
+       if (showNuevoProfesor && nuevoProfesor) {
         const nuevoProf = await base44.entities.Profesor.create({
           nombre: nuevoProfesor,
           activo: true
