@@ -236,16 +236,16 @@ export default function RecordatoriosTurnosHoy() {
                           </span>
                         </div>
                         <Button
-                          size="sm"
-                          className="bg-emerald-600 hover:bg-emerald-700"
-                          onClick={() => {
-                            setClaseSeleccionada({ id: cliente.id, professor_nombre: cliente.profesor_nombre });
-                            setModalPagoIndividual(true);
-                          }}
-                        >
-                          <DollarSign className="w-4 h-4" />
-                          Pagar
-                        </Button>
+                           size="sm"
+                           className="bg-emerald-600 hover:bg-emerald-700"
+                           onClick={() => {
+                             setClienteSeleccionado(cliente);
+                             setModalPagoOpen(true);
+                           }}
+                         >
+                           <DollarSign className="w-4 h-4" />
+                           Pagar
+                         </Button>
                       </div>
                     </div>
                   </div>
