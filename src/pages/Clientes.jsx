@@ -227,6 +227,17 @@ export default function ClientesPage() {
             const config = clasificacionConfig[cliente.clasificacion] || clasificacionConfig.nuevo;
             const Icon = config?.icon || UserPlus;
 
+            // Función para calcular estado dinámico de cobros
+            const getEstadoDinamicoCobro = (cobro) => {
+              if (cobro.estado === 'pagado') return 'pagado';
+
+              const hoy = new Date();
+              const [año, mes] = cobro.mes.split('-');
+              const fechaVencimiento = new Date(parseInt(año), parseInt(mes) - 1, 15);
+
+              return hoy > fechaVencimiento ? 'moroso' : 'pendiente';
+            };
+
             // Calcular estado de pago del cliente
             let estadoPago = null;
             if (cliente.es_alumno) {
@@ -242,19 +253,18 @@ export default function ClientesPage() {
                   estadoPago = 'al_dia';
                 }
               }
-            } else if (cliente.tipo_cliente === 'abono') {
-              const cobrosMoroso = cobros.filter(c => c.cliente_id === cliente.id && c.estado === 'moroso');
-              const cobrosPendientes = cobros.filter(c => c.cliente_id === cliente.id && c.estado === 'pendiente');
-              
+            } else if (cliente.tipo_cliente === 'abono' || cliente.tipo_cliente === 'suelto') {
+              // Calcular estados dinámicamente
+              const cobrosCliente = cobros.filter(c => c.cliente_id === cliente.id);
+              const cobrosMoroso = cobrosCliente.filter(c => getEstadoDinamicoCobro(c) === 'moroso');
+              const cobrosPendientes = cobrosCliente.filter(c => getEstadoDinamicoCobro(c) === 'pendiente');
+
               if (cobrosMoroso.length > 0) {
                 estadoPago = 'moroso';
               } else if (cobrosPendientes.length > 0) {
                 estadoPago = 'debe';
-              } else {
-                const tieneAlgunCobro = cobros.some(c => c.cliente_id === cliente.id);
-                if (tieneAlgunCobro) {
-                  estadoPago = 'al_dia';
-                }
+              } else if (cobrosCliente.length > 0) {
+                estadoPago = 'al_dia';
               }
             }
 
