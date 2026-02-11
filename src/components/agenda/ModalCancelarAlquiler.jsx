@@ -45,50 +45,27 @@ export default function ModalCancelarAlquiler({ open, onOpenChange, turno }) {
   const cancelarMutation = useMutation({
     mutationFn: async ({ tipo, motivo }) => {
       if (tipo === 'menos_24h') {
-        // Cancelar solo este turno sin descuento
-        await base44.entities.TurnoCancha.update(turno.id, {
-          estado: 'cancelado',
-          notas: `${turno.notas || ''}\nCancelado con menos de 24h - No se descuenta`.trim()
-        });
-
-        // Actualizar recordatorio asociado
-        const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: turno.id });
-        if (recordatorios.length > 0) {
-          await base44.entities.RecordatorioCancha.update(recordatorios[0].id, {
-            estado: 'hecho',
-            notas: 'Cancelado con menos de 24h'
-          });
-        }
-
-        // Log de auditoría
+        // Eliminar turno sin descuento
+        // Log de auditoría antes de eliminar
         await base44.entities.LogAuditoria.create({
           entidad: 'TurnoCancha',
           entidad_id: turno.id,
           entidad_nombre: `${turno.cliente} - Cancha ${turno.cancha}`,
-          accion: 'cambio_estado',
-          campo_modificado: 'estado',
-          valor_anterior: 'activo',
-          valor_nuevo: 'cancelado',
+          accion: 'eliminar',
           motivo: 'Cancelación con menos de 24h - No se descuenta',
           fecha: new Date().toISOString(),
         });
 
-      } else if (tipo === 'mas_24h') {
-        // Cancelar con más de 24h - se descuenta o recupera
-        await base44.entities.TurnoCancha.update(turno.id, {
-          estado: 'cancelado',
-          notas: `${turno.notas || ''}\nCancelado con más de 24h - Motivo: ${motivo}`.trim()
-        });
-
-        // Actualizar recordatorio asociado
+        // Eliminar recordatorio asociado
         const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: turno.id });
         if (recordatorios.length > 0) {
-          await base44.entities.RecordatorioCancha.update(recordatorios[0].id, {
-            estado: 'hecho',
-            notas: `Cancelado - ${motivo}`
-          });
+          await base44.entities.RecordatorioCancha.delete(recordatorios[0].id);
         }
 
+        // Eliminar el turno
+        await base44.entities.TurnoCancha.delete(turno.id);
+
+      } else if (tipo === 'mas_24h') {
         // Crear registro de cancelación para recuperar (tanto para abono como suelto)
         await base44.entities.CancelacionCancha.create({
           turno_cancha_id: turno.id,
@@ -102,18 +79,24 @@ export default function ModalCancelarAlquiler({ open, onOpenChange, turno }) {
           fecha_cancelacion: new Date().toISOString(),
         });
 
-        // Log de auditoría
+        // Log de auditoría antes de eliminar
         await base44.entities.LogAuditoria.create({
           entidad: 'TurnoCancha',
           entidad_id: turno.id,
           entidad_nombre: `${turno.cliente} - Cancha ${turno.cancha}`,
-          accion: 'cambio_estado',
-          campo_modificado: 'estado',
-          valor_anterior: 'activo',
-          valor_nuevo: 'cancelado',
-          motivo: `Cancelación con más de 24h - ${motivo}`,
+          accion: 'eliminar',
+          motivo: `Cancelación con más de 24h - ${motivo} - Genera recupero`,
           fecha: new Date().toISOString(),
         });
+
+        // Eliminar recordatorio asociado
+        const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: turno.id });
+        if (recordatorios.length > 0) {
+          await base44.entities.RecordatorioCancha.delete(recordatorios[0].id);
+        }
+
+        // Eliminar el turno
+        await base44.entities.TurnoCancha.delete(turno.id);
 
       } else if (tipo === 'eliminar_serie') {
         // Eliminar todos los turnos restantes de la serie
