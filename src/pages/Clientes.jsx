@@ -227,6 +227,37 @@ export default function ClientesPage() {
             const config = clasificacionConfig[cliente.clasificacion] || clasificacionConfig.nuevo;
             const Icon = config?.icon || UserPlus;
 
+            // Calcular estado de pago del cliente
+            let estadoPago = null;
+            if (cliente.es_alumno) {
+              const alumno = alumnos.find(a => 
+                a.nombre.toLowerCase() === cliente.nombre.toLowerCase()
+              );
+              if (alumno) {
+                if (alumno.estado === 'moroso' || alumno.estado_mes_actual === 'moroso') {
+                  estadoPago = 'moroso';
+                } else if (alumno.estado_mes_actual === 'debe' || alumno.estado_mes_actual === 'pendiente') {
+                  estadoPago = 'debe';
+                } else if (alumno.estado_mes_actual === 'pagado' || alumno.estado === 'activo') {
+                  estadoPago = 'al_dia';
+                }
+              }
+            } else if (cliente.tipo_cliente === 'abono') {
+              const cobrosMoroso = cobros.filter(c => c.cliente_id === cliente.id && c.estado === 'moroso');
+              const cobrosPendientes = cobros.filter(c => c.cliente_id === cliente.id && c.estado === 'pendiente');
+              
+              if (cobrosMoroso.length > 0) {
+                estadoPago = 'moroso';
+              } else if (cobrosPendientes.length > 0) {
+                estadoPago = 'debe';
+              } else {
+                const tieneAlgunCobro = cobros.some(c => c.cliente_id === cliente.id);
+                if (tieneAlgunCobro) {
+                  estadoPago = 'al_dia';
+                }
+              }
+            }
+
             return (
               <Card key={cliente.id} className="shadow-sm hover:shadow-md transition-all">
                 <CardContent className="p-5">
@@ -251,6 +282,21 @@ export default function ClientesPage() {
                         {cliente.clasificacion === 'recurrente' && (
                           <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700">
                             Recurrente
+                          </Badge>
+                        )}
+                        {estadoPago === 'al_dia' && (
+                          <Badge className="text-xs bg-emerald-100 text-emerald-700">
+                            Al día
+                          </Badge>
+                        )}
+                        {estadoPago === 'debe' && (
+                          <Badge className="text-xs bg-amber-100 text-amber-700">
+                            Debe pagar
+                          </Badge>
+                        )}
+                        {estadoPago === 'moroso' && (
+                          <Badge className="text-xs bg-rose-100 text-rose-700">
+                            Moroso
                           </Badge>
                         )}
                         {!cliente.activo && (
