@@ -233,7 +233,7 @@ export default function SeccionCobrosPagosUnificada({ cliente }) {
             {/* Combinar y ordenar cobros y pagos por fecha */}
             {[
               ...cobrosConVirtual
-                .filter(c => getEstadoDinamicoCobro(c) !== 'pagado' || !c.virtual)
+                .filter(c => !c.virtual || getEstadoDinamicoCobro(c) !== 'pagado')
                 .map(c => ({
                   ...c,
                   tipo: 'cobro',
