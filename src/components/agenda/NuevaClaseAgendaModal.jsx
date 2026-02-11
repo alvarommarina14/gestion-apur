@@ -134,11 +134,12 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
         cancha,
         cliente: alumnosDisponibles.find(x => x.id === alumnos[0])?.nombre || 'Clase',
         tipo_turno: 'clase',
-        profesor: profesores.find(p => p.id === profesorId)?.nombre || '',
+        profesor: nombreProfesor,
         monto: datosClase.precio,
         pagado: false,
         estado: 'activo',
         empleados_asignados_ids: [],
+        alumnos_nombres: datosClase.alumnos_nombres,
         notas
       };
 
