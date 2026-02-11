@@ -273,6 +273,11 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
       
       // Si es una clase, crear también en entidad Clase y sincronizar
       if (data.tipo_turno === 'clase') {
+        const alumnosNombres = (data.alumnos_ids || []).map(id => {
+          const alumno = alumnos.find(a => a.id === id);
+          return alumno?.nombre || '';
+        }).filter(Boolean);
+
         const claseData = {
           fecha: data.fecha,
           hora_inicio: data.hora_inicio,
@@ -281,10 +286,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
           sede: 'Principal',
           cancha: data.cancha,
           alumnos_ids: data.alumnos_ids || [],
-          alumnos_nombres: (data.alumnos_ids || []).map(id => {
-            const alumno = alumnos.find(a => a.id === id);
-            return alumno?.nombre || '';
-          }).filter(Boolean),
+          alumnos_nombres: alumnosNombres,
           precio: data.monto || 0,
           estado: 'programada',
           profesor_id: data.profesor_id || '',
@@ -292,6 +294,11 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
           notas: data.notas || '',
         };
         const claseCreada = await base44.entities.Clase.create(claseData);
+        
+        // Actualizar el turno con alumnos_nombres
+        await base44.entities.TurnoCancha.update(turnoCreado.id, {
+          alumnos_nombres: alumnosNombres
+        });
         
         // Sincronizar clase con Google Calendar (sin bloquear)
         base44.functions.invoke('sincronizarClaseGoogleCalendar', { 
