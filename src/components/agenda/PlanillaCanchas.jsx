@@ -30,10 +30,28 @@ const getStatusBadge = (tipo) => {
 };
 
 const getPagoColor = (pagado) => {
-  return pagado ? 'text-emerald-600 font-semibold' : 'text-orange-600 font-semibold';
+   return pagado ? 'text-emerald-600 font-semibold' : 'text-orange-600 font-semibold';
 };
 
-export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pagosAlumnos = {}, onEdit, onDelete, onEditBloqueo, onDeleteBloqueo }) {
+const getEstadoPagoCliente = (clienteId, fecha) => {
+  const estadoPago = pagosClientes[clienteId];
+  if (!estadoPago) return 'pendiente';
+
+  const dia = fecha.getDate();
+  const esAfueraDelTermino = estadoPago.fuera_de_termino;
+
+  if (estadoPago.estado === 'pagado') return 'pagado';
+  if (estadoPago.estado === 'moroso' || (estadoPago.estado === 'pendiente' && dia > 15)) return 'moroso';
+  return 'pendiente';
+};
+
+const getPagoBadgeCliente = (estado) => {
+  if (estado === 'pagado') return <Badge className="bg-emerald-600 text-white text-xs">Pagado</Badge>;
+  if (estado === 'moroso') return <Badge className="bg-red-600 text-white text-xs">Moroso</Badge>;
+  return <Badge className="bg-orange-600 text-white text-xs">Debe Pagar</Badge>;
+};
+
+export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pagosAlumnos = {}, pagosClientes = {}, onEdit, onDelete, onEditBloqueo, onDeleteBloqueo }) {
   const [turnoACancelar, setTurnoACancelar] = useState(null);
   const [showModalCancelar, setShowModalCancelar] = useState(false);
   const [turnoAEditar, setTurnoAEditar] = useState(null);
@@ -237,18 +255,21 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pago
                                   }}
                                 />
                               ) : (
-                               <div className="space-y-1">
-                                 <p className="text-xs font-semibold text-slate-900 truncate">
-                                   {turno.cliente}
-                                 </p>
-                                 <p className="text-xs text-slate-600">
-                                   {turno.hora_inicio} - {turno.hora_fin}
-                                 </p>
-                                 {turno.notas && (
-                                   <p className="text-xs text-slate-500 italic">{turno.notas}</p>
-                                 )}
-                               </div>
-                             )}
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-1 justify-between">
+                                    <p className="text-xs font-semibold text-slate-900 truncate flex-1">
+                                      {turno.cliente}
+                                    </p>
+                                    {getPagoBadgeCliente(getEstadoPagoCliente(turno.cliente_id, date))}
+                                  </div>
+                                  <p className="text-xs text-slate-600">
+                                    {turno.hora_inicio} - {turno.hora_fin}
+                                  </p>
+                                  {turno.notas && (
+                                    <p className="text-xs text-slate-500 italic">{turno.notas}</p>
+                                  )}
+                                </div>
+                              )}
                             </div>
 
                           {/* Turnos secundarios */}
