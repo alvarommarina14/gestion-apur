@@ -137,6 +137,7 @@ export default function NuevoAlquilerModal({ isOpen, onClose, initialDate }) {
     setShowListaClientes(false);
     setNotas('');
     setRecurrenciaSemanal(false);
+    setError('');
     onClose();
   };
 
