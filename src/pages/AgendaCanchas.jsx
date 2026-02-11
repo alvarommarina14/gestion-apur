@@ -49,19 +49,27 @@ export default function AgendaCanchas() {
     queryKey: ['cobros', mesFiltro],
     queryFn: async () => {
       try {
-        const cobros = await base44.entities.CobroCliente.filter({ mes: mesFiltro });
-        console.log('Cobros traídos:', cobros, 'Mes:', mesFiltro);
+        const [cobros, pagos] = await Promise.all([
+          base44.entities.CobroCliente.filter({ mes: mesFiltro }),
+          base44.entities.Pago.filter({ mes_correspondiente: mesFiltro })
+        ]);
         
         // Mapear cliente_id (alumno_id) directamente a su estado de pago
         const estadosPago = {};
+        
+        // Primero agregar cobros
         cobros.forEach(cobro => {
           estadosPago[cobro.cliente_id] = cobro.estado;
         });
         
-        console.log('Estados de pago mapeados:', estadosPago);
+        // Si hay pagos de alumno, marcar como pagado
+        pagos.forEach(pago => {
+          estadosPago[pago.alumno_id] = 'pagado';
+        });
+        
         return estadosPago;
       } catch (error) {
-        console.error('Error al traer cobros:', error);
+        console.error('Error al traer cobros y pagos:', error);
         return {};
       }
     },
