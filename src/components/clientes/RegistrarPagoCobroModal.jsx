@@ -46,15 +46,15 @@ export default function RegistrarPagoCobroModal({ open, onOpenChange, cobro, cli
       return result;
     },
     onSuccess: () => {
-      // Invalidar todas las queries relacionadas inmediatamente
+      // Invalidar queries - el refetch automático actualizará los estados
       queryClient.invalidateQueries({ queryKey: ['cobros-clientes', cliente?.id] });
       queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
-      queryClient.invalidateQueries({ queryKey: ['turnos-hoy'] });
-      queryClient.invalidateQueries({ queryKey: ['recordatorios-turnos-hoy'] });
-      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['alumnos'] });
       queryClient.invalidateQueries({ queryKey: ['pagos-alumnos'] });
+      // Refetch inmediato para Recordatorios Hoy (actualiza estados dinámicamente)
+      queryClient.refetchQueries({ queryKey: ['recordatorios-turnos-hoy'] });
+      queryClient.refetchQueries({ queryKey: ['turnos-cancha'] });
       
       setTimeout(() => {
         onOpenChange(false);
