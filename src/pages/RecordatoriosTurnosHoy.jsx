@@ -540,8 +540,84 @@ export default function RecordatoriosTurnosHoy() {
               </div>
             </Card>
           ))}
-        </div>
-        )}
+          </div>
+
+          {/* Sección de Recordatorios de Pagos Pendientes/Morosos */}
+          <div className="pt-6 border-t-2 border-slate-200">
+          <div className="mb-4">
+            <h2 className="text-xl lg:text-2xl font-bold text-slate-900 flex items-center gap-2">
+              <AlertTriangle className="w-6 h-6 text-amber-600" />
+              Recordatorios de Pagos
+            </h2>
+            <p className="text-sm text-slate-500 mt-1">Alumnos y clientes con pagos pendientes o morosos</p>
+          </div>
+
+          {clientesPendientes.length === 0 ? (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center py-8">
+                  <CheckCircle className="w-12 h-12 text-green-300 mx-auto mb-3" />
+                  <p className="text-slate-500 font-medium">¡Todos los pagos están al día! 🎉</p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-3">
+              {clientesPendientes.map((cliente) => (
+                <Card key={`${cliente.type}-${cliente.id}`} className={cn(
+                  'overflow-hidden',
+                  cliente.estado === 'moroso' && 'border-red-300 bg-red-50'
+                )}>
+                  <div className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          {cliente.estado === 'moroso' ? (
+                            <AlertTriangle className="w-5 h-5 text-red-600" />
+                          ) : (
+                            <Clock className="w-5 h-5 text-amber-600" />
+                          )}
+                          <div>
+                            <h3 className="font-semibold text-slate-900">{cliente.nombre}</h3>
+                            {cliente.profesor_nombre && (
+                              <p className="text-sm text-slate-500">Prof: {cliente.profesor_nombre}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 ml-4">
+                        <div className="text-right">
+                          <p className="text-sm text-slate-600">{formatMoney(cliente.monto)}</p>
+                          <span className={cn(
+                            'text-xs font-semibold px-3 py-1 rounded-full block mt-1',
+                            cliente.estado === 'moroso' 
+                              ? 'bg-red-200 text-red-700' 
+                              : 'bg-amber-200 text-amber-700'
+                          )}>
+                            {cliente.estado === 'moroso' ? 'Moroso' : 'Pendiente'}
+                          </span>
+                        </div>
+                        <Button
+                          size="sm"
+                          className="bg-emerald-600 hover:bg-emerald-700"
+                          onClick={() => {
+                            setClaseSeleccionada({ id: cliente.id, professor_nombre: cliente.profesor_nombre });
+                            setModalPagoIndividual(true);
+                          }}
+                        >
+                          <DollarSign className="w-4 h-4" />
+                          Pagar
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+          </div>
+          </>
+          )}
 
         {/* Modal Pago Individual */}
         {modalPagoIndividual && claseSeleccionada?.alumnos_ids?.[0] && (
