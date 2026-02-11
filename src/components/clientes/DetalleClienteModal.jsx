@@ -42,7 +42,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import SeccionCobros from './SeccionCobros';
+import SeccionCobrosPagosUnificada from './SeccionCobrosPagosUnificada';
 import { registrarCambioCliente, registrarEliminacion } from '@/components/utils/auditLog';
 import {
   AlertDialog,
@@ -58,7 +58,6 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
   const queryClient = useQueryClient();
   const [editando, setEditando] = useState(false);
   const [formData, setFormData] = useState({});
-  const [pagoAEliminar, setPagoAEliminar] = useState(null);
 
   // Fetch pagos y cobros del cliente
   const { data: cobrosClientes = [] } = useQuery({
@@ -232,13 +231,7 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
     }
   });
 
-  const deletePagoMutation = useMutation({
-    mutationFn: (pagoId) => base44.entities.Pago.delete(pagoId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pagos-alumnos', cliente?.id] });
-      setPagoAEliminar(null);
-    },
-  });
+
 
   // Función para calcular estado dinámico de cobros
   const getEstadoDinamicoCobro = (cobro) => {
@@ -380,13 +373,12 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
         </DialogHeader>
 
         <Tabs defaultValue="info" className="flex-1 flex flex-col overflow-hidden">
-           <TabsList className="grid w-full grid-cols-5">
-             <TabsTrigger value="info">Info</TabsTrigger>
-             <TabsTrigger value="asistencia">Asistencia</TabsTrigger>
-             <TabsTrigger value="cobros">Cobros</TabsTrigger>
-             <TabsTrigger value="pagos">Pagos</TabsTrigger>
-             <TabsTrigger value="historial">Historial</TabsTrigger>
-           </TabsList>
+           <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="info">Info</TabsTrigger>
+              <TabsTrigger value="asistencia">Asistencia</TabsTrigger>
+              <TabsTrigger value="cobros">Cobros & Pagos</TabsTrigger>
+              <TabsTrigger value="historial">Historial</TabsTrigger>
+            </TabsList>
 
           <TabsContent value="info" className="flex-1 overflow-y-auto space-y-4 px-1">
             <div className="flex items-center justify-between">
@@ -635,82 +627,7 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
           </TabsContent>
 
           <TabsContent value="cobros" className="flex-1 overflow-y-auto px-1">
-            <SeccionCobros cliente={cliente} />
-          </TabsContent>
-
-          <TabsContent value="pagos" className="flex-1 overflow-y-auto px-1">
-            {pagosAlumnos.length === 0 ? (
-              <div className="py-12 text-center text-slate-500">
-                <DollarSign className="w-12 h-12 mx-auto mb-3 opacity-40" />
-                <p>No hay pagos registrados</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-emerald-700">Total Pagado</p>
-                      <p className="text-2xl font-bold text-emerald-600">
-                        ${estadisticas.totalPagosAlumnos.toLocaleString('es-AR')}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-emerald-700">Cantidad</p>
-                      <p className="text-xl font-bold text-emerald-600">
-                        {estadisticas.cantidadPagosAlumnos}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {pagosAlumnos
-                  .sort((a, b) => b.fecha.localeCompare(a.fecha))
-                  .map((pago) => (
-                    <Card key={pago.id} className="shadow-sm">
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="font-medium text-slate-900">
-                                {format(parseISO(pago.fecha), "d 'de' MMM yyyy", { locale: es })}
-                              </span>
-                              <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700">
-                                {pago.medio_pago || 'Efectivo'}
-                              </Badge>
-                            </div>
-                            {pago.notas && (
-                              <p className="text-sm text-slate-600">{pago.notas}</p>
-                            )}
-                            <p className="text-xs text-slate-400 mt-1">
-                              Mes: {format(parseISO(pago.mes_correspondiente + '-01'), "MMMM yyyy", { locale: es })}
-                            </p>
-                          </div>
-                          <div className="text-right flex items-start gap-2">
-                            <div>
-                              <div className="font-semibold text-emerald-600">
-                                ${(pago.monto || 0).toLocaleString('es-AR')}
-                              </div>
-                              {pago.fuera_de_termino && (
-                                <Badge variant="outline" className="text-xs text-amber-600 border-amber-300 mt-1">
-                                  Fuera de término
-                                </Badge>
-                              )}
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setPagoAEliminar(pago)}
-                              className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 h-8 w-8 p-0"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-              </div>
-            )}
+            <SeccionCobrosPagosUnificada cliente={cliente} />
           </TabsContent>
 
           <TabsContent value="historial" className="flex-1 overflow-y-auto px-1">
@@ -747,30 +664,7 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
 
           </Tabs>
 
-          {/* Alert Dialog para eliminar pago */}
-          <AlertDialog open={!!pagoAEliminar} onOpenChange={(open) => !open && setPagoAEliminar(null)}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle className="flex items-center gap-2">
-                <AlertCircle className="w-5 h-5 text-rose-600" />
-                Eliminar pago
-              </AlertDialogTitle>
-              <AlertDialogDescription>
-                ¿Estás seguro de que deseas eliminar el pago de ${(pagoAEliminar?.monto || 0).toLocaleString('es-AR')} del {pagoAEliminar?.fecha && format(parseISO(pagoAEliminar.fecha), "d 'de' MMMM", { locale: es })}? Esta acción no se puede deshacer.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <div className="flex gap-3 justify-end">
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => pagoAEliminar && deletePagoMutation.mutate(pagoAEliminar.id)}
-                disabled={deletePagoMutation.isPending}
-                className="bg-rose-600 hover:bg-rose-700"
-              >
-                Eliminar
-              </AlertDialogAction>
-            </div>
-          </AlertDialogContent>
-          </AlertDialog>
+
           </DialogContent>
           </Dialog>
           );
