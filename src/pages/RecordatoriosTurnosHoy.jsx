@@ -205,8 +205,6 @@ export default function RecordatoriosTurnosHoy() {
           )}
           </div>
           )}
-          </>
-          )}
 
         {/* Modal Pago Individual */}
         {modalPagoIndividual && claseSeleccionada?.alumnos_ids?.[0] && (
