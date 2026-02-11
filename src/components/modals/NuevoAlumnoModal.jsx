@@ -211,7 +211,8 @@ export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null, pr
       
       setSuccess(true);
       queryClient.invalidateQueries({ queryKey: ['alumnos'] });
-      
+      queryClient.invalidateQueries({ queryKey: ['clientes'] });
+
       setTimeout(() => {
         setSuccess(false);
         onOpenChange(false);
