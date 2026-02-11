@@ -40,6 +40,7 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pago
   const [showModalEditar, setShowModalEditar] = useState(false);
   const [claseAEditar, setClaseAEditar] = useState(null);
   const [showModalEditarClase, setShowModalEditarClase] = useState(false);
+  const [nuevoTurnoModal, setNuevoTurnoModal] = useState({ open: false, cancha: null, hora: null });
   // Calcular rowSpan de un turno (cuántas celdas de 30 min ocupa)
   const calcularRowSpan = (horaInicio, horaFin) => {
     const [hInicio, mInicio] = horaInicio.split(':').map(Number);
