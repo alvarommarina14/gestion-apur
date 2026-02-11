@@ -534,13 +534,13 @@ export default function RecuperoCanchas() {
              >
                Cerrar
              </Button>
-             {accion && (
+             {accion && accion !== 'ver_precio' && (
                <Button
-                 onClick={accion === 'recuperar' ? handleRecuperar : handleDescontar}
+                 onClick={handleDescontar}
                  disabled={updateMutation.isPending || deleteCancelacionMutation.isPending}
-                 className={accion === 'recuperar' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-blue-600 hover:bg-blue-700'}
+                 className="bg-blue-600 hover:bg-blue-700"
                >
-                 {updateMutation.isPending ? 'Guardando...' : `${accion === 'recuperar' ? 'Recuperar' : 'Descontar'}`}
+                 {updateMutation.isPending ? 'Guardando...' : 'Descontar'}
                </Button>
              )}
              </div>
