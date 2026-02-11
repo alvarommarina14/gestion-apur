@@ -456,7 +456,7 @@ export default function RecordatoriosTurnosHoy() {
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <DollarSign className="w-5 h-5 text-emerald-600" />
-                  Registrar pago - {claseSeleccionada?.alumnos_nombres?.[0]}
+                  Registrar pago - {claseSeleccionada?.profesor_nombre}
                 </DialogTitle>
               </DialogHeader>
 
