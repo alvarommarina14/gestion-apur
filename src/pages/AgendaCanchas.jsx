@@ -44,19 +44,24 @@ export default function AgendaCanchas() {
   });
 
   // Query para traer estados de pago del mes seleccionado
-  const mesActual = format(selectedDate, 'yyyy-MM');
-  const { data: cobrosPago = [] } = useQuery({
-    queryKey: ['cobros', mesActual],
+  const mesFiltro = format(selectedDate, 'yyyy-MM');
+  const { data: cobrosPago = {} } = useQuery({
+    queryKey: ['cobros', mesFiltro],
     queryFn: async () => {
-      const cobros = await base44.entities.CobroCliente.filter({ mes: mesActual });
-      // Transformar a objeto con alumno_id => estado
-      const estadosPago = {};
-      cobros.forEach(cobro => {
-        if (cobro.cliente_id) {
-          estadosPago[cobro.cliente_id] = cobro.estado;
-        }
-      });
-      return estadosPago;
+      try {
+        const cobros = await base44.entities.CobroCliente.filter({ mes: mesFiltro });
+        // Transformar a objeto con cliente_id => estado
+        const estadosPago = {};
+        cobros.forEach(cobro => {
+          if (cobro.cliente_id) {
+            estadosPago[cobro.cliente_id] = cobro.estado;
+          }
+        });
+        return estadosPago;
+      } catch (error) {
+        console.error('Error al traer cobros:', error);
+        return {};
+      }
     },
   });
 
