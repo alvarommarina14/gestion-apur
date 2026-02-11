@@ -84,7 +84,34 @@ export default function ClientesPage() {
   // Eliminar cliente
   const eliminarClienteMutation = useMutation({
     mutationFn: async (clienteId) => {
-      await base44.functions.invoke('limpiarAlEliminarCliente', { clienteId });
+      const cliente = clientes.find(c => c.id === clienteId);
+      
+      // Eliminar cobros del cliente
+      const cobros = await base44.entities.CobroCliente.filter({ cliente_id: clienteId });
+      for (const cobro of cobros) {
+        await base44.entities.CobroCliente.delete(cobro.id);
+      }
+      
+      // Eliminar turnos del cliente
+      if (cliente?.nombre) {
+        const turnos = await base44.entities.TurnoCancha.filter({ cliente: cliente.nombre });
+        for (const turno of turnos) {
+          await base44.entities.TurnoCancha.delete(turno.id);
+        }
+      }
+      
+      // Eliminar alumno sincronizado si existe
+      if (cliente?.es_alumno && cliente?.profesor_id) {
+        const alumnosFiltrados = await base44.entities.Alumno.filter({ 
+          nombre: cliente.nombre,
+          whatsapp: cliente.telefono
+        });
+        for (const alumno of alumnosFiltrados) {
+          await base44.entities.Alumno.delete(alumno.id);
+        }
+      }
+      
+      // Finalmente eliminar el cliente
       return await base44.entities.Cliente.delete(clienteId);
     },
     onSuccess: () => {
