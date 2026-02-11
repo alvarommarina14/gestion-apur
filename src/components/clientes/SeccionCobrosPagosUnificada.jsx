@@ -261,7 +261,7 @@ export default function SeccionCobrosPagosUnificada({ cliente }) {
                               {renderEstadoBadge(estadoDinamico)}
                             </div>
                             <div className="text-xs text-slate-500">
-                               {cliente.es_alumno ? 'Clase' : item.tipo_cobro === 'abono_mensual' ? 'Abono' : 'Cancha suelta'}
+                               {cliente.es_alumno ? 'Clase' : cliente.tipo_cliente === 'abono' ? 'Cancha abono' : item.tipo_cobro === 'abono_mensual' ? 'Abono' : 'Cancha suelta'}
                             </div>
                           </div>
                           <div className="text-right flex items-start gap-2">
