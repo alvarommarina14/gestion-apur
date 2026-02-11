@@ -15,6 +15,8 @@ const getPagoBadge = (estado) => {
 };
 
 export default function TarjetaClase({ turno, estadosPago = {}, onEdit }) {
+  const [mostrarGestionar, setMostrarGestionar] = useState(false);
+
   return (
     <div className="space-y-2.5">
       {/* Profesor - Título y botón editar */}
