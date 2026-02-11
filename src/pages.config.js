@@ -51,10 +51,6 @@ import AgendaCanchas from './pages/AgendaCanchas';
 import Alumnos from './pages/Alumnos';
 import Clientes from './pages/Clientes';
 import Configuracion from './pages/Configuracion';
-import Dashboard from './pages/Dashboard';
-import Empleados from './pages/Empleados';
-import Finanzas from './pages/Finanzas';
-import GestionDisponibilidad from './pages/GestionDisponibilidad';
 import GestionPermisosUsuarios from './pages/GestionPermisosUsuarios';
 import Pagos from './pages/Pagos';
 import PendienteAprobacion from './pages/PendienteAprobacion';
@@ -77,10 +73,6 @@ export const PAGES = {
     "Alumnos": Alumnos,
     "Clientes": Clientes,
     "Configuracion": Configuracion,
-    "Dashboard": Dashboard,
-    "Empleados": Empleados,
-    "Finanzas": Finanzas,
-    "GestionDisponibilidad": GestionDisponibilidad,
     "GestionPermisosUsuarios": GestionPermisosUsuarios,
     "Pagos": Pagos,
     "PendienteAprobacion": PendienteAprobacion,
