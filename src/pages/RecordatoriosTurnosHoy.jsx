@@ -100,13 +100,13 @@ export default function RecordatoriosTurnosHoy() {
        }
 
        // Clientes con abono (tipo_cliente='abono') con turno HOY
+       const cobros = await base44.entities.CobroCliente.list();
        for (const cliente of clientes) {
          if (cliente.tipo_cliente !== 'abono' || cliente.es_alumno) continue;
          
-         const tieneturnoHoy = turnosHoy.some(t => t.cliente === cliente.nombre);
-         if (!tieneturnoHoy) continue;
+         const turnoHoy = turnosHoy.find(t => t.cliente === cliente.nombre);
+         if (!turnoHoy) continue;
 
-         const cobros = await base44.entities.CobroCliente.list();
          const cobroDelMes = cobros.find(c => c.cliente_id === cliente.id && c.mes === mesActual);
          if (cobroDelMes && cobroDelMes.estado !== 'pagado') {
            resultado.push({
@@ -114,7 +114,7 @@ export default function RecordatoriosTurnosHoy() {
              id: cliente.id,
              nombre: cliente.nombre,
              estado: cobroDelMes.estado === 'moroso' ? 'moroso' : 'pendiente',
-             monto: cliente.precio
+             monto: cobroDelMes.monto || turnoHoy.monto || cliente.precio
            });
          }
        }
