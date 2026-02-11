@@ -63,6 +63,16 @@ export default function ClientesPage() {
     queryFn: () => base44.entities.Cliente.list('-total_gastado'),
   });
 
+  const { data: alumnos = [] } = useQuery({
+    queryKey: ['alumnos'],
+    queryFn: () => base44.entities.Alumno.list(),
+  });
+
+  const { data: cobros = [] } = useQuery({
+    queryKey: ['cobros-clientes'],
+    queryFn: () => base44.entities.CobroCliente.list(),
+  });
+
   // Eliminar cliente
   const eliminarClienteMutation = useMutation({
     mutationFn: async (clienteId) => {
@@ -141,16 +151,6 @@ export default function ClientesPage() {
     ocasional: { icon: UserPlus, color: 'bg-blue-100 text-blue-700', label: 'Ocasional' },
     recurrente: { icon: UserCheck, color: 'bg-emerald-100 text-emerald-700', label: 'Recurrente' },
   };
-
-  const { data: alumnos = [] } = useQuery({
-    queryKey: ['alumnos'],
-    queryFn: () => base44.entities.Alumno.list(),
-  });
-
-  const { data: cobros = [] } = useQuery({
-    queryKey: ['cobros-clientes'],
-    queryFn: () => base44.entities.CobroCliente.list(),
-  });
 
   const renderClientesGrid = () => (
     <>
