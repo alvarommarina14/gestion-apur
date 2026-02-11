@@ -223,13 +223,19 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEd
                                 </div>
                               )}
                             </div>
-                            {turno.tipo_turno === 'clase' && turno.alumnos_nombres?.length > 0 ? (
+                            {turno.tipo_turno === 'clase' ? (
                               <div className="space-y-0.5">
-                                {turno.alumnos_nombres.map((alumno, idx) => (
-                                  <p key={idx} className="text-xs font-semibold text-slate-900 truncate">
-                                    {alumno}
+                                {turno.alumnos_nombres?.length > 0 ? (
+                                  turno.alumnos_nombres.map((alumno, idx) => (
+                                    <p key={idx} className="text-xs font-semibold text-slate-900 truncate">
+                                      {alumno}
+                                    </p>
+                                  ))
+                                ) : (
+                                  <p className="text-xs font-semibold text-slate-900 truncate">
+                                    {turno.cliente}
                                   </p>
-                                ))}
+                                )}
                               </div>
                             ) : (
                               <p className="text-xs font-semibold text-slate-900 truncate">
