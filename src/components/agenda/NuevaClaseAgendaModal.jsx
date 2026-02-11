@@ -203,7 +203,6 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
   };
 
   const alumnosFiltrados = alumnosDisponibles.filter(a =>
-     a.profesor_id === profesor && 
      a.nombre.toLowerCase().includes(busquedaAlumno.toLowerCase())
    );
 
