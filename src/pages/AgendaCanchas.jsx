@@ -44,56 +44,56 @@ export default function AgendaCanchas() {
   });
 
   // Query para traer estados de pago del mes seleccionado
-  const mesFiltro = format(selectedDate, 'yyyy-MM');
-  const { data: cobrosPago = {} } = useQuery({
-    queryKey: ['cobros', mesFiltro],
-    queryFn: async () => {
-      try {
-        const [cobros, pagos] = await Promise.all([
-          base44.entities.CobroCliente.filter({ mes: mesFiltro }),
-          base44.entities.Pago.filter({ mes_correspondiente: mesFiltro })
-        ]);
-        
-        console.log('🔍 DEBUG - Cobros traídos para mes', mesFiltro, ':', cobros);
-        console.log('🔍 DEBUG - Pagos traídos para mes', mesFiltro, ':', pagos);
-        
-        // Mapear cliente_id (alumno_id) directamente a su estado de pago
-        const estadosPago = {};
-        
-        // Verificar si ya pasó el día 15 del mes actual
-        const hoy = new Date();
-        const [año, mes] = mesFiltro.split('-');
-        const vencimiento = new Date(parseInt(año), parseInt(mes) - 1, 15);
-        const pasóVencimiento = hoy > vencimiento;
-        
-        // Primero agregar cobros
-        cobros.forEach(cobro => {
-          console.log('📌 Procesando cobro:', cobro.cliente_id, cobro.cliente_nombre, cobro.estado);
-          let estado = cobro.estado;
-          
-          // Si pasó la fecha de vencimiento y sigue pendiente, marcar como moroso
-          if (pasóVencimiento && estado === 'pendiente') {
-            estado = 'moroso';
-            console.log('⚠️ MOROSO: Pasó la fecha de vencimiento para', cobro.cliente_nombre);
-          }
-          
-          estadosPago[cobro.cliente_id] = estado;
-        });
-        
-        // Si hay pagos de alumno, marcar como pagado
-        pagos.forEach(pago => {
-          console.log('💰 Procesando pago:', pago.alumno_id, pago.alumno_nombre);
-          estadosPago[pago.alumno_id] = 'pagado';
-        });
-        
-        console.log('✅ Estados finales:', estadosPago);
-        return estadosPago;
-      } catch (error) {
-        console.error('Error al traer cobros y pagos:', error);
-        return {};
-      }
-    },
-  });
+   const mesFiltro = format(selectedDate, 'yyyy-MM');
+   const { data: cobrosPago = {} } = useQuery({
+     queryKey: ['cobros', mesFiltro],
+     queryFn: async () => {
+       try {
+         const [cobros, pagos] = await Promise.all([
+           base44.entities.CobroCliente.filter({ mes: mesFiltro }),
+           base44.entities.Pago.filter({ mes_correspondiente: mesFiltro })
+         ]);
+
+         console.log('🔍 DEBUG - Cobros traídos para mes', mesFiltro, ':', cobros);
+         console.log('🔍 DEBUG - Pagos traídos para mes', mesFiltro, ':', pagos);
+
+         // Mapear cliente_id (alumno_id) directamente a su estado de pago
+         const estadosPago = {};
+
+         // Verificar si ya pasó el día 15 del mes actual
+         const hoy = new Date();
+         const [año, mes] = mesFiltro.split('-');
+         const vencimiento = new Date(parseInt(año), parseInt(mes) - 1, 15);
+         const pasóVencimiento = hoy > vencimiento;
+
+         // Primero agregar cobros
+         cobros.forEach(cobro => {
+           console.log('📌 Procesando cobro:', cobro.cliente_id, cobro.cliente_nombre, cobro.estado);
+           let estado = cobro.estado;
+
+           // Si pasó la fecha de vencimiento y sigue pendiente, marcar como moroso
+           if (pasóVencimiento && estado === 'pendiente') {
+             estado = 'moroso';
+             console.log('⚠️ MOROSO: Pasó la fecha de vencimiento para', cobro.cliente_nombre);
+           }
+
+           estadosPago[cobro.cliente_id] = { estado, fuera_de_termino: cobro.fuera_de_termino };
+         });
+
+         // Si hay pagos de alumno, marcar como pagado
+         pagos.forEach(pago => {
+           console.log('💰 Procesando pago:', pago.alumno_id, pago.alumno_nombre);
+           estadosPago[pago.alumno_id] = { estado: 'pagado', fuera_de_termino: false };
+         });
+
+         console.log('✅ Estados finales:', estadosPago);
+         return estadosPago;
+       } catch (error) {
+         console.error('Error al traer cobros y pagos:', error);
+         return {};
+       }
+     },
+   });
 
   const handleDescargarPDF = async () => {
     try {
@@ -278,15 +278,16 @@ export default function AgendaCanchas() {
               </div>
             ) : (
               <PlanillaCanchas
-                date={selectedDate}
-                turnos={turnosFecha}
-                bloqueos={bloqueos}
-                pagosAlumnos={cobrosPago}
-                onEdit={handleEditTurno}
-                onDelete={handleDeleteTurno}
-                onEditBloqueo={handleEditBloqueo}
-                onDeleteBloqueo={handleDeleteBloqueo}
-              />
+                 date={selectedDate}
+                 turnos={turnosFecha}
+                 bloqueos={bloqueos}
+                 pagosAlumnos={cobrosPago}
+                 pagosClientes={cobrosPago}
+                 onEdit={handleEditTurno}
+                 onDelete={handleDeleteTurno}
+                 onEditBloqueo={handleEditBloqueo}
+                 onDeleteBloqueo={handleDeleteBloqueo}
+               />
             )}
           </Card>
         </TabsContent>
