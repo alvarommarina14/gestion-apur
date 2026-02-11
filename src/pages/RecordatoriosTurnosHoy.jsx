@@ -145,7 +145,7 @@ export default function RecordatoriosTurnosHoy() {
   const clientesFiltrados = clientesPendientes.filter(cliente => {
     if (filtroTipo === 'todos') return true;
     if (filtroTipo === 'clases') return cliente.type === 'alumno';
-    if (filtroTipo === 'alquileres') return cliente.type === 'cliente';
+    if (filtroTipo === 'alquileres') return cliente.type === 'turno' || cliente.type === 'cliente';
     return true;
   });
 
