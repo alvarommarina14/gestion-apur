@@ -208,16 +208,19 @@ export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null, pr
              console.log('Error sincronizando alumno con clientes:', err);
            }
          }
-         setSuccess(true);
-       }
+           setSuccess(true);
+         }
 
-       queryClient.invalidateQueries({ queryKey: ['alumnos'] });
-       queryClient.invalidateQueries({ queryKey: ['clientes'] });
+         // Mostrar pantalla de éxito
+         await new Promise(resolve => setTimeout(resolve, 1500));
 
-       // Esperar a que se vea la pantalla de éxito, luego cerrar
-       await new Promise(resolve => setTimeout(resolve, 1500));
-       setSuccess(false);
-       onOpenChange(false);
+         // Cerrar ANTES de invalidar queries para evitar re-renders
+         setSuccess(false);
+         onOpenChange(false);
+
+         // Invalidar queries DESPUÉS de cerrar el modal
+         queryClient.invalidateQueries({ queryKey: ['alumnos'] });
+         queryClient.invalidateQueries({ queryKey: ['clientes'] });
 
      } catch (error) {
        console.error('Error guardando alumno:', error);
