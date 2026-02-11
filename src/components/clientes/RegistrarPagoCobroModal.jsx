@@ -52,8 +52,8 @@ export default function RegistrarPagoCobroModal({ open, onOpenChange, cobro, cli
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
       queryClient.invalidateQueries({ queryKey: ['alumnos'] });
       queryClient.invalidateQueries({ queryKey: ['pagos-alumnos'] });
-      // Invalidar cobros de AgendaCanchas (para actualizar badges de estado de pago)
-      queryClient.invalidateQueries({ queryKey: ['cobros'] });
+      // Invalidar cobros de AgendaCanchas específicamente para el mes del cobro
+      queryClient.invalidateQueries({ queryKey: ['cobros', cobro?.mes] });
       // Refetch inmediato para Recordatorios Hoy (actualiza estados dinámicamente)
       queryClient.refetchQueries({ queryKey: ['recordatorios-turnos-hoy'] });
       queryClient.refetchQueries({ queryKey: ['turnos-cancha'] });
