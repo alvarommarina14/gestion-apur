@@ -1,0 +1,353 @@
+import React, { useState, useMemo } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
+import { format, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { 
+  DollarSign, 
+  Plus, 
+  Trash2,
+  AlertCircle,
+  CheckCircle,
+  Clock
+} from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import RegistrarPagoCobroModal from './RegistrarPagoCobroModal';
+
+export default function SeccionCobrosPagosUnificada({ cliente }) {
+  const queryClient = useQueryClient();
+  const [modalRegistrar, setModalRegistrar] = useState({ open: false, cobro: null });
+  const [itemAEliminar, setItemAEliminar] = useState(null);
+
+  // Fetch cobros del cliente
+  const { data: cobrosClientes = [] } = useQuery({
+    queryKey: ['cobros-clientes', cliente?.id],
+    queryFn: () => base44.entities.CobroCliente.filter({ cliente_id: cliente.id }),
+    enabled: !!cliente?.id,
+  });
+
+  // Fetch pagos de alumno (si aplica)
+  const { data: alumnos = [] } = useQuery({
+    queryKey: ['alumnos'],
+    queryFn: () => base44.entities.Alumno.list(),
+    enabled: !!cliente?.id,
+  });
+
+  const { data: pagosAlumnos = [] } = useQuery({
+    queryKey: ['pagos-alumnos', cliente?.id],
+    queryFn: async () => {
+      if (!cliente?.nombre) return [];
+      const alumnosCliente = alumnos.filter(a => 
+        a.nombre.toLowerCase().includes(cliente.nombre.toLowerCase()) ||
+        cliente.nombre.toLowerCase().includes(a.nombre.toLowerCase())
+      );
+      if (alumnosCliente.length === 0) return [];
+      
+      const pagos = [];
+      for (const alumno of alumnosCliente) {
+        const pagosList = await base44.entities.Pago.filter({ alumno_id: alumno.id });
+        pagos.push(...pagosList);
+      }
+      return pagos;
+    },
+    enabled: !!cliente?.nombre && alumnos.length > 0,
+  });
+
+  // Eliminar cobro o pago
+  const deleteMutation = useMutation({
+    mutationFn: async (item) => {
+      if (item.tipo === 'cobro') {
+        return await base44.entities.CobroCliente.delete(item.id);
+      } else {
+        return await base44.entities.Pago.delete(item.id);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cobros-clientes', cliente?.id] });
+      queryClient.invalidateQueries({ queryKey: ['pagos-alumnos', cliente?.id] });
+      setItemAEliminar(null);
+    },
+  });
+
+  // Función para calcular estado dinámico de cobros
+  const getEstadoDinamicoCobro = (cobro) => {
+    if (cobro.estado === 'pagado') return 'pagado';
+    
+    const hoy = new Date();
+    const [año, mes] = cobro.mes.split('-');
+    const fechaVencimiento = new Date(parseInt(año), parseInt(mes) - 1, 15);
+    
+    return hoy > fechaVencimiento ? 'moroso' : 'pendiente';
+  };
+
+  // Calcular cobro virtual del mes actual si no existe
+  const cobrosConVirtual = useMemo(() => {
+    if (!cliente?.precio) return cobrosClientes;
+    
+    const hoy = new Date();
+    const mesActual = format(hoy, 'yyyy-MM');
+    const diaActual = hoy.getDate();
+    
+    const yaExisteCobro = cobrosClientes.some(c => c.mes === mesActual);
+    
+    if (!yaExisteCobro && cliente.precio > 0 && diaActual >= 5) {
+      const cobroVirtual = {
+        id: `virtual-${mesActual}`,
+        cliente_id: cliente.id,
+        cliente_nombre: cliente.nombre,
+        tipo_cobro: cliente.tipo_cliente || 'abono_mensual',
+        mes: mesActual,
+        monto: cliente.precio,
+        estado: 'pendiente',
+        virtual: true,
+      };
+      return [...cobrosClientes, cobroVirtual];
+    }
+    
+    return cobrosClientes;
+  }, [cobrosClientes, cliente]);
+
+  // Estadísticas
+  const estadisticas = useMemo(() => {
+    const totalCobrosPendientes = cobrosConVirtual
+      .filter(c => getEstadoDinamicoCobro(c) !== 'pagado')
+      .reduce((sum, c) => sum + (c.monto || 0), 0);
+    
+    const totalCobrosPagados = cobrosConVirtual
+      .filter(c => getEstadoDinamicoCobro(c) === 'pagado')
+      .reduce((sum, c) => sum + (c.monto || 0), 0);
+
+    const totalPagosAlumnos = pagosAlumnos.reduce((sum, p) => sum + (p.monto || 0), 0);
+
+    return {
+      totalCobrosPendientes,
+      totalCobrosPagados,
+      cantidadCobros: cobrosConVirtual.length,
+      totalPagosAlumnos,
+      cantidadPagos: pagosAlumnos.length,
+    };
+  }, [cobrosConVirtual, pagosAlumnos]);
+
+  const renderEstadoBadge = (estado) => {
+    const config = {
+      pagado: { color: 'bg-emerald-100 text-emerald-700', icon: CheckCircle, label: '✓ Pagado' },
+      pendiente: { color: 'bg-amber-100 text-amber-700', icon: Clock, label: '⏳ Pendiente' },
+      moroso: { color: 'bg-rose-100 text-rose-700', icon: AlertCircle, label: '⚠️ Moroso' },
+    };
+    const cfg = config[estado];
+    const Icon = cfg?.icon || Clock;
+    return (
+      <Badge className={cfg?.color}>
+        <Icon className="w-3 h-3 mr-1" />
+        {cfg?.label}
+      </Badge>
+    );
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Estadísticas */}
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <Card className="shadow-sm bg-gradient-to-br from-emerald-50 to-emerald-100">
+          <CardContent className="p-4">
+            <div className="text-center">
+              <p className="text-xs text-emerald-700 font-medium">Cobros Pagados</p>
+              <p className="text-xl font-bold text-emerald-600">
+                ${estadisticas.totalCobrosPagados.toLocaleString('es-AR')}
+              </p>
+              <p className="text-xs text-emerald-600">({cobrosConVirtual.filter(c => getEstadoDinamicoCobro(c) === 'pagado').length})</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-sm bg-gradient-to-br from-rose-50 to-rose-100">
+          <CardContent className="p-4">
+            <div className="text-center">
+              <p className="text-xs text-rose-700 font-medium">Cobros Pendientes</p>
+              <p className="text-xl font-bold text-rose-600">
+                ${estadisticas.totalCobrosPendientes.toLocaleString('es-AR')}
+              </p>
+              <p className="text-xs text-rose-600">({cobrosConVirtual.filter(c => getEstadoDinamicoCobro(c) !== 'pagado').length})</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Cobros */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between mb-2">
+          <h4 className="font-semibold text-slate-900 text-sm">Cobros ({estadisticas.cantidadCobros})</h4>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setModalRegistrar({ 
+              open: true, 
+              cobro: cobrosConVirtual.find(c => c.mes === format(new Date(), 'yyyy-MM')) 
+            })}
+            className="h-7"
+          >
+            <Plus className="w-3 h-3 mr-1" />
+            Registrar
+          </Button>
+        </div>
+
+        {cobrosConVirtual.length === 0 ? (
+          <div className="text-center py-6 text-slate-500">
+            <DollarSign className="w-10 h-10 mx-auto mb-2 opacity-30" />
+            <p className="text-sm">No hay cobros registrados</p>
+          </div>
+        ) : (
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {cobrosConVirtual
+              .sort((a, b) => b.mes.localeCompare(a.mes))
+              .map((cobro) => {
+                const estadoDinamico = getEstadoDinamicoCobro(cobro);
+                return (
+                  <Card key={cobro.id} className="shadow-sm">
+                    <CardContent className="p-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <span className="font-medium text-slate-900 text-sm">
+                              {format(parseISO(cobro.mes + '-01'), "MMMM yyyy", { locale: es })}
+                            </span>
+                            {renderEstadoBadge(estadoDinamico)}
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-slate-500">
+                            <span>{cobro.tipo_cobro === 'abono_mensual' ? 'Abono' : 'Cancha suelta'}</span>
+                            {cobro.virtual && <Badge variant="outline" className="text-xs">Virtual</Badge>}
+                          </div>
+                        </div>
+                        <div className="text-right flex items-start gap-2">
+                          <div>
+                            <div className="font-semibold text-slate-900">
+                              ${(cobro.monto || 0).toLocaleString('es-AR')}
+                            </div>
+                            {cobro.fecha_pago && (
+                              <p className="text-xs text-slate-500">
+                                {format(parseISO(cobro.fecha_pago), "d MMM", { locale: es })}
+                              </p>
+                            )}
+                          </div>
+                          {estadoDinamico !== 'pagado' && !cobro.virtual && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setModalRegistrar({ open: true, cobro })}
+                              className="h-7 w-7 p-0 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                            >
+                              <DollarSign className="w-3 h-3" />
+                            </Button>
+                          )}
+                          {!cobro.virtual && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setItemAEliminar({ ...cobro, tipo: 'cobro' })}
+                              className="h-7 w-7 p-0 text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+          </div>
+        )}
+      </div>
+
+      {/* Pagos de Alumno */}
+      {pagosAlumnos.length > 0 && (
+        <div className="space-y-2 pt-4 border-t border-slate-200">
+          <h4 className="font-semibold text-slate-900 text-sm">Pagos como Alumno ({estadisticas.cantidadPagos})</h4>
+          
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {pagosAlumnos
+              .sort((a, b) => b.fecha.localeCompare(a.fecha))
+              .map((pago) => (
+                <Card key={pago.id} className="shadow-sm">
+                  <CardContent className="p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <span className="font-medium text-slate-900 text-sm">
+                            {format(parseISO(pago.fecha), "d 'de' MMM yyyy", { locale: es })}
+                          </span>
+                          <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700">
+                            {pago.medio_pago || 'Efectivo'}
+                          </Badge>
+                        </div>
+                        {pago.notas && (
+                          <p className="text-xs text-slate-600 truncate">{pago.notas}</p>
+                        )}
+                      </div>
+                      <div className="text-right flex items-start gap-2">
+                        <div className="font-semibold text-emerald-600">
+                          ${(pago.monto || 0).toLocaleString('es-AR')}
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setItemAEliminar({ ...pago, tipo: 'pago' })}
+                          className="h-7 w-7 p-0 text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* Modal Registrar Pago */}
+      <RegistrarPagoCobroModal
+        open={modalRegistrar.open}
+        onOpenChange={(open) => !open && setModalRegistrar({ open: false, cobro: null })}
+        cobro={modalRegistrar.cobro}
+        cliente={cliente}
+      />
+
+      {/* Alert Eliminar */}
+      <AlertDialog open={!!itemAEliminar} onOpenChange={(open) => !open && setItemAEliminar(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-rose-600" />
+              Eliminar {itemAEliminar?.tipo === 'cobro' ? 'cobro' : 'pago'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro? Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex gap-3 justify-end">
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => itemAEliminar && deleteMutation.mutate(itemAEliminar)}
+              disabled={deleteMutation.isPending}
+              className="bg-rose-600 hover:bg-rose-700"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
