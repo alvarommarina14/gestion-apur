@@ -40,8 +40,10 @@ export default function SeccionCobros({ cliente }) {
    };
 
   const { data: cobros = [] } = useQuery({
-    queryKey: ['cobros-cliente', cliente.id],
+    queryKey: ['cobros-clientes', cliente.id],
     queryFn: () => base44.entities.CobroCliente.filter({ cliente_id: cliente.id }),
+    staleTime: 0,
+    refetchOnMount: true,
   });
 
   // Generar cobro virtual del mes actual si no existe y el cliente tiene precio
