@@ -127,12 +127,19 @@ export default function RecordatoriosTurnosHoy() {
     }
   };
 
+  const clientesFiltrados = clientesPendientes.filter(cliente => {
+    if (filtroTipo === 'todos') return true;
+    if (filtroTipo === 'clases') return cliente.type === 'alumno';
+    if (filtroTipo === 'alquileres') return cliente.type === 'cliente';
+    return true;
+  });
+
   return (
     <div className="p-4 lg:p-6 space-y-6">
       {/* Sección de Recordatorios de Pagos Pendientes/Morosos */}
       {clientesPendientes.length > 0 && (
       <div className="pt-6">
-          <div className="mb-4">
+          <div className="mb-4 space-y-3">
             <h2 className="text-xl lg:text-2xl font-bold text-slate-900 flex items-center gap-2">
               <AlertTriangle className="w-6 h-6 text-amber-600" />
               Recordatorios de Pagos
