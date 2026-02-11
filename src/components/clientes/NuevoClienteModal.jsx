@@ -110,17 +110,16 @@ export default function NuevoClienteModal({ open, onOpenChange, tipoCliente }) {
       await registrarCreacion('Cliente', newCliente.id, data.nombre);
       return newCliente;
     },
-    onSuccess: (newCliente) => {
+    onSuccess: async (newCliente) => {
        queryClient.invalidateQueries({ queryKey: ['clientes'] });
        if (tipoCliente === 'alumno' && formData.es_alumno && formData.profesor_id) {
          // Mostrar modal de nuevo alumno si es tipo alumno
          setClienteCreado(newCliente);
        } else {
          setSuccess(true);
-         setTimeout(() => {
-           setSuccess(false);
-           onOpenChange(false);
-         }, 1500);
+         await new Promise(resolve => setTimeout(resolve, 1500));
+         setSuccess(false);
+         onOpenChange(false);
        }
      },
   });
