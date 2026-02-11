@@ -151,7 +151,7 @@ export default function RecordatoriosTurnosHoy() {
             </Card>
           ) : (
             <div className="grid gap-3">
-              {clientesFiltrados.map((cliente) => (
+              {clientesPendientes.map((cliente) => (
                 <Card key={`${cliente.type}-${cliente.id}`} className={cn(
                   'overflow-hidden',
                   cliente.estado === 'moroso' && 'border-red-300 bg-red-50'
