@@ -68,7 +68,6 @@ import RecordatoriosCanchaEmpleado from './pages/RecordatoriosCanchaEmpleado';
 import RecordatoriosCanchaHoy from './pages/RecordatoriosCanchaHoy';
 import RecordatoriosTurnosHoy from './pages/RecordatoriosTurnosHoy';
 import RecuperoCanchas from './pages/RecuperoCanchas';
-import Recuperos from './pages/Recuperos';
 import SeleccionRol from './pages/SeleccionRol';
 import Tareas from './pages/Tareas';
 import __Layout from './Layout.jsx';
@@ -96,7 +95,6 @@ export const PAGES = {
     "RecordatoriosCanchaHoy": RecordatoriosCanchaHoy,
     "RecordatoriosTurnosHoy": RecordatoriosTurnosHoy,
     "RecuperoCanchas": RecuperoCanchas,
-    "Recuperos": Recuperos,
     "SeleccionRol": SeleccionRol,
     "Tareas": Tareas,
 }
