@@ -76,26 +76,34 @@ export default function RecordatoriosTurnosHoy() {
           deuda,
         });
       } else if (turno.tipo_turno === 'clase') {
-        // Si es clase grupal, crear una entrada por alumno
+        // Si es clase grupal, crear una sola tarjeta con todos los alumnos
         if (turno.alumnos_ids && turno.alumnos_ids.length > 0) {
-          turno.alumnos_ids.forEach((alumnoId, idx) => {
+          const alumnosData = turno.alumnos_ids.map((alumnoId, idx) => {
             const alumno = alumnos.find(a => a.id === alumnoId);
             if (alumno) {
               let estado = alumno.estado_mes_actual || 'pendiente';
               const deuda = estado === 'debe' || estado === 'moroso' ? alumno.deuda_total || 0 : 0;
-
-              clases.push({
-                id: `${turno.id}-${alumnoId}`,
+              return {
+                id: alumnoId,
                 nombre: alumno.nombre,
-                profesor: turno.profesor,
-                horaInicio: turno.hora_inicio,
-                horaFin: turno.hora_fin,
-                cancha: turno.cancha,
                 precio: alumno.precio_mensual || 0,
                 estado,
                 deuda,
-              });
+              };
             }
+            return null;
+          }).filter(Boolean);
+
+          clases.push({
+            id: turno.id,
+            profesor: turno.profesor,
+            horaInicio: turno.hora_inicio,
+            horaFin: turno.hora_fin,
+            cancha: turno.cancha,
+            esGrupal: true,
+            alumnos: alumnosData,
+            precioTotal: alumnosData.reduce((sum, a) => sum + a.precio, 0),
+            deudaTotal: alumnosData.reduce((sum, a) => sum + a.deuda, 0),
           });
         } else {
           // Clase individual
@@ -117,6 +125,7 @@ export default function RecordatoriosTurnosHoy() {
             horaInicio: turno.hora_inicio,
             horaFin: turno.hora_fin,
             cancha: turno.cancha,
+            esGrupal: false,
             precio: turno.monto || 0,
             estado,
             deuda,
