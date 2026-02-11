@@ -31,6 +31,7 @@ export default function EditarClaseEnAgendaModal({ open, onOpenChange, turno }) 
     fecha: '',
     hora_inicio: '09:00',
     duracion: 50,
+    cancha: '1',
     cliente: '',
     notas: '',
   });
