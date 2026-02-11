@@ -20,7 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { AlertTriangle, Calendar } from 'lucide-react';
+import { AlertTriangle, Calendar, X, Plus } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function EditarClaseEnAgendaModal({ open, onOpenChange, turno }) {
   const queryClient = useQueryClient();
@@ -34,11 +35,20 @@ export default function EditarClaseEnAgendaModal({ open, onOpenChange, turno }) 
     cancha: '1',
     cliente: '',
     notas: '',
+    alumnos_ids: [],
+    alumnos_nombres: [],
   });
+  const [alumnoAgregar, setAlumnoAgregar] = useState('');
 
   const { data: profesores = [] } = useQuery({
     queryKey: ['profesores'],
     queryFn: () => base44.entities.Profesor.list(),
+    enabled: open,
+  });
+
+  const { data: alumnos = [] } = useQuery({
+    queryKey: ['alumnos'],
+    queryFn: () => base44.entities.Alumno.list(),
     enabled: open,
   });
 
@@ -51,8 +61,11 @@ export default function EditarClaseEnAgendaModal({ open, onOpenChange, turno }) 
         cancha: turno.cancha || '1',
         cliente: turno.cliente,
         notas: turno.notas || '',
+        alumnos_ids: turno.alumnos_ids || [],
+        alumnos_nombres: turno.alumnos_nombres || [],
       });
       setError(null);
+      setAlumnoAgregar('');
     }
   }, [turno, open]);
 
@@ -67,7 +80,7 @@ export default function EditarClaseEnAgendaModal({ open, onOpenChange, turno }) 
 
   const updateMutation = useMutation({
     mutationFn: async (data) => {
-      await base44.entities.TurnoCancha.update(turno.id, {
+      const updateData = {
         ...turno,
         fecha: data.fecha,
         hora_inicio: data.hora_inicio,
@@ -76,19 +89,32 @@ export default function EditarClaseEnAgendaModal({ open, onOpenChange, turno }) 
         hora_fin: calcularHoraFin(data.hora_inicio, data.duracion),
         cliente: data.cliente,
         notas: data.notas,
-      });
+      };
+
+      // Si es clase grupal, actualizar alumnos
+      if (turno.tipo_turno === 'clase' && (data.alumnos_ids?.length > 0 || turno.alumnos_ids?.length > 0)) {
+        updateData.alumnos_ids = data.alumnos_ids;
+        updateData.alumnos_nombres = data.alumnos_nombres;
+      }
+
+      await base44.entities.TurnoCancha.update(turno.id, updateData);
 
       // Actualizar clase sincronizada si existe
       if (turno.turno_cancha_id) {
         const clases = await base44.entities.Clase.filter({ turno_cancha_id: turno.id });
         if (clases.length > 0) {
-          await base44.entities.Clase.update(clases[0].id, {
+          const claseUpdate = {
             fecha: data.fecha,
             hora_inicio: data.hora_inicio,
             duracion: data.duracion,
             cancha: data.cancha,
             notas: data.notas,
-          });
+          };
+          if (data.alumnos_ids?.length > 0) {
+            claseUpdate.alumnos_ids = data.alumnos_ids;
+            claseUpdate.alumnos_nombres = data.alumnos_nombres;
+          }
+          await base44.entities.Clase.update(clases[0].id, claseUpdate);
         }
       }
     },
@@ -227,6 +253,66 @@ export default function EditarClaseEnAgendaModal({ open, onOpenChange, turno }) 
                 placeholder="Nombre del cliente"
                 required
               />
+            </div>
+          )}
+
+          {/* Gestionar alumnos en clase grupal */}
+          {turno?.tipo_turno === 'clase' && (
+            <div className="space-y-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <Label className="text-blue-900">Alumnos en la clase</Label>
+              <div className="space-y-2">
+                {formData.alumnos_nombres?.map((nombre, idx) => (
+                  <div key={idx} className="flex items-center justify-between bg-white p-2 rounded border border-blue-100">
+                    <span className="text-sm text-slate-700">{nombre}</span>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        const newIds = formData.alumnos_ids.filter((_, i) => i !== idx);
+                        const newNombres = formData.alumnos_nombres.filter((_, i) => i !== idx);
+                        setFormData({ ...formData, alumnos_ids: newIds, alumnos_nombres: newNombres });
+                      }}
+                      className="h-6 w-6 p-0 hover:bg-red-50"
+                    >
+                      <X className="w-4 h-4 text-red-600" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <Select value={alumnoAgregar} onValueChange={setAlumnoAgregar}>
+                  <SelectTrigger className="text-sm">
+                    <SelectValue placeholder="Agregar alumno..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {alumnos
+                      .filter(a => !formData.alumnos_ids?.includes(a.id))
+                      .map(a => (
+                        <SelectItem key={a.id} value={a.id}>{a.nombre}</SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => {
+                    if (alumnoAgregar) {
+                      const alumno = alumnos.find(a => a.id === alumnoAgregar);
+                      setFormData({
+                        ...formData,
+                        alumnos_ids: [...(formData.alumnos_ids || []), alumnoAgregar],
+                        alumnos_nombres: [...(formData.alumnos_nombres || []), alumno.nombre],
+                      });
+                      setAlumnoAgregar('');
+                    }
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           )}
 
