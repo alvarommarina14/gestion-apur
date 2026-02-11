@@ -31,7 +31,7 @@ export default function TarjetaClase({ turno, estadosPago = {} }) {
             <p className="text-xs font-semibold text-slate-900 truncate">
               {turno.alumnos_nombres[0]}
             </p>
-            {getPagoBadge(turno.pagado)}
+            {getPagoBadge(estadosPago[turno.alumnos_ids?.[0]] || 'pendiente')}
           </div>
           <p className="text-xs text-slate-600">
             {turno.hora_inicio} - {turno.hora_fin}
