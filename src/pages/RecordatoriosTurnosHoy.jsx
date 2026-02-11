@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Clock, Users, DollarSign, CheckCircle, AlertCircle, Trash2 } from 'lucide-react';
+import { Clock, Users, DollarSign, CheckCircle, AlertCircle, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { addDays, subDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import {
@@ -25,13 +26,14 @@ import {
 } from '@/components/ui/select';
 
 export default function RecordatoriosTurnosHoy() {
-  const [user, setUser] = useState(null);
-  const queryClient = useQueryClient();
-  const hoy = format(new Date(), 'yyyy-MM-dd');
-  const [modalPagoGrupal, setModalPagoGrupal] = useState(false);
-  const [claseSeleccionada, setClaseSeleccionada] = useState(null);
-  const [pagosAlumnos, setPagosAlumnos] = useState({});
-  const [medioPago, setMedioPago] = useState('');
+   const [user, setUser] = useState(null);
+   const queryClient = useQueryClient();
+   const [fechaSeleccionada, setFechaSeleccionada] = useState(new Date());
+   const fechaFormato = format(fechaSeleccionada, 'yyyy-MM-dd');
+   const [modalPagoGrupal, setModalPagoGrupal] = useState(false);
+   const [claseSeleccionada, setClaseSeleccionada] = useState(null);
+   const [pagosAlumnos, setPagosAlumnos] = useState({});
+   const [medioPago, setMedioPago] = useState('');
 
   // Fetch user
   useEffect(() => {
@@ -46,23 +48,23 @@ export default function RecordatoriosTurnosHoy() {
     getUser();
   }, []);
 
-  // Fetch turnos de hoy
+  // Fetch turnos de la fecha seleccionada
   const { data: todayTurnos = [], isLoading: turnosLoading } = useQuery({
-    queryKey: ['turnos-hoy'],
+    queryKey: ['turnos-hoy', fechaFormato],
     queryFn: async () => {
       const allTurnos = await base44.entities.TurnoCancha.list();
-      return allTurnos.filter(t => t.fecha === hoy && t.estado === 'activo');
+      return allTurnos.filter(t => t.fecha === fechaFormato && t.estado === 'activo');
     },
     refetchInterval: 60000, // Refrescar cada minuto
   });
 
-  // Fetch clases de hoy
+  // Fetch clases de la fecha seleccionada
    const { data: todayClases = [], isLoading: clasesLoading } = useQuery({
-     queryKey: ['clases-hoy'],
+     queryKey: ['clases-hoy', fechaFormato],
      queryFn: async () => {
        const allClases = await base44.entities.Clase.list();
        return allClases.filter(c => 
-         c.fecha === hoy && 
+         c.fecha === fechaFormato && 
          (c.estado === 'programada' || c.estado === 'realizada')
        );
      },
@@ -213,10 +215,26 @@ export default function RecordatoriosTurnosHoy() {
     <div className="p-4 lg:p-6 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-slate-900">Recordatorios de Turnos Hoy</h1>
-        <p className="text-slate-500 text-sm mt-1">
-          {format(new Date(), 'EEEE, d MMMM yyyy', { locale: es })}
-        </p>
+        <h1 className="text-2xl lg:text-3xl font-bold text-slate-900">Recordatorios de Turnos</h1>
+        <div className="flex items-center gap-4 mt-3">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setFechaSeleccionada(subDays(fechaSeleccionada, 1))}
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </Button>
+          <p className="text-slate-600 min-w-64 text-center font-medium">
+            {format(fechaSeleccionada, 'EEEE, d MMMM yyyy', { locale: es })}
+          </p>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setFechaSeleccionada(addDays(fechaSeleccionada, 1))}
+          >
+            <ChevronRight className="w-5 h-5" />
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
