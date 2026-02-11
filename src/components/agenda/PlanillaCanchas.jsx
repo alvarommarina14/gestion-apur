@@ -8,6 +8,7 @@ import ModalCancelarAlquiler from '@/components/agenda/ModalCancelarAlquiler';
 import EditarAlquilerModal from '@/components/agenda/EditarAlquilerModal';
 import EditarClaseEnAgendaModal from '@/components/agenda/EditarClaseEnAgendaModal';
 import TarjetaClase from '@/components/agenda/TarjetaClase';
+import NuevoTurnoModal from '@/components/agenda/NuevoTurnoModal';
 
 const HORARIOS = [];
 for (let i = 8; i < 22; i++) {
