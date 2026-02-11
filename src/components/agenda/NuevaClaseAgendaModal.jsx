@@ -240,12 +240,12 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-lg max-h-[95vh] overflow-y-auto flex flex-col p-4 sm:p-6">
+        <DialogHeader className="sticky top-0 bg-white z-10 pb-4">
           <DialogTitle>Nueva Clase</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 overflow-y-auto flex-1">
           {error && (
             <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg flex items-start gap-2">
               <AlertTriangle className="w-5 h-5 text-rose-600 mt-0.5" />
