@@ -162,6 +162,16 @@ export default function RecordatoriosTurnosHoy() {
     };
   }, [turnos, clientes, alumnos, cobrosClientes, today, buscarCliente]);
 
+  const updateMutation = useMutation({
+    mutationFn: async ({ turnoId, nuevoPrecio }) => {
+      await base44.entities.TurnoCancha.update(turnoId, { monto: nuevoPrecio });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['turnos-hoy'] });
+      setPreciosEditables({});
+    },
+  });
+
   const getEstadoBadge = (estado) => {
     if (estado === 'pagado') return <Badge className="bg-green-100 text-green-800">✓ Al día</Badge>;
     if (estado === 'moroso') return <Badge className="bg-red-100 text-red-800">✗ Moroso</Badge>;
