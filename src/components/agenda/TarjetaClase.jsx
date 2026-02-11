@@ -17,55 +17,35 @@ export default function TarjetaClase({ turno, estadosPago = {} }) {
 
   return (
     <div className="space-y-2">
-      {/* Profesor (título) */}
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-bold text-blue-700">
-          {turno.profesor || 'Sin profesor'}
-        </p>
+      {/* Profesor (título principal) */}
+      <p className="text-xs font-bold text-slate-900">
+        {turno.profesor || 'Sin profesor'}
+      </p>
+
+      {/* Alumnos */}
+      <div className="space-y-1">
+        {turno.alumnos_nombres?.map((alumno, idx) => {
+          const alumnoId = turno.alumnos_ids?.[idx];
+          const estadoPago = estadosPago[alumnoId] || 'pendiente';
+          return (
+            <div key={idx} className="flex items-center justify-between gap-1">
+              <p className="text-xs text-slate-700 truncate">
+                {alumno}
+              </p>
+              {getPagoBadge(estadoPago)}
+            </div>
+          );
+        })}
       </div>
 
-      {/* Individual */}
-      {esIndividual && (
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between gap-1">
-            <p className="text-xs font-semibold text-slate-900 truncate">
-              {turno.alumnos_nombres[0]}
-            </p>
-            {getPagoBadge(estadosPago[turno.alumnos_ids?.[0]] || 'pendiente')}
-          </div>
-          <p className="text-xs text-slate-600">
-            {turno.hora_inicio} - {turno.hora_fin}
-          </p>
-          {turno.notas && (
-            <p className="text-xs text-slate-500 italic">{turno.notas}</p>
-          )}
-        </div>
-      )}
+      {/* Horario */}
+      <p className="text-xs text-slate-600">
+        {turno.hora_inicio} - {turno.hora_fin}
+      </p>
 
-      {/* Grupal */}
-      {esGrupal && (
-        <div className="space-y-1.5">
-          <div className="space-y-1">
-            {turno.alumnos_nombres.map((alumno, idx) => {
-              const alumnoId = turno.alumnos_ids?.[idx];
-              const estadoPago = estadosPago[alumnoId] || 'pendiente';
-              return (
-                <div key={idx} className="flex items-center justify-between gap-1">
-                  <p className="text-xs font-semibold text-slate-900 truncate">
-                    {alumno}
-                  </p>
-                  {getPagoBadge(estadoPago)}
-                </div>
-              );
-            })}
-          </div>
-          <p className="text-xs text-slate-600">
-            {turno.hora_inicio} - {turno.hora_fin}
-          </p>
-          {turno.notas && (
-            <p className="text-xs text-slate-500 italic">{turno.notas}</p>
-          )}
-        </div>
+      {/* Notas */}
+      {turno.notas && (
+        <p className="text-xs text-slate-500 italic">{turno.notas}</p>
       )}
     </div>
   );
