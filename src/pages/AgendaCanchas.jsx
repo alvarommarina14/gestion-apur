@@ -54,19 +54,25 @@ export default function AgendaCanchas() {
           base44.entities.Pago.filter({ mes_correspondiente: mesFiltro })
         ]);
         
+        console.log('🔍 DEBUG - Cobros traídos para mes', mesFiltro, ':', cobros);
+        console.log('🔍 DEBUG - Pagos traídos para mes', mesFiltro, ':', pagos);
+        
         // Mapear cliente_id (alumno_id) directamente a su estado de pago
         const estadosPago = {};
         
         // Primero agregar cobros
         cobros.forEach(cobro => {
+          console.log('📌 Procesando cobro:', cobro.cliente_id, cobro.cliente_nombre, cobro.estado);
           estadosPago[cobro.cliente_id] = cobro.estado;
         });
         
         // Si hay pagos de alumno, marcar como pagado
         pagos.forEach(pago => {
+          console.log('💰 Procesando pago:', pago.alumno_id, pago.alumno_nombre);
           estadosPago[pago.alumno_id] = 'pagado';
         });
         
+        console.log('✅ Estados finales:', estadosPago);
         return estadosPago;
       } catch (error) {
         console.error('Error al traer cobros y pagos:', error);
