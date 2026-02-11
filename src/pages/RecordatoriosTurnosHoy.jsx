@@ -229,36 +229,75 @@ export default function RecordatoriosTurnosHoy() {
                       <CardContent className="pt-6">
                         <div className="flex items-start justify-between mb-4">
                           <div>
-                            <h3 className="text-lg font-semibold text-slate-900">{clase.nombre}</h3>
+                            <h3 className="text-lg font-semibold text-slate-900">
+                              {clase.esGrupal ? 'Clase Grupal' : clase.nombre}
+                            </h3>
                             <p className="text-sm text-slate-600 mt-1">
                               {clase.horaInicio} - {clase.horaFin} | Cancha {clase.cancha}
                             </p>
                             <p className="text-sm text-slate-500 mt-1">Profesor: {clase.profesor || '-'}</p>
                           </div>
-                          <div className="text-right">
-                            <p className="text-2xl font-bold text-blue-600">
-                              ${clase.precio.toLocaleString('es-AR')}
-                            </p>
-                            <p className="text-xs text-slate-500 mt-1">Mensual</p>
-                          </div>
                         </div>
 
-                        <div className="flex items-center justify-between pt-4 border-t border-slate-200">
-                          <div className="flex-1">
-                            {getEstadoBadge(clase.estado)}
+                        {/* Si es clase grupal, listar alumnos */}
+                        {clase.esGrupal ? (
+                          <div className="space-y-3 pt-4 border-t border-slate-200">
+                            {clase.alumnos.map(alumno => (
+                              <div key={alumno.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                                <div>
+                                  <p className="font-medium text-slate-900">{alumno.nombre}</p>
+                                  <p className="text-xs text-slate-500">Mensual</p>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                  <p className="font-bold text-blue-600">
+                                    ${alumno.precio.toLocaleString('es-AR')}
+                                  </p>
+                                  <div className="flex items-center gap-2">
+                                    {getEstadoBadge(alumno.estado)}
+                                    {alumno.deuda > 0 && (
+                                      <div className="text-right">
+                                        <p className="text-xs font-semibold text-red-600">
+                                          DEBE: ${alumno.deuda.toLocaleString('es-AR')}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
                           </div>
-                          {clase.deuda > 0 && (
-                            <div className="flex items-center gap-2 ml-4 p-3 bg-red-50 rounded-lg">
-                              <AlertCircle className="w-5 h-5 text-red-600" />
-                              <div className="text-right">
-                                <p className="text-xs text-red-600 font-semibold">DEBE</p>
-                                <p className="text-lg font-bold text-red-600">
-                                  ${clase.deuda.toLocaleString('es-AR')}
+                        ) : (
+                          /* Clase individual */
+                          <div>
+                            <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+                              <div className="flex-1">
+                                <p className="font-medium text-slate-900">{clase.nombre}</p>
+                              </div>
+                              <div className="text-right mr-3">
+                                <p className="text-lg font-bold text-blue-600">
+                                  ${clase.precio.toLocaleString('es-AR')}
                                 </p>
                               </div>
                             </div>
-                          )}
-                        </div>
+
+                            <div className="flex items-center justify-between pt-4">
+                              <div className="flex-1">
+                                {getEstadoBadge(clase.estado)}
+                              </div>
+                              {clase.deuda > 0 && (
+                                <div className="flex items-center gap-2 ml-4 p-3 bg-red-50 rounded-lg">
+                                  <AlertCircle className="w-5 h-5 text-red-600" />
+                                  <div className="text-right">
+                                    <p className="text-xs text-red-600 font-semibold">DEBE</p>
+                                    <p className="text-lg font-bold text-red-600">
+                                      ${clase.deuda.toLocaleString('es-AR')}
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   ))}
