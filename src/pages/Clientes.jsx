@@ -57,6 +57,7 @@ export default function ClientesPage() {
   const [reporteModal, setReporteModal] = useState({ open: false, alumno: null });
   const [pagoModal, setPagoModal] = useState({ open: false, alumno: null });
   const [filtroEstadoPago, setFiltroEstadoPago] = useState('todos');
+  const [ordenamiento, setOrdenamiento] = useState('reciente');
 
   const { data: clientes = [], isLoading } = useQuery({
     queryKey: ['clientes'],
@@ -87,7 +88,7 @@ export default function ClientesPage() {
 
   // Filtrar clientes por sección
   const clientesFiltrados = useMemo(() => {
-    let filtrados = clientes;
+    let filtrados = [...clientes];
 
     // Filtrar por sección principal
     if (seccionActual === 'clase') {
@@ -143,8 +144,31 @@ export default function ClientesPage() {
       );
     }
 
+    // Ordenar según la opción seleccionada
+    switch (ordenamiento) {
+      case 'reciente':
+        filtrados.sort((a, b) => {
+          const fechaA = new Date(a.created_date || 0);
+          const fechaB = new Date(b.created_date || 0);
+          return fechaB - fechaA;
+        });
+        break;
+      case 'antiguo':
+        filtrados.sort((a, b) => {
+          const fechaA = new Date(a.created_date || 0);
+          const fechaB = new Date(b.created_date || 0);
+          return fechaA - fechaB;
+        });
+        break;
+      case 'alfabetico':
+        filtrados.sort((a, b) => a.nombre.localeCompare(b.nombre));
+        break;
+      default:
+        break;
+    }
+
     return filtrados;
-  }, [clientes, seccionActual, busqueda, filtroEstadoPago, alumnos, cobros]);
+  }, [clientes, seccionActual, busqueda, filtroEstadoPago, alumnos, cobros, ordenamiento]);
 
   const clasificacionConfig = {
     nuevo: { icon: UserPlus, color: 'bg-blue-100 text-blue-700', label: 'Nuevo' },
@@ -157,16 +181,28 @@ export default function ClientesPage() {
       {/* Buscador y Filtros */}
       <Card className="shadow-sm mb-4">
         <CardContent className="p-4 space-y-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input
-              placeholder="Buscar cliente..."
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-              className="pl-9"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Input
+                placeholder="Buscar cliente..."
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <Select value={ordenamiento} onValueChange={setOrdenamiento}>
+              <SelectTrigger>
+                <SelectValue placeholder="Ordenar por" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="reciente">Más recientes</SelectItem>
+                <SelectItem value="antiguo">Más antiguos</SelectItem>
+                <SelectItem value="alfabetico">Alfabético</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          
+
           {/* Filtros de estado de pago */}
           <div className="flex flex-wrap gap-2">
             <Button
