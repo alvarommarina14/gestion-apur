@@ -65,10 +65,23 @@ export default function RecordatoriosTurnosHoy() {
      queryKey: ['clases-hoy', fechaFormato],
      queryFn: async () => {
        const allClases = await base44.entities.Clase.list();
-       return allClases.filter(c => 
+       const clasesFiltered = allClases.filter(c => 
          c.fecha === fechaFormato && 
          (c.estado === 'programada' || c.estado === 'realizada')
        );
+
+       // Cargar nombres de profesores si no existen
+       return Promise.all(clasesFiltered.map(async (clase) => {
+         if (!clase.profesor_nombre && clase.profesor_id) {
+           try {
+             const profesor = await base44.entities.Profesor.read(clase.profesor_id);
+             return { ...clase, profesor_nombre: profesor.nombre };
+           } catch (e) {
+             return clase;
+           }
+         }
+         return clase;
+       }));
      },
      refetchInterval: 60000,
    });
