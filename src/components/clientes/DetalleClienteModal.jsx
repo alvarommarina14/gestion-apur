@@ -517,10 +517,10 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
                 </div>
               )}
 
-              {((formData.tipo_cliente === 'abono' || formData.tipo_cliente === 'suelto') && editando) && (
+              {editando && (
                 <div className="space-y-2">
                   <Label>
-                    {formData.tipo_cliente === 'abono' ? 'Precio mensual' : 'Precio'}
+                    {formData.tipo_cliente === 'clase' ? 'Monto' : formData.tipo_cliente === 'abono' ? 'Precio mensual' : 'Precio'}
                   </Label>
                   <Input
                     type="number"
