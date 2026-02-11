@@ -65,21 +65,26 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
       const horaFin = new Date(new Date(`2000-01-01 ${horaInicio}`).getTime() + duracion * 60000);
       const horaFinStr = `${String(horaFin.getHours()).padStart(2, '0')}:${String(horaFin.getMinutes()).padStart(2, '0')}`;
       
+      const nombreProfesor = showNuevoProfesor 
+        ? nuevoProfesor 
+        : profesores.find(p => p.id === profesorId)?.nombre || '';
+
       const datosClase = {
-        fecha: format(initialDate, 'yyyy-MM-dd'),
-        hora_inicio: horaInicio,
-        duracion,
-        tipo,
-        sede: 'Sede Principal',
-        cancha,
-        alumnos_ids: alumnos,
-        alumnos_nombres: alumnos.map(aId => {
-          const a = alumnosDisponibles.find(x => x.id === aId);
-          return a?.nombre || '';
-        }).filter(Boolean),
-        estado: 'programada',
-        profesor_id: profesorId
-      };
+         fecha: format(initialDate, 'yyyy-MM-dd'),
+         hora_inicio: horaInicio,
+         duracion,
+         tipo,
+         sede: 'Sede Principal',
+         cancha,
+         alumnos_ids: alumnos,
+         alumnos_nombres: alumnos.map(aId => {
+           const a = alumnosDisponibles.find(x => x.id === aId);
+           return a?.nombre || '';
+         }).filter(Boolean),
+         estado: 'programada',
+         profesor_id: profesorId,
+         profesor_nombre: nombreProfesor
+       };
 
       const datosTurno = {
         fecha: format(initialDate, 'yyyy-MM-dd'),
