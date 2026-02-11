@@ -498,7 +498,7 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
           </div>
 
           {/* Botones */}
-          <div className="flex gap-3 justify-end">
+          <div className="flex gap-3 justify-end pb-2">
             <Button variant="outline" onClick={handleClose}>
               Cancelar
             </Button>
@@ -511,6 +511,8 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
             </Button>
           </div>
         </div>
+
+        <div className="sticky bottom-0 bg-white border-t h-1"></div>
       </DialogContent>
     </Dialog>
   );
