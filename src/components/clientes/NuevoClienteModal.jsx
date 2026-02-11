@@ -205,29 +205,26 @@ export default function NuevoClienteModal({ open, onOpenChange, tipoCliente }) {
 
    if (clienteCreado) {
       return (
-        <div>
-          <Dialog open={open} onOpenChange={onOpenChange} />
-          <NuevoAlumnoModal 
-            open={true}
-            onOpenChange={(isOpen) => {
-              if (!isOpen) {
-                // Cerrar todo y resetear
-                queryClient.invalidateQueries({ queryKey: ['clientes'] });
-                queryClient.invalidateQueries({ queryKey: ['alumnos'] });
-                setClienteCreado(null);
-                onOpenChange(false);
-              }
-            }}
-            clienteData={{
-              nombre: clienteCreado.nombre,
-              whatsapp: clienteCreado.telefono,
-              profesor_id: formData.profesor_id,
-              profesor_nombre: formData.profesor_nombre,
-              precio_mensual: formData.precio,
-              observaciones: formData.notas,
-            }}
-          />
-        </div>
+        <NuevoAlumnoModal 
+          open={true}
+          onOpenChange={(isOpen) => {
+            if (!isOpen) {
+              // Cerrar todo y resetear
+              queryClient.invalidateQueries({ queryKey: ['clientes'] });
+              queryClient.invalidateQueries({ queryKey: ['alumnos'] });
+              setClienteCreado(null);
+              onOpenChange(false);
+            }
+          }}
+          clienteData={{
+            nombre: clienteCreado.nombre,
+            whatsapp: clienteCreado.telefono,
+            profesor_id: formData.profesor_id,
+            profesor_nombre: formData.profesor_nombre,
+            precio_mensual: formData.precio,
+            observaciones: formData.notas,
+          }}
+        />
       );
     }
 
