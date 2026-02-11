@@ -2,7 +2,29 @@ import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Edit2, Trash2 } from 'lucide-react';
+import { format } from 'date-fns';
 import GestionarClaseModal from './GestionarClaseModal';
+
+const getEstadoPago = (clienteId, estadosPago) => {
+  // Si existe en estadosPago y está pagado, retorna 'pagado'
+  if (estadosPago[clienteId] === 'pagado') {
+    return 'pagado';
+  }
+
+  // Calcular si pasó la fecha de vencimiento (día 15 del mes actual)
+  const hoy = new Date();
+  const mesActual = format(hoy, 'yyyy-MM');
+  const [año, mes] = mesActual.split('-');
+  const fechaVencimiento = new Date(parseInt(año), parseInt(mes) - 1, 15);
+
+  // Si pasó la fecha vencimiento y no hay pago, es moroso
+  if (hoy > fechaVencimiento) {
+    return 'moroso';
+  }
+
+  // Si aún no pasó la fecha, es pendiente
+  return 'pendiente';
+};
 
 const getPagoBadge = (estado) => {
   if (estado === 'pagado') {
@@ -66,7 +88,7 @@ export default function TarjetaClase({ turno, estadosPago = {}, onEdit }) {
       <div className="space-y-1 pl-2 border-l-2 border-blue-200">
         {turno.alumnos_nombres?.map((alumno, idx) => {
           const alumnoId = turno.alumnos_ids?.[idx];
-          const estadoPago = estadosPago[alumnoId] || 'pendiente';
+          const estadoPago = getEstadoPago(alumnoId, estadosPago);
           return (
             <div key={idx} className="flex items-center justify-between gap-2">
               <p className="text-xs text-slate-700 truncate flex-1">
