@@ -218,15 +218,17 @@ export default function EditarClaseEnAgendaModal({ open, onOpenChange, turno }) 
             />
           </div>
 
-          <div className="space-y-2">
-            <Label>Cliente / Nombre *</Label>
-            <Input
-              value={formData.cliente}
-              onChange={(e) => setFormData({ ...formData, cliente: e.target.value })}
-              placeholder="Nombre del cliente"
-              required
-            />
-          </div>
+          {turno?.tipo_turno !== 'clase' && (
+            <div className="space-y-2">
+              <Label>Cliente / Nombre *</Label>
+              <Input
+                value={formData.cliente}
+                onChange={(e) => setFormData({ ...formData, cliente: e.target.value })}
+                placeholder="Nombre del cliente"
+                required
+              />
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label>Notas (opcional)</Label>
