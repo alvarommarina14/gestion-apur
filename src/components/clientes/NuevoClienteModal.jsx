@@ -43,23 +43,25 @@ export default function NuevoClienteModal({ open, onOpenChange, tipoCliente }) {
    const [showNewProfesor, setShowNewProfesor] = useState(false);
    const [newProfesorData, setNewProfesorData] = useState({ nombre: '', email: '', telefono: '' });
    const [formData, setFormData] = useState({
-       nombre: '',
-       telefono: '',
-       email: '',
-       clasificacion: 'recurrente',
-       tipo_cliente: 'clase',
-       precio: 0,
-       es_alumno: false,
-       profesor_id: '',
-       profesor_nombre: '',
-       clases_por_mes: '4',
-       horario_preferido: '',
-       sede_preferida: '',
-       tipo_asistencia: 'un_dia',
-       dia_preferido: '',
-       dias_semana: [],
-       notas: '',
-       });
+        nombre: '',
+        telefono: '',
+        email: '',
+        clasificacion: 'recurrente',
+        tipo_cliente: 'clase',
+        precio: 0,
+        precio_clase: 0,
+        precio_alquiler: 0,
+        es_alumno: false,
+        profesor_id: '',
+        profesor_nombre: '',
+        clases_por_mes: '4',
+        horario_preferido: '',
+        sede_preferida: '',
+        tipo_asistencia: 'un_dia',
+        dia_preferido: '',
+        dias_semana: [],
+        notas: '',
+        });
 
    const { data: profesores = [] } = useQuery({
      queryKey: ['profesores-list'],
