@@ -89,12 +89,10 @@ export default function RecordatoriosTurnosHoy() {
    });
 
    // Cargar alumnos cuando se abre modal grupal
-   const { data: alumnos = [] } = useQuery({
+   const { data: alumnos = [], isLoading: alumnosLoading } = useQuery({
      queryKey: ['alumnos-pagos', claseSeleccionada?.id],
      queryFn: async () => {
-       console.log('Cargando alumnos para clase:', claseSeleccionada?.id, 'IDs:', claseSeleccionada?.alumnos_ids);
        if (!claseSeleccionada?.alumnos_ids || claseSeleccionada.alumnos_ids.length === 0) {
-         console.log('Sin alumnos_ids');
          return [];
        }
        const alumnos = [];
@@ -106,11 +104,12 @@ export default function RecordatoriosTurnosHoy() {
            console.error('Error loading student:', id, e);
          }
        }
-       console.log('Alumnos cargados:', alumnos);
        return alumnos;
      },
      enabled: modalPagoGrupal && !!claseSeleccionada?.id
    });
+
+   const [alumnosPagos, setAlumnosPagos] = useState({});
 
   // Combinar y ordenar turnos y clases con filtro
   const getAllItems = () => {
