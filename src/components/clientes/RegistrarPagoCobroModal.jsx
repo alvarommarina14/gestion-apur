@@ -44,6 +44,7 @@ export default function RegistrarPagoCobroModal({ open, onOpenChange, cobro, cli
       });
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cobros-clientes', cliente?.id] });
       queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
       onOpenChange(false);
