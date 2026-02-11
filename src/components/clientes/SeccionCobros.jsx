@@ -156,15 +156,6 @@ export default function SeccionCobros({ cliente }) {
         )}
       </div>
 
-      <Button 
-        onClick={() => setModalNuevoCobro(true)}
-        variant="outline"
-        className="w-full"
-      >
-        <Plus className="w-4 h-4 mr-2" />
-        Registrar cobro
-      </Button>
-
       <NuevoCbroModal
         open={modalNuevoCobro}
         onOpenChange={setModalNuevoCobro}
