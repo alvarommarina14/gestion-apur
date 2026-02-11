@@ -30,6 +30,7 @@ export default function RecordatoriosTurnosHoy() {
    const [modalPagoIndividual, setModalPagoIndividual] = useState(false);
    const [claseSeleccionada, setClaseSeleccionada] = useState(null);
    const [medioPago, setMedioPago] = useState('');
+   const [filtroTipo, setFiltroTipo] = useState('todos');
 
   // Fetch user
   useEffect(() => {
