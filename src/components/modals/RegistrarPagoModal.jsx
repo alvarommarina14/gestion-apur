@@ -23,50 +23,54 @@ import { DollarSign, AlertCircle, CheckCircle } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
 
-export default function RegistrarPagoModal({ open, onOpenChange, alumno }) {
-  const queryClient = useQueryClient();
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  
-  const currentMonth = format(new Date(), 'yyyy-MM');
-  const currentDay = new Date().getDate();
-  const isFueraDetermino = currentDay > 15;
-  
-  const [formData, setFormData] = useState({
-    monto: alumno?.precio_mensual || '',
-    medio_pago: '',
-    mes_correspondiente: currentMonth,
-    notas: '',
-  });
+export default function RegistrarPagoModal({ open, onOpenChange, alumno, esCliente = false }) {
+   const queryClient = useQueryClient();
+   const [loading, setLoading] = useState(false);
+   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!alumno) return;
-    
-    setLoading(true);
-    
-    try {
-      // Crear el pago
-      await base44.entities.Pago.create({
-        alumno_id: alumno.id,
-        alumno_nombre: alumno.nombre,
-        fecha: format(new Date(), 'yyyy-MM-dd'),
-        monto: Number(formData.monto),
-        medio_pago: formData.medio_pago,
-        mes_correspondiente: formData.mes_correspondiente,
-        fuera_de_termino: isFueraDetermino,
-        notas: formData.notas,
-      });
-      
-      // Sincronizar con CobroCliente y actualizar estado
-      await base44.functions.invoke('sincronizarPagosCompleto', {
-        tipo_evento: 'alumno_pago',
-        alumnoId: alumno.id,
-        monto: Number(formData.monto),
-        fecha: format(new Date(), 'yyyy-MM-dd'),
-        mes: formData.mes_correspondiente,
-        medio_pago: formData.medio_pago
-      });
+   const currentMonth = format(new Date(), 'yyyy-MM');
+   const currentDay = new Date().getDate();
+   const isFueraDetermino = currentDay > 15;
+
+   const [formData, setFormData] = useState({
+     monto: alumno?.precio_mensual || '',
+     medio_pago: '',
+     mes_correspondiente: currentMonth,
+     notas: '',
+   });
+
+   const handleSubmit = async (e) => {
+     e.preventDefault();
+     if (!alumno) return;
+
+     setLoading(true);
+
+     try {
+       // Si es cliente, crear cobro. Si es alumno, crear pago
+       if (!esCliente) {
+         // Crear el pago para alumno
+         await base44.entities.Pago.create({
+           alumno_id: alumno.id,
+           alumno_nombre: alumno.nombre,
+           fecha: format(new Date(), 'yyyy-MM-dd'),
+           monto: Number(formData.monto),
+           medio_pago: formData.medio_pago,
+           mes_correspondiente: formData.mes_correspondiente,
+           fuera_de_termino: isFueraDetermino,
+           notas: formData.notas,
+         });
+       }
+
+       // Sincronizar con CobroCliente y actualizar estado
+       await base44.functions.invoke('sincronizarPagosCompleto', {
+         tipo_evento: esCliente ? 'cliente_pago' : 'alumno_pago',
+         clienteId: esCliente ? alumno.id : undefined,
+         alumnoId: esCliente ? undefined : alumno.id,
+         monto: Number(formData.monto),
+         fecha: format(new Date(), 'yyyy-MM-dd'),
+         mes: formData.mes_correspondiente,
+         medio_pago: formData.medio_pago
+       });
       
       // Log de auditoría
       const nuevaDeuda = Math.max(0, (alumno.deuda_total || 0) - Number(formData.monto));
