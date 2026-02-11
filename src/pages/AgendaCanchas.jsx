@@ -60,10 +60,24 @@ export default function AgendaCanchas() {
         // Mapear cliente_id (alumno_id) directamente a su estado de pago
         const estadosPago = {};
         
+        // Verificar si ya pasó el día 15 del mes actual
+        const hoy = new Date();
+        const [año, mes] = mesFiltro.split('-');
+        const vencimiento = new Date(parseInt(año), parseInt(mes) - 1, 15);
+        const pasóVencimiento = hoy > vencimiento;
+        
         // Primero agregar cobros
         cobros.forEach(cobro => {
           console.log('📌 Procesando cobro:', cobro.cliente_id, cobro.cliente_nombre, cobro.estado);
-          estadosPago[cobro.cliente_id] = cobro.estado;
+          let estado = cobro.estado;
+          
+          // Si pasó la fecha de vencimiento y sigue pendiente, marcar como moroso
+          if (pasóVencimiento && estado === 'pendiente') {
+            estado = 'moroso';
+            console.log('⚠️ MOROSO: Pasó la fecha de vencimiento para', cobro.cliente_nombre);
+          }
+          
+          estadosPago[cobro.cliente_id] = estado;
         });
         
         // Si hay pagos de alumno, marcar como pagado
