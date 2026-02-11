@@ -294,10 +294,6 @@ export default function ClientesPage() {
                         <span>{cliente.total_turnos} turnos</span>
                       </div>
                     )}
-                    <div className="flex items-center gap-2 text-emerald-600 font-semibold">
-                      <TrendingUp className="w-4 h-4" />
-                      <span>${(cliente.total_gastado || 0).toLocaleString('es-AR')}</span>
-                    </div>
                   </div>
 
                   {cliente.notas && (
