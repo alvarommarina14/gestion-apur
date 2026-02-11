@@ -31,6 +31,7 @@ import FormularioClaseAdmin from '@/components/agenda/FormularioClaseAdmin';
 import BotonesCancelacion from '@/components/agenda/BotonesCancelacion';
 import ModalEditarTurno from '@/components/agenda/ModalEditarTurno';
 import ModalConfirmarCancelacionRecurrencia from '@/components/agenda/ModalConfirmarCancelacionRecurrencia';
+import ModalCancelarAlquiler from '@/components/agenda/ModalCancelarAlquiler';
 
 export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isProfesor = false }) {
   const queryClient = useQueryClient();
@@ -690,6 +691,7 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
   const [busquedaCliente, setBusquedaCliente] = useState('');
   const [showListaClientes, setShowListaClientes] = useState(false);
   const [showConfirmarCancelacion, setShowConfirmarCancelacion] = useState(false);
+  const [showModalCancelarAlquiler, setShowModalCancelarAlquiler] = useState(false);
 
   useEffect(() => {
     const verificarRepeticion = async () => {
@@ -1109,18 +1111,15 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
       <DialogFooter className="flex-col sm:flex-row gap-2">
          {turno && formData.tipo_turno !== 'clase' && (
            <div className="w-full sm:mr-auto flex flex-col gap-2">
-             {tieneRepeticionSemanal && (
-               <Button
-                 type="button"
-                 variant="outline"
-                 onClick={handleDeleteSerie}
-                 className="text-rose-700 hover:text-rose-800 border-rose-300 w-full sm:w-auto"
-               >
-                 <Trash2 className="w-4 h-4 mr-2" />
-                 Eliminar recurrencia semanal
-               </Button>
-             )}
-             <BotonesCancelacion turno={turno} onModalClose={() => onOpenChange(false)} />
+             <Button
+               type="button"
+               variant="outline"
+               onClick={() => setShowModalCancelarAlquiler(true)}
+               className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200 w-full sm:w-auto"
+             >
+               <Trash2 className="w-4 h-4 mr-2" />
+               Eliminar turno
+             </Button>
            </div>
          )}
         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
@@ -1233,6 +1232,15 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
           onConfirm={handleConfirmarCancelacion}
           turno={turno}
           isPending={deleteMutation.isPending}
+        />
+      )}
+
+      {/** Modal de cancelación de alquiler */}
+      {turno && formData.tipo_turno !== 'clase' && (
+        <ModalCancelarAlquiler
+          open={showModalCancelarAlquiler}
+          onOpenChange={setShowModalCancelarAlquiler}
+          turno={turno}
         />
       )}
     </>
