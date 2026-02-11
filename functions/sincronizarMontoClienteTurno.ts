@@ -25,12 +25,13 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Cliente no encontrado' }, { status: 404 });
     }
 
-    // Buscar todos los TurnoCancha de este cliente que NO estén pagados
-    const turnos = await base44.entities.TurnoCancha.filter({
-      cliente: cliente.nombre,
-      pagado: false,
-      estado: 'activo'
-    });
+    // Buscar todos los TurnoCancha de este cliente que NO estén pagados (clases individuales o alquileres)
+    const todosTurnos = await base44.entities.TurnoCancha.list();
+    const turnos = todosTurnos.filter(t => 
+      t.cliente === cliente.nombre && 
+      t.pagado === false && 
+      t.estado === 'activo'
+    );
 
     // Actualizar el monto en cada turno
     let actualizados = 0;
@@ -39,6 +40,22 @@ Deno.serve(async (req) => {
         monto: nuevo_monto
       });
       actualizados++;
+    }
+
+    // Si es alumno, también buscar Clases individuales sincronizadas
+    let clasesActualizadas = 0;
+    if (cliente.es_alumno) {
+      const clasesDelCliente = await base44.entities.Clase.filter({
+        alumnos_nombres: cliente.nombre,
+        estado: { $ne: 'cancelada_anticipada' }
+      });
+      
+      for (const clase of clasesDelCliente) {
+        await base44.entities.Clase.update(clase.id, {
+          precio: nuevo_monto
+        });
+        clasesActualizadas++;
+      }
     }
 
     return Response.json({
