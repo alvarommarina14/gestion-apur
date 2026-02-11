@@ -187,6 +187,7 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
     setShowListaAlumnos(false);
     setNotas('');
     setRecurrenciaSemanal(false);
+    setError('');
     onClose();
   };
 
