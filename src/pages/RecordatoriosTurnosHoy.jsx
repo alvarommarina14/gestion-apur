@@ -169,6 +169,16 @@ export default function RecordatoriosTurnosHoy() {
              medio_pago: medio,
              mes_correspondiente: mes,
            });
+
+           // Sincronizar con CobroCliente
+           await base44.functions.invoke('sincronizarPagosCompleto', {
+             tipo_evento: 'alumno_pago',
+             alumnoId: alumnoId,
+             monto: alumno.precio_mensual,
+             fecha: format(new Date(), 'yyyy-MM-dd'),
+             mes: mes,
+             medio_pago: medio
+           });
          }
        }
      },
@@ -178,6 +188,11 @@ export default function RecordatoriosTurnosHoy() {
        setPagosAlumnos({});
        setMedioPago('');
        queryClient.invalidateQueries({ queryKey: ['clases-hoy'] });
+       queryClient.invalidateQueries({ queryKey: ['alumnos'] });
+       queryClient.invalidateQueries({ queryKey: ['pagos'] });
+       queryClient.invalidateQueries({ queryKey: ['pagos-alumnos'] });
+       queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
+       queryClient.invalidateQueries({ queryKey: ['clientes'] });
        toast.success('Pagos registrados correctamente');
      }
    });
