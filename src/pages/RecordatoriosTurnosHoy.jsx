@@ -114,7 +114,7 @@ export default function RecordatoriosTurnosHoy() {
              id: cliente.id,
              nombre: cliente.nombre,
              estado: cobroDelMes.estado === 'moroso' ? 'moroso' : 'pendiente',
-             monto: turnoHoy.monto || cliente.precio
+             monto: cliente.precio
            });
          }
        }
