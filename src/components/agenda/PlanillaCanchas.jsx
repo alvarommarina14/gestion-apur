@@ -225,33 +225,20 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEd
                               )}
                             </div>
                             {turno.tipo_turno === 'clase' ? (
-                              <div className="space-y-0.5">
-                                {turno.alumnos_nombres?.length > 0 ? (
-                                  turno.alumnos_nombres.map((alumno, idx) => (
-                                    <p key={idx} className="text-xs font-semibold text-slate-900 truncate">
-                                      {alumno}
-                                    </p>
-                                  ))
-                                ) : (
-                                  <p className="text-xs font-semibold text-slate-900 truncate">
-                                    {turno.cliente}
-                                  </p>
-                                )}
-                              </div>
-                            ) : (
-                              <p className="text-xs font-semibold text-slate-900 truncate">
-                                {turno.cliente}
-                              </p>
-                            )}
-                            <p className="text-xs text-slate-600">
-                              {turno.hora_inicio} - {turno.hora_fin}
-                            </p>
-                            {turno.tipo_turno === 'clase' && turno.profesor && (
-                              <p className="text-xs text-blue-600">Prof: {turno.profesor}</p>
-                            )}
-                            {turno.notas && (
-                              <p className="text-xs text-slate-500 italic mt-1">{turno.notas}</p>
-                            )}
+                               <TarjetaClase turno={turno} />
+                             ) : (
+                               <div className="space-y-1">
+                                 <p className="text-xs font-semibold text-slate-900 truncate">
+                                   {turno.cliente}
+                                 </p>
+                                 <p className="text-xs text-slate-600">
+                                   {turno.hora_inicio} - {turno.hora_fin}
+                                 </p>
+                                 {turno.notas && (
+                                   <p className="text-xs text-slate-500 italic">{turno.notas}</p>
+                                 )}
+                               </div>
+                             )}
                             </div>
 
                           {/* Turnos secundarios */}
