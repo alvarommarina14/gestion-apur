@@ -1,14 +1,16 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { format, isToday } from 'date-fns';
+import { format, isToday, addDays, subDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function RecordatoriosTurnosHoy() {
-  const today = format(new Date(), 'yyyy-MM-dd');
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const today = format(selectedDate, 'yyyy-MM-dd');
 
   // Fetch turnos del día
   const { data: turnos = [], isLoading: loadingTurnos } = useQuery({
@@ -149,12 +151,37 @@ export default function RecordatoriosTurnosHoy() {
   return (
     <div className="min-h-screen bg-slate-50 p-4 lg:p-6">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
+        {/* Header con navegación */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Recordatorios de Hoy</h1>
-          <p className="text-slate-600">
-            {format(new Date(), 'EEEE, d MMMM yyyy', { locale: es })}
-          </p>
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-3xl font-bold text-slate-900">Recordatorios</h1>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setSelectedDate(subDays(selectedDate, 1))}
+                className="h-10 w-10"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </Button>
+              <div className="text-center min-w-[200px]">
+                <p className="text-sm font-medium text-slate-600">
+                  {format(selectedDate, 'EEEE', { locale: es })}
+                </p>
+                <p className="text-lg font-bold text-slate-900">
+                  {format(selectedDate, 'd MMMM yyyy', { locale: es })}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setSelectedDate(addDays(selectedDate, 1))}
+                className="h-10 w-10"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
         </div>
 
         {loadingTurnos ? (
