@@ -243,6 +243,14 @@ export default function RecordatoriosTurnosHoy() {
 
   const allItems = getAllItems();
 
+  // Filtrar clientes pendientes según el filtro
+  const clientesFiltrados = clientesPendientes.filter(cliente => {
+    if (filtro === 'todos') return true;
+    if (filtro === 'clases') return cliente.type === 'alumno';
+    if (filtro === 'alquileres') return cliente.type === 'cliente';
+    return true;
+  });
+
   const handleMarcarRealizado = async (item) => {
     try {
       if (item.type === 'turno') {
