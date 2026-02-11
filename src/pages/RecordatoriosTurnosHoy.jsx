@@ -57,6 +57,7 @@ export default function RecordatoriosTurnosHoy() {
 
        const alumnos = await base44.entities.Alumno.list();
        const clientes = await base44.entities.Cliente.list();
+       const turnos = await base44.entities.TurnoCancha.list();
 
        const resultado = [];
 
@@ -71,6 +72,20 @@ export default function RecordatoriosTurnosHoy() {
              profesor_nombre: alumno.profesor_nombre,
              estado: alumno.deuda_total > 0 ? 'moroso' : 'pendiente',
              monto: alumno.precio_mensual
+           });
+         }
+       }
+
+       // Alquileres sin pagar (TurnoCancha con tipo_turno='alquiler' y pagado=false)
+       const alquileresNoPagados = turnos.filter(t => t.tipo_turno === 'alquiler' && !t.pagado);
+       for (const alquiler of alquileresNoPagados) {
+         if (!resultado.some(r => r.id === alquiler.id && r.type === 'turno')) {
+           resultado.push({
+             type: 'turno',
+             id: alquiler.id,
+             nombre: alquiler.cliente,
+             estado: 'pendiente',
+             monto: alquiler.monto
            });
          }
        }
