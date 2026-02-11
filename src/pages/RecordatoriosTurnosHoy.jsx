@@ -552,6 +552,61 @@ export default function RecordatoriosTurnosHoy() {
           ))}
         </div>
         )}
+        )}
+
+        {/* Tab Pendientes y Morosos */}
+        {(tab === 'pendientes' || tab === 'morosos') && (
+        <div className="space-y-3">
+          {pendientesYMorosos
+            .filter(p => tab === 'pendientes' ? p.estado_pago === 'pendiente' : p.estado_pago === 'moroso')
+            .map((item) => (
+              <Card key={item.alumno_id} className="overflow-hidden">
+                <div className="flex items-start justify-between p-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-slate-900 text-lg">{item.nombre}</h3>
+                        <p className="text-sm text-slate-500 mt-1">{item.profesor_nombre}</p>
+                        <div className="flex items-center gap-4 mt-3 text-sm">
+                          <div>
+                            <span className="text-slate-500">Monto mensual:</span>
+                            <p className="font-semibold text-slate-900">{formatMoney(item.monto)}</p>
+                          </div>
+                          {item.deuda_total > 0 && (
+                            <div>
+                              <span className="text-slate-500">Deuda total:</span>
+                              <p className="font-semibold text-red-600">{formatMoney(item.deuda_total)}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2 ml-4">
+                    <span className={cn(
+                      'text-xs font-semibold px-3 py-1 rounded border text-center',
+                      getEstadoPagoColor(item.estado_pago)
+                    )}>
+                      {getEstadoPagoLabel(item.estado_pago)}
+                    </span>
+                    <Button
+                      onClick={() => {
+                        setClaseSeleccionada({ ...item, alumnos_ids: [item.alumno_id], alumnos_nombres: [item.nombre] });
+                        setModalPagoIndividual(true);
+                      }}
+                      size="sm"
+                      className="gap-2 bg-emerald-600 hover:bg-emerald-700 whitespace-nowrap"
+                    >
+                      <DollarSign className="w-4 h-4" />
+                      Pagar
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))
+          }
+        </div>
+        )}
 
         {/* Modal Pago Individual */}
         {modalPagoIndividual && claseSeleccionada?.alumnos_ids?.[0] && (
