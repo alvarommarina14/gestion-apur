@@ -43,13 +43,37 @@ export default function SeccionCobros({ cliente }) {
     queryFn: () => base44.entities.CobroCliente.filter({ cliente_id: cliente.id }),
   });
 
+  // Generar cobro virtual del mes actual si no existe y el cliente tiene precio
+  const cobrosConVirtual = useMemo(() => {
+    if (!cliente.precio || cliente.precio <= 0) return cobros;
+    
+    const mesActual = format(new Date(), 'yyyy-MM');
+    const yaExisteCobro = cobros.some(c => c.mes === mesActual);
+    
+    if (yaExisteCobro) return cobros;
+    
+    // Crear cobro virtual para el mes actual
+    const cobroVirtual = {
+      id: 'virtual-' + mesActual,
+      cliente_id: cliente.id,
+      cliente_nombre: cliente.nombre,
+      tipo_cobro: cliente.tipo_cliente === 'abono' ? 'abono_mensual' : 'cancha_suelta',
+      mes: mesActual,
+      monto: cliente.precio,
+      estado: 'pendiente',
+      isVirtual: true,
+    };
+    
+    return [...cobros, cobroVirtual].sort((a, b) => b.mes.localeCompare(a.mes));
+  }, [cobros, cliente.precio, cliente.tipo_cliente]);
+
   const stats = useMemo(() => {
-    const pendientes = cobros.filter(c => getEstadoDinamico(c) === 'pendiente').reduce((sum, c) => sum + (c.monto || 0), 0);
-    const morosos = cobros.filter(c => getEstadoDinamico(c) === 'moroso').reduce((sum, c) => sum + (c.monto || 0), 0);
-    const pagados = cobros.filter(c => c.estado === 'pagado').reduce((sum, c) => sum + (c.monto || 0), 0);
+    const pendientes = cobrosConVirtual.filter(c => getEstadoDinamico(c) === 'pendiente').reduce((sum, c) => sum + (c.monto || 0), 0);
+    const morosos = cobrosConVirtual.filter(c => getEstadoDinamico(c) === 'moroso').reduce((sum, c) => sum + (c.monto || 0), 0);
+    const pagados = cobrosConVirtual.filter(c => c.estado === 'pagado').reduce((sum, c) => sum + (c.monto || 0), 0);
 
     return { pendientes, morosos, pagados };
-  }, [cobros]);
+  }, [cobrosConVirtual]);
 
   const getEstadoColor = (estado) => {
     switch (estado) {
@@ -90,7 +114,7 @@ export default function SeccionCobros({ cliente }) {
 
       {/* Lista de cobros */}
       <div className="space-y-2">
-        {cobros.length === 0 ? (
+        {cobrosConVirtual.length === 0 ? (
           <Card className="shadow-sm">
             <CardContent className="py-8 text-center">
               <DollarSign className="w-10 h-10 mx-auto mb-2 opacity-30" />
@@ -98,10 +122,10 @@ export default function SeccionCobros({ cliente }) {
             </CardContent>
           </Card>
         ) : (
-          cobros.map(cobro => {
+          cobrosConVirtual.map(cobro => {
             const estadoDinamico = getEstadoDinamico(cobro);
             return (
-            <Card key={cobro.id} className="shadow-sm hover:shadow-md transition-all">
+            <Card key={cobro.id} className={cn("shadow-sm hover:shadow-md transition-all", cobro.isVirtual && "border-dashed border-2")}>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
@@ -135,18 +159,20 @@ export default function SeccionCobros({ cliente }) {
                         <Edit className="w-4 h-4" />
                       </Button>
                     )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        if (confirm('¿Eliminar este cobro?')) {
-                          deleteCbroMutation.mutate(cobro.id);
-                        }
-                      }}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    {!cobro.isVirtual && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          if (confirm('¿Eliminar este cobro?')) {
+                            deleteCbroMutation.mutate(cobro.id);
+                          }
+                        }}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardContent>
