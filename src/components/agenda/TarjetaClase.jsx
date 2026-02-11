@@ -86,6 +86,13 @@ export default function TarjetaClase({ turno, estadosPago = {}, onEdit }) {
           </p>
         </div>
       )}
+
+      {/* Modal Gestionar Clase */}
+      <GestionarClaseModal 
+        isOpen={mostrarGestionar} 
+        onClose={() => setMostrarGestionar(false)} 
+        clase={turno} 
+      />
     </div>
   );
 }
