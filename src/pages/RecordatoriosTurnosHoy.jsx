@@ -158,7 +158,61 @@ export default function RecordatoriosTurnosHoy() {
 
    const [alumnosPagos, setAlumnosPagos] = useState({});
 
-  // Combinar y ordenar turnos y clases con filtro
+   // Cargar clientes y alumnos pendientes/morosos
+   const { data: clientesPendientes = [] } = useQuery({
+     queryKey: ['clientes-pendientes'],
+     queryFn: async () => {
+       const mesActual = format(new Date(), 'yyyy-MM');
+       const pagos = await base44.entities.Pago.list();
+       const pagosDelMes = pagos.filter(p => p.mes_correspondiente === mesActual);
+
+       const alumnos = await base44.entities.Alumno.list();
+       const clientes = await base44.entities.Cliente.list();
+
+       const resultado = [];
+
+       // Alumnos pendientes/morosos
+       for (const alumno of alumnos) {
+         const pagado = pagosDelMes.some(p => p.alumno_id === alumno.id);
+         if (!pagado) {
+           resultado.push({
+             type: 'alumno',
+             id: alumno.id,
+             nombre: alumno.nombre,
+             profesor_nombre: alumno.profesor_nombre,
+             estado: alumno.deuda_total > 0 ? 'moroso' : 'pendiente',
+             monto: alumno.precio_mensual
+           });
+         }
+       }
+
+       // Clientes con abono pendiente
+       for (const cliente of clientes) {
+         if (cliente.tipo_cliente === 'clase' && cliente.es_alumno) continue; // Ya está en alumnos
+         const cobros = await base44.entities.CobroCliente.list();
+         const cobroDelMes = cobros.find(c => c.cliente_id === cliente.id && c.mes === mesActual);
+         if (cobroDelMes && !cobroDelMes.pagado) {
+           resultado.push({
+             type: 'cliente',
+             id: cliente.id,
+             nombre: cliente.nombre,
+             estado: cobroDelMes.estado === 'moroso' ? 'moroso' : 'pendiente',
+             monto: cliente.precio
+           });
+         }
+       }
+
+       return resultado.sort((a, b) => {
+         // Morosos primero
+         if (a.estado === 'moroso' && b.estado !== 'moroso') return -1;
+         if (a.estado !== 'moroso' && b.estado === 'moroso') return 1;
+         return a.nombre.localeCompare(b.nombre);
+       });
+     },
+     refetchInterval: 60000
+   });
+
+   // Combinar y ordenar turnos y clases con filtro
   const getAllItems = () => {
     let items = [];
 
