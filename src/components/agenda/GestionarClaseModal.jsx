@@ -204,6 +204,23 @@ export default function GestionarClaseModal({ isOpen, onClose, clase }) {
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Liberar Cancha */}
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm font-medium text-blue-700 mb-3">💼 Liberar cancha para otro turno</p>
+            <p className="text-xs text-blue-600 mb-3">Cancela la clase, crea recuperos para todos los alumnos y libera el horario</p>
+            <Button
+              onClick={() => {
+                if (confirm('Se cancelará la clase y se crearán recuperos para todos los alumnos. ¿Continuar?')) {
+                  liberarCanchaMutation.mutate();
+                }
+              }}
+              disabled={liberarCanchaMutation.isPending}
+              className="w-full bg-blue-600 hover:bg-blue-700"
+            >
+              {liberarCanchaMutation.isPending ? 'Liberando...' : 'Liberar cancha'}
+            </Button>
+          </div>
+
           {/* Eliminar Serie */}
           {clase.serie_recurrente_id && (
             <div className="p-4 bg-rose-50 border border-rose-200 rounded-lg">
