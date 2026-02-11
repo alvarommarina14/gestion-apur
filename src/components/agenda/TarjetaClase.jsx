@@ -1,14 +1,17 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 
-const getPagoBadge = (pagado) => {
-  if (pagado) {
+const getPagoBadge = (estado) => {
+  if (estado === 'pagado') {
     return <Badge className="bg-emerald-600 text-xs">Pagado</Badge>;
+  }
+  if (estado === 'moroso') {
+    return <Badge className="bg-rose-600 text-xs">Moroso</Badge>;
   }
   return <Badge className="bg-orange-600 text-xs">Pendiente</Badge>;
 };
 
-export default function TarjetaClase({ turno }) {
+export default function TarjetaClase({ turno, estadosPago = {} }) {
   const esIndividual = turno.alumnos_nombres?.length === 1;
   const esGrupal = turno.alumnos_nombres?.length > 1;
 
