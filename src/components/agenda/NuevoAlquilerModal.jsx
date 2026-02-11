@@ -71,6 +71,12 @@ export default function NuevoAlquilerModal({ isOpen, onClose, initialDate }) {
         throw new Error('Selecciona un cliente');
       }
 
+      // Validar disponibilidad antes de crear
+      const validacion = validarDisponibilidad(format(initialDate, 'yyyy-MM-dd'), horaInicio, duracion, cancha);
+      if (validacion) {
+        throw new Error(validacion.error);
+      }
+
       const clienteObj = clientes.find(c => c.id === clienteSeleccionado);
       const horaFin = new Date(new Date(`2000-01-01 ${horaInicio}`).getTime() + duracion * 60000);
       const horaFinStr = `${String(horaFin.getHours()).padStart(2, '0')}:${String(horaFin.getMinutes()).padStart(2, '0')}`;
