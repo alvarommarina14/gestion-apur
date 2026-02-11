@@ -107,6 +107,8 @@ export default function GestionarClaseModal({ isOpen, onClose, clase }) {
       toast.success('Recupero creado');
       queryClient.invalidateQueries({ queryKey: ['recuperos'] });
       queryClient.invalidateQueries({ queryKey: ['asistencia'] });
+      queryClient.invalidateQueries({ queryKey: ['clases'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos'] });
       setExpandedAlumno(null);
       setMostrarMotivoAlumno(null);
       setMotivo('');
