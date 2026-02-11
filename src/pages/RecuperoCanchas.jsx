@@ -287,7 +287,6 @@ export default function RecuperoCanchas() {
                           <div>
                             <h3 className="font-semibold text-slate-900">{cancelacion.cliente}</h3>
                             <div className="flex items-center gap-2 mt-2 flex-wrap">
-                              <Badge className={config.color}>{motivoConfig[cancelacion.motivo_cancelacion]?.label || 'Otro'}</Badge>
                               <Badge variant="outline" className="text-xs">
                                 Cancha {cancelacion.cancha}
                               </Badge>
