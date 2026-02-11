@@ -32,14 +32,11 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
     queryFn: () => base44.entities.Profesor.list(),
   });
 
-  // Fetch clientes (alumnos)
-  const { data: clientes = [] } = useQuery({
-    queryKey: ['clientes'],
-    queryFn: () => base44.entities.Cliente.list(),
-  });
-
-  // Filtrar solo clientes que son alumnos
-  const alumnosDisponibles = clientes.filter(c => c.es_alumno === true);
+  // Fetch alumnos
+   const { data: alumnosDisponibles = [] } = useQuery({
+     queryKey: ['alumnos-disponibles'],
+     queryFn: () => base44.entities.Alumno.list(),
+   });
 
   const mutation = useMutation({
     mutationFn: async () => {
