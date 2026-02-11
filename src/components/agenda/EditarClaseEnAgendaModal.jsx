@@ -328,7 +328,7 @@ export default function EditarClaseEnAgendaModal({ open, onOpenChange, turno }) 
             />
           </div>
 
-          <DialogFooter className="flex-col sm:flex-row gap-2">
+          <DialogFooter className="flex-col sm:flex-row gap-2 pb-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
@@ -341,6 +341,8 @@ export default function EditarClaseEnAgendaModal({ open, onOpenChange, turno }) 
             </Button>
           </DialogFooter>
         </form>
+
+        <div className="sticky bottom-0 bg-white border-t h-1"></div>
       </DialogContent>
     </Dialog>
   );
