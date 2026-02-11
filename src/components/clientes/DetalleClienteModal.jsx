@@ -372,19 +372,13 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
                 <Icon className="w-3 h-3 mr-1" />
                 {config.label}
               </Badge>
-              {estadisticas.estadoGeneral ? (
+              {estadisticas.estadoGeneral && estadisticas.estadoGeneral !== 'pagado' && (
                 <Badge className={cn('', 
-                  estadisticas.estadoGeneral === 'pagado' ? 'bg-emerald-100 text-emerald-700' :
                   estadisticas.estadoGeneral === 'pendiente' ? 'bg-amber-100 text-amber-700' :
                   'bg-rose-100 text-rose-700'
                 )}>
-                  {estadisticas.estadoGeneral === 'pagado' ? '✓ Pagado' :
-                   estadisticas.estadoGeneral === 'pendiente' ? '⏳ Pendiente' :
+                  {estadisticas.estadoGeneral === 'pendiente' ? '⏳ Pendiente' :
                    '⚠️ Moroso'}
-                </Badge>
-              ) : (
-                <Badge variant="outline" className="text-slate-500">
-                  Sin cobros
                 </Badge>
               )}
             </div>
