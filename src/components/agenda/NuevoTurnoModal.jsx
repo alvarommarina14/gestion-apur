@@ -573,11 +573,17 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
 
              // Preparar todos los turnos
              const turnosACrear = [];
+             const alumnosNombres = (data.alumnos_ids || []).map(id => {
+               const alumno = alumnos.find(a => a.id === id);
+               return alumno?.nombre || '';
+             }).filter(Boolean);
+
              for (let i = 0; i < 52; i++) {
                const fechaTurno = addWeeks(parseISO(data.fecha), i);
                turnosACrear.push({
                  ...data,
                  fecha: format(fechaTurno, 'yyyy-MM-dd'),
+                 alumnos_nombres: alumnosNombres,
                  empleados_asignados_emails: empleadosSeleccionados.map(e => e.email),
                  empleados_asignados_nombres: empleadosSeleccionados.map(e => e.full_name),
                  estado: 'activo',
