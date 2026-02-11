@@ -139,6 +139,7 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
         pagado: false,
         estado: 'activo',
         empleados_asignados_ids: [],
+        alumnos_ids: alumnos,
         alumnos_nombres: datosClase.alumnos_nombres,
         notas
       };
