@@ -139,6 +139,8 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
         clasificacion: cliente.clasificacion,
         tipo_cliente: cliente.tipo_cliente || 'clase',
         precio: cliente.precio || 0,
+        precio_clase: cliente.precio_clase || 0,
+        precio_alquiler: cliente.precio_alquiler || 0,
         notas: cliente.notas || '',
         profesor_id: cliente.profesor_id || '',
         profesor_nombre: cliente.profesor_nombre || '',
