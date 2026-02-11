@@ -255,6 +255,13 @@ export default function RecordatoriosTurnosHoy() {
           )}
           </div>
           )}
+
+          {/* Modal de Pago */}
+          <ModalPagoRecordatorio
+          open={modalPagoOpen}
+          onOpenChange={setModalPagoOpen}
+          cliente={clienteSeleccionado}
+          />
           </div>
-  );
-}
+          );
+          }
