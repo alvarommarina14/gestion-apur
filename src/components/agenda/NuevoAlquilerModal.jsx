@@ -19,6 +19,7 @@ export default function NuevoAlquilerModal({ isOpen, onClose, initialDate }) {
   const [showListaClientes, setShowListaClientes] = useState(false);
   const [notas, setNotas] = useState('');
   const [recurrenciaSemanal, setRecurrenciaSemanal] = useState(false);
+  const [error, setError] = useState('');
   const queryClient = useQueryClient();
 
   // Fetch clientes
@@ -26,6 +27,39 @@ export default function NuevoAlquilerModal({ isOpen, onClose, initialDate }) {
     queryKey: ['clientes'],
     queryFn: () => base44.entities.Cliente.list(),
   });
+
+  // Fetch turnos existentes
+  const { data: turnosExistentes = [] } = useQuery({
+    queryKey: ['turnos-cancha-validacion'],
+    queryFn: () => base44.entities.TurnoCancha.list(),
+  });
+
+  const validarDisponibilidad = (fecha, horaInicio, duracion, canchaSel) => {
+    const horaFin = new Date(new Date(`2000-01-01 ${horaInicio}`).getTime() + duracion * 60000);
+    const horaFinStr = `${String(horaFin.getHours()).padStart(2, '0')}:${String(horaFin.getMinutes()).padStart(2, '0')}`;
+    
+    const solapados = turnosExistentes.filter(t => {
+      if (t.fecha !== fecha || t.cancha !== canchaSel) return false;
+      if (t.estado === 'cancelado') return false;
+      
+      const tFin = t.hora_fin;
+      if (horaInicio >= t.hora_inicio && horaInicio < tFin) return true;
+      if (horaFinStr > t.hora_inicio && horaFinStr <= tFin) return true;
+      if (horaInicio <= t.hora_inicio && horaFinStr >= tFin) return true;
+      
+      return false;
+    });
+    
+    if (solapados.length > 0) {
+      const turno = solapados[0];
+      return {
+        error: `⚠️ La Cancha ${canchaSel} ya está ocupada entre ${turno.hora_inicio} y ${turno.hora_fin} por ${turno.cliente}`,
+        tipo: 'solapamiento'
+      };
+    }
+    
+    return null;
+  };
 
   const clientesFiltrados = clientes.filter(c =>
     c.nombre.toLowerCase().includes(busquedaCliente.toLowerCase())
