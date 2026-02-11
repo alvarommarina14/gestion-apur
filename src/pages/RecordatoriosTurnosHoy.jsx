@@ -111,8 +111,10 @@ export default function RecordatoriosTurnosHoy() {
             deudaTotal: alumnosData.reduce((sum, a) => sum + a.deuda, 0),
           });
         } else {
-          // Clase individual
+          // Clase individual - usar precio actualizado del cliente
           const cliente = clientes.find(c => c.nombre === turno.cliente);
+          const montoActual = cliente?.precio || turno.monto || 0;
+
           let estado = 'pendiente';
           let deuda = 0;
 
@@ -120,7 +122,9 @@ export default function RecordatoriosTurnosHoy() {
             estado = 'pagado';
           } else if (cliente?.activo === false) {
             estado = 'moroso';
-            deuda = turno.monto || 0;
+            deuda = montoActual;
+          } else {
+            deuda = montoActual;
           }
 
           clases.push({
@@ -131,7 +135,7 @@ export default function RecordatoriosTurnosHoy() {
             horaFin: turno.hora_fin,
             cancha: turno.cancha,
             esGrupal: false,
-            precio: turno.monto || 0,
+            precio: montoActual,
             estado,
             deuda,
           });
