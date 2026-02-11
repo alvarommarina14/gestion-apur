@@ -35,6 +35,7 @@ export default function RegistrarPagoCobroModal({ open, onOpenChange, cobro, cli
       await base44.functions.invoke('registrarPagoClienteCompleto', {
         cobro_id: cobro.id,
         cliente_id: cobro.cliente_id,
+        cliente_nombre: cobro.cliente_nombre,
         fecha_pago: data.fecha_pago,
         medio_pago: data.medio_pago,
         monto: data.monto,
@@ -43,10 +44,14 @@ export default function RegistrarPagoCobroModal({ open, onOpenChange, cobro, cli
       });
     },
     onSuccess: () => {
+      // Invalidar todos los queries relevantes para actualizar UI en todas partes
       queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
-      queryClient.invalidateQueries({ queryKey: ['cobros-cliente', cobro?.cliente_id] });
+      queryClient.invalidateQueries({ queryKey: ['alumnos'] });
+      queryClient.invalidateQueries({ queryKey: ['cobros-cliente'] });
       queryClient.invalidateQueries({ queryKey: ['turnos-hoy'] });
+      queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['pagos-alumnos'] });
       onOpenChange(false);
       setFormData({
         fecha_pago: format(new Date(), 'yyyy-MM-dd'),

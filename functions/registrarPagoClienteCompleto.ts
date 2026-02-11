@@ -9,9 +9,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { cobro_id, cliente_id, fecha_pago, medio_pago, monto, notas, mes } = await req.json();
+    const { cobro_id, cliente_id, cliente_nombre, fecha_pago, medio_pago, monto, notas, mes } = await req.json();
 
-    // Actualizar cobro a pagado
+    // 1. Actualizar cobro a pagado
     await base44.entities.CobroCliente.update(cobro_id, {
       estado: 'pagado',
       fecha_pago,
@@ -19,10 +19,10 @@ Deno.serve(async (req) => {
       notas,
     });
 
-    // Crear registro de pago para trazabilidad
+    // 2. Crear registro de pago para trazabilidad
     await base44.entities.CobroCliente.create({
       cliente_id,
-      cliente_nombre: (await base44.entities.Cliente.read(cliente_id)).nombre,
+      cliente_nombre,
       fecha: fecha_pago,
       monto: parseFloat(monto),
       medio_pago,
@@ -30,13 +30,33 @@ Deno.serve(async (req) => {
       notas,
     });
 
-    // Actualizar estado del cliente a "pagado"
+    // 3. Obtener cliente para verificar si es alumno
+    const cliente = await base44.entities.Cliente.read(cliente_id);
+
+    // 4. Si es alumno, actualizar su estado_mes_actual a "pagado"
+    if (cliente.es_alumno && cliente.profesor_id) {
+      const alumnos = await base44.entities.Alumno.filter({ 
+        nombre: cliente.nombre 
+      });
+      
+      if (alumnos.length > 0) {
+        await base44.entities.Alumno.update(alumnos[0].id, {
+          estado_mes_actual: 'pagado'
+        });
+      }
+    }
+
+    // 5. Actualizar Cliente a estado "pagado"
     await base44.entities.Cliente.update(cliente_id, {
-      estado: 'pagado',
+      estado: 'pagado'
     });
 
-    return Response.json({ success: true, message: 'Pago registrado' });
+    return Response.json({ 
+      success: true, 
+      message: 'Pago registrado exitosamente'
+    });
   } catch (error) {
+    console.error('Error en registrarPagoClienteCompleto:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
