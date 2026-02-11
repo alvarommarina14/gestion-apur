@@ -236,6 +236,15 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
   };
 
   const estadisticas = useMemo(() => {
+    if (!cliente) {
+      return {
+        deudaCobros: 0,
+        totalPagosAlumnos: 0,
+        cantidadPagosAlumnos: 0,
+        estadoGeneral: 'pagado'
+      };
+    }
+
     // Total pagos de alumnos
     const totalPagosAlumnos = pagosAlumnos.reduce((sum, p) => sum + (p.monto || 0), 0);
     const cantidadPagosAlumnos = pagosAlumnos.length;
