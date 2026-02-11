@@ -5,24 +5,25 @@ import { Edit2, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import GestionarClaseModal from './GestionarClaseModal';
 
-const getEstadoPago = (clienteId, estadosPago) => {
-  // Si existe en estadosPago y está pagado, retorna 'pagado'
-  if (estadosPago[clienteId] === 'pagado') {
+const getEstadoPago = (alumnoId, estadosPago) => {
+  // Si no existe cobro registrado para este alumno, retorna null
+  if (!estadosPago[alumnoId]) {
+    return null;
+  }
+
+  const estadoCobro = estadosPago[alumnoId];
+
+  // Si ya está pagado, retorna 'pagado'
+  if (estadoCobro === 'pagado') {
     return 'pagado';
   }
 
-  // Calcular si pasó la fecha de vencimiento (día 15 del mes actual)
-  const hoy = new Date();
-  const mesActual = format(hoy, 'yyyy-MM');
-  const [año, mes] = mesActual.split('-');
-  const fechaVencimiento = new Date(parseInt(año), parseInt(mes) - 1, 15);
-
-  // Si pasó la fecha vencimiento y no hay pago, es moroso
-  if (hoy > fechaVencimiento) {
+  // Si está moroso, retorna 'moroso'
+  if (estadoCobro === 'moroso') {
     return 'moroso';
   }
 
-  // Si aún no pasó la fecha, es pendiente
+  // Si existe cobro pero no está pagado, es pendiente
   return 'pendiente';
 };
 
