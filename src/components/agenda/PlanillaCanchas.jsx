@@ -343,6 +343,18 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pago
           turno={claseAEditar}
         />
       )}
+
+      {/* Modal para crear nuevo turno en celda vacía */}
+      <NuevoTurnoModal
+        open={nuevoTurnoModal.open}
+        onOpenChange={(open) => setNuevoTurnoModal({ ...nuevoTurnoModal, open })}
+        fecha={date}
+        turno={null}
+        initialData={{
+          cancha: nuevoTurnoModal.cancha,
+          hora_inicio: nuevoTurnoModal.hora,
+        }}
+      />
     </div>
   );
 }
