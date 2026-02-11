@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Edit2, Trash2 } from 'lucide-react';
 import ModalCancelarAlquiler from '@/components/agenda/ModalCancelarAlquiler';
+import EditarAlquilerModal from '@/components/agenda/EditarAlquilerModal';
 
 const HORARIOS = [];
 for (let i = 8; i < 22; i++) {
