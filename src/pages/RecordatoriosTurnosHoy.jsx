@@ -402,37 +402,6 @@ export default function RecordatoriosTurnosHoy() {
                 </div>
 
                 <div className="flex gap-2 ml-4">
-                   {item.type === 'clase' && (
-                      item.tipo === 'grupal' ? (
-                        <Button
-                          onClick={() => {
-                            setClaseSeleccionada(item);
-                            setPagosAlumnos({});
-                            setMedioPago('');
-                            setModalPagoGrupal(true);
-                          }}
-                          variant="outline"
-                          size="sm"
-                          className="gap-2 whitespace-nowrap bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                        >
-                          <Users className="w-4 h-4" />
-                          Registrar Pagos
-                        </Button>
-                      ) : (
-                        <Button
-                          onClick={() => {
-                            setClaseSeleccionada(item);
-                            setModalPagoIndividual(true);
-                          }}
-                          variant="outline"
-                          size="sm"
-                          className="gap-2 whitespace-nowrap bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                        >
-                          <DollarSign className="w-4 h-4" />
-                          Registrar Pago
-                        </Button>
-                      )
-                    )}
                    <Button
                      onClick={() => handleMarcarRealizado(item)}
                      variant="outline"
