@@ -19,24 +19,37 @@ export default function TarjetaClase({ turno, estadosPago = {}, onEdit }) {
 
   return (
     <div className="space-y-2.5">
-      {/* Profesor - Título y botón editar */}
+      {/* Profesor - Título y botones editar/eliminar */}
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm font-bold text-blue-700">
           {turno.profesor || 'Sin profesor'}
         </p>
-        {onEdit && (
+        <div className="flex gap-1">
+          {onEdit && (
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(turno);
+              }}
+              className="h-6 w-6 hover:bg-blue-100 hover:text-blue-600"
+            >
+              <Edit2 className="w-3 h-3" />
+            </Button>
+          )}
           <Button
             size="icon"
             variant="ghost"
             onClick={(e) => {
               e.stopPropagation();
-              onEdit(turno);
+              setMostrarGestionar(true);
             }}
-            className="h-6 w-6 hover:bg-blue-100 hover:text-blue-600"
+            className="h-6 w-6 hover:bg-rose-100 hover:text-rose-600"
           >
-            <Edit2 className="w-3 h-3" />
+            <Trash2 className="w-3 h-3" />
           </Button>
-        )}
+        </div>
       </div>
 
       {/* Horario */}
