@@ -57,7 +57,6 @@ import Empleados from './pages/Empleados';
 import Finanzas from './pages/Finanzas';
 import GestionDisponibilidad from './pages/GestionDisponibilidad';
 import GestionPermisosUsuarios from './pages/GestionPermisosUsuarios';
-import GestionRoles from './pages/GestionRoles';
 import Pagos from './pages/Pagos';
 import PendienteAprobacion from './pages/PendienteAprobacion';
 import ProfesorMenu from './pages/ProfesorMenu';
@@ -87,7 +86,6 @@ export const PAGES = {
     "Finanzas": Finanzas,
     "GestionDisponibilidad": GestionDisponibilidad,
     "GestionPermisosUsuarios": GestionPermisosUsuarios,
-    "GestionRoles": GestionRoles,
     "Pagos": Pagos,
     "PendienteAprobacion": PendienteAprobacion,
     "ProfesorMenu": ProfesorMenu,
