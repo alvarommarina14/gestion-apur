@@ -119,7 +119,7 @@ export default function RecordatoriosTurnosHoy() {
           });
         } else {
           // Clase individual - usar precio actualizado del cliente
-          const cliente = clientes.find(c => c.nombre === turno.cliente);
+          const cliente = buscarCliente(turno.cliente);
           const montoActual = cliente?.precio || turno.monto || 0;
 
           let estado = 'pendiente';
