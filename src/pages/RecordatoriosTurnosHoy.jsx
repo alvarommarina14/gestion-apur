@@ -129,7 +129,7 @@ export default function RecordatoriosTurnosHoy() {
     try {
       if (item.type === 'turno') {
         await base44.entities.TurnoCancha.update(item.id, {
-          estado: 'cancelado'
+          estado: 'activo'
         });
       } else if (item.type === 'clase') {
         await base44.entities.Clase.update(item.id, {
