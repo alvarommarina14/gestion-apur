@@ -38,9 +38,10 @@ export default function RegistrarPagoCobroModal({ open, onOpenChange, cobro, cli
         cliente_nombre: cobro.cliente_nombre,
         fecha_pago: data.fecha_pago,
         medio_pago: data.medio_pago,
-        monto: data.monto,
+        monto: parseFloat(data.monto),
         notas: data.notas,
         mes: cobro.mes,
+        tipo_cobro: cobro.tipo_cobro,
       });
       return result;
     },
