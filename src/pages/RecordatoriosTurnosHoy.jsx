@@ -175,7 +175,7 @@ export default function RecordatoriosTurnosHoy() {
   const getEstadoBadge = (estado) => {
     if (estado === 'pagado') return <Badge className="bg-green-100 text-green-800">✓ Al día</Badge>;
     if (estado === 'moroso') return <Badge className="bg-red-100 text-red-800">✗ Moroso</Badge>;
-    return <Badge className="bg-yellow-100 text-yellow-800">⏳ Pendiente</Badge>;
+    return null;
   };
 
   return (
