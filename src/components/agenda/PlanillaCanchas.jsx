@@ -33,19 +33,15 @@ const getPagoColor = (pagado) => {
    return pagado ? 'text-emerald-600 font-semibold' : 'text-orange-600 font-semibold';
 };
 
-const getEstadoPagoCliente = (clienteId, fecha) => {
-  const estadoPago = pagosClientes[clienteId];
-  if (!estadoPago) return 'pendiente';
+const getEstadoPagoCliente = (clienteId, fecha, pagosClientesMap = {}) => {
+  const estadoPago = pagosClientesMap[clienteId];
+  if (!estadoPago) return { estado: 'pendiente', fuera_de_termino: false };
 
-  const dia = fecha.getDate();
-  const esAfueraDelTermino = estadoPago.fuera_de_termino;
-
-  if (estadoPago.estado === 'pagado') return 'pagado';
-  if (estadoPago.estado === 'moroso' || (estadoPago.estado === 'pendiente' && dia > 15)) return 'moroso';
-  return 'pendiente';
+  return estadoPago;
 };
 
-const getPagoBadgeCliente = (estado) => {
+const getPagoBadgeCliente = (estadoObj) => {
+  const estado = estadoObj?.estado || 'pendiente';
   if (estado === 'pagado') return <Badge className="bg-emerald-600 text-white text-xs">Pagado</Badge>;
   if (estado === 'moroso') return <Badge className="bg-red-600 text-white text-xs">Moroso</Badge>;
   return <Badge className="bg-orange-600 text-white text-xs">Debe Pagar</Badge>;
@@ -260,7 +256,7 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pago
                                     <p className="text-xs font-semibold text-slate-900 truncate flex-1">
                                       {turno.cliente}
                                     </p>
-                                    {getPagoBadgeCliente(getEstadoPagoCliente(turno.cliente_id, date))}
+                                    {getPagoBadgeCliente(getEstadoPagoCliente(turno.cliente_id, date, pagosClientes))}
                                   </div>
                                   <p className="text-xs text-slate-600">
                                     {turno.hora_inicio} - {turno.hora_fin}
