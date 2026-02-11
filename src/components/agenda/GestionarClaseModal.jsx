@@ -109,6 +109,12 @@ export default function GestionarClaseModal({ isOpen, onClose, clase }) {
         estado: 'ausente_con_aviso',
         genera_recupero: true
       });
+
+      // Si es clase individual y es la última persona, eliminar turno
+      const esUnicoAlumno = clase.alumnos_ids?.length === 1;
+      if (esUnicoAlumno && clase.turno_cancha_id) {
+        await base44.entities.TurnoCancha.delete(clase.turno_cancha_id);
+      }
     },
     onSuccess: () => {
       toast.success('Recupero creado');
