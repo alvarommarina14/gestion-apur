@@ -283,8 +283,7 @@ export default function ClientesPage() {
                       <div className="flex items-center gap-2 text-blue-600 font-semibold">
                         <DollarSign className="w-4 h-4" />
                         <span>
-                          ${(cliente.precio || 0).toLocaleString('es-AR')}
-                          {cliente.tipo_cliente === 'abono' && '/mes'}
+                          ${(cliente.precio || 0).toLocaleString('es-AR')}/mes
                         </span>
                       </div>
                     )}
