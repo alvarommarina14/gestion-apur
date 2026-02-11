@@ -175,7 +175,7 @@ export default function RecordatoriosTurnosHoy() {
             </div>
           </div>
 
-          {clientesPendientes.length === 0 ? (
+          {clientesFiltrados.length === 0 ? (
             <Card>
               <CardContent className="pt-6">
                 <div className="text-center py-8">
@@ -186,7 +186,7 @@ export default function RecordatoriosTurnosHoy() {
             </Card>
           ) : (
             <div className="grid gap-3">
-              {clientesPendientes.map((cliente) => (
+              {clientesFiltrados.map((cliente) => (
                 <Card key={`${cliente.type}-${cliente.id}`} className={cn(
                   'overflow-hidden',
                   cliente.estado === 'moroso' && 'border-red-300 bg-red-50'
