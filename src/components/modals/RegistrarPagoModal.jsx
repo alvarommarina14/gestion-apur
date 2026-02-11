@@ -85,7 +85,9 @@ export default function RegistrarPagoModal({ open, onOpenChange, alumno }) {
       setSuccess(true);
       queryClient.invalidateQueries({ queryKey: ['alumnos'] });
       queryClient.invalidateQueries({ queryKey: ['pagos'] });
+      queryClient.invalidateQueries({ queryKey: ['pagos-alumnos'] });
       queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
+      queryClient.invalidateQueries({ queryKey: ['clientes'] });
       
       setTimeout(() => {
         setSuccess(false);
