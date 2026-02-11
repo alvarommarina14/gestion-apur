@@ -277,10 +277,26 @@ export default function RecordatoriosTurnosHoy() {
   };
 
   const getTypeColor = (item) => {
-    if (item.type === 'clase') return 'bg-blue-50 border-blue-200 text-blue-700';
-    if (item.modalidad_alquiler === 'abono') return 'bg-purple-50 border-purple-200 text-purple-700';
-    return 'bg-emerald-50 border-emerald-200 text-emerald-700';
-  };
+     if (item.type === 'clase') return 'bg-blue-50 border-blue-200 text-blue-700';
+     if (item.modalidad_alquiler === 'abono') return 'bg-purple-50 border-purple-200 text-purple-700';
+     return 'bg-emerald-50 border-emerald-200 text-emerald-700';
+   };
+
+   const getEstadoPagoColor = (estado) => {
+     switch(estado) {
+       case 'pagado': return 'bg-green-100 text-green-700 border-green-200';
+       case 'moroso': return 'bg-red-100 text-red-700 border-red-200';
+       default: return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+     }
+   };
+
+   const getEstadoPagoLabel = (estado) => {
+     switch(estado) {
+       case 'pagado': return '✓ Pagado';
+       case 'moroso': return 'Moroso';
+       default: return 'Pendiente';
+     }
+   };
 
   const isLoading = turnosLoading || clasesLoading;
 
