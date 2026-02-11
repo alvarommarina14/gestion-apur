@@ -514,19 +514,47 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
                 </div>
               )}
 
+              {/* Precios - Alumno */}
+              {cliente.es_alumno && editando && (
+                <div className="space-y-2">
+                  <Label>Precio mensual (clases)</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="100"
+                    value={formData.precio_clase || 0}
+                    onChange={(e) => setFormData({ ...formData, precio_clase: parseFloat(e.target.value) || 0 })}
+                    placeholder="Ej: 35000"
+                  />
+                </div>
+              )}
+
+              {/* Precios - Alquiler */}
               {((formData.tipo_cliente === 'abono' || formData.tipo_cliente === 'suelto') && editando) && (
                 <div className="space-y-2">
                   <Label>
-                    {formData.tipo_cliente === 'abono' ? 'Precio mensual' : 'Precio'}
+                    {formData.tipo_cliente === 'abono' ? 'Precio mensual (alquiler)' : 'Precio por turno'}
                   </Label>
                   <Input
                     type="number"
                     min="0"
                     step="100"
-                    value={formData.precio || cliente.precio || 0}
-                    onChange={(e) => setFormData({ ...formData, precio: parseFloat(e.target.value) || 0 })}
+                    value={formData.precio_alquiler || 0}
+                    onChange={(e) => setFormData({ ...formData, precio_alquiler: parseFloat(e.target.value) || 0 })}
                     placeholder={formData.tipo_cliente === 'abono' ? 'Ej: 120000' : 'Ej: 50000'}
                   />
+                </div>
+              )}
+
+              {/* Ambos precios - Alumno + Alquila */}
+              {cliente.es_alumno && (formData.tipo_cliente === 'abono' || formData.tipo_cliente === 'suelto') && editando && (
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded text-sm space-y-2">
+                  <p className="font-semibold text-blue-900">Este cliente es alumno Y alquila</p>
+                  <div className="text-xs text-blue-700">
+                    • Clases: ${(formData.precio_clase || 0).toLocaleString('es-AR')}/mes
+                    <br />
+                    • Alquileres: ${(formData.precio_alquiler || 0).toLocaleString('es-AR')}/turno
+                  </div>
                 </div>
               )}
 
