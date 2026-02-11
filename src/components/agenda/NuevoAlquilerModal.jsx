@@ -122,7 +122,8 @@ export default function NuevoAlquilerModal({ isOpen, onClose, initialDate }) {
       handleClose();
     },
     onError: (error) => {
-      toast.error('Error: ' + error.message);
+      setError(error.message);
+      toast.error(error.message);
     }
   });
 
