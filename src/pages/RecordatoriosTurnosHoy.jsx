@@ -92,7 +92,9 @@ export default function RecordatoriosTurnosHoy() {
    const { data: alumnos = [] } = useQuery({
      queryKey: ['alumnos-pagos', claseSeleccionada?.id],
      queryFn: async () => {
+       console.log('Cargando alumnos para clase:', claseSeleccionada?.id, 'IDs:', claseSeleccionada?.alumnos_ids);
        if (!claseSeleccionada?.alumnos_ids || claseSeleccionada.alumnos_ids.length === 0) {
+         console.log('Sin alumnos_ids');
          return [];
        }
        const alumnos = [];
@@ -101,12 +103,13 @@ export default function RecordatoriosTurnosHoy() {
            const alumno = await base44.entities.Alumno.read(id);
            alumnos.push(alumno);
          } catch (e) {
-           console.error('Error loading student:', e);
+           console.error('Error loading student:', id, e);
          }
        }
+       console.log('Alumnos cargados:', alumnos);
        return alumnos;
      },
-     enabled: modalPagoGrupal && claseSeleccionada?.tipo === 'grupal'
+     enabled: modalPagoGrupal && !!claseSeleccionada?.id
    });
 
   // Combinar y ordenar turnos y clases con filtro
