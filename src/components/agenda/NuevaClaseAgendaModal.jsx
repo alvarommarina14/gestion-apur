@@ -97,24 +97,18 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
       };
 
       if (recurrenciaSemanal) {
-        // Crear 52 clases y turnos (un año de repeticiones semanales)
+        // Crear 52 clases (un año de repeticiones semanales)
         for (let i = 0; i < 52; i++) {
           const fecha = new Date(initialDate);
           fecha.setDate(fecha.getDate() + (i * 7));
-          
+
           await base44.entities.Clase.create({
             ...datosClase,
-            fecha: format(fecha, 'yyyy-MM-dd')
-          });
-
-          await base44.entities.TurnoCancha.create({
-            ...datosTurno,
             fecha: format(fecha, 'yyyy-MM-dd')
           });
         }
       } else {
         const clase = await base44.entities.Clase.create(datosClase);
-        await base44.entities.TurnoCancha.create(datosTurno);
         return clase;
       }
     },
