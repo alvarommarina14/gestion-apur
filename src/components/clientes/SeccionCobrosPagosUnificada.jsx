@@ -192,10 +192,10 @@ export default function SeccionCobrosPagosUnificada({ cliente }) {
         </Card>
       </div>
 
-      {/* Cobros */}
+      {/* Cobros y Pagos Unificados */}
       <div className="space-y-2">
         <div className="flex items-center justify-between mb-2">
-          <h4 className="font-semibold text-slate-900 text-sm">Cobros ({estadisticas.cantidadCobros})</h4>
+          <h4 className="font-semibold text-slate-900 text-sm">Movimientos ({cobrosConVirtual.length + pagosAlumnos.length})</h4>
           <Button
             size="sm"
             variant="outline"
@@ -210,119 +210,121 @@ export default function SeccionCobrosPagosUnificada({ cliente }) {
           </Button>
         </div>
 
-        {cobrosConVirtual.length === 0 ? (
+        {cobrosConVirtual.length === 0 && pagosAlumnos.length === 0 ? (
           <div className="text-center py-6 text-slate-500">
             <DollarSign className="w-10 h-10 mx-auto mb-2 opacity-30" />
-            <p className="text-sm">No hay cobros registrados</p>
+            <p className="text-sm">No hay movimientos registrados</p>
           </div>
         ) : (
           <div className="space-y-2 max-h-96 overflow-y-auto">
-            {cobrosConVirtual
-              .sort((a, b) => b.mes.localeCompare(a.mes))
-              .map((cobro) => {
-                const estadoDinamico = getEstadoDinamicoCobro(cobro);
-                return (
-                  <Card key={cobro.id} className="shadow-sm">
-                    <CardContent className="p-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <span className="font-medium text-slate-900 text-sm">
-                              {format(parseISO(cobro.mes + '-01'), "MMMM yyyy", { locale: es })}
-                            </span>
-                            {renderEstadoBadge(estadoDinamico)}
-                          </div>
-                          <div className="flex items-center gap-2 text-xs text-slate-500">
-                            <span>{cobro.tipo_cobro === 'abono_mensual' ? 'Abono' : 'Cancha suelta'}</span>
-                            {cobro.virtual && <Badge variant="outline" className="text-xs">Virtual</Badge>}
-                          </div>
-                        </div>
-                        <div className="text-right flex items-start gap-2">
-                          <div>
-                            <div className="font-semibold text-slate-900">
-                              ${(cobro.monto || 0).toLocaleString('es-AR')}
+            {/* Combinar y ordenar cobros y pagos por fecha */}
+            {[
+              ...cobrosConVirtual.map(c => ({
+                ...c,
+                tipo: 'cobro',
+                fecha_orden: c.mes + '-15'
+              })),
+              ...pagosAlumnos.map(p => ({
+                ...p,
+                tipo: 'pago',
+                fecha_orden: p.fecha
+              }))
+            ]
+              .sort((a, b) => b.fecha_orden.localeCompare(a.fecha_orden))
+              .map((item) => {
+                if (item.tipo === 'cobro') {
+                  const estadoDinamico = getEstadoDinamicoCobro(item);
+                  return (
+                    <Card key={item.id} className="shadow-sm">
+                      <CardContent className="p-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <span className="font-medium text-slate-900 text-sm">
+                                {format(parseISO(item.mes + '-01'), "MMMM yyyy", { locale: es })}
+                              </span>
+                              {renderEstadoBadge(estadoDinamico)}
                             </div>
-                            {cobro.fecha_pago && (
-                              <p className="text-xs text-slate-500">
-                                {format(parseISO(cobro.fecha_pago), "d MMM", { locale: es })}
-                              </p>
+                            <div className="text-xs text-slate-500">
+                              {item.tipo_cobro === 'abono_mensual' ? 'Abono' : 'Cancha suelta'}
+                            </div>
+                          </div>
+                          <div className="text-right flex items-start gap-2">
+                            <div>
+                              <div className="font-semibold text-slate-900">
+                                ${(item.monto || 0).toLocaleString('es-AR')}
+                              </div>
+                              {item.fecha_pago && (
+                                <p className="text-xs text-slate-500">
+                                  {format(parseISO(item.fecha_pago), "d MMM", { locale: es })}
+                                </p>
+                              )}
+                            </div>
+                            {estadoDinamico !== 'pagado' && !item.virtual && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setModalRegistrar({ open: true, cobro: item })}
+                                className="h-7 w-7 p-0 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                              >
+                                <DollarSign className="w-3 h-3" />
+                              </Button>
+                            )}
+                            {!item.virtual && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setItemAEliminar({ ...item, tipo: 'cobro' })}
+                                className="h-7 w-7 p-0 text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
                             )}
                           </div>
-                          {estadoDinamico !== 'pagado' && !cobro.virtual && (
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                } else {
+                  return (
+                    <Card key={item.id} className="shadow-sm">
+                      <CardContent className="p-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <span className="font-medium text-slate-900 text-sm">
+                                {format(parseISO(item.fecha), "d 'de' MMM yyyy", { locale: es })}
+                              </span>
+                              <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700">
+                                {item.medio_pago || 'Efectivo'}
+                              </Badge>
+                            </div>
+                            {item.notas && (
+                              <p className="text-xs text-slate-600 truncate">{item.notas}</p>
+                            )}
+                          </div>
+                          <div className="text-right flex items-start gap-2">
+                            <div className="font-semibold text-emerald-600">
+                              ${(item.monto || 0).toLocaleString('es-AR')}
+                            </div>
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => setModalRegistrar({ open: true, cobro })}
-                              className="h-7 w-7 p-0 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
-                            >
-                              <DollarSign className="w-3 h-3" />
-                            </Button>
-                          )}
-                          {!cobro.virtual && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setItemAEliminar({ ...cobro, tipo: 'cobro' })}
+                              onClick={() => setItemAEliminar({ ...item, tipo: 'pago' })}
                               className="h-7 w-7 p-0 text-rose-600 hover:text-rose-700 hover:bg-rose-50"
                             >
                               <Trash2 className="w-3 h-3" />
                             </Button>
-                          )}
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
+                      </CardContent>
+                    </Card>
+                  );
+                }
               })}
           </div>
         )}
       </div>
-
-      {/* Pagos de Alumno */}
-      {pagosAlumnos.length > 0 && (
-        <div className="space-y-2 pt-4 border-t border-slate-200">
-          <h4 className="font-semibold text-slate-900 text-sm">Pagos como Alumno ({estadisticas.cantidadPagos})</h4>
-          
-          <div className="space-y-2 max-h-96 overflow-y-auto">
-            {pagosAlumnos
-              .sort((a, b) => b.fecha.localeCompare(a.fecha))
-              .map((pago) => (
-                <Card key={pago.id} className="shadow-sm">
-                  <CardContent className="p-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <span className="font-medium text-slate-900 text-sm">
-                            {format(parseISO(pago.fecha), "d 'de' MMM yyyy", { locale: es })}
-                          </span>
-                          <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700">
-                            {pago.medio_pago || 'Efectivo'}
-                          </Badge>
-                        </div>
-                        {pago.notas && (
-                          <p className="text-xs text-slate-600 truncate">{pago.notas}</p>
-                        )}
-                      </div>
-                      <div className="text-right flex items-start gap-2">
-                        <div className="font-semibold text-emerald-600">
-                          ${(pago.monto || 0).toLocaleString('es-AR')}
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setItemAEliminar({ ...pago, tipo: 'pago' })}
-                          className="h-7 w-7 p-0 text-rose-600 hover:text-rose-700 hover:bg-rose-50"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-          </div>
-        </div>
-      )}
 
       {/* Modal Registrar Pago */}
       <RegistrarPagoCobroModal
