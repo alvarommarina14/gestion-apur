@@ -284,17 +284,20 @@ export default function RecuperoCanchas() {
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                       <div className="flex-1">
                         <div className="flex items-start gap-3 mb-3">
-                          <div>
-                            <h3 className="font-semibold text-slate-900">{cancelacion.cliente}</h3>
-                            <div className="flex items-center gap-2 mt-2 flex-wrap">
-                              <Badge variant="outline" className="text-xs">
-                                Cancha {cancelacion.cancha}
-                              </Badge>
-                              <Badge variant="outline" className="text-xs">
-                                {cancelacion.fecha ? format(parseISO(cancelacion.fecha), "d 'de' MMM", { locale: es }) : 'Sin fecha'} {cancelacion.hora_inicio}
-                              </Badge>
-                            </div>
+                        <div>
+                          <h3 className="font-semibold text-slate-900">{cancelacion.cliente}</h3>
+                          <div className="flex items-center gap-2 mt-2 flex-wrap">
+                            <Badge variant="outline" className="text-xs">
+                              Cancha {cancelacion.cancha}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {cancelacion.fecha ? format(parseISO(cancelacion.fecha), "d 'de' MMM", { locale: es }) : 'Sin fecha'} {cancelacion.hora_inicio}
+                            </Badge>
+                            <Badge className="bg-slate-200 text-slate-800 text-xs">
+                              {motivoConfig[cancelacion.motivo_cancelacion]?.label || 'Sin motivo'}
+                            </Badge>
                           </div>
+                        </div>
                         </div>
 
                         {cancelacion.detalles && (
