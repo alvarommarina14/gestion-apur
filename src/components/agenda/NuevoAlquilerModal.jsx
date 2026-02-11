@@ -87,6 +87,7 @@ export default function NuevoAlquilerModal({ isOpen, onClose, initialDate }) {
         duracion: duracion === 80 ? 80 : 60,
         cancha,
         cliente: clienteObj.nombre,
+        cliente_id: clienteObj.id,
         tipo_turno: 'alquiler',
         modalidad_alquiler: modalidad,
         pagado: false,
