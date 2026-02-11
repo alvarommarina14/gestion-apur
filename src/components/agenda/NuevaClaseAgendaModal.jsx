@@ -149,10 +149,18 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
          for (let i = 0; i < 52; i++) {
            const fecha = new Date(initialDate);
            fecha.setDate(fecha.getDate() + (i * 7));
+           const horaFin = new Date(new Date(`2000-01-01 ${horaInicio}`).getTime() + duracion * 60000);
+           const horaFinStr = `${String(horaFin.getHours()).padStart(2, '0')}:${String(horaFin.getMinutes()).padStart(2, '0')}`;
 
            await base44.entities.Clase.create({
              ...datosClase,
              fecha: format(fecha, 'yyyy-MM-dd')
+           });
+
+           await base44.entities.TurnoCancha.create({
+             ...datosTurno,
+             fecha: format(fecha, 'yyyy-MM-dd'),
+             hora_fin: horaFinStr
            });
          }
        } else {
