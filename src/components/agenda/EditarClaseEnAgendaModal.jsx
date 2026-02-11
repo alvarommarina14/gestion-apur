@@ -149,15 +149,15 @@ export default function EditarClaseEnAgendaModal({ open, onOpenChange, turno }) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-md max-h-[95vh] flex flex-col p-0 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-400 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-gray-600">
+        <DialogHeader className="sticky top-0 bg-white z-10 px-6 py-4 border-b shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="w-5 h-5 text-blue-600" />
             Editar clase
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto flex-1 px-6 py-4 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-400 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-gray-600">
           {error && (
             <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg flex items-start gap-2">
               <AlertTriangle className="w-5 h-5 text-rose-600 mt-0.5" />
