@@ -361,7 +361,7 @@ export default function ClientesPage() {
                     </Button>
                     
                     {/* Menú extra para clientes clase con alumno asociado */}
-                    {seccionActual === 'clase' && cliente.es_alumno && (() => {
+                    {cliente.es_alumno && (() => {
                       const alumno = alumnos.find(a => 
                         a.nombre.toLowerCase() === cliente.nombre.toLowerCase()
                       );
@@ -412,8 +412,28 @@ export default function ClientesPage() {
                       );
                     })()}
                     
+                    {/* Menú para clientes de alquiler */}
+                    {!cliente.es_alumno && (cliente.tipo_cliente === 'abono' || cliente.tipo_cliente === 'suelto') && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem 
+                            onClick={() => setEliminandoCliente(cliente)}
+                            className="text-rose-600"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Eliminar
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                    
                     {/* Botón eliminar simple para otros casos */}
-                    {(seccionActual !== 'clase' || !cliente.es_alumno) && (
+                    {!cliente.es_alumno && cliente.tipo_cliente !== 'abono' && cliente.tipo_cliente !== 'suelto' && (
                       <Button
                         size="sm"
                         variant="ghost"
