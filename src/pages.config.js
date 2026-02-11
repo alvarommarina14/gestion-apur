@@ -51,14 +51,10 @@ import AgendaCanchas from './pages/AgendaCanchas';
 import Alumnos from './pages/Alumnos';
 import Clientes from './pages/Clientes';
 import Configuracion from './pages/Configuracion';
-import GestionPermisosUsuarios from './pages/GestionPermisosUsuarios';
-import Pagos from './pages/Pagos';
 import PendienteAprobacion from './pages/PendienteAprobacion';
 import ProfesorMenu from './pages/ProfesorMenu';
 import ProfesorRegistro from './pages/ProfesorRegistro';
 import Profesores from './pages/Profesores';
-import Recordatorios from './pages/Recordatorios';
-import RecordatoriosCanchaAdmin from './pages/RecordatoriosCanchaAdmin';
 import RecordatoriosCanchaEmpleado from './pages/RecordatoriosCanchaEmpleado';
 import RecordatoriosCanchaHoy from './pages/RecordatoriosCanchaHoy';
 import RecordatoriosTurnosHoy from './pages/RecordatoriosTurnosHoy';
@@ -73,14 +69,10 @@ export const PAGES = {
     "Alumnos": Alumnos,
     "Clientes": Clientes,
     "Configuracion": Configuracion,
-    "GestionPermisosUsuarios": GestionPermisosUsuarios,
-    "Pagos": Pagos,
     "PendienteAprobacion": PendienteAprobacion,
     "ProfesorMenu": ProfesorMenu,
     "ProfesorRegistro": ProfesorRegistro,
     "Profesores": Profesores,
-    "Recordatorios": Recordatorios,
-    "RecordatoriosCanchaAdmin": RecordatoriosCanchaAdmin,
     "RecordatoriosCanchaEmpleado": RecordatoriosCanchaEmpleado,
     "RecordatoriosCanchaHoy": RecordatoriosCanchaHoy,
     "RecordatoriosTurnosHoy": RecordatoriosTurnosHoy,
