@@ -232,8 +232,8 @@ export default function RecuperoCanchas() {
               </div>
 
         {/* Estadísticas */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-          {['pendiente', 'recuperado', 'descontado', 'rechazado'].map((estado) => {
+        <div className="grid grid-cols-2 sm:grid-cols-2 gap-3 sm:gap-4">
+          {['pendiente', 'descontado'].map((estado) => {
             const count = cancelaciones.filter(c => c.estado_recupero === estado).length;
             const total = cancelaciones.filter(c => c.estado_recupero === estado)
               .reduce((sum, c) => sum + (c.monto || 0), 0);
