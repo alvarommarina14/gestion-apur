@@ -57,7 +57,7 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEd
       });
     });
 
-    // Llenar con turnos existentes (incluyendo cancelados para mostrarlos tachados)
+    // Llenar con turnos existentes
     turnos.forEach(turno => {
       if (mapa[turno.cancha]) {
         const horaInicio = turno.hora_inicio;
