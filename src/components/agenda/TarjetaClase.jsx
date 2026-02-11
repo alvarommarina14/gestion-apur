@@ -6,24 +6,15 @@ import { format } from 'date-fns';
 import GestionarClaseModal from './GestionarClaseModal';
 
 const getEstadoPago = (alumnoId, estadosPago) => {
-  // Si no existe cobro registrado para este alumno, retorna null
-  if (!estadosPago[alumnoId]) {
-    return null;
+  // Si existe cobro para este alumno, usar su estado
+  if (estadosPago[alumnoId]) {
+    const estado = estadosPago[alumnoId];
+    if (estado === 'pagado') return 'pagado';
+    if (estado === 'moroso') return 'moroso';
+    return 'pendiente';
   }
 
-  const estadoCobro = estadosPago[alumnoId];
-
-  // Si ya está pagado, retorna 'pagado'
-  if (estadoCobro === 'pagado') {
-    return 'pagado';
-  }
-
-  // Si está moroso, retorna 'moroso'
-  if (estadoCobro === 'moroso') {
-    return 'moroso';
-  }
-
-  // Si existe cobro pero no está pagado, es pendiente
+  // Si no hay cobro, asumir pendiente (mes sin cobro registrado)
   return 'pendiente';
 };
 
