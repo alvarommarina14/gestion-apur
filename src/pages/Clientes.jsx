@@ -81,6 +81,11 @@ export default function ClientesPage() {
     queryFn: () => base44.entities.CobroCliente.list(),
   });
 
+  const { data: pagos = [] } = useQuery({
+    queryKey: ['pagos'],
+    queryFn: () => base44.entities.Pago.list(),
+  });
+
   // Eliminar cliente
   const eliminarClienteMutation = useMutation({
     mutationFn: async (clienteId) => {
