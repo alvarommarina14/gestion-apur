@@ -89,20 +89,18 @@ export default function ModalCancelarAlquiler({ open, onOpenChange, turno }) {
           });
         }
 
-        // Si es abono, crear registro de cancelación para recuperar
-        if (turno.modalidad_alquiler === 'abono') {
-          await base44.entities.CancelacionCancha.create({
-            turno_cancha_id: turno.id,
-            cliente_id: null,
-            cliente_nombre: turno.cliente,
-            fecha_original: turno.fecha,
-            hora_original: turno.hora_inicio,
-            cancha: turno.cancha,
-            motivo: motivo,
-            estado: 'pendiente_recupero',
-            fecha_cancelacion: new Date().toISOString(),
-          });
-        }
+        // Crear registro de cancelación para recuperar (tanto para abono como suelto)
+        await base44.entities.CancelacionCancha.create({
+          turno_cancha_id: turno.id,
+          cliente_id: null,
+          cliente_nombre: turno.cliente,
+          fecha_original: turno.fecha,
+          hora_original: turno.hora_inicio,
+          cancha: turno.cancha,
+          motivo: motivo,
+          estado: 'pendiente_recupero',
+          fecha_cancelacion: new Date().toISOString(),
+        });
 
         // Log de auditoría
         await base44.entities.LogAuditoria.create({
