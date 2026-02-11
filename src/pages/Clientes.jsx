@@ -25,12 +25,10 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import DetalleClienteModal from '@/components/clientes/DetalleClienteModal';
 import NuevoClienteModal from '@/components/clientes/NuevoClienteModal';
 import SeleccionTipoClienteModal from '@/components/clientes/SeleccionTipoClienteModal';
-import EditarClienteForm from '@/components/finanzas/EditarClienteForm';
 import { cn } from '@/lib/utils';
 
 export default function ClientesPage() {
@@ -41,23 +39,11 @@ export default function ClientesPage() {
   const [modalNuevo, setModalNuevo] = useState(false);
   const [modalSeleccion, setModalSeleccion] = useState(false);
   const [tipoClienteSeleccionado, setTipoClienteSeleccionado] = useState(null);
-  const [editandoCliente, setEditandoCliente] = useState(null);
   const [eliminandoCliente, setEliminandoCliente] = useState(null);
 
   const { data: clientes = [], isLoading } = useQuery({
     queryKey: ['clientes'],
     queryFn: () => base44.entities.Cliente.list('-total_gastado'),
-  });
-
-  // Editar cliente
-  const editarClienteMutation = useMutation({
-    mutationFn: async (data) => {
-      return await base44.entities.Cliente.update(editandoCliente.id, data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clientes'] });
-      setEditandoCliente(null);
-    },
   });
 
   // Eliminar cliente
@@ -250,15 +236,6 @@ export default function ClientesPage() {
                       </Button>
                       <Button
                         size="sm"
-                        variant="outline"
-                        onClick={() => setEditandoCliente(cliente)}
-                        className="flex-1"
-                      >
-                        <Edit className="w-4 h-4 mr-1" />
-                        Editar
-                      </Button>
-                      <Button
-                        size="sm"
                         variant="ghost"
                         onClick={() => setEliminandoCliente(cliente)}
                         className="text-rose-600 hover:text-rose-700"
@@ -297,23 +274,6 @@ export default function ClientesPage() {
         }}
         tipoCliente={tipoClienteSeleccionado}
       />
-
-      {/* Modal Editar Cliente */}
-      <Dialog open={!!editandoCliente} onOpenChange={(open) => {
-        if (!open) setEditandoCliente(null);
-      }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Editar Cliente - {editandoCliente?.nombre}</DialogTitle>
-          </DialogHeader>
-          {editandoCliente && (
-            <EditarClienteForm 
-              cliente={editandoCliente} 
-              onSave={(data) => editarClienteMutation.mutate(data)} 
-            />
-          )}
-        </DialogContent>
-      </Dialog>
 
       {/* Modal Eliminar Cliente */}
       <AlertDialog open={!!eliminandoCliente} onOpenChange={(open) => {
