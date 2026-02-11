@@ -56,6 +56,7 @@ export default function ClientesPage() {
   const [eliminandoCliente, setEliminandoCliente] = useState(null);
   const [reporteModal, setReporteModal] = useState({ open: false, alumno: null });
   const [pagoModal, setPagoModal] = useState({ open: false, alumno: null });
+  const [filtroEstadoPago, setFiltroEstadoPago] = useState('todos');
 
   const { data: clientes = [], isLoading } = useQuery({
     queryKey: ['clientes'],
@@ -85,6 +86,43 @@ export default function ClientesPage() {
       filtrados = filtrados.filter(c => c.tipo_cliente === 'abono' || c.tipo_cliente === 'suelto');
     }
 
+    // Filtrar por estado de pago
+    if (filtroEstadoPago !== 'todos') {
+      filtrados = filtrados.filter(cliente => {
+        // Para clientes clase con alumno asociado
+        if (cliente.es_alumno) {
+          const alumno = alumnos.find(a => 
+            a.nombre.toLowerCase() === cliente.nombre.toLowerCase()
+          );
+          if (alumno) {
+            if (filtroEstadoPago === 'al_dia') {
+              return alumno.estado_mes_actual === 'pagado' || alumno.estado === 'activo';
+            } else if (filtroEstadoPago === 'moroso') {
+              return alumno.estado === 'moroso' || alumno.estado_mes_actual === 'moroso';
+            } else if (filtroEstadoPago === 'debe') {
+              return alumno.estado_mes_actual === 'debe' || alumno.estado_mes_actual === 'pendiente';
+            }
+          }
+        }
+        
+        // Para clientes de alquiler (abono)
+        if (cliente.tipo_cliente === 'abono') {
+          const cobrosPendientes = cobros.filter(c => 
+            c.cliente_id === cliente.id && c.estado !== 'pagado'
+          );
+          if (filtroEstadoPago === 'al_dia') {
+            return cobrosPendientes.length === 0;
+          } else if (filtroEstadoPago === 'moroso') {
+            return cobros.some(c => c.cliente_id === cliente.id && c.estado === 'moroso');
+          } else if (filtroEstadoPago === 'debe') {
+            return cobros.some(c => c.cliente_id === cliente.id && c.estado === 'pendiente');
+          }
+        }
+        
+        return false;
+      });
+    }
+
     // Filtrar por búsqueda
     if (busqueda.trim()) {
       const termino = busqueda.toLowerCase();
@@ -96,7 +134,7 @@ export default function ClientesPage() {
     }
 
     return filtrados;
-  }, [clientes, seccionActual, busqueda]);
+  }, [clientes, seccionActual, busqueda, filtroEstadoPago, alumnos, cobros]);
 
   const clasificacionConfig = {
     nuevo: { icon: UserPlus, color: 'bg-blue-100 text-blue-700', label: 'Nuevo' },
@@ -107,14 +145,18 @@ export default function ClientesPage() {
   const { data: alumnos = [] } = useQuery({
     queryKey: ['alumnos'],
     queryFn: () => base44.entities.Alumno.list(),
-    enabled: seccionActual === 'clase',
+  });
+
+  const { data: cobros = [] } = useQuery({
+    queryKey: ['cobros-clientes'],
+    queryFn: () => base44.entities.CobroCliente.list(),
   });
 
   const renderClientesGrid = () => (
     <>
-      {/* Buscador */}
+      {/* Buscador y Filtros */}
       <Card className="shadow-sm mb-4">
-        <CardContent className="p-4">
+        <CardContent className="p-4 space-y-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
@@ -123,6 +165,42 @@ export default function ClientesPage() {
               onChange={(e) => setBusqueda(e.target.value)}
               className="pl-9"
             />
+          </div>
+          
+          {/* Filtros de estado de pago */}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant={filtroEstadoPago === 'todos' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFiltroEstadoPago('todos')}
+              className={filtroEstadoPago === 'todos' ? 'bg-slate-900' : ''}
+            >
+              Todos
+            </Button>
+            <Button
+              variant={filtroEstadoPago === 'al_dia' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFiltroEstadoPago('al_dia')}
+              className={filtroEstadoPago === 'al_dia' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+            >
+              Al día
+            </Button>
+            <Button
+              variant={filtroEstadoPago === 'debe' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFiltroEstadoPago('debe')}
+              className={filtroEstadoPago === 'debe' ? 'bg-amber-600 hover:bg-amber-700' : ''}
+            >
+              Debe pagar
+            </Button>
+            <Button
+              variant={filtroEstadoPago === 'moroso' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFiltroEstadoPago('moroso')}
+              className={filtroEstadoPago === 'moroso' ? 'bg-rose-600 hover:bg-rose-700' : ''}
+            >
+              Morosos
+            </Button>
           </div>
         </CardContent>
       </Card>
