@@ -57,7 +57,7 @@ export default function SeccionCobros({ cliente }) {
       id: 'virtual-' + mesActual,
       cliente_id: cliente.id,
       cliente_nombre: cliente.nombre,
-      tipo_cobro: cliente.tipo_cliente === 'abono' ? 'abono_mensual' : 'cancha_suelta',
+      tipo_cobro: cliente.tipo_cliente === 'clase' ? 'clase_mensual' : cliente.tipo_cliente === 'abono' ? 'abono_mensual' : 'cancha_suelta',
       mes: mesActual,
       monto: cliente.precio,
       estado: 'pendiente',
@@ -131,7 +131,7 @@ export default function SeccionCobros({ cliente }) {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <p className="font-medium text-slate-900">
-                        {cobro.tipo_cobro === 'abono_mensual' ? 'Abono' : 'Cancha suelta'} - {cobro.mes}
+                        {cobro.tipo_cobro === 'clase_mensual' ? 'Clase' : cobro.tipo_cobro === 'abono_mensual' ? 'Abono' : 'Cancha suelta'} - {cobro.mes}
                       </p>
                       <Badge className={cn('text-xs', getEstadoColor(estadoDinamico))}>
                         {estadoDinamico === 'pagado' && <CheckCircle className="w-3 h-3 mr-1" />}
