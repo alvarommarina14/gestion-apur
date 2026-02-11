@@ -18,6 +18,7 @@ export default function NuevoAlquilerModal({ isOpen, onClose, initialDate }) {
   const [clienteSeleccionado, setClienteSeleccionado] = useState('');
   const [showListaClientes, setShowListaClientes] = useState(false);
   const [notas, setNotas] = useState('');
+  const [recurrenciaSemanal, setRecurrenciaSemanal] = useState(false);
   const queryClient = useQueryClient();
 
   // Fetch clientes
