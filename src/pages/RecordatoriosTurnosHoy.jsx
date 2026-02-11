@@ -553,6 +553,7 @@ export default function RecordatoriosTurnosHoy() {
           ))}
         </div>
         )}
+        </>
         )}
 
         {/* Tab Pendientes y Morosos */}
