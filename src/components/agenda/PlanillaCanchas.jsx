@@ -313,6 +313,15 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEd
           turno={turnoACancelar}
         />
       )}
+
+      {/* Modal de edición */}
+      {turnoAEditar && (
+        <EditarAlquilerModal
+          open={showModalEditar}
+          onOpenChange={setShowModalEditar}
+          turno={turnoAEditar}
+        />
+      )}
     </div>
   );
 }
