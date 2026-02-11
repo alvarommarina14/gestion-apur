@@ -175,8 +175,8 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEd
                             <p className="text-xs text-slate-600">
                               {turno.hora_inicio} - {turno.hora_fin}
                             </p>
-                            <p className={`text-xs ${getPagoColor(turno.pagado)}`}>
-                              ${turno.monto} {turno.pagado && '✓'}
+                            <p className="text-xs text-slate-600">
+                              ${turno.monto}
                             </p>
                             {turno.tipo_turno === 'clase' && turno.profesor && (
                               <p className="text-xs text-blue-600">Prof: {turno.profesor}</p>
