@@ -248,7 +248,10 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEd
                             {turno.tipo_turno === 'clase' && turno.profesor && (
                               <p className="text-xs text-blue-600">Prof: {turno.profesor}</p>
                             )}
-                          </div>
+                            {turno.notas && (
+                              <p className="text-xs text-slate-500 italic mt-1">{turno.notas}</p>
+                            )}
+                            </div>
 
                           {/* Turnos secundarios */}
                           {secundarios.length > 0 && (
