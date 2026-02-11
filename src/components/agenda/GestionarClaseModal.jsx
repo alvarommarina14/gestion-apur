@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function GestionarClaseModal({ isOpen, onClose, clase }) {
@@ -206,6 +206,26 @@ export default function GestionarClaseModal({ isOpen, onClose, clase }) {
     }
   });
 
+  const eliminarClaseMutation = useMutation({
+    mutationFn: async () => {
+      // Eliminar turno de cancha si existe
+      if (clase.turno_cancha_id) {
+        await base44.entities.TurnoCancha.delete(clase.turno_cancha_id);
+      }
+      // Eliminar la clase
+      await base44.entities.Clase.delete(clase.id);
+    },
+    onSuccess: () => {
+      toast.success('Clase eliminada');
+      queryClient.invalidateQueries({ queryKey: ['clases'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos'] });
+      onClose();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    }
+  });
+
   if (!clase) return null;
 
   const motivos = [
@@ -257,6 +277,25 @@ export default function GestionarClaseModal({ isOpen, onClose, clase }) {
               </Button>
             </div>
           )}
+
+          {/* Eliminar Clase */}
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm font-medium text-red-700 mb-3">🗑️ Eliminar esta clase</p>
+            <p className="text-xs text-red-600 mb-3">Elimina la clase por error. Se borrarán la clase y su turno asociado.</p>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (confirm('¿Eliminar esta clase? Esta acción no se puede deshacer.')) {
+                  eliminarClaseMutation.mutate();
+                }
+              }}
+              disabled={eliminarClaseMutation.isPending}
+              className="w-full"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              {eliminarClaseMutation.isPending ? 'Eliminando...' : 'Eliminar clase'}
+            </Button>
+          </div>
 
           {/* Gestionar Alumnos */}
           <div>
