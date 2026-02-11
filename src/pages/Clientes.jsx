@@ -19,18 +19,29 @@ import {
   TrendingUp,
   Trash2,
   Eye,
-  RefreshCw
+  RefreshCw,
+  MoreVertical,
+  Bell
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import DetalleClienteModal from '@/components/clientes/DetalleClienteModal';
 import NuevoClienteModal from '@/components/clientes/NuevoClienteModal';
 import SeleccionTipoClienteModal from '@/components/clientes/SeleccionTipoClienteModal';
 import ListaEsperaPanel from '@/components/alumnos/ListaEsperaPanel';
+import EnviarRecordatorioBtn from '@/components/recordatorios/EnviarRecordatorioBtn';
+import ReporteAlumnoModal from '@/components/alumnos/ReporteAlumnoModal';
+import RegistrarPagoModal from '@/components/modals/RegistrarPagoModal';
 import { cn } from '@/lib/utils';
 
 export default function ClientesPage() {
@@ -43,6 +54,8 @@ export default function ClientesPage() {
   const [modalSeleccion, setModalSeleccion] = useState(false);
   const [tipoClienteSeleccionado, setTipoClienteSeleccionado] = useState(null);
   const [eliminandoCliente, setEliminandoCliente] = useState(null);
+  const [reporteModal, setReporteModal] = useState({ open: false, alumno: null });
+  const [pagoModal, setPagoModal] = useState({ open: false, alumno: null });
 
   const { data: clientes = [], isLoading } = useQuery({
     queryKey: ['clientes'],
@@ -90,6 +103,12 @@ export default function ClientesPage() {
     ocasional: { icon: UserPlus, color: 'bg-blue-100 text-blue-700', label: 'Ocasional' },
     recurrente: { icon: UserCheck, color: 'bg-emerald-100 text-emerald-700', label: 'Recurrente' },
   };
+
+  const { data: alumnos = [] } = useQuery({
+    queryKey: ['alumnos'],
+    queryFn: () => base44.entities.Alumno.list(),
+    enabled: seccionActual === 'clase',
+  });
 
   const renderClientesGrid = () => (
     <>
@@ -221,14 +240,70 @@ export default function ClientesPage() {
                       <Eye className="w-4 h-4 mr-1" />
                       Ver
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setEliminandoCliente(cliente)}
-                      className="text-rose-600 hover:text-rose-700"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    
+                    {/* Menú extra para clientes clase con alumno asociado */}
+                    {seccionActual === 'clase' && cliente.es_alumno && (() => {
+                      const alumno = alumnos.find(a => 
+                        a.nombre.toLowerCase() === cliente.nombre.toLowerCase()
+                      );
+                      return alumno ? (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setReporteModal({ open: true, alumno })}>
+                              <FileText className="w-4 h-4 mr-2" />
+                              Reporte detallado
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setPagoModal({ open: true, alumno })}>
+                              <DollarSign className="w-4 h-4 mr-2" />
+                              Registrar pago
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <div className="w-full">
+                                <EnviarRecordatorioBtn 
+                                  alumno={alumno} 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="w-full justify-start p-0 h-auto font-normal hover:bg-transparent" 
+                                />
+                              </div>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => setEliminandoCliente(cliente)}
+                              className="text-rose-600"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Eliminar
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setEliminandoCliente(cliente)}
+                          className="text-rose-600 hover:text-rose-700"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      );
+                    })()}
+                    
+                    {/* Botón eliminar simple para otros casos */}
+                    {(seccionActual !== 'clase' || !cliente.es_alumno) && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setEliminandoCliente(cliente)}
+                        className="text-rose-600 hover:text-rose-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -333,6 +408,18 @@ export default function ClientesPage() {
           if (!open) setTipoClienteSeleccionado(null);
         }}
         tipoCliente={tipoClienteSeleccionado}
+      />
+
+      <ReporteAlumnoModal 
+        open={reporteModal.open}
+        onOpenChange={(open) => setReporteModal({ ...reporteModal, open })}
+        alumno={reporteModal.alumno}
+      />
+
+      <RegistrarPagoModal 
+        open={pagoModal.open}
+        onOpenChange={(open) => setPagoModal({ ...pagoModal, open })}
+        alumno={pagoModal.alumno}
       />
 
       {/* Modal Eliminar Cliente */}
