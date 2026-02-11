@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { format, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { Clock, Users, DollarSign, CheckCircle, AlertCircle, Trash2, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
-import { addDays, subDays } from 'date-fns';
+import { format } from 'date-fns';
+import { Clock, DollarSign, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import {
@@ -24,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 
 export default function RecordatoriosTurnosHoy() {
    const [user, setUser] = useState(null);
