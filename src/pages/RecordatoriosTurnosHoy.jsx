@@ -47,8 +47,6 @@ export default function RecordatoriosTurnosHoy() {
 
 
 
-   const [alumnosPagos, setAlumnosPagos] = useState({});
-
    // Cargar clientes y alumnos pendientes/morosos
    const { data: clientesPendientes = [] } = useQuery({
      queryKey: ['clientes-pendientes'],
