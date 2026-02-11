@@ -413,24 +413,50 @@ export default function ClientesPage() {
                     })()}
                     
                     {/* Menú para clientes de alquiler */}
-                    {!cliente.es_alumno && (cliente.tipo_cliente === 'abono' || cliente.tipo_cliente === 'suelto') && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreVertical className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem 
-                            onClick={() => setEliminandoCliente(cliente)}
-                            className="text-rose-600"
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Eliminar
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
+                    {!cliente.es_alumno && (cliente.tipo_cliente === 'abono' || cliente.tipo_cliente === 'suelto') && (() => {
+                      // Crear un objeto "alumno" simulado para clientes de alquiler
+                      const clienteComoAlumno = {
+                        id: cliente.id,
+                        nombre: cliente.nombre,
+                        whatsapp: cliente.telefono,
+                        precio_mensual: cliente.precio,
+                        estado_mes_actual: estadoPago === 'moroso' ? 'moroso' : estadoPago === 'debe' ? 'pendiente' : 'pagado',
+                        estado: estadoPago === 'moroso' ? 'moroso' : 'activo'
+                      };
+
+                      return (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setModalDetalle({ open: true, cliente })}>
+                              <FileText className="w-4 h-4 mr-2" />
+                              Reporte detallado
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <div className="w-full">
+                                <EnviarRecordatorioBtn 
+                                  alumno={clienteComoAlumno} 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="w-full justify-start p-0 h-auto font-normal hover:bg-transparent" 
+                                />
+                              </div>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => setEliminandoCliente(cliente)}
+                              className="text-rose-600"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Eliminar
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      );
+                    })()}
                     
                     {/* Botón eliminar simple para otros casos */}
                     {!cliente.es_alumno && cliente.tipo_cliente !== 'abono' && cliente.tipo_cliente !== 'suelto' && (
