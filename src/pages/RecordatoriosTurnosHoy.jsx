@@ -11,6 +11,8 @@ import { AlertCircle, ChevronLeft, ChevronRight, Save } from 'lucide-react';
 
 export default function RecordatoriosTurnosHoy() {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [preciosEditables, setPreciosEditables] = useState({});
+  const queryClient = useQueryClient();
   const today = format(selectedDate, 'yyyy-MM-dd');
 
   // Fetch turnos del día
