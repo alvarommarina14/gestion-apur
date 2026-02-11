@@ -184,14 +184,18 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEd
                            )}
                          </button>
                        ) : turno ? (
-                         <div className={`rounded p-2 h-full space-y-1 ${getStatusColor(turno.tipo_turno)}`}>
+                         <div className={`rounded p-2 h-full space-y-1 ${turno.estado === 'cancelado' ? 'bg-slate-100 border-l-4 border-slate-400 opacity-60' : getStatusColor(turno.tipo_turno)}`}>
                           {/* Turno principal */}
                           <div>
                             <div className="flex items-center justify-between gap-1 mb-1">
                               <div className="flex items-center gap-1">
-                                {getStatusBadge(turno.tipo_turno)}
+                                {turno.estado === 'cancelado' ? (
+                                  <Badge className="bg-slate-600">Cancelado</Badge>
+                                ) : (
+                                  getStatusBadge(turno.tipo_turno)
+                                )}
                               </div>
-                              {turno.tipo_turno === 'alquiler' && (
+                              {turno.tipo_turno === 'alquiler' && turno.estado !== 'cancelado' && (
                                 <Button
                                   size="icon"
                                   variant="ghost"
@@ -209,21 +213,21 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEd
                             {turno.tipo_turno === 'clase' && turno.alumnos_nombres?.length > 0 ? (
                               <div className="space-y-0.5">
                                 {turno.alumnos_nombres.map((alumno, idx) => (
-                                  <p key={idx} className="text-xs font-semibold text-slate-900 truncate">
+                                  <p key={idx} className={`text-xs font-semibold truncate ${turno.estado === 'cancelado' ? 'text-slate-500 line-through' : 'text-slate-900'}`}>
                                     {alumno}
                                   </p>
                                 ))}
                               </div>
                             ) : (
-                              <p className="text-xs font-semibold text-slate-900 truncate">
+                              <p className={`text-xs font-semibold truncate ${turno.estado === 'cancelado' ? 'text-slate-500 line-through' : 'text-slate-900'}`}>
                                 {turno.cliente}
                               </p>
                             )}
-                            <p className="text-xs text-slate-600">
+                            <p className={`text-xs ${turno.estado === 'cancelado' ? 'text-slate-400' : 'text-slate-600'}`}>
                               {turno.hora_inicio} - {turno.hora_fin}
                             </p>
                             {turno.tipo_turno === 'clase' && turno.profesor && (
-                              <p className="text-xs text-blue-600">Prof: {turno.profesor}</p>
+                              <p className={`text-xs ${turno.estado === 'cancelado' ? 'text-slate-400' : 'text-blue-600'}`}>Prof: {turno.profesor}</p>
                             )}
                           </div>
 
