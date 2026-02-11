@@ -25,6 +25,7 @@ export default function RecordatoriosTurnosHoy() {
   const { data: clientes = [] } = useQuery({
     queryKey: ['clientes'],
     queryFn: () => base44.entities.Cliente.list(),
+    staleTime: 0, // Siempre consultar datos frescos
   });
 
   const { data: alumnos = [] } = useQuery({
