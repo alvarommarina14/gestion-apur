@@ -213,17 +213,6 @@ export default function EditarAlquilerModal({ open, onOpenChange, turno }) {
           </div>
 
           <div className="space-y-2">
-            <Label>Monto</Label>
-            <Input
-              type="number"
-              value={formData.monto}
-              onChange={(e) => setFormData({ ...formData, monto: parseFloat(e.target.value) || 0 })}
-              placeholder="0"
-              step="0.01"
-            />
-          </div>
-
-          <div className="space-y-2">
             <Label>Notas</Label>
             <Textarea
               value={formData.notas}
