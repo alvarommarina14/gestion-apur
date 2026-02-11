@@ -45,16 +45,19 @@ export default function RegistrarPagoCobroModal({ open, onOpenChange, cobro, cli
       return result;
     },
     onSuccess: () => {
+      // Invalidar todas las queries relacionadas inmediatamente
+      queryClient.invalidateQueries({ queryKey: ['cobros-clientes', cliente?.id] });
+      queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
+      queryClient.invalidateQueries({ queryKey: ['clientes'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos-hoy'] });
+      queryClient.invalidateQueries({ queryKey: ['recordatorios-turnos-hoy'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['alumnos'] });
+      queryClient.invalidateQueries({ queryKey: ['pagos-alumnos'] });
+      
       setTimeout(() => {
-        // Invalidar todas las queries relacionadas
-        queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
-        queryClient.invalidateQueries({ queryKey: ['clientes'] });
-        queryClient.invalidateQueries({ queryKey: ['turnos-hoy'] });
-        queryClient.invalidateQueries({ queryKey: ['recordatorios-turnos-hoy'] });
-        queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
-        queryClient.invalidateQueries({ queryKey: ['alumnos'] });
         onOpenChange(false);
-      }, 500);
+      }, 100);
       setFormData({
         fecha_pago: format(new Date(), 'yyyy-MM-dd'),
         medio_pago: 'efectivo',
