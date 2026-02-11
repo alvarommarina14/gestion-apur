@@ -95,6 +95,7 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
         cliente: alumnosDisponibles.find(x => x.id === alumnos[0])?.nombre || 'Clase',
         tipo_turno: 'clase',
         profesor: profesores.find(p => p.id === profesorId)?.nombre || '',
+        monto: datosClase.precio,
         pagado: false,
         estado: 'activo',
         empleados_asignados_ids: [],
