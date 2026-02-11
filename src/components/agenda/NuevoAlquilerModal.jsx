@@ -151,6 +151,13 @@ export default function NuevoAlquilerModal({ isOpen, onClose, initialDate }) {
         </DialogHeader>
 
         <div className="space-y-4">
+          {error && (
+            <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg flex items-start gap-2">
+              <AlertTriangle className="w-5 h-5 text-rose-600 mt-0.5" />
+              <p className="text-sm text-rose-700">{error}</p>
+            </div>
+          )}
+          
           {/* Cancha y Horario */}
           <div className="grid grid-cols-3 gap-3">
             <div>
