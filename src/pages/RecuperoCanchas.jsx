@@ -304,18 +304,45 @@ export default function RecuperoCanchas() {
                       </div>
 
                       <div className="text-right">
-                        <p className="text-2xl font-bold text-slate-900">
-                          ${(cancelacion.monto || 0).toLocaleString('es-AR')}
-                        </p>
-                        <div className="flex items-center gap-2 mt-2 justify-end">
-                          {IconoEstado && (
-                            <IconoEstado className={cn('w-4 h-4', estConfig.color)} />
-                          )}
-                          <span className={cn('text-sm font-medium', estConfig.color)}>
-                            {estConfig.label}
-                          </span>
-                        </div>
-                      </div>
+                         <p className="text-2xl font-bold text-slate-900">
+                           ${(cancelacion.monto || 0).toLocaleString('es-AR')}
+                         </p>
+                         <div className="flex items-center gap-2 mt-2 justify-end">
+                           {IconoEstado && (
+                             <IconoEstado className={cn('w-4 h-4', estConfig.color)} />
+                           )}
+                           <span className={cn('text-sm font-medium', estConfig.color)}>
+                             {estConfig.label}
+                           </span>
+                         </div>
+                         <div className="flex gap-2 mt-3 justify-end">
+                           <Button
+                             size="sm"
+                             variant="outline"
+                             onClick={(e) => {
+                               e.stopPropagation();
+                               if (confirm('¿Eliminar este recupero?')) {
+                                 deleteCancelacionMutation.mutate(cancelacion.id);
+                               }
+                             }}
+                             disabled={deleteCancelacionMutation.isPending}
+                             className="text-rose-600 border-rose-200"
+                           >
+                             <Trash2 className="w-3 h-3" />
+                           </Button>
+                           <Button
+                             size="sm"
+                             onClick={(e) => {
+                               e.stopPropagation();
+                               setSelectedCancelacion(cancelacion);
+                               setAccion('descontar');
+                             }}
+                             className="bg-blue-600 hover:bg-blue-700"
+                           >
+                             Descontar
+                           </Button>
+                         </div>
+                       </div>
                     </div>
                   </CardContent>
                 </Card>
