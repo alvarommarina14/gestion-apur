@@ -44,9 +44,16 @@ export default function RecordatoriosTurnosHoy() {
     const alquileres = [];
     const clases = [];
 
+    // Helper para buscar cliente (case-insensitive)
+    const buscarCliente = (nombreTurno) => {
+      return clientes.find(c => 
+        c.nombre.toLowerCase().trim() === nombreTurno.toLowerCase().trim()
+      );
+    };
+
     turnos.forEach(turno => {
       if (turno.tipo_turno === 'alquiler') {
-        const cliente = clientes.find(c => c.nombre === turno.cliente);
+        const cliente = buscarCliente(turno.cliente);
         const cobro = cobrosClientes.find(
           c => c.cliente_nombre === turno.cliente && c.mes === mesActual
         );
