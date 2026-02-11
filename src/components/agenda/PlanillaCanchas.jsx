@@ -1,9 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Edit2, Trash2 } from 'lucide-react';
+import ModalCancelarAlquiler from '@/components/agenda/ModalCancelarAlquiler';
 
 const HORARIOS = [];
 for (let i = 8; i < 22; i++) {
@@ -30,6 +31,8 @@ const getPagoColor = (pagado) => {
 };
 
 export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEdit, onDelete, onEditBloqueo, onDeleteBloqueo }) {
+  const [turnoACancelar, setTurnoACancelar] = useState(null);
+  const [showModalCancelar, setShowModalCancelar] = useState(false);
   // Calcular rowSpan de un turno (cuántas celdas de 30 min ocupa)
   const calcularRowSpan = (horaInicio, horaFin) => {
     const [hInicio, mInicio] = horaInicio.split(':').map(Number);
@@ -184,8 +187,24 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEd
                          <div className={`rounded p-2 h-full space-y-1 ${getStatusColor(turno.tipo_turno)}`}>
                           {/* Turno principal */}
                           <div>
-                            <div className="flex items-center gap-1 mb-1">
-                              {getStatusBadge(turno.tipo_turno)}
+                            <div className="flex items-center justify-between gap-1 mb-1">
+                              <div className="flex items-center gap-1">
+                                {getStatusBadge(turno.tipo_turno)}
+                              </div>
+                              {turno.tipo_turno === 'alquiler' && (
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setTurnoACancelar(turno);
+                                    setShowModalCancelar(true);
+                                  }}
+                                  className="h-6 w-6 hover:bg-rose-100 hover:text-rose-600"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </Button>
+                              )}
                             </div>
                             {turno.tipo_turno === 'clase' && turno.alumnos_nombres?.length > 0 ? (
                               <div className="space-y-0.5">
