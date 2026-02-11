@@ -195,18 +195,32 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEd
                                 {getStatusBadge(turno.tipo_turno)}
                               </div>
                               {turno.tipo_turno === 'alquiler' && (
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setTurnoACancelar(turno);
-                                    setShowModalCancelar(true);
-                                  }}
-                                  className="h-6 w-6 hover:bg-rose-100 hover:text-rose-600"
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </Button>
+                                <div className="flex gap-1">
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setTurnoAEditar(turno);
+                                      setShowModalEditar(true);
+                                    }}
+                                    className="h-6 w-6 hover:bg-blue-100 hover:text-blue-600"
+                                  >
+                                    <Edit2 className="w-3 h-3" />
+                                  </Button>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setTurnoACancelar(turno);
+                                      setShowModalCancelar(true);
+                                    }}
+                                    className="h-6 w-6 hover:bg-rose-100 hover:text-rose-600"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                </div>
                               )}
                             </div>
                             {turno.tipo_turno === 'clase' && turno.alumnos_nombres?.length > 0 ? (
