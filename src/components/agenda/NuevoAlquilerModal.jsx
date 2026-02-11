@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { Search } from 'lucide-react';
+import { Search, AlertTriangle } from 'lucide-react';
 
 export default function NuevoAlquilerModal({ isOpen, onClose, initialDate }) {
   const [cancha, setCancha] = useState('1');
