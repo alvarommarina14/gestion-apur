@@ -66,25 +66,37 @@ Deno.serve(async (req) => {
     // Tabla de turnos
     const tableData = filteredTurnos
       .sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio))
-      .map(turno => {
-        const cliente = clientes.find(c => c.nombre === turno.cliente);
-        const cobroCliente = cobrosClientes.find(c => 
-          c.cliente_nombre === turno.cliente && 
-          c.mes === fecha.substring(0, 7)
-        );
+      .flatMap(turno => {
+        // Si es clase grupal con alumnos, crear una fila por alumno
+        if (turno.tipo_turno === 'clase' && turno.alumnos_ids && turno.alumnos_ids.length > 0) {
+          return turno.alumnos_ids.map((alumnoId, idx) => {
+            const alumno = alumnos.find(a => a.id === alumnoId);
+            const estado = turno.pagado ? '✓ Pagado' : (alumno ? 'Pendiente' : 'Pendiente');
 
+            return [
+              turno.hora_inicio,
+              `${turno.hora_fin || ''}`,
+              turno.cancha,
+              turno.alumnos_nombres?.[idx] || '-',
+              turno.profesor || '-',
+              `$${(alumno?.precio_mensual || 0).toLocaleString('es-AR')}`,
+              estado,
+              turno.notas || '-'
+            ];
+          });
+        }
+
+        // Para otros tipos (alquileres o clases sin alumnos)
+        const cliente = clientes.find(c => c.nombre === turno.cliente);
         let estado = 'Pendiente';
-        let estadoColor = [59, 130, 246]; // blue
         
         if (turno.pagado) {
           estado = '✓ Pagado';
-          estadoColor = [34, 197, 94]; // green
         } else if (cliente?.activo === false) {
           estado = '✗ Moroso';
-          estadoColor = [239, 68, 68]; // red
         }
 
-        return [
+        return [[
           turno.hora_inicio,
           `${turno.hora_fin || ''}`,
           turno.cancha,
@@ -93,7 +105,7 @@ Deno.serve(async (req) => {
           `$${(turno.monto || 0).toLocaleString('es-AR')}`,
           estado,
           turno.notas || '-'
-        ];
+        ]];
       });
 
     doc.autoTable({
