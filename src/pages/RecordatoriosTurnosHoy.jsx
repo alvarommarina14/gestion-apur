@@ -769,6 +769,7 @@ export default function RecordatoriosTurnosHoy() {
                            [alumno.id]: { ...alumnosPagos[alumno.id], guardado: true }
                          });
                          queryClient.invalidateQueries({ queryKey: ['alumnos-con-pagos'] });
+                         queryClient.invalidateQueries({ queryKey: ['pendientes-morosos'] });
                          toast.success(`Pago de ${alumno.nombre} registrado`);
                          } catch (error) {
                          toast.error('Error: ' + error.message);
