@@ -276,9 +276,12 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pago
 
                         </div>
                       ) : (
-                        <div className="h-full bg-slate-50 rounded flex items-center justify-center">
-                          <span className="text-xs text-slate-400">Disponible</span>
-                        </div>
+                        <button
+                          onClick={() => setNuevoTurnoModal({ open: true, cancha, hora })}
+                          className="h-full w-full bg-slate-50 hover:bg-emerald-50 rounded flex items-center justify-center cursor-pointer transition-colors group"
+                        >
+                          <span className="text-xs text-slate-400 group-hover:text-emerald-600">Disponible</span>
+                        </button>
                       )}
                     </td>
                   );
