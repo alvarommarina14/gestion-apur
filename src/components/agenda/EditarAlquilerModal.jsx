@@ -94,6 +94,7 @@ export default function EditarAlquilerModal({ open, onOpenChange, turno }) {
     mutationFn: async () => {
       const horaFin = calcularHoraFin(formData.hora_inicio, formData.duracion);
 
+      // Actualizar turno en BD
       await base44.entities.TurnoCancha.update(turno.id, {
         cancha: formData.cancha,
         hora_inicio: formData.hora_inicio,
@@ -103,10 +104,36 @@ export default function EditarAlquilerModal({ open, onOpenChange, turno }) {
         monto: formData.monto,
         notas: formData.notas,
       });
+
+      // Actualizar evento en Google Calendar si existe
+      if (turno.gcal_event_id && turno.gcal_event_id.trim()) {
+        try {
+          await base44.functions.invoke('sincronizarTurnoGoogleCalendar', {
+            turno_id: turno.id,
+            isUpdate: true,
+          });
+        } catch (error) {
+          console.error('Error sincronizando con Google Calendar:', error);
+        }
+      }
+
+      // Actualizar recordatorios asociados
+      try {
+        const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: turno.id });
+        for (const recordatorio of recordatorios) {
+          await base44.entities.RecordatorioCancha.update(recordatorio.id, {
+            hora: formData.hora_inicio,
+            fecha: turno.fecha,
+          });
+        }
+      } catch (error) {
+        console.error('Error actualizando recordatorios:', error);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha-lista'] });
+      queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
       onOpenChange(false);
     },
     onError: (error) => {
