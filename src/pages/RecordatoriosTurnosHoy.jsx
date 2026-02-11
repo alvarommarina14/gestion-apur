@@ -31,6 +31,7 @@ export default function RecordatoriosTurnosHoy() {
    const [fechaSeleccionada, setFechaSeleccionada] = useState(new Date());
    const fechaFormato = format(fechaSeleccionada, 'yyyy-MM-dd');
    const [filtro, setFiltro] = useState('todos');
+   const [tab, setTab] = useState('hoy'); // 'hoy', 'pendientes', 'morosos'
    const [modalPagoGrupal, setModalPagoGrupal] = useState(false);
    const [modalPagoIndividual, setModalPagoIndividual] = useState(false);
    const [claseSeleccionada, setClaseSeleccionada] = useState(null);
