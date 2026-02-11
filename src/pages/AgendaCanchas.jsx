@@ -49,14 +49,26 @@ export default function AgendaCanchas() {
     queryKey: ['cobros', mesFiltro],
     queryFn: async () => {
       try {
+        // Traer turnos de cancha con clases para obtener alumnos_ids
+        const turnosCompletos = await base44.entities.TurnoCancha.list();
         const cobros = await base44.entities.CobroCliente.filter({ mes: mesFiltro });
-        // Transformar a objeto con cliente_id => estado
+        
+        // Mapear cliente_id a alumno_ids de las clases
         const estadosPago = {};
-        cobros.forEach(cobro => {
-          if (cobro.cliente_id) {
-            estadosPago[cobro.cliente_id] = cobro.estado;
+        
+        turnosCompletos.forEach(turno => {
+          if (turno.tipo_turno === 'clase' && turno.alumnos_ids && turno.alumnos_ids.length > 0) {
+            // Buscar si existe cobro para el cliente (profesor)
+            const cobroBuscado = cobros.find(c => c.cliente_id === turno.cliente);
+            if (cobroBuscado) {
+              // Asignar el estado a cada alumno de esta clase
+              turno.alumnos_ids.forEach(alumnoId => {
+                estadosPago[alumnoId] = cobroBuscado.estado;
+              });
+            }
           }
         });
+        
         return estadosPago;
       } catch (error) {
         console.error('Error al traer cobros:', error);
