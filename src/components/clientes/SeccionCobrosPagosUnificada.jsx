@@ -194,8 +194,15 @@ export default function SeccionCobrosPagosUnificada({ cliente }) {
 
       {/* Cobros y Pagos Unificados */}
       <div className="space-y-2">
-        <div className="flex items-center justify-between mb-2">
-          <h4 className="font-semibold text-slate-900 text-sm">Movimientos ({cobrosConVirtual.length + pagosAlumnos.length})</h4>
+        {(() => {
+          const movimientosFiltrados = [
+            ...cobrosConVirtual.filter(c => getEstadoDinamicoCobro(c) !== 'pagado' || !c.virtual),
+            ...pagosAlumnos
+          ];
+          return (
+            <>
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-semibold text-slate-900 text-sm">Movimientos ({movimientosFiltrados.length})</h4>
           <Button
             size="sm"
             variant="outline"
