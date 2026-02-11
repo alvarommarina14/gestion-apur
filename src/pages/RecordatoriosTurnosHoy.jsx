@@ -109,12 +109,16 @@ export default function RecordatoriosTurnosHoy() {
 
          const cobroDelMes = cobros.find(c => c.cliente_id === cliente.id && c.mes === mesActual);
          if (cobroDelMes && cobroDelMes.estado !== 'pagado') {
+           // Si es abono, usar precio del cliente; si es suelto, usar monto del turno
+           const monto = cliente.tipo_cliente === 'abono' || turnoHoy?.modalidad_alquiler === 'abono' 
+             ? cliente.precio 
+             : (cobroDelMes.monto || turnoHoy?.monto);
            resultado.push({
              type: 'cliente',
              id: cliente.id,
              nombre: cliente.nombre,
              estado: cobroDelMes.estado === 'moroso' ? 'moroso' : 'pendiente',
-             monto: cobroDelMes.monto || turnoHoy.monto || cliente.precio
+             monto
            });
          }
        }
