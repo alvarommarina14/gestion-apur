@@ -24,8 +24,9 @@ Deno.serve(async (req) => {
       ? turnos.filter(t => t.cancha === selectedCancha)
       : turnos;
 
-    // Fetch clientes y cobros para obtener datos de pagos
+    // Fetch clientes, alumnos y cobros para obtener datos de pagos
     const clientes = await base44.asServiceRole.entities.Cliente.list();
+    const alumnos = await base44.asServiceRole.entities.Alumno.list();
     const cobrosClientes = await base44.asServiceRole.entities.CobroCliente.list();
 
     // Crear PDF
