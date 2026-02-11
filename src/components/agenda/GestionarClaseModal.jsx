@@ -67,6 +67,8 @@ export default function GestionarClaseModal({ isOpen, onClose, clase }) {
     onSuccess: () => {
       toast.success('Asistencia registrada');
       queryClient.invalidateQueries({ queryKey: ['asistencia'] });
+      queryClient.invalidateQueries({ queryKey: ['clases'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos'] });
       setExpandedAlumno(null);
     },
     onError: (error) => {
