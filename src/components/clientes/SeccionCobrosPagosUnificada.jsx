@@ -219,11 +219,13 @@ export default function SeccionCobrosPagosUnificada({ cliente }) {
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {/* Combinar y ordenar cobros y pagos por fecha */}
             {[
-              ...cobrosConVirtual.map(c => ({
-                ...c,
-                tipo: 'cobro',
-                fecha_orden: c.mes + '-15'
-              })),
+              ...cobrosConVirtual
+                .filter(c => getEstadoDinamicoCobro(c) !== 'pagado' || !c.virtual)
+                .map(c => ({
+                  ...c,
+                  tipo: 'cobro',
+                  fecha_orden: c.mes + '-15'
+                })),
               ...pagosAlumnos.map(p => ({
                 ...p,
                 tipo: 'pago',
