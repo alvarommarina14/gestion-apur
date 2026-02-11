@@ -297,10 +297,27 @@ export default function ClientesPage() {
                 }
               }
             } else if (cliente.tipo_cliente === 'abono' || cliente.tipo_cliente === 'suelto') {
-              // Calcular estados dinámicamente
-              const cobrosCliente = cobros.filter(c => c.cliente_id === cliente.id);
+              // Generar cobro virtual para el mes actual si no existe
+              const hoy = new Date();
+              const mesActual = format(hoy, 'yyyy-MM');
+              const diaActual = hoy.getDate();
 
-              // Solo calcular estado si hay cobros registrados
+              let cobrosCliente = cobros.filter(c => c.cliente_id === cliente.id);
+              const yaExisteCobro = cobrosCliente.some(c => c.mes === mesActual);
+
+              // Si no existe cobro para el mes actual y el cliente tiene precio, crear uno virtual
+              if (!yaExisteCobro && cliente.precio > 0 && diaActual >= 5) {
+                const cobroVirtual = {
+                  id: 'virtual',
+                  cliente_id: cliente.id,
+                  mes: mesActual,
+                  monto: cliente.precio,
+                  estado: 'pendiente',
+                };
+                cobrosCliente = [...cobrosCliente, cobroVirtual];
+              }
+
+              // Calcular estados dinámicamente
               if (cobrosCliente.length > 0) {
                 const cobrosMoroso = cobrosCliente.filter(c => getEstadoDinamicoCobro(c) === 'moroso');
                 const cobrosPendientes = cobrosCliente.filter(c => getEstadoDinamicoCobro(c) === 'pendiente');
