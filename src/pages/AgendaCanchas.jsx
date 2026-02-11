@@ -253,6 +253,7 @@ export default function AgendaCanchas() {
                 date={selectedDate}
                 turnos={turnosFecha}
                 bloqueos={bloqueos}
+                pagosAlumnos={cobrosPago}
                 onEdit={handleEditTurno}
                 onDelete={handleDeleteTurno}
                 onEditBloqueo={handleEditBloqueo}
