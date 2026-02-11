@@ -51,7 +51,7 @@ const getPagoBadgeCliente = (estadoObj) => {
   const estado = estadoObj?.estado || 'pendiente';
   if (estado === 'pagado') return <Badge className="bg-emerald-600 text-white text-xs">Pagado</Badge>;
   if (estado === 'moroso') return <Badge className="bg-red-600 text-white text-xs">Moroso</Badge>;
-  return <Badge className="bg-orange-600 text-white text-xs">Debe Pagar</Badge>;
+  return <Badge className="bg-orange-600 text-white text-xs">Pago</Badge>;
 };
 
 export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pagosAlumnos = {}, pagosClientes = {}, onEdit, onDelete, onEditBloqueo, onDeleteBloqueo }) {
