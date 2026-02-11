@@ -216,22 +216,20 @@ export default function RecuperoCanchas() {
           {/* TAB CANCHAS */}
           <TabsContent value="canchas" className="space-y-6">
             {/* Filtros */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="space-y-2 sm:w-48">
-                <Label>Estado</Label>
-                <Select value={filterEstado} onValueChange={setFilterEstado}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pendiente">Pendiente de resolución</SelectItem>
-                    <SelectItem value="recuperado">Recuperado</SelectItem>
-                    <SelectItem value="descontado">Descontado</SelectItem>
-                    <SelectItem value="rechazado">Rechazado</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="space-y-2 sm:w-48">
+                  <Label>Estado</Label>
+                  <Select value={filterEstado} onValueChange={setFilterEstado}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pendiente">Pendiente de resolución</SelectItem>
+                      <SelectItem value="descontado">Descontado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-            </div>
 
         {/* Estadísticas */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
