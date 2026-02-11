@@ -51,6 +51,9 @@ export default function RecordatoriosTurnosHoy() {
           c => c.cliente_nombre === turno.cliente && c.mes === mesActual
         );
 
+        // Usar el precio actualizado del cliente en lugar del monto antiguo del turno
+        const montoActual = cliente?.precio || turno.monto || 0;
+
         let estado = 'pendiente';
         let deuda = 0;
 
@@ -58,12 +61,12 @@ export default function RecordatoriosTurnosHoy() {
           estado = 'pagado';
         } else if (cliente?.activo === false) {
           estado = 'moroso';
-          deuda = turno.monto || 0;
+          deuda = montoActual;
         } else if (cobro?.estado === 'moroso') {
           estado = 'moroso';
-          deuda = cobro.monto || 0;
+          deuda = cobro.monto || montoActual;
         } else {
-          deuda = turno.monto || 0;
+          deuda = montoActual;
         }
 
         alquileres.push({
@@ -73,7 +76,7 @@ export default function RecordatoriosTurnosHoy() {
           horaInicio: turno.hora_inicio,
           horaFin: turno.hora_fin,
           cancha: turno.cancha,
-          precio: turno.monto || 0,
+          precio: montoActual,
           estado,
           deuda,
         });
