@@ -253,67 +253,6 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
             </div>
           )}
 
-          {/* Cancha y Horario */}
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label className="text-sm font-medium text-slate-700 block mb-2">
-                Cancha
-              </label>
-              <Select value={cancha} onValueChange={setCancha}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">Cancha 1</SelectItem>
-                  <SelectItem value="2">Cancha 2</SelectItem>
-                  <SelectItem value="3">Cancha 3</SelectItem>
-                  <SelectItem value="4">Cancha 4</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-slate-700 block mb-2">
-                Hora inicio
-              </label>
-              <input
-                type="time"
-                value={horaInicio}
-                onChange={(e) => setHoraInicio(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-slate-700 block mb-2">
-                Duración
-              </label>
-              <Select value={duracion.toString()} onValueChange={(v) => setDuracion(parseInt(v))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="50">50 minutos</SelectItem>
-                  <SelectItem value="80">80 minutos</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Tipo de clase */}
-          <div>
-            <label className="text-sm font-medium text-slate-700 block mb-2">
-              Tipo de clase
-            </label>
-            <Select value={tipo} onValueChange={setTipo}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="individual">Individual</SelectItem>
-                <SelectItem value="grupal">Grupal</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
           {/* Profesor con búsqueda */}
           <div>
             <label className="text-sm font-medium text-slate-700 block mb-2">
