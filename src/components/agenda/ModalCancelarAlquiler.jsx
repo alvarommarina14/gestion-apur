@@ -22,6 +22,25 @@ export default function ModalCancelarAlquiler({ open, onOpenChange, turno }) {
   const queryClient = useQueryClient();
   const [opcionSeleccionada, setOpcionSeleccionada] = useState(null);
   const [motivo, setMotivo] = useState('');
+  const [tieneRepeticionSemanal, setTieneRepeticionSemanal] = React.useState(false);
+
+  React.useEffect(() => {
+    const verificarRepeticion = async () => {
+      if (turno && open) {
+        try {
+          const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: turno.id });
+          const tieneRepeticion = recordatorios.length > 0 && recordatorios[0].repeticion_semanal;
+          setTieneRepeticionSemanal(tieneRepeticion);
+        } catch (error) {
+          console.error('Error verificando repetición:', error);
+          setTieneRepeticionSemanal(false);
+        }
+      } else {
+        setTieneRepeticionSemanal(false);
+      }
+    };
+    verificarRepeticion();
+  }, [turno?.id, open]);
 
   const cancelarMutation = useMutation({
     mutationFn: async ({ tipo, motivo }) => {
@@ -238,34 +257,36 @@ export default function ModalCancelarAlquiler({ open, onOpenChange, turno }) {
               </div>
             )}
 
-            {/* Opción 3: Eliminar serie completa */}
-            <button
-              onClick={() => setOpcionSeleccionada('eliminar_serie')}
-              className={`w-full text-left p-4 rounded-lg border-2 transition-colors ${
-                opcionSeleccionada === 'eliminar_serie'
-                  ? 'border-rose-500 bg-rose-50'
-                  : 'border-slate-200 hover:border-slate-300'
-              }`}
-            >
-              <div className="flex items-start gap-3">
-                <div className={`w-4 h-4 rounded-full border-2 mt-0.5 flex items-center justify-center ${
+            {/* Opción 3: Eliminar serie completa - Solo si tiene recurrencia semanal */}
+            {tieneRepeticionSemanal && (
+              <button
+                onClick={() => setOpcionSeleccionada('eliminar_serie')}
+                className={`w-full text-left p-4 rounded-lg border-2 transition-colors ${
                   opcionSeleccionada === 'eliminar_serie'
-                    ? 'border-rose-500 bg-rose-500'
-                    : 'border-slate-300'
-                }`}>
-                  {opcionSeleccionada === 'eliminar_serie' && (
-                    <div className="w-2 h-2 bg-white rounded-full" />
-                  )}
+                    ? 'border-rose-500 bg-rose-50'
+                    : 'border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <div className={`w-4 h-4 rounded-full border-2 mt-0.5 flex items-center justify-center ${
+                    opcionSeleccionada === 'eliminar_serie'
+                      ? 'border-rose-500 bg-rose-500'
+                      : 'border-slate-300'
+                  }`}>
+                    {opcionSeleccionada === 'eliminar_serie' && (
+                      <div className="w-2 h-2 bg-white rounded-full" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-slate-900">Eliminar todos los turnos restantes</p>
+                    <p className="text-xs text-rose-600 mt-1 flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" />
+                      Borra permanentemente toda la serie recurrente
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="font-medium text-slate-900">Eliminar todos los turnos restantes</p>
-                  <p className="text-xs text-rose-600 mt-1 flex items-center gap-1">
-                    <AlertTriangle className="w-3 h-3" />
-                    Borra permanentemente toda la serie recurrente
-                  </p>
-                </div>
-              </div>
-            </button>
+              </button>
+            )}
           </div>
 
           <div className="flex gap-2 pt-4">
