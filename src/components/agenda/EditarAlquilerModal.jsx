@@ -31,7 +31,6 @@ export default function EditarAlquilerModal({ open, onOpenChange, turno }) {
     hora_inicio: '',
     duracion: 60,
     cliente: '',
-    monto: 0,
     notas: '',
   });
   const [error, setError] = useState('');
