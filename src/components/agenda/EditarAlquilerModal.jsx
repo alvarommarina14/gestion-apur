@@ -42,7 +42,6 @@ export default function EditarAlquilerModal({ open, onOpenChange, turno }) {
         hora_inicio: turno.hora_inicio,
         duracion: turno.duracion || 60,
         cliente: turno.cliente,
-        monto: turno.monto || 0,
         notas: turno.notas || '',
       });
       setError('');
