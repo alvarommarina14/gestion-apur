@@ -33,7 +33,7 @@ import ModalEditarTurno from '@/components/agenda/ModalEditarTurno';
 import ModalConfirmarCancelacionRecurrencia from '@/components/agenda/ModalConfirmarCancelacionRecurrencia';
 import ModalCancelarAlquiler from '@/components/agenda/ModalCancelarAlquiler';
 
-export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isProfesor = false, initialData = {} }) {
+export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isProfesor = false }) {
   const queryClient = useQueryClient();
   const [success, setSuccess] = useState(false);
    const [error, setError] = useState(null);
@@ -78,9 +78,9 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
 
   const [formData, setFormData] = useState({
     fecha: format(fecha || new Date(), 'yyyy-MM-dd'),
-    hora_inicio: initialData.hora_inicio || '09:00',
+    hora_inicio: '09:00',
     duracion: 60,
-    cancha: initialData.cancha || '1',
+    cancha: '1',
     cliente: '',
     tipo_turno: 'alquiler',
     profesor_id: '',
@@ -142,9 +142,9 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
     } else if (!turno && open) {
      setFormData({
        fecha: format(fecha || new Date(), 'yyyy-MM-dd'),
-       hora_inicio: initialData.hora_inicio || '09:00',
+       hora_inicio: '09:00',
        duracion: 60,
-       cancha: initialData.cancha || '1',
+       cancha: '1',
        cliente: '',
        tipo_turno: 'alquiler',
        profesor_id: '',

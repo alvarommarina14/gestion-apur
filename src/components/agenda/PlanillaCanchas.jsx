@@ -8,7 +8,6 @@ import ModalCancelarAlquiler from '@/components/agenda/ModalCancelarAlquiler';
 import EditarAlquilerModal from '@/components/agenda/EditarAlquilerModal';
 import EditarClaseEnAgendaModal from '@/components/agenda/EditarClaseEnAgendaModal';
 import TarjetaClase from '@/components/agenda/TarjetaClase';
-import NuevoTurnoModal from '@/components/agenda/NuevoTurnoModal';
 
 const HORARIOS = [];
 for (let i = 8; i < 22; i++) {
@@ -41,7 +40,6 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pago
   const [showModalEditar, setShowModalEditar] = useState(false);
   const [claseAEditar, setClaseAEditar] = useState(null);
   const [showModalEditarClase, setShowModalEditarClase] = useState(false);
-  const [nuevoTurnoModal, setNuevoTurnoModal] = useState({ open: false, cancha: null, hora: null });
   // Calcular rowSpan de un turno (cuántas celdas de 30 min ocupa)
   const calcularRowSpan = (horaInicio, horaFin) => {
     const [hInicio, mInicio] = horaInicio.split(':').map(Number);
@@ -277,12 +275,9 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pago
 
                         </div>
                       ) : (
-                        <button
-                          onClick={() => setNuevoTurnoModal({ open: true, cancha, hora })}
-                          className="h-full w-full bg-slate-50 hover:bg-emerald-50 rounded flex items-center justify-center cursor-pointer transition-colors group"
-                        >
-                          <span className="text-xs text-slate-400 group-hover:text-emerald-600">Disponible</span>
-                        </button>
+                        <div className="h-full bg-slate-50 rounded flex items-center justify-center">
+                          <span className="text-xs text-slate-400">Disponible</span>
+                        </div>
                       )}
                     </td>
                   );
@@ -343,18 +338,6 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pago
           turno={claseAEditar}
         />
       )}
-
-      {/* Modal para crear nuevo turno en celda vacía */}
-      <NuevoTurnoModal
-        open={nuevoTurnoModal.open}
-        onOpenChange={(open) => setNuevoTurnoModal({ ...nuevoTurnoModal, open })}
-        fecha={date}
-        turno={null}
-        initialData={{
-          cancha: nuevoTurnoModal.cancha,
-          hora_inicio: nuevoTurnoModal.hora,
-        }}
-      />
     </div>
   );
 }
