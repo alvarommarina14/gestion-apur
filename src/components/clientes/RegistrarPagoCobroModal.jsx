@@ -32,7 +32,7 @@ export default function RegistrarPagoCobroModal({ open, onOpenChange, cobro, cli
 
   const registrarPagoMutation = useMutation({
     mutationFn: async (data) => {
-      await base44.functions.invoke('registrarPagoClienteCompleto', {
+      const result = await base44.functions.invoke('registrarPagoClienteCompleto', {
         cobro_id: cobro.id,
         cliente_id: cobro.cliente_id,
         cliente_nombre: cobro.cliente_nombre,
@@ -42,12 +42,15 @@ export default function RegistrarPagoCobroModal({ open, onOpenChange, cobro, cli
         notas: data.notas,
         mes: cobro.mes,
       });
+      return result;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cobros-clientes', cliente?.id] });
-      queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
-      queryClient.invalidateQueries({ queryKey: ['clientes'] });
-      onOpenChange(false);
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['cobros-clientes', cliente?.id] });
+        queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
+        queryClient.invalidateQueries({ queryKey: ['clientes'] });
+        onOpenChange(false);
+      }, 300);
       setFormData({
         fecha_pago: format(new Date(), 'yyyy-MM-dd'),
         medio_pago: 'efectivo',
@@ -57,7 +60,7 @@ export default function RegistrarPagoCobroModal({ open, onOpenChange, cobro, cli
     },
     onError: (error) => {
       console.error('Error al registrar pago:', error);
-      alert('Error al registrar pago: ' + (error?.response?.data?.error || error.message));
+      alert('Error: ' + (error?.response?.data?.error || error.message));
     },
   });
 
