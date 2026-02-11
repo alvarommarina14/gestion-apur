@@ -452,6 +452,7 @@ export default function RecordatoriosTurnosHoy() {
           </CardContent>
         </Card>
       ) : (
+        <>
         <div className="space-y-3">
           {allItems.map((item) => (
             <Card key={`${item.type}-${item.id}`} className="overflow-hidden">
