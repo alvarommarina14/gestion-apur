@@ -29,32 +29,40 @@ export default function RecordatoriosTurnosHoy() {
 
 
 
-   // Cargar clientes y alumnos pendientes/morosos
+   // Cargar clientes y alumnos pendientes/morosos con turno/clase hoy
    const { data: clientesPendientes = [] } = useQuery({
      queryKey: ['clientes-pendientes'],
      queryFn: async () => {
        const mesActual = format(new Date(), 'yyyy-MM');
+       const hoy = new Date();
+       const hoySinHora = format(hoy, 'yyyy-MM-dd');
+       const diaDelMes = hoy.getDate();
+
        const pagos = await base44.entities.Pago.list();
        const pagosDelMes = pagos.filter(p => p.mes_correspondiente === mesActual);
 
        const alumnos = await base44.entities.Alumno.list();
        const clientes = await base44.entities.Cliente.list();
        const turnos = await base44.entities.TurnoCancha.list();
+       const clases = await base44.entities.Clase.list();
 
        const resultado = [];
 
-       // Alumnos pendientes/morosos
-       const hoy = new Date();
-       const diaDelMes = hoy.getDate();
-
-       for (const alumno of alumnos) {
-         const pagado = pagosDelMes.some(p => p.alumno_id === alumno.id);
-         if (pagado) {
-           // Si ya pagó este mes, no mostrar
-           continue;
+       // Obtener IDs de alumnos con clase HOY
+       const alumnosConClasseHoy = new Set();
+       clases.forEach(clase => {
+         if (clase.fecha === hoySinHora && clase.estado !== 'cancelada_anticipada' && clase.estado !== 'cancelada_tarde') {
+           clase.alumnos_ids?.forEach(id => alumnosConClasseHoy.add(id));
          }
+       });
 
-         // Determinar estado según fecha
+       // Alumnos con clase HOY y pendiente/moroso
+       for (const alumno of alumnos) {
+         if (!alumnosConClasseHoy.has(alumno.id)) continue; // Solo si tiene clase hoy
+         
+         const pagado = pagosDelMes.some(p => p.alumno_id === alumno.id);
+         if (pagado) continue;
+
          let estado = 'pendiente';
          if (diaDelMes > 15) {
            estado = 'moroso';
@@ -70,11 +78,12 @@ export default function RecordatoriosTurnosHoy() {
          });
        }
 
-       // Alquileres sin pagar (TurnoCancha con tipo_turno='alquiler' y pagado=false)
-       const alquileresNoPagados = turnos.filter(t => t.tipo_turno === 'alquiler' && !t.pagado);
-       for (const alquiler of alquileresNoPagados) {
+       // Alquileres sin pagar con turno HOY
+       const turnosHoy = turnos.filter(t => t.fecha === hoySinHora && t.estado === 'activo');
+       const alquileresHoyNoPagados = turnosHoy.filter(t => t.tipo_turno === 'alquiler' && !t.pagado);
+       
+       for (const alquiler of alquileresHoyNoPagados) {
          if (!resultado.some(r => r.id === alquiler.id && r.type === 'turno')) {
-           // Determinar estado según fecha
            let estado = 'pendiente';
            if (diaDelMes > 15) {
              estado = 'moroso';
@@ -90,12 +99,16 @@ export default function RecordatoriosTurnosHoy() {
          }
        }
 
-       // Clientes con abono pendiente
+       // Clientes con abono (tipo_cliente='abono') con turno HOY
        for (const cliente of clientes) {
-         if (cliente.tipo_cliente === 'clase' && cliente.es_alumno) continue; // Ya está en alumnos
+         if (cliente.tipo_cliente !== 'abono' || cliente.es_alumno) continue;
+         
+         const tieneturnoHoy = turnosHoy.some(t => t.cliente === cliente.nombre);
+         if (!tieneturnoHoy) continue;
+
          const cobros = await base44.entities.CobroCliente.list();
          const cobroDelMes = cobros.find(c => c.cliente_id === cliente.id && c.mes === mesActual);
-         if (cobroDelMes && !cobroDelMes.pagado) {
+         if (cobroDelMes && cobroDelMes.estado !== 'pagado') {
            resultado.push({
              type: 'cliente',
              id: cliente.id,
