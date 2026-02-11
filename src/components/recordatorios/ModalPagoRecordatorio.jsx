@@ -78,7 +78,12 @@ export default function ModalPagoRecordatorio({ open, onOpenChange, cliente }) {
       }
 
       toast.success('Pago registrado correctamente');
+      // Sincronizar todas las secciones que se ven afectadas
       queryClient.invalidateQueries({ queryKey: ['clientes-pendientes'] });
+      queryClient.invalidateQueries({ queryKey: ['clientes'] });
+      queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
+      queryClient.invalidateQueries({ queryKey: ['pagos'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
       onOpenChange(false);
       setMedioPago('');
       setNotas('');
