@@ -34,6 +34,9 @@ const getPagoBadge = (estado) => {
   if (estado === 'moroso') {
     return <Badge className="bg-rose-600 text-xs">Moroso</Badge>;
   }
+  if (estado === 'pendiente') {
+    return <Badge className="bg-amber-600 text-xs">Pendiente</Badge>;
+  }
   return null;
 };
 
