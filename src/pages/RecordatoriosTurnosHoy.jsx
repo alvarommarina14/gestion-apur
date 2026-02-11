@@ -625,7 +625,6 @@ export default function RecordatoriosTurnosHoy() {
             </div>
           )}
           </div>
-          </div>
           )}
           </>
           )}
