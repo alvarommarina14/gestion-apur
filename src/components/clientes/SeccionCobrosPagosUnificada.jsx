@@ -82,6 +82,7 @@ export default function SeccionCobrosPagosUnificada({ cliente }) {
 
   // Función para calcular estado dinámico de cobros
   const getEstadoDinamicoCobro = (cobro) => {
+    // Si el cobro ya está marcado como pagado en la BD
     if (cobro.estado === 'pagado') return 'pagado';
     
     // Verificar si hay pagos de alumno que cubran este mes
@@ -92,11 +93,16 @@ export default function SeccionCobrosPagosUnificada({ cliente }) {
     
     if (pagoDelMes) return 'pagado';
     
+    // Calcular si pasó la fecha de vencimiento (día 15)
     const hoy = new Date();
     const [año, mes] = cobro.mes.split('-');
     const fechaVencimiento = new Date(parseInt(año), parseInt(mes) - 1, 15);
     
-    return hoy > fechaVencimiento ? 'moroso' : 'pendiente';
+    // Si pasó la fecha vencimiento, es moroso
+    if (hoy > fechaVencimiento) return 'moroso';
+    
+    // Si aún no pasó la fecha, es pendiente
+    return 'pendiente';
   };
 
   // Calcular cobro virtual del mes actual si no existe
