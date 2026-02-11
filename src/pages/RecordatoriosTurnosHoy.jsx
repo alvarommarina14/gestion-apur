@@ -361,30 +361,57 @@ export default function RecordatoriosTurnosHoy() {
         </div>
       </div>
 
-      {/* Filtros */}
-      <div className="flex gap-2">
-        <Button
-          variant={filtro === 'todos' ? 'default' : 'outline'}
-          onClick={() => setFiltro('todos')}
-          className={filtro === 'todos' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
-        >
-          Todos ({allItems.length})
-        </Button>
-        <Button
-          variant={filtro === 'clases' ? 'default' : 'outline'}
-          onClick={() => setFiltro('clases')}
-          className={filtro === 'clases' ? 'bg-blue-600 hover:bg-blue-700' : ''}
-        >
-          Clases ({todayClases.length})
-        </Button>
-        <Button
-          variant={filtro === 'alquileres' ? 'default' : 'outline'}
-          onClick={() => setFiltro('alquileres')}
-          className={filtro === 'alquileres' ? 'bg-purple-600 hover:bg-purple-700' : ''}
-        >
-          Alquileres ({todayTurnos.filter(t => t.tipo_turno === 'alquiler').length})
-        </Button>
-      </div>
+      {/* Tabs principales */}
+       <div className="flex gap-2 border-b border-slate-200">
+         <Button
+           variant={tab === 'hoy' ? 'default' : 'ghost'}
+           onClick={() => setTab('hoy')}
+           className={tab === 'hoy' ? 'bg-emerald-600 hover:bg-emerald-700 rounded-b-none' : 'rounded-b-none'}
+         >
+           Hoy
+         </Button>
+         <Button
+           variant={tab === 'pendientes' ? 'default' : 'ghost'}
+           onClick={() => setTab('pendientes')}
+           className={tab === 'pendientes' ? 'bg-yellow-600 hover:bg-yellow-700 rounded-b-none' : 'rounded-b-none'}
+         >
+           Pendientes ({pendientesYMorosos.filter(p => p.estado_pago === 'pendiente').length})
+         </Button>
+         <Button
+           variant={tab === 'morosos' ? 'default' : 'ghost'}
+           onClick={() => setTab('morosos')}
+           className={tab === 'morosos' ? 'bg-red-600 hover:bg-red-700 rounded-b-none' : 'rounded-b-none'}
+         >
+           Morosos ({pendientesYMorosos.filter(p => p.estado_pago === 'moroso').length})
+         </Button>
+       </div>
+
+       {/* Filtros (solo en tab hoy) */}
+       {tab === 'hoy' && (
+       <div className="flex gap-2">
+         <Button
+           variant={filtro === 'todos' ? 'default' : 'outline'}
+           onClick={() => setFiltro('todos')}
+           className={filtro === 'todos' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+         >
+           Todos ({allItems.length})
+         </Button>
+         <Button
+           variant={filtro === 'clases' ? 'default' : 'outline'}
+           onClick={() => setFiltro('clases')}
+           className={filtro === 'clases' ? 'bg-blue-600 hover:bg-blue-700' : ''}
+         >
+           Clases ({todayClases.length})
+         </Button>
+         <Button
+           variant={filtro === 'alquileres' ? 'default' : 'outline'}
+           onClick={() => setFiltro('alquileres')}
+           className={filtro === 'alquileres' ? 'bg-purple-600 hover:bg-purple-700' : ''}
+         >
+           Alquileres ({todayTurnos.filter(t => t.tipo_turno === 'alquiler').length})
+         </Button>
+       </div>
+       )}
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
