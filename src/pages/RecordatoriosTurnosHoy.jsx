@@ -70,18 +70,19 @@ export default function RecordatoriosTurnosHoy() {
          (c.estado === 'programada' || c.estado === 'realizada')
        );
 
+       // Cargar profesores para enriquecer datos
+       const profesores = await base44.entities.Profesor.list();
+
        // Cargar nombres de profesores si no existen
-       return Promise.all(clasesFiltered.map(async (clase) => {
+       return clasesFiltered.map(clase => {
          if (!clase.profesor_nombre && clase.profesor_id) {
-           try {
-             const profesor = await base44.entities.Profesor.read(clase.profesor_id);
+           const profesor = profesores.find(p => p.id === clase.profesor_id);
+           if (profesor) {
              return { ...clase, profesor_nombre: profesor.nombre };
-           } catch (e) {
-             return clase;
            }
          }
          return clase;
-       }));
+       });
      },
      refetchInterval: 60000,
    });
