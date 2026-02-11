@@ -210,6 +210,8 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['turnos-hoy'] });
       queryClient.invalidateQueries({ queryKey: ['turnos'] });
+      queryClient.invalidateQueries({ queryKey: ['recordatorios-turnos-hoy'] });
+      queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
       setEditando(false);
     },
   });
