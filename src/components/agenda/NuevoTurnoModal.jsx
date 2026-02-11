@@ -234,8 +234,18 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
   const createMutation = useMutation({
     mutationFn: async (data) => {
       const empleadosSeleccionados = empleados.filter(e => data.empleados_asignados_ids.includes(e.id));
+      
+      // Obtener nombres de alumnos si es clase
+      const alumnosNombres = data.tipo_turno === 'clase' && data.alumnos_ids?.length > 0
+        ? data.alumnos_ids.map(id => {
+            const alumno = alumnos.find(a => a.id === id);
+            return alumno?.nombre || '';
+          }).filter(Boolean)
+        : [];
+      
       const turnoData = {
         ...data,
+        alumnos_nombres: alumnosNombres,
         empleados_asignados_emails: empleadosSeleccionados.map(e => e.email),
         empleados_asignados_nombres: empleadosSeleccionados.map(e => e.full_name),
         estado: 'activo',
