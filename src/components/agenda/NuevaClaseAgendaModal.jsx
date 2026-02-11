@@ -422,9 +422,56 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
                 ))}
               </div>
             )}
-          </div>
+            </div>
 
-          <div>
+            {/* Cancha */}
+            <div>
+            <label className="text-sm font-medium text-slate-700 block mb-2">
+              Cancha
+            </label>
+            <Select value={cancha} onValueChange={setCancha}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">Cancha 1</SelectItem>
+                <SelectItem value="2">Cancha 2</SelectItem>
+                <SelectItem value="3">Cancha 3</SelectItem>
+                <SelectItem value="4">Cancha 4</SelectItem>
+              </SelectContent>
+            </Select>
+            </div>
+
+            {/* Horario */}
+            <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-sm font-medium text-slate-700 block mb-2">
+                Hora inicio
+              </label>
+              <input
+                type="time"
+                value={horaInicio}
+                onChange={(e) => setHoraInicio(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-slate-700 block mb-2">
+                Duración
+              </label>
+              <Select value={duracion.toString()} onValueChange={(v) => setDuracion(parseInt(v))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="50">50 minutos</SelectItem>
+                  <SelectItem value="80">80 minutos</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            </div>
+
+            <div>
             <label className="text-sm font-medium text-slate-700 block mb-2">
               Notas
             </label>
@@ -434,7 +481,7 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
               placeholder="Detalles o comentarios..."
               className="resize-none h-20"
             />
-          </div>
+            </div>
 
           {/* Recurrencia semanal */}
           <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
