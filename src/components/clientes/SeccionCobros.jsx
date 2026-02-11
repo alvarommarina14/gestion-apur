@@ -17,11 +17,12 @@ export default function SeccionCobros({ cliente }) {
    const queryClient = useQueryClient();
 
    const deleteCbroMutation = useMutation({
-     mutationFn: (cobroId) => base44.entities.CobroCliente.delete(cobroId),
-     onSuccess: () => {
-       queryClient.invalidateQueries({ queryKey: ['cobros-cliente', cliente.id] });
-     },
-   });
+      mutationFn: (cobroId) => base44.entities.CobroCliente.delete(cobroId),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['cobros-clientes', cliente.id] });
+        queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
+      },
+    });
 
    const getEstadoDinamico = (cobro) => {
      // Si ya está pagado, mantener estado pagado
