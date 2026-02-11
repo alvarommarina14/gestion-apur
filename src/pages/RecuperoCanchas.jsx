@@ -474,37 +474,16 @@ export default function RecuperoCanchas() {
               </div>
             )}
 
-            {accion && (
+            {accion === 'descontar' && (
               <div className="space-y-3 border-t pt-4">
                 <div className="space-y-2">
-                  <Label>Fecha de {accion === 'recuperar' ? 'recupero' : 'descuento'}</Label>
+                  <Label>Fecha de descuento</Label>
                   <Input
                     type="date"
                     value={formData.fecha_recupero}
                     onChange={(e) => setFormData({ ...formData, fecha_recupero: e.target.value })}
                   />
                 </div>
-
-                {accion === 'recuperar' && (
-                  <div className="space-y-2">
-                    <Label>Turno de recupero (opcional)</Label>
-                    <Select
-                      value={formData.turno_recupero_id}
-                      onValueChange={(v) => setFormData({ ...formData, turno_recupero_id: v })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar turno" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {turnos.map((turno) => (
-                          <SelectItem key={turno.id} value={turno.id}>
-                            {turno.cliente} - {turno.fecha ? format(parseISO(turno.fecha), 'd MMM', { locale: es }) : 'Sin fecha'} {turno.hora_inicio}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
 
                 <div className="space-y-2">
                   <Label>Notas</Label>
@@ -515,6 +494,17 @@ export default function RecuperoCanchas() {
                     rows={2}
                   />
                 </div>
+              </div>
+            )}
+
+            {accion === 'ver_precio' && (
+              <div className="space-y-3 border-t pt-4 bg-blue-50 p-4 rounded-lg">
+                <p className="text-sm text-slate-700">
+                  <span className="font-semibold">Monto a descontar del próximo mes:</span> ${(selectedCancelacion?.monto || 0).toLocaleString('es-AR')}
+                </p>
+                <p className="text-xs text-slate-600">
+                  Este monto se descontará del pago mensual del próximo mes.
+                </p>
               </div>
             )}
           </div>
