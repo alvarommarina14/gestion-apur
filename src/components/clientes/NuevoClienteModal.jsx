@@ -347,13 +347,13 @@ export default function NuevoClienteModal({ open, onOpenChange, tipoCliente }) {
                </div>
                <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-2">
-                   <Label>Precio mensual *</Label>
+                   <Label>Precio mensual (clase) *</Label>
                    <Input
                      type="number"
                      min="0"
                      step="100"
-                     value={formData.precio}
-                     onChange={(e) => setFormData({ ...formData, precio: parseFloat(e.target.value) || 0 })}
+                     value={formData.precio_clase}
+                     onChange={(e) => setFormData({ ...formData, precio_clase: parseFloat(e.target.value) || 0 })}
                      placeholder="Ej: 35000"
                      required={formData.es_alumno}
                    />
