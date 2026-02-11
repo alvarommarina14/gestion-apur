@@ -158,8 +158,9 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
   };
 
   const alumnosFiltrados = alumnosDisponibles.filter(a =>
-    a.nombre.toLowerCase().includes(busquedaAlumno.toLowerCase())
-  );
+     a.profesor_id === profesor && 
+     a.nombre.toLowerCase().includes(busquedaAlumno.toLowerCase())
+   );
 
   const profesoresFiltrados = profesores.filter(p =>
     p.activo && p.nombre.toLowerCase().includes(busquedaProfesor.toLowerCase())
