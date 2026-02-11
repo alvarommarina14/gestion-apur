@@ -287,6 +287,15 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEd
           <span className="text-slate-600">Pendiente</span>
         </div>
       </div>
+
+      {/* Modal de cancelación */}
+      {turnoACancelar && (
+        <ModalCancelarAlquiler
+          open={showModalCancelar}
+          onOpenChange={setShowModalCancelar}
+          turno={turnoACancelar}
+        />
+      )}
     </div>
   );
 }
