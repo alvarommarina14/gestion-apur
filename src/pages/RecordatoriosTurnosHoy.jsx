@@ -64,20 +64,28 @@ export default function RecordatoriosTurnosHoy() {
        // Alumnos pendientes/morosos
        const hoy = new Date();
        const diaDelMes = hoy.getDate();
-       const esMoroso = diaDelMes > 15; // Después del día 15 es moroso
 
        for (const alumno of alumnos) {
          const pagado = pagosDelMes.some(p => p.alumno_id === alumno.id);
-         if (!pagado) {
-           resultado.push({
-             type: 'alumno',
-             id: alumno.id,
-             nombre: alumno.nombre,
-             profesor_nombre: alumno.profesor_nombre,
-             estado: esMoroso ? 'moroso' : 'pendiente',
-             monto: alumno.precio_mensual
-           });
+         if (pagado) {
+           // Si ya pagó este mes, no mostrar
+           continue;
          }
+
+         // Determinar estado según fecha
+         let estado = 'pendiente';
+         if (diaDelMes > 15) {
+           estado = 'moroso';
+         }
+
+         resultado.push({
+           type: 'alumno',
+           id: alumno.id,
+           nombre: alumno.nombre,
+           profesor_nombre: alumno.profesor_nombre,
+           estado,
+           monto: alumno.precio_mensual
+         });
        }
 
        // Alquileres sin pagar (TurnoCancha con tipo_turno='alquiler' y pagado=false)
