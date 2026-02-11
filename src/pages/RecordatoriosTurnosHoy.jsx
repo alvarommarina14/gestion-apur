@@ -659,6 +659,8 @@ export default function RecordatoriosTurnosHoy() {
                   queryClient.invalidateQueries({ queryKey: ['clases-hoy'] });
                   queryClient.invalidateQueries({ queryKey: ['alumnos'] });
                   queryClient.invalidateQueries({ queryKey: ['pagos'] });
+                  queryClient.invalidateQueries({ queryKey: ['alumnos-con-pagos'] });
+                  queryClient.invalidateQueries({ queryKey: ['clientes-pendientes'] });
                   toast.success('Pago registrado correctamente');
                 } catch (error) {
                   toast.error('Error: ' + error.message);
