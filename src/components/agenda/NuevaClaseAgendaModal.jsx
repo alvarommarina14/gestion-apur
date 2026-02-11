@@ -80,7 +80,10 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
          }).filter(Boolean),
          estado: 'programada',
          profesor_id: profesorId,
-         profesor_nombre: nombreProfesor
+         profesor_nombre: nombreProfesor,
+         precio: tipo === 'individual' && alumnos.length > 0 
+           ? alumnosDisponibles.find(a => a.id === alumnos[0])?.precio_mensual || 0
+           : 0
        };
 
       const datosTurno = {
