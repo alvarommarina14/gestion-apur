@@ -135,6 +135,58 @@ export default function GestionarClaseModal({ isOpen, onClose, clase }) {
     }
   });
 
+  const liberarCanchaMutation = useMutation({
+    mutationFn: async () => {
+      // Crear recupero para cada alumno
+      for (let i = 0; i < clase.alumnos_ids.length; i++) {
+        const alumnoId = clase.alumnos_ids[i];
+        const alumnoNombre = clase.alumnos_nombres[i];
+        
+        // Crear Recupero
+        await base44.entities.Recupero.create({
+          alumno_id: alumnoId,
+          alumno_nombre: alumnoNombre,
+          clase_original_id: clase.id,
+          fecha_original: clase.fecha,
+          motivo: 'otro',
+          estado: 'pendiente'
+        });
+
+        // Crear Asistencia con aviso
+        await base44.entities.Asistencia.create({
+          clase_id: clase.id,
+          alumno_id: alumnoId,
+          alumno_nombre: alumnoNombre,
+          fecha: clase.fecha,
+          estado: 'ausente_con_aviso',
+          genera_recupero: true
+        });
+      }
+
+      // Eliminar turno de cancha si existe
+      if (clase.turno_cancha_id) {
+        await base44.entities.TurnoCancha.delete(clase.turno_cancha_id);
+      }
+
+      // Cancelar la clase
+      await base44.entities.Clase.update(clase.id, {
+        estado: 'cancelada_anticipada',
+        cancelado_por: 'otro'
+      });
+    },
+    onSuccess: () => {
+      toast.success('Cancha liberada y recuperos creados para todos los alumnos');
+      queryClient.invalidateQueries({ queryKey: ['clases'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos'] });
+      queryClient.invalidateQueries({ queryKey: ['recuperos'] });
+      queryClient.invalidateQueries({ queryKey: ['asistencia'] });
+      onClose();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    }
+  });
+
   if (!clase) return null;
 
   const motivos = [
