@@ -523,14 +523,14 @@ export default function ClientesPage() {
                           <Button
                             size="sm"
                             variant="default"
-                            onClick={() => setPagoModal({ open: true, alumno: clienteComoAlumno })}
+                            onClick={() => setPagoModal({ open: true, alumno: clienteComoAlumno, esCliente: true })}
                             className="bg-emerald-600 hover:bg-emerald-700"
                           >
                             <DollarSign className="w-4 h-4 mr-1" />
                             Cobrar
                           </Button>
                         );
-                      }
+                        }
                       
                       return null;
                     })()}
