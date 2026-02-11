@@ -72,6 +72,7 @@ export default function EditarClaseEnAgendaModal({ open, onOpenChange, turno }) 
         fecha: data.fecha,
         hora_inicio: data.hora_inicio,
         duracion: data.duracion,
+        cancha: data.cancha,
         hora_fin: calcularHoraFin(data.hora_inicio, data.duracion),
         cliente: data.cliente,
         notas: data.notas,
@@ -85,6 +86,7 @@ export default function EditarClaseEnAgendaModal({ open, onOpenChange, turno }) 
             fecha: data.fecha,
             hora_inicio: data.hora_inicio,
             duracion: data.duracion,
+            cancha: data.cancha,
             notas: data.notas,
           });
         }
