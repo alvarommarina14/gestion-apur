@@ -213,7 +213,7 @@ export default function ClientesPage() {
     }
 
     return filtrados;
-  }, [clientes, seccionActual, busqueda, filtroEstadoPago, alumnos, cobros, ordenamiento]);
+    }, [clientes, seccionActual, busqueda, filtroEstadoPago, alumnos, cobros, pagos, ordenamiento]);
 
   const clasificacionConfig = {
     nuevo: { icon: UserPlus, color: 'bg-blue-100 text-blue-700', label: 'Nuevo' },
