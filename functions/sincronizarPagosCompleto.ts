@@ -140,51 +140,56 @@ Deno.serve(async (req) => {
 
     // ===== SINCRONIZACIÓN DESDE PAGO DE CLIENTE =====
     if (tipo_evento === 'cliente_pago' && clienteId) {
-      const cliente = await base44Admin.entities.Cliente.read(clienteId);
-      if (!cliente) return Response.json({ error: 'Cliente no encontrado' }, { status: 404 });
+      try {
+        const cliente = await base44Admin.entities.Cliente.read(clienteId);
+        if (!cliente) return Response.json({ error: 'Cliente no encontrado' }, { status: 404 });
 
-      const estado = determinarEstado(diaActual);
-      const mesPago = mes || mesActual;
+        const estado = determinarEstado(diaActual);
+        const mesPago = mes || mesActual;
 
-      // Crear o actualizar CobroCliente
-      const cobrosExistentes = await base44Admin.entities.CobroCliente.filter({
-        cliente_id: clienteId,
-        tipo_cobro: 'abono_mensual',
-        mes: mesPago
-      });
-
-      if (cobrosExistentes.length > 0) {
-        await base44Admin.entities.CobroCliente.update(cobrosExistentes[0].id, {
-          estado,
-          fecha_pago: fecha
-        });
-      } else {
-        await base44Admin.entities.CobroCliente.create({
+        // Crear o actualizar CobroCliente
+        const cobrosExistentes = await base44Admin.entities.CobroCliente.filter({
           cliente_id: clienteId,
-          cliente_nombre: cliente.nombre,
           tipo_cobro: 'abono_mensual',
-          mes: mesPago,
-          monto: monto || cliente.precio || 0,
-          estado,
-          fecha_pago: fecha
+          mes: mesPago
         });
-      }
 
-      // Si el cliente es alumno, sincronizar también el alumno
-      if (cliente.es_alumno) {
-        const alumnoSincronizado = await base44Admin.entities.Alumno.filter({
-          nombre: cliente.nombre
-        });
-        if (alumnoSincronizado.length > 0) {
-          const alumno = alumnoSincronizado[0];
-          const nuevaDeuda = Math.max(0, (alumno.deuda_total || 0) - (monto || alumno.precio_mensual || 0));
-          await base44Admin.entities.Alumno.update(alumno.id, {
-            estado_mes_actual: 'pagado',
-            estado: nuevaDeuda > 0 ? 'moroso' : 'activo',
-            deuda_total: nuevaDeuda,
-            ultimo_pago_fecha: fecha
+        if (cobrosExistentes.length > 0) {
+          await base44Admin.entities.CobroCliente.update(cobrosExistentes[0].id, {
+            estado,
+            fecha_pago: fecha
+          });
+        } else {
+          await base44Admin.entities.CobroCliente.create({
+            cliente_id: clienteId,
+            cliente_nombre: cliente.nombre,
+            tipo_cobro: 'abono_mensual',
+            mes: mesPago,
+            monto: monto || cliente.precio || 0,
+            estado,
+            fecha_pago: fecha
           });
         }
+
+        // Si el cliente es alumno, sincronizar también el alumno
+        if (cliente.es_alumno) {
+          const alumnoSincronizado = await base44Admin.entities.Alumno.filter({
+            nombre: cliente.nombre
+          });
+          if (alumnoSincronizado.length > 0) {
+            const alumno = alumnoSincronizado[0];
+            const nuevaDeuda = Math.max(0, (alumno.deuda_total || 0) - (monto || alumno.precio_mensual || 0));
+            await base44Admin.entities.Alumno.update(alumno.id, {
+              estado_mes_actual: 'pagado',
+              estado: nuevaDeuda > 0 ? 'moroso' : 'activo',
+              deuda_total: nuevaDeuda,
+              ultimo_pago_fecha: fecha
+            });
+          }
+        }
+      } catch (clienteError) {
+        console.error('Error procesando pago de cliente:', clienteError);
+        // Continuar si es cliente_pago
       }
     }
 
