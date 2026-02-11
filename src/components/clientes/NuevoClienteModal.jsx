@@ -471,19 +471,52 @@ export default function NuevoClienteModal({ open, onOpenChange, tipoCliente }) {
             )}
 
             {tipoCliente === 'abono_cancha' && (formData.tipo_cliente === 'abono' || formData.tipo_cliente === 'suelto') && (
-             <div className="space-y-2">
-               <Label>{formData.tipo_cliente === 'abono' ? 'Precio mensual *' : 'Precio por turno *'}</Label>
-               <Input
-                 type="number"
-                 min="0"
-                 step="100"
-                 value={formData.precio}
-                 onChange={(e) => setFormData({ ...formData, precio: parseFloat(e.target.value) || 0 })}
-                 placeholder={formData.tipo_cliente === 'abono' ? 'Ej: 120000' : 'Ej: 50000'}
-                 required
-               />
-             </div>
-            )}
+              <div className="space-y-2">
+                <Label>{formData.tipo_cliente === 'abono' ? 'Precio mensual (alquiler) *' : 'Precio por turno *'}</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  step="100"
+                  value={formData.precio_alquiler}
+                  onChange={(e) => setFormData({ ...formData, precio_alquiler: parseFloat(e.target.value) || 0 })}
+                  placeholder={formData.tipo_cliente === 'abono' ? 'Ej: 120000' : 'Ej: 50000'}
+                  required
+                />
+              </div>
+             )}
+
+             {/* Mostrar ambos precios si cliente es ALUMNO + ALQUILA */}
+             {tipoCliente === 'alumno' && (
+               <div className="p-3 bg-blue-50 border border-blue-200 rounded text-sm space-y-2">
+                 <p className="font-semibold text-blue-900">Este cliente es alumno Y alquila:</p>
+                 <div className="grid grid-cols-2 gap-2">
+                   <div className="space-y-1">
+                     <Label className="text-xs">Precio clases (mensual)</Label>
+                     <Input
+                       type="number"
+                       min="0"
+                       step="100"
+                       value={formData.precio_clase}
+                       onChange={(e) => setFormData({ ...formData, precio_clase: parseFloat(e.target.value) || 0 })}
+                       placeholder="Ej: 35000"
+                       className="text-sm"
+                     />
+                   </div>
+                   <div className="space-y-1">
+                     <Label className="text-xs">Precio alquileres</Label>
+                     <Input
+                       type="number"
+                       min="0"
+                       step="100"
+                       value={formData.precio_alquiler}
+                       onChange={(e) => setFormData({ ...formData, precio_alquiler: parseFloat(e.target.value) || 0 })}
+                       placeholder="Ej: 800"
+                       className="text-sm"
+                     />
+                   </div>
+                 </div>
+               </div>
+             )}
 
           <div className="space-y-2">
             <Label>Notas</Label>
