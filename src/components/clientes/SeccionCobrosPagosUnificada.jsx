@@ -84,6 +84,14 @@ export default function SeccionCobrosPagosUnificada({ cliente }) {
   const getEstadoDinamicoCobro = (cobro) => {
     if (cobro.estado === 'pagado') return 'pagado';
     
+    // Verificar si hay pagos de alumno que cubran este mes
+    const pagoDelMes = pagosAlumnos.some(p => {
+      const mesDelPago = p.mes_correspondiente || format(parseISO(p.fecha), 'yyyy-MM');
+      return mesDelPago === cobro.mes;
+    });
+    
+    if (pagoDelMes) return 'pagado';
+    
     const hoy = new Date();
     const [año, mes] = cobro.mes.split('-');
     const fechaVencimiento = new Date(parseInt(año), parseInt(mes) - 1, 15);
