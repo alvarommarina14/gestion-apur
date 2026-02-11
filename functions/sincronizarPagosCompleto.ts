@@ -144,7 +144,7 @@ Deno.serve(async (req) => {
         const cliente = await base44Admin.entities.Cliente.read(clienteId);
         if (!cliente) return Response.json({ error: 'Cliente no encontrado' }, { status: 404 });
 
-        const estado = determinarEstado(diaActual);
+        const estado = 'pagado'; // Un pago registrado siempre es pagado
         const mesPago = mes || mesActual;
 
         // Crear o actualizar CobroCliente
