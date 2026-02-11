@@ -140,7 +140,7 @@ export default function RecordatoriosTurnosHoy() {
             <p className="text-sm text-slate-500 mt-1">Alumnos y clientes con pagos pendientes o morosos</p>
           </div>
 
-          {clientesFiltrados.length === 0 ? (
+          {clientesPendientes.length === 0 ? (
             <Card>
               <CardContent className="pt-6">
                 <div className="text-center py-8">
