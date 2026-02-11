@@ -201,25 +201,7 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEd
                             </div>
                           )}
 
-                          {/* Botones de acciones */}
-                          <div className="flex gap-1 pt-1">
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="h-6 w-6"
-                              onClick={() => onEdit(turno)}
-                            >
-                              <Edit2 className="w-3 h-3" />
-                            </Button>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="h-6 w-6 text-red-600 hover:text-red-700"
-                              onClick={() => onDelete(turno)}
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
-                          </div>
+
                         </div>
                       ) : (
                         <div className="h-full bg-slate-50 rounded flex items-center justify-center">
