@@ -428,9 +428,9 @@ export default function ClientesPage() {
                       </div>
                     )}
                     {cliente.es_alumno && cliente.profesor_nombre && (
-                      <div className="flex items-center gap-2 text-slate-600">
+                      <div className="flex items-center gap-2 text-slate-600 text-xs">
                         <UserCheck className="w-4 h-4" />
-                        <span>{cliente.profesor_nombre}</span>
+                        <span>Alumno sincronizado - Profesor: {cliente.profesor_nombre}</span>
                       </div>
                     )}
                     {cliente.precio > 0 && (
