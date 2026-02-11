@@ -82,7 +82,7 @@ export default function RecordatoriosTurnosHoy() {
             const alumno = alumnos.find(a => a.id === alumnoId);
             if (alumno) {
               let estado = alumno.estado_mes_actual || 'pendiente';
-              const deuda = estado === 'debe' || estado === 'moroso' ? alumno.deuda_total || 0 : 0;
+              const deuda = estado === 'debe' || estado === 'moroso' ? alumno.precio_mensual || 0 : 0;
               return {
                 id: alumnoId,
                 nombre: alumno.nombre,
