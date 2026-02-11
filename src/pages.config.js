@@ -54,8 +54,6 @@ import PendienteAprobacion from './pages/PendienteAprobacion';
 import ProfesorMenu from './pages/ProfesorMenu';
 import ProfesorRegistro from './pages/ProfesorRegistro';
 import Profesores from './pages/Profesores';
-import RecordatoriosCanchaEmpleado from './pages/RecordatoriosCanchaEmpleado';
-import RecordatoriosCanchaHoy from './pages/RecordatoriosCanchaHoy';
 import RecuperoCanchas from './pages/RecuperoCanchas';
 import SeleccionRol from './pages/SeleccionRol';
 import Tareas from './pages/Tareas';
@@ -70,8 +68,6 @@ export const PAGES = {
     "ProfesorMenu": ProfesorMenu,
     "ProfesorRegistro": ProfesorRegistro,
     "Profesores": Profesores,
-    "RecordatoriosCanchaEmpleado": RecordatoriosCanchaEmpleado,
-    "RecordatoriosCanchaHoy": RecordatoriosCanchaHoy,
     "RecuperoCanchas": RecuperoCanchas,
     "SeleccionRol": SeleccionRol,
     "Tareas": Tareas,
