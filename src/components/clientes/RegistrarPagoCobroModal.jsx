@@ -32,27 +32,21 @@ export default function RegistrarPagoCobroModal({ open, onOpenChange, cobro, cli
 
   const registrarPagoMutation = useMutation({
     mutationFn: async (data) => {
-      // Actualizar el cobro a pagado
-      await base44.entities.CobroCliente.update(cobro.id, {
-        estado: 'pagado',
+      await base44.functions.invoke('registrarPagoClienteCompleto', {
+        cobro_id: cobro.id,
+        cliente_id: cobro.cliente_id,
         fecha_pago: data.fecha_pago,
         medio_pago: data.medio_pago,
+        monto: data.monto,
         notas: data.notas,
-      });
-
-      // Crear registro en tabla Pago para trazabilidad
-      await base44.entities.CobroCliente.create({
-        cliente_id: cobro.cliente_id,
-        cliente_nombre: cobro.cliente_nombre,
-        fecha: data.fecha_pago,
-        monto: parseFloat(data.monto),
-        medio_pago: data.medio_pago,
-        mes_correspondiente: cobro.mes,
-        notas: data.notas,
+        mes: cobro.mes,
       });
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
+      queryClient.invalidateQueries({ queryKey: ['clientes'] });
       queryClient.invalidateQueries({ queryKey: ['cobros-cliente', cobro?.cliente_id] });
+      queryClient.invalidateQueries({ queryKey: ['turnos-hoy'] });
       onOpenChange(false);
       setFormData({
         fecha_pago: format(new Date(), 'yyyy-MM-dd'),
