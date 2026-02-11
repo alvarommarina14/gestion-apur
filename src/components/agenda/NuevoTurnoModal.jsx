@@ -33,7 +33,7 @@ import ModalEditarTurno from '@/components/agenda/ModalEditarTurno';
 import ModalConfirmarCancelacionRecurrencia from '@/components/agenda/ModalConfirmarCancelacionRecurrencia';
 import ModalCancelarAlquiler from '@/components/agenda/ModalCancelarAlquiler';
 
-export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isProfesor = false }) {
+export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isProfesor = false, initialData = {} }) {
   const queryClient = useQueryClient();
   const [success, setSuccess] = useState(false);
    const [error, setError] = useState(null);
