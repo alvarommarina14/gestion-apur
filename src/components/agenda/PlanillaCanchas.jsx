@@ -30,14 +30,27 @@ const getPagoColor = (pagado) => {
 };
 
 export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEdit, onDelete, onEditBloqueo, onDeleteBloqueo }) {
+  // Calcular rowSpan de un turno (cuántas celdas de 30 min ocupa)
+  const calcularRowSpan = (horaInicio, horaFin) => {
+    const [hInicio, mInicio] = horaInicio.split(':').map(Number);
+    const [hFin, mFin] = horaFin.split(':').map(Number);
+    const minutosInicio = hInicio * 60 + mInicio;
+    const minutosFin = hFin * 60 + mFin;
+    const duracionMinutos = minutosFin - minutosInicio;
+    return Math.ceil(duracionMinutos / 30); // Cada celda = 30 minutos
+  };
+
   // Organizar turnos por cancha y horario
   const turnosPorCancha = useMemo(() => {
     const mapa = {};
+    const ocupadas = {}; // Para marcar celdas ocupadas por rowSpan
     
     CANCHAS.forEach(cancha => {
       mapa[cancha] = {};
+      ocupadas[cancha] = {};
       HORARIOS.forEach(hora => {
         mapa[cancha][hora] = null;
+        ocupadas[cancha][hora] = false;
       });
     });
 
@@ -45,6 +58,8 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEd
     turnos.forEach(turno => {
       if (mapa[turno.cancha]) {
         const horaInicio = turno.hora_inicio;
+        const rowSpan = calcularRowSpan(turno.hora_inicio, turno.hora_fin);
+        
         if (mapa[turno.cancha][horaInicio]) {
           // Si hay espacio, agregar como secundario
           if (!mapa[turno.cancha][horaInicio].secundario) {
@@ -52,12 +67,18 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], onEd
           }
           mapa[turno.cancha][horaInicio].secundario.push(turno);
         } else {
-          mapa[turno.cancha][horaInicio] = turno;
+          mapa[turno.cancha][horaInicio] = { ...turno, rowSpan };
+          
+          // Marcar celdas intermedias como ocupadas
+          const idxInicio = HORARIOS.indexOf(horaInicio);
+          for (let i = 1; i < rowSpan && idxInicio + i < HORARIOS.length; i++) {
+            ocupadas[turno.cancha][HORARIOS[idxInicio + i]] = true;
+          }
         }
       }
     });
 
-    return mapa;
+    return { mapa, ocupadas };
   }, [turnos]);
 
   // Verificar si hay bloqueos para una cancha y hora
