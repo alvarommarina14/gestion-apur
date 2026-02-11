@@ -89,8 +89,14 @@ export default function ClientesPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
+      queryClient.invalidateQueries({ queryKey: ['alumnos'] });
+      queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
       setEliminandoCliente(null);
     },
+    onError: (error) => {
+      console.error('Error eliminando cliente:', error);
+      alert('Error al eliminar cliente: ' + error.message);
+    }
   });
 
   // Filtrar clientes por sección
