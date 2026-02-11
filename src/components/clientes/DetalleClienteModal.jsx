@@ -224,27 +224,56 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
     },
   });
 
+  // Función para calcular estado dinámico de cobros
+  const getEstadoDinamicoCobro = (cobro) => {
+    if (cobro.estado === 'pagado') return 'pagado';
+    
+    const hoy = new Date();
+    const [año, mes] = cobro.mes.split('-');
+    const fechaVencimiento = new Date(parseInt(año), parseInt(mes) - 1, 15);
+    
+    return hoy > fechaVencimiento ? 'moroso' : 'pendiente';
+  };
+
   const estadisticas = useMemo(() => {
     // Total pagos de alumnos
     const totalPagosAlumnos = pagosAlumnos.reduce((sum, p) => sum + (p.monto || 0), 0);
     const cantidadPagosAlumnos = pagosAlumnos.length;
 
-    // Deudas de cobros pendientes y morosos
+    // Deudas de cobros pendientes y morosos (calculadas dinámicamente)
     const deudaCobros = cobrosClientes
-      .filter(c => c.estado === 'pendiente' || c.estado === 'moroso')
+      .filter(c => {
+        const estadoDinamico = getEstadoDinamicoCobro(c);
+        return estadoDinamico === 'pendiente' || estadoDinamico === 'moroso';
+      })
       .reduce((sum, c) => sum + (c.monto || 0), 0);
 
     // Estado general del cliente
-    const cobrosActuales = cobrosClientes.filter(c => {
-      const mesActual = format(new Date(), 'yyyy-MM');
-      return c.mes === mesActual;
-    });
-    
     let estadoGeneral = 'pagado';
-    if (cobrosActuales.some(c => c.estado === 'moroso')) {
-      estadoGeneral = 'moroso';
-    } else if (cobrosActuales.some(c => c.estado === 'pendiente')) {
-      estadoGeneral = 'pendiente';
+    
+    // Para clientes alumnos, usar el estado del alumno
+    if (cliente.es_alumno && alumnoCliente) {
+      if (alumnoCliente.estado === 'moroso' || alumnoCliente.estado_mes_actual === 'moroso') {
+        estadoGeneral = 'moroso';
+      } else if (alumnoCliente.estado_mes_actual === 'debe' || alumnoCliente.estado_mes_actual === 'pendiente') {
+        estadoGeneral = 'pendiente';
+      } else if (alumnoCliente.estado_mes_actual === 'pagado' || alumnoCliente.estado === 'activo') {
+        estadoGeneral = 'pagado';
+      }
+    } else {
+      // Para clientes de alquiler, usar cobros del mes actual con estado dinámico
+      const cobrosActuales = cobrosClientes.filter(c => {
+        const mesActual = format(new Date(), 'yyyy-MM');
+        return c.mes === mesActual;
+      });
+      
+      if (cobrosActuales.some(c => getEstadoDinamicoCobro(c) === 'moroso')) {
+        estadoGeneral = 'moroso';
+      } else if (cobrosActuales.some(c => getEstadoDinamicoCobro(c) === 'pendiente')) {
+        estadoGeneral = 'pendiente';
+      } else if (cobrosActuales.length > 0) {
+        estadoGeneral = 'pagado';
+      }
     }
 
     return { 
@@ -253,7 +282,7 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
       cantidadPagosAlumnos,
       estadoGeneral
     };
-  }, [cobrosClientes, pagosAlumnos]);
+  }, [cobrosClientes, pagosAlumnos, cliente, alumnoCliente]);
 
   const handleGuardar = () => {
     console.log('Guardando cliente con datos:', formData);
