@@ -50,6 +50,7 @@ export default function AgendaCanchas() {
     queryFn: async () => {
       try {
         const cobros = await base44.entities.CobroCliente.filter({ mes: mesFiltro });
+        console.log('Cobros traídos:', cobros, 'Mes:', mesFiltro);
         
         // Mapear cliente_id (alumno_id) directamente a su estado de pago
         const estadosPago = {};
@@ -57,6 +58,7 @@ export default function AgendaCanchas() {
           estadosPago[cobro.cliente_id] = cobro.estado;
         });
         
+        console.log('Estados de pago mapeados:', estadosPago);
         return estadosPago;
       } catch (error) {
         console.error('Error al traer cobros:', error);
