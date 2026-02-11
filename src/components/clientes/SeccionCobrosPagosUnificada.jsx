@@ -332,10 +332,9 @@ export default function SeccionCobrosPagosUnificada({ cliente }) {
               })}
               </div>
             )}
-            </>
-          );
-        })()}
-      </div>
+          </div>
+        );
+      })()}
 
       {/* Modal Registrar Pago */}
       <RegistrarPagoCobroModal
