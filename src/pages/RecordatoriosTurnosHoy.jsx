@@ -92,19 +92,31 @@ export default function RecordatoriosTurnosHoy() {
    const { data: alumnos = [], isLoading: alumnosLoading } = useQuery({
      queryKey: ['alumnos-pagos', claseSeleccionada?.id],
      queryFn: async () => {
-       if (!claseSeleccionada?.alumnos_ids || claseSeleccionada.alumnos_ids.length === 0) {
-         return [];
+       // Primero intentar cargar por alumnos_ids
+       if (claseSeleccionada?.alumnos_ids && claseSeleccionada.alumnos_ids.length > 0) {
+         const alumnos = [];
+         for (const id of claseSeleccionada.alumnos_ids) {
+           try {
+             const alumno = await base44.entities.Alumno.read(id);
+             alumnos.push(alumno);
+           } catch (e) {
+             console.error('Error loading student by ID:', id, e);
+           }
+         }
+         if (alumnos.length > 0) return alumnos;
        }
-       const alumnos = [];
-       for (const id of claseSeleccionada.alumnos_ids) {
+
+       // Si no hay alumnos_ids o no se cargaron, intentar cargar por profesor_id
+       if (claseSeleccionada?.profesor_id) {
          try {
-           const alumno = await base44.entities.Alumno.read(id);
-           alumnos.push(alumno);
+           const allAlumnos = await base44.entities.Alumno.list();
+           return allAlumnos.filter(a => a.profesor_id === claseSeleccionada.profesor_id);
          } catch (e) {
-           console.error('Error loading student:', id, e);
+           console.error('Error loading students by profesor_id:', e);
          }
        }
-       return alumnos;
+
+       return [];
      },
      enabled: modalPagoGrupal && !!claseSeleccionada?.id
    });
