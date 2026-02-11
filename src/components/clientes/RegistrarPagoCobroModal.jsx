@@ -46,11 +46,15 @@ export default function RegistrarPagoCobroModal({ open, onOpenChange, cobro, cli
     },
     onSuccess: () => {
       setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ['cobros-clientes', cliente?.id] });
+        // Invalidar todas las queries relacionadas
         queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
         queryClient.invalidateQueries({ queryKey: ['clientes'] });
+        queryClient.invalidateQueries({ queryKey: ['turnos-hoy'] });
+        queryClient.invalidateQueries({ queryKey: ['recordatorios-turnos-hoy'] });
+        queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+        queryClient.invalidateQueries({ queryKey: ['alumnos'] });
         onOpenChange(false);
-      }, 300);
+      }, 500);
       setFormData({
         fecha_pago: format(new Date(), 'yyyy-MM-dd'),
         medio_pago: 'efectivo',
