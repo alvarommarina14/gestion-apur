@@ -121,6 +121,8 @@ export default function EditarClaseEnAgendaModal({ open, onOpenChange, turno }) 
     onSuccess: () => {
       setIsSubmitting(false);
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos-hoy'] });
       queryClient.invalidateQueries({ queryKey: ['clases'] });
       onOpenChange(false);
     },
