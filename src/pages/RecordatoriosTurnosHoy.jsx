@@ -335,7 +335,7 @@ export default function RecordatoriosTurnosHoy() {
                     <span>Total a Cobrar:</span>
                     <span>
                       ${(alquileres.reduce((sum, a) => sum + a.deuda, 0) + 
-                          clases.reduce((sum, c) => sum + c.deuda, 0)).toLocaleString('es-AR')}
+                          clases.reduce((sum, c) => sum + (c.deuda || c.deudaTotal || 0), 0)).toLocaleString('es-AR')}
                     </span>
                   </div>
                 </CardContent>
