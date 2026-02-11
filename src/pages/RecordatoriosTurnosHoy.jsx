@@ -28,13 +28,8 @@ import {
 export default function RecordatoriosTurnosHoy() {
    const [user, setUser] = useState(null);
    const queryClient = useQueryClient();
-   const [fechaSeleccionada, setFechaSeleccionada] = useState(new Date());
-   const fechaFormato = format(fechaSeleccionada, 'yyyy-MM-dd');
-   const [filtro, setFiltro] = useState('todos');
-   const [modalPagoGrupal, setModalPagoGrupal] = useState(false);
    const [modalPagoIndividual, setModalPagoIndividual] = useState(false);
    const [claseSeleccionada, setClaseSeleccionada] = useState(null);
-   const [pagosAlumnos, setPagosAlumnos] = useState({});
    const [medioPago, setMedioPago] = useState('');
 
   // Fetch user
