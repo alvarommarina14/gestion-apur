@@ -459,18 +459,17 @@ export default function RecuperoCanchas() {
             {!accion && selectedCancelacion?.estado_recupero === 'pendiente' && (
               <div className="flex flex-col gap-2">
                 <Button
-                  onClick={() => setAccion('recuperar')}
-                  className="bg-emerald-600 hover:bg-emerald-700"
-                >
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Recuperar
-                </Button>
-                <Button
                   onClick={() => setAccion('descontar')}
-                  variant="outline"
-                  className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                  className="bg-blue-600 hover:bg-blue-700"
                 >
                   Descontar
+                </Button>
+                <Button
+                  onClick={() => setAccion('ver_precio')}
+                  variant="outline"
+                  className="border-slate-300 text-slate-700 hover:bg-slate-50"
+                >
+                  Ver precio mensual para próximo mes
                 </Button>
               </div>
             )}
