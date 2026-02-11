@@ -279,39 +279,44 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
         estadoGeneral = 'pagado';
       }
     } else if (cliente.tipo_cliente === 'abono' || cliente.tipo_cliente === 'suelto') {
-      // Para clientes de alquiler, usar cobros con estado dinámico o generar virtual
-      const hoy = new Date();
-      const mesActual = format(hoy, 'yyyy-MM');
-      const diaActual = hoy.getDate();
-      
-      let cobrosActuales = cobrosClientes.filter(c => c.mes === mesActual);
-      const yaExisteCobro = cobrosActuales.length > 0;
-      
-      // Si no existe cobro para el mes actual y el cliente tiene precio, crear uno virtual
-      if (!yaExisteCobro && cliente.precio > 0 && diaActual >= 5) {
-        const cobroVirtual = {
-          id: 'virtual',
-          mes: mesActual,
-          monto: cliente.precio,
-          estado: 'pendiente',
-        };
-        cobrosActuales = [cobroVirtual];
-      }
-      
-      // Calcular estados dinámicamente
-      if (cobrosActuales.length > 0) {
-        const hayMoroso = cobrosActuales.some(c => getEstadoDinamicoCobro(c) === 'moroso');
-        const hayPendiente = cobrosActuales.some(c => getEstadoDinamicoCobro(c) === 'pendiente');
-        const todosPagados = cobrosActuales.every(c => getEstadoDinamicoCobro(c) === 'pagado');
-        
-        if (hayMoroso) {
-          estadoGeneral = 'moroso';
-        } else if (hayPendiente) {
-          estadoGeneral = 'pendiente';
-        } else if (todosPagados) {
-          estadoGeneral = 'pagado';
-        }
-      }
+       // Para clientes de alquiler, usar cobros con estado dinámico o generar virtual
+       const hoy = new Date();
+       const mesActual = format(hoy, 'yyyy-MM');
+       const diaActual = hoy.getDate();
+
+       let cobrosActuales = cobrosClientes.filter(c => c.mes === mesActual);
+       const yaExisteCobro = cobrosActuales.length > 0;
+
+       // Si no existe cobro para el mes actual y el cliente tiene precio, crear uno virtual
+       if (!yaExisteCobro && cliente.precio > 0 && diaActual >= 5) {
+         const cobroVirtual = {
+           id: 'virtual',
+           mes: mesActual,
+           monto: cliente.precio,
+           estado: 'pendiente',
+         };
+         cobrosActuales = [cobroVirtual];
+       }
+
+       // Si no hay cobros del mes actual, buscar el más reciente para determinar estado
+       if (cobrosActuales.length === 0 && cobrosClientes.length > 0) {
+         cobrosActuales = cobrosClientes.sort((a, b) => b.mes.localeCompare(a.mes)).slice(0, 1);
+       }
+
+       // Calcular estados dinámicamente
+       if (cobrosActuales.length > 0) {
+         const hayMoroso = cobrosActuales.some(c => getEstadoDinamicoCobro(c) === 'moroso');
+         const hayPendiente = cobrosActuales.some(c => getEstadoDinamicoCobro(c) === 'pendiente');
+         const todosPagados = cobrosActuales.every(c => getEstadoDinamicoCobro(c) === 'pagado');
+
+         if (hayMoroso) {
+           estadoGeneral = 'moroso';
+         } else if (hayPendiente) {
+           estadoGeneral = 'pendiente';
+         } else if (todosPagados) {
+           estadoGeneral = 'pagado';
+         }
+       }
     }
 
     return { 
