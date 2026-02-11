@@ -744,10 +744,11 @@ export default function ClientesPage() {
       />
 
       <RegistrarPagoModal 
-        open={pagoModal.open}
-        onOpenChange={(open) => setPagoModal({ ...pagoModal, open })}
-        alumno={pagoModal.alumno}
-      />
+         open={pagoModal.open}
+         onOpenChange={(open) => setPagoModal({ ...pagoModal, open })}
+         alumno={pagoModal.alumno}
+         esCliente={pagoModal.esCliente}
+       />
 
       {/* Modal Eliminar Cliente */}
       <AlertDialog open={!!eliminandoCliente} onOpenChange={(open) => {
