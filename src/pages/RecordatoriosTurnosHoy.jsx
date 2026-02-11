@@ -648,11 +648,12 @@ export default function RecordatoriosTurnosHoy() {
                            ...alumnosPagos,
                            [alumno.id]: { ...alumnosPagos[alumno.id], guardado: true }
                          });
+                         queryClient.invalidateQueries({ queryKey: ['alumnos-con-pagos'] });
                          toast.success(`Pago de ${alumno.nombre} registrado`);
-                       } catch (error) {
+                         } catch (error) {
                          toast.error('Error: ' + error.message);
-                       }
-                     }}
+                         }
+                         }}
                    >
                      {alumnosPagos[alumno.id]?.guardado ? '✓ Pagado' : 'Registrar pago'}
                    </Button>
