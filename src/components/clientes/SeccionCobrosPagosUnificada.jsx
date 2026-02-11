@@ -217,12 +217,12 @@ export default function SeccionCobrosPagosUnificada({ cliente }) {
           </Button>
         </div>
 
-        {cobrosConVirtual.length === 0 && pagosAlumnos.length === 0 ? (
-          <div className="text-center py-6 text-slate-500">
-            <DollarSign className="w-10 h-10 mx-auto mb-2 opacity-30" />
-            <p className="text-sm">No hay movimientos registrados</p>
-          </div>
-        ) : (
+              {movimientosFiltrados.length === 0 ? (
+                <div className="text-center py-6 text-slate-500">
+                  <DollarSign className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                  <p className="text-sm">No hay movimientos registrados</p>
+                </div>
+              ) : (
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {/* Combinar y ordenar cobros y pagos por fecha */}
             {[
