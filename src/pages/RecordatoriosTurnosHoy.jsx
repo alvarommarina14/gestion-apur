@@ -239,11 +239,40 @@ export default function RecordatoriosTurnosHoy() {
                               {alquiler.horaInicio} - {alquiler.horaFin} | Cancha {alquiler.cancha}
                             </p>
                           </div>
-                          <div className="text-right">
-                            <p className="text-2xl font-bold text-emerald-600">
-                              ${alquiler.precio.toLocaleString('es-AR')}
-                            </p>
-                            <p className="text-xs text-slate-500 mt-1">{alquiler.modalidad}</p>
+                          <div className="text-right flex flex-col items-end gap-2">
+                            {preciosEditables[alquiler.id] !== undefined ? (
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  value={preciosEditables[alquiler.id]}
+                                  onChange={(e) => setPreciosEditables({ ...preciosEditables, [alquiler.id]: e.target.value })}
+                                  className="w-24"
+                                />
+                                <Button
+                                  size="sm"
+                                  onClick={() => updateMutation.mutate({ turnoId: alquiler.id, nuevoPrecio: parseFloat(preciosEditables[alquiler.id]) })}
+                                  disabled={updateMutation.isPending}
+                                >
+                                  <Save className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <>
+                                <p className="text-2xl font-bold text-emerald-600">
+                                  ${alquiler.precio.toLocaleString('es-AR')}
+                                </p>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setPreciosEditables({ ...preciosEditables, [alquiler.id]: alquiler.precio })}
+                                  className="text-xs"
+                                >
+                                  Editar
+                                </Button>
+                              </>
+                            )}
+                            <p className="text-xs text-slate-500">{alquiler.modalidad}</p>
                           </div>
                         </div>
 
