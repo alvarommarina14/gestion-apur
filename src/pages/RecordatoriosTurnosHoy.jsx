@@ -115,7 +115,9 @@ export default function RecordatoriosTurnosHoy() {
         ...c,
         type: 'clase',
         hora: c.hora_inicio,
-        titulo: c.alumnos_nombres?.[0] || 'Clase',
+        titulo: c.alumnos_nombres?.length > 1 
+          ? `${c.alumnos_nombres.join(', ')}`
+          : (c.alumnos_nombres?.[0] || 'Clase'),
         icon: '👥',
       })));
     }
