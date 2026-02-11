@@ -413,7 +413,8 @@ export default function RecordatoriosTurnosHoy() {
        </div>
        )}
 
-      {/* Stats */}
+      {/* Stats - solo en tab hoy */}
+      {tab === 'hoy' && (
       <div className="grid grid-cols-3 gap-3">
         <Card>
           <CardContent className="pt-6">
