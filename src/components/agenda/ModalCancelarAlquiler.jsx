@@ -69,14 +69,14 @@ export default function ModalCancelarAlquiler({ open, onOpenChange, turno }) {
         // Crear registro de cancelación para recuperar (tanto para abono como suelto)
         await base44.entities.CancelacionCancha.create({
           turno_cancha_id: turno.id,
-          cliente_id: null,
-          cliente_nombre: turno.cliente,
-          fecha_original: turno.fecha,
-          hora_original: turno.hora_inicio,
+          cliente: turno.cliente,
           cancha: turno.cancha,
-          motivo: motivo,
-          estado: 'pendiente_recupero',
-          fecha_cancelacion: new Date().toISOString(),
+          fecha: turno.fecha,
+          hora_inicio: turno.hora_inicio,
+          monto: turno.monto,
+          tipo: 'cancha',
+          motivo_cancelacion: motivo,
+          estado_recupero: 'pendiente',
         });
 
         // Log de auditoría antes de eliminar
