@@ -55,6 +55,7 @@ export default function GestionarClaseModal({ isOpen, onClose, clase }) {
 
   const pierdeClaseMutation = useMutation({
     mutationFn: async (alumnoId) => {
+      // Crear asistencia
       await base44.entities.Asistencia.create({
         clase_id: clase.id,
         alumno_id: alumnoId,
@@ -63,6 +64,12 @@ export default function GestionarClaseModal({ isOpen, onClose, clase }) {
         estado: 'ausente_sin_aviso',
         genera_recupero: false
       });
+
+      // Si es clase individual y es la última persona, eliminar turno
+      const esUnicoAlumno = clase.alumnos_ids?.length === 1;
+      if (esUnicoAlumno && clase.turno_cancha_id) {
+        await base44.entities.TurnoCancha.delete(clase.turno_cancha_id);
+      }
     },
     onSuccess: () => {
       toast.success('Asistencia registrada');
