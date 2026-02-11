@@ -335,6 +335,22 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
             )}
           </div>
 
+          {/* Tipo de clase */}
+          <div>
+            <label className="text-sm font-medium text-slate-700 block mb-2">
+              Tipo de clase
+            </label>
+            <Select value={tipo} onValueChange={setTipo}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="individual">Individual</SelectItem>
+                <SelectItem value="grupal">Grupal</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Alumnos */}
           <div>
             <label className="text-sm font-medium text-slate-700 block mb-2">
