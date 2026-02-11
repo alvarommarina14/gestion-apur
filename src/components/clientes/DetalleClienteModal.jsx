@@ -208,12 +208,17 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
       await registrarEliminacion('Cliente', id, cliente.nombre, 'Cliente eliminado por administrador');
-      await base44.entities.Cliente.delete(id);
+      return await base44.entities.Cliente.delete(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
+      queryClient.invalidateQueries({ queryKey: ['alumnos'] });
+      queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
       onOpenChange(false);
     },
+    onError: (error) => {
+      console.error('Error al eliminar cliente:', error);
+    }
   });
 
   const deletePagoMutation = useMutation({
