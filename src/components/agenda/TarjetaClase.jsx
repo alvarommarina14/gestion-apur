@@ -95,7 +95,7 @@ export default function TarjetaClase({ turno, estadosPago = {}, onEdit }) {
               <p className="text-xs text-slate-700 truncate flex-1">
                 {alumno}
               </p>
-              {getPagoBadge(estadoPago)}
+              {estadoPago && getPagoBadge(estadoPago)}
             </div>
           );
         })}
