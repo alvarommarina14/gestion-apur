@@ -186,26 +186,27 @@ export default function NuevoAlumnoModal({ open, onOpenChange, alumno = null, pr
 
         const alumnoCreado = await base44.entities.Alumno.create(data);
 
-        // Sincronizar alumno con gestión de clientes
-        if (data.profesor_id && data.profesor_nombre) {
-          try {
-            await base44.entities.Cliente.create({
-              nombre: data.nombre,
-              telefono: data.whatsapp || '',
-              email: '',
-              precio: data.precio_mensual,
-              clasificacion: 'recurrente',
-              tipo_cliente: 'clase',
-              es_alumno: true,
-              profesor_id: data.profesor_id,
-              profesor_nombre: data.profesor_nombre,
-              notas: `Alumno sincronizado - Profesor: ${data.profesor_nombre}`,
-              activo: true,
-            });
-          } catch (err) {
-            console.log('Error sincronizando alumno con clientes:', err);
-          }
-        }
+         // Sincronizar alumno con gestión de clientes SOLO si viene de clienteData vacío
+         // Si viene de clienteData, el cliente ya fue creado en NuevoClienteModal
+         if (!clienteData && data.profesor_id && data.profesor_nombre) {
+           try {
+             await base44.entities.Cliente.create({
+               nombre: data.nombre,
+               telefono: data.whatsapp || '',
+               email: '',
+               precio: data.precio_mensual,
+               clasificacion: 'recurrente',
+               tipo_cliente: 'clase',
+               es_alumno: true,
+               profesor_id: data.profesor_id,
+               profesor_nombre: data.profesor_nombre,
+               notas: `Alumno sincronizado - Profesor: ${data.profesor_nombre}`,
+               activo: true,
+             });
+           } catch (err) {
+             console.log('Error sincronizando alumno con clientes:', err);
+           }
+         }
       }
       
       setSuccess(true);
