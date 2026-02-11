@@ -88,8 +88,8 @@ Deno.serve(async (req) => {
 
         // Para otros tipos (alquileres o clases sin alumnos)
         const cliente = clientes.find(c => c.nombre === turno.cliente);
-        let estado = 'Pendiente';
-        
+        let estado = '';
+
         if (turno.pagado) {
           estado = '✓ Pagado';
         } else if (cliente?.activo === false) {
