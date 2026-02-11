@@ -98,35 +98,36 @@ export default function RecordatoriosPendientes({ compact = false }) {
           });
 
           // Agregar clientes de abono y cancha suelta
-          const clientesActivos = clientes.filter(c => 
-            c.activo && 
-            (c.tipo_cliente === 'abono' || c.tipo_cliente === 'suelto') &&
-            c.precio > 0
-          );
-          
-          clientesActivos.forEach(cliente => {
-            const yaExiste = recordatorios.some(r => 
-              r.alumno_id === cliente.id && 
-              r.tipo === 'pre_cobro' && 
-              r.mes_correspondiente === currentMonth
-            );
-            
-            if (!yaExiste && cliente.telefono) {
-              pendientes.push({
-                _nuevo: true,
-                alumno_id: cliente.id,
-                alumno_nombre: cliente.nombre,
-                tipo: 'pre_cobro',
-                fecha_programada: todayStr,
-                estado: 'pendiente',
-                mensaje: reemplazarVariables(config.mensaje_template, { ...cliente, precio_mensual: cliente.precio }, currentMonth),
-                canal: config.canal,
-                whatsapp: cliente.telefono,
-                monto_recordado: cliente.precio,
-                mes_correspondiente: currentMonth,
-              });
-            }
-          });
+           const clientesActivos = clientes.filter(c => 
+             c.activo && 
+             (c.tipo_cliente === 'abono' || c.tipo_cliente === 'suelto') &&
+             c.precio && c.precio > 0
+           );
+
+           clientesActivos.forEach(cliente => {
+             const yaExiste = recordatorios.some(r => 
+               r.alumno_id === cliente.id && 
+               r.tipo === 'pre_cobro' && 
+               r.mes_correspondiente === currentMonth
+             );
+
+             if (!yaExiste && cliente.telefono) {
+               const montoPrecio = cliente.precio || 0;
+               pendientes.push({
+                 _nuevo: true,
+                 alumno_id: cliente.id,
+                 alumno_nombre: cliente.nombre,
+                 tipo: 'pre_cobro',
+                 fecha_programada: todayStr,
+                 estado: 'pendiente',
+                 mensaje: reemplazarVariables(config.mensaje_template, { ...cliente, precio_mensual: montoPrecio }, currentMonth),
+                 canal: config.canal,
+                 whatsapp: cliente.telefono,
+                 monto_recordado: montoPrecio,
+                 mes_correspondiente: currentMonth,
+               });
+             }
+           });
         }
       } else if (config.tipo === 'moroso') {
         // Recordatorios morosos (X días después del día 15)
