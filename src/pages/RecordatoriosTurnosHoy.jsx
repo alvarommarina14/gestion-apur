@@ -10,10 +10,8 @@ import ModalPagoRecordatorio from '@/components/recordatorios/ModalPagoRecordato
 
 export default function RecordatoriosTurnosHoy() {
    const [user, setUser] = useState(null);
-   const queryClient = useQueryClient();
-   const [modalPagoIndividual, setModalPagoIndividual] = useState(false);
-   const [claseSeleccionada, setClaseSeleccionada] = useState(null);
-   const [medioPago, setMedioPago] = useState('');
+   const [modalPagoOpen, setModalPagoOpen] = useState(false);
+   const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
    const [filtroTipo, setFiltroTipo] = useState('todos');
 
   // Fetch user
