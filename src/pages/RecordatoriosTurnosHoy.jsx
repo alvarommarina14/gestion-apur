@@ -31,7 +31,6 @@ export default function RecordatoriosTurnosHoy() {
    const [fechaSeleccionada, setFechaSeleccionada] = useState(new Date());
    const fechaFormato = format(fechaSeleccionada, 'yyyy-MM-dd');
    const [filtro, setFiltro] = useState('todos');
-   const [tab, setTab] = useState('hoy'); // 'hoy', 'pendientes', 'morosos'
    const [modalPagoGrupal, setModalPagoGrupal] = useState(false);
    const [modalPagoIndividual, setModalPagoIndividual] = useState(false);
    const [claseSeleccionada, setClaseSeleccionada] = useState(null);
@@ -133,41 +132,7 @@ export default function RecordatoriosTurnosHoy() {
        }
 
        return resultado;
-     },
-     refetchInterval: 30000, // Actualizar cada 30 segundos
-   });
-
-   // Cargar pendientes y morosos de todo el mes
-   const { data: pendientesYMorosos = [] } = useQuery({
-     queryKey: ['pendientes-morosos'],
-     queryFn: async () => {
-       const mesActual = format(new Date(), 'yyyy-MM');
-       const alumnos = await base44.entities.Alumno.list();
-       const pagos = await base44.entities.Pago.list();
-       const pagosDelMes = pagos.filter(p => p.mes_correspondiente === mesActual);
-
-       const resultado = [];
-       for (const alumno of alumnos) {
-         if (alumno.estado === 'activo') {
-           const pagado = pagosDelMes.some(p => p.alumno_id === alumno.id);
-           const estado = pagado ? 'pagado' : alumno.deuda_total > 0 ? 'moroso' : 'pendiente';
-
-           if (estado !== 'pagado') {
-             resultado.push({
-               type: 'alumno',
-               alumno_id: alumno.id,
-               nombre: alumno.nombre,
-               profesor_nombre: alumno.profesor_nombre,
-               estado_pago: estado,
-               monto: alumno.precio_mensual,
-               deuda_total: alumno.deuda_total
-             });
-           }
-         }
-       }
-       return resultado;
-     },
-     refetchInterval: 30000, // Actualizar cada 30 segundos
+     }
    });
 
    // Cargar alumnos cuando se abre modal grupal
@@ -361,60 +326,32 @@ export default function RecordatoriosTurnosHoy() {
         </div>
       </div>
 
-      {/* Tabs principales */}
-       <div className="flex gap-2 border-b border-slate-200">
-         <Button
-           variant={tab === 'hoy' ? 'default' : 'ghost'}
-           onClick={() => setTab('hoy')}
-           className={tab === 'hoy' ? 'bg-emerald-600 hover:bg-emerald-700 rounded-b-none' : 'rounded-b-none'}
-         >
-           Hoy
-         </Button>
-         <Button
-           variant={tab === 'pendientes' ? 'default' : 'ghost'}
-           onClick={() => setTab('pendientes')}
-           className={tab === 'pendientes' ? 'bg-yellow-600 hover:bg-yellow-700 rounded-b-none' : 'rounded-b-none'}
-         >
-           Pendientes ({pendientesYMorosos.filter(p => p.estado_pago === 'pendiente').length})
-         </Button>
-         <Button
-           variant={tab === 'morosos' ? 'default' : 'ghost'}
-           onClick={() => setTab('morosos')}
-           className={tab === 'morosos' ? 'bg-red-600 hover:bg-red-700 rounded-b-none' : 'rounded-b-none'}
-         >
-           Morosos ({pendientesYMorosos.filter(p => p.estado_pago === 'moroso').length})
-         </Button>
-       </div>
+      {/* Filtros */}
+      <div className="flex gap-2">
+        <Button
+          variant={filtro === 'todos' ? 'default' : 'outline'}
+          onClick={() => setFiltro('todos')}
+          className={filtro === 'todos' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+        >
+          Todos ({allItems.length})
+        </Button>
+        <Button
+          variant={filtro === 'clases' ? 'default' : 'outline'}
+          onClick={() => setFiltro('clases')}
+          className={filtro === 'clases' ? 'bg-blue-600 hover:bg-blue-700' : ''}
+        >
+          Clases ({todayClases.length})
+        </Button>
+        <Button
+          variant={filtro === 'alquileres' ? 'default' : 'outline'}
+          onClick={() => setFiltro('alquileres')}
+          className={filtro === 'alquileres' ? 'bg-purple-600 hover:bg-purple-700' : ''}
+        >
+          Alquileres ({todayTurnos.filter(t => t.tipo_turno === 'alquiler').length})
+        </Button>
+      </div>
 
-       {/* Filtros (solo en tab hoy) */}
-       {tab === 'hoy' && (
-       <div className="flex gap-2">
-         <Button
-           variant={filtro === 'todos' ? 'default' : 'outline'}
-           onClick={() => setFiltro('todos')}
-           className={filtro === 'todos' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
-         >
-           Todos ({allItems.length})
-         </Button>
-         <Button
-           variant={filtro === 'clases' ? 'default' : 'outline'}
-           onClick={() => setFiltro('clases')}
-           className={filtro === 'clases' ? 'bg-blue-600 hover:bg-blue-700' : ''}
-         >
-           Clases ({todayClases.length})
-         </Button>
-         <Button
-           variant={filtro === 'alquileres' ? 'default' : 'outline'}
-           onClick={() => setFiltro('alquileres')}
-           className={filtro === 'alquileres' ? 'bg-purple-600 hover:bg-purple-700' : ''}
-         >
-           Alquileres ({todayTurnos.filter(t => t.tipo_turno === 'alquiler').length})
-         </Button>
-       </div>
-       )}
-
-      {/* Stats - solo en tab hoy */}
-      {tab === 'hoy' && (
+      {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         <Card>
           <CardContent className="pt-6">
@@ -444,13 +381,10 @@ export default function RecordatoriosTurnosHoy() {
             </div>
           </CardContent>
         </Card>
-        </div>
-        )}
+      </div>
 
-        {/* Lista de turnos - Tab Hoy */}
-        {tab === 'hoy' && (
-          <>
-        {isLoading ? (
+      {/* Lista de turnos */}
+      {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
         </div>
@@ -551,62 +485,6 @@ export default function RecordatoriosTurnosHoy() {
               </div>
             </Card>
           ))}
-        </div>
-        )}
-        </>
-        )}
-
-        {/* Tab Pendientes y Morosos */}
-        {(tab === 'pendientes' || tab === 'morosos') && (
-        <div className="space-y-3">
-          {pendientesYMorosos
-            .filter(p => tab === 'pendientes' ? p.estado_pago === 'pendiente' : p.estado_pago === 'moroso')
-            .map((item) => (
-              <Card key={item.alumno_id} className="overflow-hidden">
-                <div className="flex items-start justify-between p-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-slate-900 text-lg">{item.nombre}</h3>
-                        <p className="text-sm text-slate-500 mt-1">{item.profesor_nombre}</p>
-                        <div className="flex items-center gap-4 mt-3 text-sm">
-                          <div>
-                            <span className="text-slate-500">Monto mensual:</span>
-                            <p className="font-semibold text-slate-900">{formatMoney(item.monto)}</p>
-                          </div>
-                          {item.deuda_total > 0 && (
-                            <div>
-                              <span className="text-slate-500">Deuda total:</span>
-                              <p className="font-semibold text-red-600">{formatMoney(item.deuda_total)}</p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-2 ml-4">
-                    <span className={cn(
-                      'text-xs font-semibold px-3 py-1 rounded border text-center',
-                      getEstadoPagoColor(item.estado_pago)
-                    )}>
-                      {getEstadoPagoLabel(item.estado_pago)}
-                    </span>
-                    <Button
-                      onClick={() => {
-                        setClaseSeleccionada({ ...item, alumnos_ids: [item.alumno_id], alumnos_nombres: [item.nombre] });
-                        setModalPagoIndividual(true);
-                      }}
-                      size="sm"
-                      className="gap-2 bg-emerald-600 hover:bg-emerald-700 whitespace-nowrap"
-                    >
-                      <DollarSign className="w-4 h-4" />
-                      Pagar
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            ))
-          }
         </div>
         )}
 
@@ -771,7 +649,6 @@ export default function RecordatoriosTurnosHoy() {
                            [alumno.id]: { ...alumnosPagos[alumno.id], guardado: true }
                          });
                          queryClient.invalidateQueries({ queryKey: ['alumnos-con-pagos'] });
-                         queryClient.invalidateQueries({ queryKey: ['pendientes-morosos'] });
                          toast.success(`Pago de ${alumno.nombre} registrado`);
                          } catch (error) {
                          toast.error('Error: ' + error.message);
