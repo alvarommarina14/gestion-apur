@@ -554,77 +554,83 @@ export default function RecordatoriosTurnosHoy() {
            </DialogHeader>
 
            <div className="space-y-4 py-4">
-             {/* Alumnos */}
-             <div className="space-y-3">
-               {alumnos.length === 0 ? (
-                 <p className="text-sm text-slate-500 text-center py-4">No hay alumnos registrados</p>
-               ) : (
-                 alumnos.map((alumno) => (
-                   <div key={alumno.id} className="border rounded-lg p-3 space-y-2">
-                     <div className="flex items-center justify-between">
-                       <div>
-                         <p className="font-semibold text-slate-900">{alumno.nombre}</p>
-                         <p className="text-sm text-slate-500">{formatMoney(alumno.precio_mensual)}/mes</p>
-                       </div>
-                       <Select 
-                         value={pagosAlumnos[alumno.id] || 'pendiente'}
-                         onValueChange={(value) => {
-                           setPagosAlumnos({
-                             ...pagosAlumnos,
-                             [alumno.id]: value === 'pendiente' ? undefined : value
-                           });
-                         }}
-                       >
-                         <SelectTrigger className="w-32">
-                           <SelectValue />
-                         </SelectTrigger>
-                         <SelectContent>
-                           <SelectItem value="pendiente">Pendiente</SelectItem>
-                           <SelectItem value="pagado">
-                             <span className="text-emerald-600">Pagó</span>
-                           </SelectItem>
-                         </SelectContent>
-                       </Select>
-                     </div>
+             {alumnosLoading ? (
+               <div className="flex items-center justify-center py-8">
+                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+               </div>
+             ) : alumnos.length === 0 ? (
+               <p className="text-sm text-slate-500 text-center py-4">No hay alumnos registrados</p>
+             ) : (
+               alumnos.map((alumno) => (
+                 <div key={alumno.id} className="border rounded-lg p-4 space-y-3 bg-slate-50">
+                   <div>
+                     <p className="font-semibold text-slate-900">{alumno.nombre}</p>
+                     <p className="text-sm text-slate-500 mt-1">Precio mensual: {formatMoney(alumno.precio_mensual)}</p>
                    </div>
-                 ))
-               )}
-             </div>
 
-             {/* Medio de pago */}
-             <div className="space-y-2">
-               <Label>Medio de pago *</Label>
-               <Select value={medioPago} onValueChange={setMedioPago}>
-                 <SelectTrigger>
-                   <SelectValue placeholder="Seleccionar medio" />
-                 </SelectTrigger>
-                 <SelectContent>
-                   <SelectItem value="Efectivo">Efectivo</SelectItem>
-                   <SelectItem value="Transferencia">Transferencia</SelectItem>
-                   <SelectItem value="Mercado Pago">Mercado Pago</SelectItem>
-                   <SelectItem value="Débito">Débito</SelectItem>
-                   <SelectItem value="Crédito">Crédito</SelectItem>
-                 </SelectContent>
-               </Select>
-             </div>
+                   <div className="space-y-2">
+                     <Label className="text-xs">Medio de pago</Label>
+                     <Select 
+                       value={alumnosPagos[alumno.id]?.medio || ''}
+                       onValueChange={(value) => {
+                         setAlumnosPagos({
+                           ...alumnosPagos,
+                           [alumno.id]: { ...alumnosPagos[alumno.id], medio: value }
+                         });
+                       }}
+                     >
+                       <SelectTrigger className="h-8 text-sm">
+                         <SelectValue placeholder="Seleccionar..." />
+                       </SelectTrigger>
+                       <SelectContent>
+                         <SelectItem value="Efectivo">Efectivo</SelectItem>
+                         <SelectItem value="Transferencia">Transferencia</SelectItem>
+                         <SelectItem value="Mercado Pago">Mercado Pago</SelectItem>
+                         <SelectItem value="Débito">Débito</SelectItem>
+                         <SelectItem value="Crédito">Crédito</SelectItem>
+                       </SelectContent>
+                     </Select>
+                   </div>
+
+                   <Button
+                     size="sm"
+                     className="w-full bg-emerald-600 hover:bg-emerald-700"
+                     disabled={!alumnosPagos[alumno.id]?.medio}
+                     onClick={async () => {
+                       try {
+                         const mes = format(new Date(claseSeleccionada.fecha), 'yyyy-MM');
+                         await base44.entities.Pago.create({
+                           alumno_id: alumno.id,
+                           alumno_nombre: alumno.nombre,
+                           fecha: format(new Date(), 'yyyy-MM-dd'),
+                           monto: alumno.precio_mensual,
+                           medio_pago: alumnosPagos[alumno.id].medio,
+                           mes_correspondiente: mes,
+                         });
+                         setAlumnosPagos({
+                           ...alumnosPagos,
+                           [alumno.id]: { ...alumnosPagos[alumno.id], guardado: true }
+                         });
+                         toast.success(`Pago de ${alumno.nombre} registrado`);
+                       } catch (error) {
+                         toast.error('Error: ' + error.message);
+                       }
+                     }}
+                   >
+                     {alumnosPagos[alumno.id]?.guardado ? '✓ Pagado' : 'Registrar pago'}
+                   </Button>
+                 </div>
+               ))
+             )}
            </div>
 
            <DialogFooter>
-             <Button variant="outline" onClick={() => setModalPagoGrupal(false)}>
-               Cancelar
-             </Button>
-             <Button
-               className="bg-emerald-600 hover:bg-emerald-700"
-               disabled={!medioPago || Object.keys(pagosAlumnos).length === 0 || registrarPagoGrupalMutation.isPending}
-               onClick={() => {
-                 registrarPagoGrupalMutation.mutate({
-                   clase: claseSeleccionada,
-                   pagosAlumnos,
-                   medio: medioPago,
-                 });
-               }}
-             >
-               {registrarPagoGrupalMutation.isPending ? 'Guardando...' : 'Registrar pagos'}
+             <Button variant="outline" onClick={() => {
+               setModalPagoGrupal(false);
+               setAlumnosPagos({});
+               queryClient.invalidateQueries({ queryKey: ['clases-hoy'] });
+             }}>
+               Cerrar
              </Button>
            </DialogFooter>
          </DialogContent>
