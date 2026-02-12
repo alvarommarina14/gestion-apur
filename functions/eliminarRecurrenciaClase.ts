@@ -115,7 +115,7 @@ Deno.serve(async (req) => {
     let conteoTurnos = 0;
     for (let i = 0; i < turnosABorrar.length; i += 5) {
       const batch = turnosABorrar.slice(i, i + 5);
-      await Promise.all(batch.map(id => base44SR.entities.TurnoCancha.delete(id)));
+      await Promise.all(batch.map(id => base44.asServiceRole.entities.TurnoCancha.delete(id)));
       conteoTurnos += batch.length;
       if (i + 5 < turnosABorrar.length) {
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -125,7 +125,7 @@ Deno.serve(async (req) => {
     // Eliminar clases futuras si aplica
     for (let i = 0; i < clasesABorrar.length; i += 5) {
       const batch = clasesABorrar.slice(i, i + 5);
-      await Promise.all(batch.map(c => base44SR.entities.Clase.delete(c.id)));
+      await Promise.all(batch.map(c => base44.asServiceRole.entities.Clase.delete(c.id)));
       if (i + 5 < clasesABorrar.length) {
         await new Promise(resolve => setTimeout(resolve, 100));
       }
