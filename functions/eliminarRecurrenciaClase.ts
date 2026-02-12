@@ -18,16 +18,39 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'La clase no es recurrente' }, { status: 400 });
     }
 
-    // Buscar todos los turnos de esta serie que sean posteriores a hoy
+    // Buscar todas las clases de la misma serie recurrente
     const hoy = new Date().toISOString().split('T')[0];
-    const turnos = await base44.entities.TurnoCancha.filter({
-      serie_recurrente_id: clase.serie_recurrente_id
-    }, '-fecha');
+    let clasesDelaSerie = [];
+    
+    if (clase.serie_recurrente_id) {
+      clasesDelaSerie = await base44.entities.Clase.filter({
+        serie_recurrente_id: clase.serie_recurrente_id
+      }, '-fecha');
+    } else {
+      // Si no tiene serie_recurrente_id, incluir solo clases con mismos alumnos/profesor/horario
+      clasesDelaSerie = await base44.entities.Clase.filter({
+        profesor_id: clase.profesor_id,
+        hora_inicio: clase.hora_inicio,
+        tipo: clase.tipo
+      }, '-fecha');
+    }
 
-    // Eliminar turnos futuros en lotes
-    const turnosAEliminar = turnos
-      .filter(t => t.fecha >= hoy)
-      .map(t => t.id);
+    // Obtener los turnos asociados a esas clases que sean futuros
+    const clasesIds = clasesDelaSerie
+      .filter(c => c.fecha >= hoy)
+      .map(c => c.turno_cancha_id)
+      .filter(id => id); // Solo los que tienen turno_cancha_id
+
+    // Buscar los turnos por ID
+    const turnosAEliminar = [];
+    for (const turnoId of clasesIds) {
+      try {
+        await base44.entities.TurnoCancha.read(turnoId);
+        turnosAEliminar.push(turnoId);
+      } catch (e) {
+        // Turno no existe, ignorar
+      }
+    }
 
     if (turnosAEliminar.length > 0) {
       for (let i = 0; i < turnosAEliminar.length; i += 10) {
