@@ -300,6 +300,26 @@ export default function GestionarClaseModal({ isOpen, onClose, clase }) {
               </Button>
             </div>
 
+            {/* Eliminar Serie - Si es recurrente (después de Eliminar Clase) */}
+            {clase.serie_recurrente_id && (
+              <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                <p className="text-sm font-medium text-orange-700 mb-3">⚠️ Eliminar toda la serie recurrente</p>
+                <p className="text-xs text-orange-600 mb-3">Elimina permanentemente TODAS las clases futuras de esta serie</p>
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    if (confirm('⚠️ Esto eliminará TODAS las clases futuras de esta serie recurrente. ¿Estás seguro?')) {
+                      eliminarSerieMutation.mutate();
+                    }
+                  }}
+                  disabled={eliminarSerieMutation.isPending}
+                  className="w-full bg-orange-600 hover:bg-orange-700"
+                >
+                  {eliminarSerieMutation.isPending ? 'Eliminando...' : 'Eliminar toda la serie'}
+                </Button>
+              </div>
+            )}
+
             {/* Gestionar Alumnos */}
             <div>
               <h3 className="font-semibold text-slate-700 mb-3">Gestionar Alumnos ({clase.alumnos_nombres?.length || 0})</h3>
