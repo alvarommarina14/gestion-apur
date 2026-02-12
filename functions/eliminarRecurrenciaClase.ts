@@ -69,10 +69,10 @@ Deno.serve(async (req) => {
     } 
     // CASO 2: Abono/Alquiler recurrente
     else if (tipo === 'abono' && turnoId) {
-      const turno = await base44.entities.TurnoCancha.read(turnoId);
+      const turno = await base44SR.entities.TurnoCancha.read(turnoId);
       
       // Buscar todos los turnos con mismo cliente, cancha, hora y estado activo
-      const allTurnos = await base44.entities.TurnoCancha.filter({
+      const allTurnos = await base44SR.entities.TurnoCancha.filter({
         cliente: turno.cliente,
         cancha: turno.cancha,
         hora_inicio: turno.hora_inicio,
