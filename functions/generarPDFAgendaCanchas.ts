@@ -444,7 +444,7 @@ Deno.serve(async (req) => {
     doc.text('Desglose por Tipo:', 15, y);
     y += 7;
     doc.setFont(undefined, 'normal');
-    doc.text(`Clases: ${clases.length} turnos | $${montoClases.toLocaleString('es-AR')}`, 20, y);
+    doc.text(`Clases: ${clases.length} turnos | $${montoClasesTotal.toLocaleString('es-AR')}`, 20, y);
     y += 5;
     doc.text(`Alquileres Abono: ${alquileresAbono.length} turnos | $${montoAbono.toLocaleString('es-AR')}`, 20, y);
     y += 5;
