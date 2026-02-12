@@ -3,7 +3,6 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Edit2, Trash2 } from 'lucide-react';
 import ModalCancelarAlquiler from '@/components/agenda/ModalCancelarAlquiler';
 import EditarAlquilerModal from '@/components/agenda/EditarAlquilerModal';
@@ -30,7 +29,7 @@ const getStatusBadge = (tipo) => {
   return null;
 };
 
-export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pagosAlumnos = {}, pagosClientes = {}, onEdit, onDelete, onEditBloqueo, onDeleteBloqueo, turnosSeleccionados = new Set(), onToggleTurno }) {
+export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pagosAlumnos = {}, pagosClientes = {}, onEdit, onDelete, onEditBloqueo, onDeleteBloqueo }) {
   const [turnoACancelar, setTurnoACancelar] = useState(null);
   const [showModalCancelar, setShowModalCancelar] = useState(false);
   const [turnoAEditar, setTurnoAEditar] = useState(null);
@@ -188,47 +187,42 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pago
                            )}
                          </button>
                        ) : turno ? (
-                          <div className={`rounded p-2 h-full space-y-1 ${getStatusColor(turno.tipo_turno)}`}>
-                           {/* Turno principal */}
-                           <div>
-                             <div className="flex items-center justify-between gap-1 mb-1">
-                               <div className="flex items-center gap-1">
-                                 <Checkbox
-                                   checked={turnosSeleccionados.has(turno.id)}
-                                   onCheckedChange={() => onToggleTurno?.(turno.id)}
-                                   onClick={(e) => e.stopPropagation()}
-                                 />
-                                 {getStatusBadge(turno.tipo_turno)}
-                               </div>
-                               {turno.tipo_turno === 'alquiler' && (
-                                 <div className="flex gap-1">
-                                   <Button
-                                     size="icon"
-                                     variant="ghost"
-                                     onClick={(e) => {
-                                       e.stopPropagation();
-                                       setTurnoAEditar(turno);
-                                       setShowModalEditar(true);
-                                     }}
-                                     className="h-6 w-6 hover:bg-blue-100 hover:text-blue-600"
-                                   >
-                                     <Edit2 className="w-3 h-3" />
-                                   </Button>
-                                   <Button
-                                     size="icon"
-                                     variant="ghost"
-                                     onClick={(e) => {
-                                       e.stopPropagation();
-                                       setTurnoACancelar(turno);
-                                       setShowModalCancelar(true);
-                                     }}
-                                     className="h-6 w-6 hover:bg-rose-100 hover:text-rose-600"
-                                   >
-                                     <Trash2 className="w-3 h-3" />
-                                   </Button>
-                                 </div>
-                               )}
-                             </div>
+                         <div className={`rounded p-2 h-full space-y-1 ${getStatusColor(turno.tipo_turno)}`}>
+                          {/* Turno principal */}
+                          <div>
+                            <div className="flex items-center justify-between gap-1 mb-1">
+                              <div className="flex items-center gap-1">
+                                {getStatusBadge(turno.tipo_turno)}
+                              </div>
+                              {turno.tipo_turno === 'alquiler' && (
+                                <div className="flex gap-1">
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setTurnoAEditar(turno);
+                                      setShowModalEditar(true);
+                                    }}
+                                    className="h-6 w-6 hover:bg-blue-100 hover:text-blue-600"
+                                  >
+                                    <Edit2 className="w-3 h-3" />
+                                  </Button>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setTurnoACancelar(turno);
+                                      setShowModalCancelar(true);
+                                    }}
+                                    className="h-6 w-6 hover:bg-rose-100 hover:text-rose-600"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
                             {turno.tipo_turno === 'clase' ? (
                                 <TarjetaClase 
                                   turno={turno} 
