@@ -105,16 +105,36 @@ Deno.serve(async (req) => {
     doc.setFontSize(7);
     
     horarios.forEach((hora, idx) => {
-      if (y + rowHeight > 190) {
+      // Mejor control de paginación
+      const pageHeight = doc.internal.pageSize.getHeight();
+      if (y + rowHeight > pageHeight - 20) {
         doc.addPage();
         y = 15;
+        
+        // Re-dibujar encabezados en la nueva página
+        doc.setFillColor(240, 240, 240);
+        doc.rect(startX, y, 20, 8, 'F');
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.text('Hora', startX + 10, y + 5.5, { align: 'center' });
+        
+        canchas.forEach((cancha, cIdx) => {
+          const xHeader = startX + 20 + (cIdx * colWidth);
+          doc.setFillColor(16, 185, 129);
+          doc.rect(xHeader, y, colWidth, 8, 'F');
+          doc.setTextColor(255, 255, 255);
+          doc.text(`Cancha ${cancha}`, xHeader + colWidth / 2, y + 5.5, { align: 'center' });
+          doc.setTextColor(0, 0, 0);
+        });
+        
+        y += 8;
       }
 
       // Columna de hora
       doc.rect(startX, y, 20, rowHeight);
       doc.setFont(undefined, 'bold');
       doc.setFontSize(8);
-      doc.text(hora, startX + 10, y + 9, { align: 'center' });
+      doc.text(hora, startX + 10, y + 11, { align: 'center' });
       doc.setFont(undefined, 'normal');
       doc.setFontSize(7);
 
@@ -407,14 +427,16 @@ Deno.serve(async (req) => {
     y += 4;
     doc.text('Pagado  |  Pendiente  |  Moroso', 20, y);
 
-    // Generar PDF
-    const pdfBytes = doc.output('arraybuffer');
+    // Generar PDF como blob y convertir a ArrayBuffer
+    const pdfBlob = doc.output('blob');
+    const pdfArrayBuffer = await pdfBlob.arrayBuffer();
 
-    return new Response(pdfBytes, {
+    return new Response(pdfArrayBuffer, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename=agenda-canchas-${fecha}.pdf`
+        'Content-Disposition': `attachment; filename="agenda-canchas-${fecha}.pdf"`,
+        'Content-Length': pdfArrayBuffer.byteLength.toString()
       }
     });
   } catch (error) {
