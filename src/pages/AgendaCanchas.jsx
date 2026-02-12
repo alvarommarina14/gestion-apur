@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Calendar, Plus, Lock, AlertCircle, ChevronDown } from 'lucide-react';
+import { Calendar, Plus, Lock, AlertCircle, ChevronDown, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import PlanillaCanchas from '@/components/agenda/PlanillaCanchas';
@@ -97,17 +97,15 @@ export default function AgendaCanchas() {
 
   const handleDescargarPDF = async () => {
     try {
-      const response = await base44.functions.invoke('generarPDFAgenda', {
-        fecha: format(selectedDate, 'yyyy-MM-dd'),
-        selectedCancha: 'todas'
+      const response = await base44.functions.invoke('generarPDFAgendaCanchas', {
+        fecha: format(selectedDate, 'yyyy-MM-dd')
       });
       
-      // La respuesta es el PDF directamente
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `planilla_${format(selectedDate, 'dd-MM-yyyy')}.pdf`;
+      link.download = `agenda-canchas-${format(selectedDate, 'dd-MM-yyyy')}.pdf`;
       document.body.appendChild(link);
       link.click();
       window.URL.revokeObjectURL(url);
@@ -235,7 +233,14 @@ export default function AgendaCanchas() {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-
+        <Button
+          onClick={handleDescargarPDF}
+          variant="outline"
+          className="gap-2"
+        >
+          <Download className="w-4 h-4" />
+          Descargar PDF
+        </Button>
       </div>
 
       {/* Tabs de vistas */}
