@@ -426,16 +426,16 @@ Deno.serve(async (req) => {
     const alquileresSueltos = turnos.filter(t => t.tipo_turno === 'alquiler' && t.modalidad_alquiler === 'suelto');
 
     // Calcular montos correctamente para clases (sumando precio de cada alumno)
-    let montoClases = 0;
-    clases.forEach(clase => {
-      const alumnosIds = clase.alumnos_ids || [];
-      alumnosIds.forEach(alumnoId => {
-        const alumno = alumnos.find(a => a.id === alumnoId);
-        if (alumno) {
-          montoClases += alumno.precio_mensual || 0;
-        }
-      });
-    });
+     let montoClasesTotal = 0;
+     clases.forEach(clase => {
+       const alumnosIds = clase.alumnos_ids || [];
+       alumnosIds.forEach(alumnoId => {
+         const alumno = alumnos.find(a => a.id === alumnoId);
+         if (alumno) {
+           montoClasesTotal += alumno.precio_mensual || 0;
+         }
+       });
+     });
 
     const montoAbono = alquileresAbono.reduce((sum, t) => sum + (t.monto || 0), 0);
     const montoSueltos = alquileresSueltos.reduce((sum, t) => sum + (t.monto || 0), 0);
