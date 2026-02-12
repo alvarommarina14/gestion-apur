@@ -47,7 +47,6 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import AgendaCanchas from './pages/AgendaCanchas';
 import Clientes from './pages/Clientes';
 import Configuracion from './pages/Configuracion';
 import PendienteAprobacion from './pages/PendienteAprobacion';
@@ -61,7 +60,6 @@ import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "AgendaCanchas": AgendaCanchas,
     "Clientes": Clientes,
     "Configuracion": Configuracion,
     "PendienteAprobacion": PendienteAprobacion,
@@ -74,7 +72,7 @@ export const PAGES = {
 }
 
 export const pagesConfig = {
-    mainPage: "AgendaCanchas",
+    mainPage: "Clientes",
     Pages: PAGES,
     Layout: __Layout,
 };
