@@ -250,10 +250,7 @@ Deno.serve(async (req) => {
                   doc.text(`Prof. ${turno.profesor || ''}`, x + 2, textY);
                   textY += 3.5;
 
-                  // Estado de pago
-                  const estadoPago = alumno.estado_mes_actual === 'pagado' ? 'Pagado' : alumno.estado === 'moroso' ? 'Moroso' : 'Pendiente';
-                  doc.setFont(undefined, 'bold');
-                  doc.text(estadoPago, x + 2, textY);
+
               }
             }
           } else {
