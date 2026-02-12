@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Edit2, Trash2 } from 'lucide-react';
 import ModalCancelarAlquiler from '@/components/agenda/ModalCancelarAlquiler';
 import EditarAlquilerModal from '@/components/agenda/EditarAlquilerModal';
