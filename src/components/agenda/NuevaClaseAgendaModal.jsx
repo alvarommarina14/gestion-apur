@@ -126,7 +126,9 @@ export default function NuevaClaseAgendaModal({ isOpen, onClose, initialDate }) 
         profesor_nombre: nombreProfesor,
         precio: tipo === 'individual' && alumnos.length > 0 
           ? alumnosDisponibles.find(a => a.id === alumnos[0])?.precio_mensual || 0
-          : 0
+          : 0,
+        es_recurrente: recurrenciaSemanal,
+        recurrencia_tipo: recurrenciaSemanal ? 'semanal' : undefined
       };
 
       const datosTurno = {
