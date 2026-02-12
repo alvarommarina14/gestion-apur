@@ -246,19 +246,14 @@ Deno.serve(async (req) => {
                 doc.text(`${alumno.nombre} - $${(alumno.precio_mensual || 0).toLocaleString('es-AR')}`, x + 2, textY);
                 textY += 3.5;
                 doc.text(`${turno.hora_inicio}-${turno.hora_fin}`, x + 2, textY);
-                textY += 3.5;
-                doc.text(`Prof. ${turno.profesor || ''}`, x + 2, textY);
-                textY += 3.5;
-                
-                // Estado de pago
-                const mesActual = fecha.substring(0, 7);
-                const pagosAlumno = pagos.filter(p => 
-                  p.alumno_id === alumno.id && 
-                  (p.mes_correspondiente === mesActual || p.fecha?.startsWith(mesActual))
-                );
-                const estadoPago = pagosAlumno.length > 0 ? 'Pagado' : alumno.estado === 'moroso' ? 'Moroso' : 'Pendiente';
-                doc.setFont(undefined, 'bold');
-                doc.text(estadoPago, x + 2, textY);
+                  textY += 3.5;
+                  doc.text(`Prof. ${turno.profesor || ''}`, x + 2, textY);
+                  textY += 3.5;
+
+                  // Estado de pago
+                  const estadoPago = alumno.estado_mes_actual === 'pagado' ? 'Pagado' : alumno.estado === 'moroso' ? 'Moroso' : 'Pendiente';
+                  doc.setFont(undefined, 'bold');
+                  doc.text(estadoPago, x + 2, textY);
               }
             }
           } else {
