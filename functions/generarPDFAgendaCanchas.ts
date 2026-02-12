@@ -268,13 +268,6 @@ Deno.serve(async (req) => {
             doc.text(`${turno.hora_inicio}-${turno.hora_fin}`, x + 2, textY);
             textY += 3.5;
 
-            // Estado de pago - solo mostrar si está pagado
-            if (turno.pagado) {
-              doc.setFont(undefined, 'bold');
-              doc.text('Pagado', x + 2, textY);
-              textY += 3.5;
-            }
-
             // Notas si existen
             if (turno.notas) {
               doc.setFont(undefined, 'italic');
