@@ -260,11 +260,11 @@ export default function GestionarClaseModal({ isOpen, onClose, clase }) {
             </Button>
           </div>
 
-          {/* Eliminar Serie */}
+          {/* Eliminar Serie - Si es recurrente */}
           {clase.serie_recurrente_id && (
             <div className="p-4 bg-rose-50 border border-rose-200 rounded-lg">
-              <p className="text-sm font-medium text-rose-700 mb-3">⚠️ Esta es una clase recurrente semanal</p>
-              <p className="text-xs text-rose-600 mb-3">Elimina todas las clases futuras de esta serie</p>
+              <p className="text-sm font-medium text-rose-700 mb-3">⚠️ Eliminar toda la serie recurrente</p>
+              <p className="text-xs text-rose-600 mb-3">Elimina permanentemente todas las clases futuras de esta serie</p>
               <Button
                 variant="destructive"
                 onClick={() => {
@@ -275,7 +275,7 @@ export default function GestionarClaseModal({ isOpen, onClose, clase }) {
                 disabled={eliminarSerieMutation.isPending}
                 className="w-full"
               >
-                {eliminarSerieMutation.isPending ? 'Eliminando...' : 'Eliminar clase para siempre'}
+                {eliminarSerieMutation.isPending ? 'Eliminando...' : 'Eliminar para siempre'}
               </Button>
             </div>
           )}
@@ -283,7 +283,7 @@ export default function GestionarClaseModal({ isOpen, onClose, clase }) {
           {/* Eliminar Clase */}
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-sm font-medium text-red-700 mb-3">🗑️ Eliminar esta clase</p>
-            <p className="text-xs text-red-600 mb-3">Elimina la clase por error. Se borrarán la clase y su turno asociado.</p>
+            <p className="text-xs text-red-600 mb-3">Elimina solo esta clase por error. Se borrarán la clase y su turno asociado.</p>
             <Button
               variant="destructive"
               onClick={() => {
