@@ -407,7 +407,9 @@ export default function AgendaCanchas() {
                  onDelete={handleDeleteTurno}
                  onEditBloqueo={handleEditBloqueo}
                  onDeleteBloqueo={handleDeleteBloqueo}
-               />
+                 turnosSeleccionados={turnosSeleccionados}
+                 onToggleTurno={handleToggleTurno}
+              />
             )}
           </Card>
         </TabsContent>
