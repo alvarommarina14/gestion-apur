@@ -392,9 +392,11 @@ export default function GestionarClaseModal({ isOpen, onClose, clase }) {
           </div>
         </div>
 
-        <Button variant="outline" onClick={onClose} className="w-full mt-4">
-          Cerrar
-        </Button>
+        <div className="flex gap-2 pt-4 border-t border-slate-200 mt-4 flex-shrink-0">
+          <Button variant="outline" onClick={onClose} className="flex-1">
+            Cerrar
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
