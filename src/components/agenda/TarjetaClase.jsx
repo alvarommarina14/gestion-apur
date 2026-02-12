@@ -144,8 +144,11 @@ export default function TarjetaClase({ turno, onEdit }) {
             variant="ghost"
             onClick={(e) => {
               e.stopPropagation();
-              setMostrarGestionar(true);
+              if (confirm('¿Eliminar este turno para siempre?')) {
+                eliminarTurnoMutation.mutate();
+              }
             }}
+            disabled={eliminarTurnoMutation.isPending}
             className="h-6 w-6 hover:bg-rose-100 hover:text-rose-600"
           >
             <Trash2 className="w-3 h-3" />
