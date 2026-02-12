@@ -71,17 +71,18 @@ Deno.serve(async (req) => {
       }
 
       // Actualizar la clase actual para quitar recurrencia
-      try {
-        await base44.asServiceRole.entities.Clase.update(claseId, {
-          es_recurrente: false,
-          recurrencia_tipo: null,
-          recurrencia_hasta: null,
-          recurrencia_cantidad: null,
-          serie_recurrente_id: null
-        });
-      } catch (e) {
-        console.error('Error al actualizar clase:', e);
-      }
+        try {
+          await base44.asServiceRole.entities.Clase.update(claseId, {
+            es_recurrente: false,
+            recurrencia_tipo: null,
+            recurrencia_hasta: null,
+            recurrencia_cantidad: null,
+            serie_recurrente_id: null
+          });
+          console.log('✅ Clase actualizada:', claseId);
+        } catch (e) {
+          console.error('Error al actualizar clase:', e);
+        }
     } 
     // CASO 2: Abono/Alquiler recurrente
     else if (tipo === 'abono' && turnoId) {
