@@ -259,8 +259,7 @@ Deno.serve(async (req) => {
             textY += 3.5;
             
             // Estado de pago
-            const cobro = cobros.find(c => c.cliente_id === turno.cliente_id);
-            const estadoPago = turno.pagado ? 'Pagado' : cobro?.estado === 'moroso' ? 'Moroso' : 'Pendiente';
+            const estadoPago = turno.pagado ? 'Pagado' : 'Pendiente';
             doc.setFont(undefined, 'bold');
             doc.text(estadoPago, x + 2, textY);
           }
