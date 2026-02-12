@@ -47,32 +47,34 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import AgendaCanchas from './pages/AgendaCanchas';
 import Clientes from './pages/Clientes';
 import Configuracion from './pages/Configuracion';
 import PendienteAprobacion from './pages/PendienteAprobacion';
 import ProfesorMenu from './pages/ProfesorMenu';
 import ProfesorRegistro from './pages/ProfesorRegistro';
 import Profesores from './pages/Profesores';
+import RecuperoCanchas from './pages/RecuperoCanchas';
 import SeleccionRol from './pages/SeleccionRol';
 import Tareas from './pages/Tareas';
-import AgendaCanchas from './pages/AgendaCanchas';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "AgendaCanchas": AgendaCanchas,
     "Clientes": Clientes,
     "Configuracion": Configuracion,
     "PendienteAprobacion": PendienteAprobacion,
     "ProfesorMenu": ProfesorMenu,
     "ProfesorRegistro": ProfesorRegistro,
     "Profesores": Profesores,
+    "RecuperoCanchas": RecuperoCanchas,
     "SeleccionRol": SeleccionRol,
     "Tareas": Tareas,
-    "AgendaCanchas": AgendaCanchas,
 }
 
 export const pagesConfig = {
-    mainPage: "Clientes",
+    mainPage: "AgendaCanchas",
     Pages: PAGES,
     Layout: __Layout,
 };

@@ -142,7 +142,38 @@ export default function ClientesPage() {
       filtrados = filtrados.filter(c => c.tipo_cliente === 'abono' || c.tipo_cliente === 'suelto');
     }
 
+    // Filtrar por estado de pago
+     if (filtroEstadoPago !== 'todos') {
+       filtrados = filtrados.filter(cliente => {
+         // Para clientes clase con alumno asociado
+         if (cliente.es_alumno) {
+           const alumno = alumnos.find(a => 
+             a.nombre.toLowerCase() === cliente.nombre.toLowerCase()
+           );
+           if (alumno) {
+             if (filtroEstadoPago === 'al_dia') {
+               return alumno.estado_mes_actual === 'pagado' || alumno.estado === 'activo';
+             } else if (filtroEstadoPago === 'moroso') {
+               return alumno.estado === 'moroso' || alumno.estado_mes_actual === 'moroso';
+             }
+           }
+         }
 
+         // Para clientes de alquiler (abono)
+         if (cliente.tipo_cliente === 'abono') {
+           const cobrosPendientes = cobros.filter(c => 
+             c.cliente_id === cliente.id && c.estado !== 'pagado'
+           );
+           if (filtroEstadoPago === 'al_dia') {
+             return cobrosPendientes.length === 0;
+           } else if (filtroEstadoPago === 'moroso') {
+             return cobros.some(c => c.cliente_id === cliente.id && c.estado === 'moroso');
+           }
+         }
+
+         return false;
+       });
+     }
 
     // Filtrar por búsqueda
     if (busqueda.trim()) {
@@ -213,7 +244,33 @@ export default function ClientesPage() {
             </Select>
           </div>
 
-
+          {/* Filtros de estado de pago */}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant={filtroEstadoPago === 'todos' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFiltroEstadoPago('todos')}
+              className={filtroEstadoPago === 'todos' ? 'bg-slate-900' : ''}
+            >
+              Todos
+            </Button>
+            <Button
+               variant={filtroEstadoPago === 'al_dia' ? 'default' : 'outline'}
+               size="sm"
+               onClick={() => setFiltroEstadoPago('al_dia')}
+               className={filtroEstadoPago === 'al_dia' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+             >
+               Al día
+             </Button>
+             <Button
+               variant={filtroEstadoPago === 'moroso' ? 'default' : 'outline'}
+               size="sm"
+               onClick={() => setFiltroEstadoPago('moroso')}
+               className={filtroEstadoPago === 'moroso' ? 'bg-rose-600 hover:bg-rose-700' : ''}
+             >
+               Morosos
+             </Button>
+          </div>
         </CardContent>
       </Card>
 

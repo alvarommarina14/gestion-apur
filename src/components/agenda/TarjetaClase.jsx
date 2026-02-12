@@ -41,7 +41,7 @@ export default function TarjetaClase({ turno, onEdit }) {
             t.hora_inicio === turno.hora_inicio &&
             t.tipo_turno === 'alquiler' &&
             t.modalidad_alquiler === 'abono' &&
-            new Date(t.fecha).getTime() > new Date(turno.fecha).getTime()
+            t.fecha > turno.fecha
           );
         } catch (e) {
           return [];

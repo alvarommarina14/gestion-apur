@@ -111,7 +111,17 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
     enabled: !!cliente?.es_alumno && alumnos.length > 0,
   });
 
-
+  const { data: asistencias = [] } = useQuery({
+    queryKey: ['asistencia', cliente?.id],
+    queryFn: async () => {
+      if (!cliente?.nombre) return [];
+      const asistenciasEncontradas = await base44.entities.Asistencia.filter({ 
+        alumno_nombre: cliente.nombre 
+      });
+      return asistenciasEncontradas.sort((a, b) => b.fecha.localeCompare(a.fecha));
+    },
+    enabled: !!cliente?.nombre,
+  });
 
   const { data: logs = [] } = useQuery({
     queryKey: ['logs', cliente?.id],
@@ -367,8 +377,9 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
         </DialogHeader>
 
         <Tabs defaultValue="info" className="flex-1 flex flex-col overflow-hidden">
-           <TabsList className="grid w-full grid-cols-2">
+           <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="info">Info</TabsTrigger>
+              <TabsTrigger value="asistencia">Asistencia</TabsTrigger>
               <TabsTrigger value="historial">Historial</TabsTrigger>
             </TabsList>
 
@@ -541,7 +552,82 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
               </div>
               </TabsContent>
 
+          <TabsContent value="asistencia" className="flex-1 overflow-y-auto px-1">
+            <div className="space-y-3">
+              {asistencias.length === 0 ? (
+                <div className="py-12 text-center text-slate-500">
+                  <User className="w-12 h-12 mx-auto mb-3 opacity-40" />
+                  <p>No hay registros de asistencia</p>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-3 gap-3 mb-6">
+                    <Card className="shadow-sm bg-gradient-to-br from-emerald-50 to-emerald-100">
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <p className="text-sm text-emerald-700 font-medium">Presentes</p>
+                          <p className="text-2xl font-bold text-emerald-600">
+                            {asistencias.filter(a => a.estado === 'presente').length}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="shadow-sm bg-gradient-to-br from-amber-50 to-amber-100">
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <p className="text-sm text-amber-700 font-medium">Con Aviso</p>
+                          <p className="text-2xl font-bold text-amber-600">
+                            {asistencias.filter(a => a.estado === 'ausente_con_aviso').length}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="shadow-sm bg-gradient-to-br from-rose-50 to-rose-100">
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <p className="text-sm text-rose-700 font-medium">Sin Aviso</p>
+                          <p className="text-2xl font-bold text-rose-600">
+                            {asistencias.filter(a => a.estado === 'ausente_sin_aviso').length}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
 
+                  <div className="space-y-2">
+                    {asistencias.map((asistencia) => {
+                      const estadoConfig = {
+                        presente: { color: 'bg-emerald-100 text-emerald-700', label: '✓ Presente', icon: CheckCircle },
+                        ausente_con_aviso: { color: 'bg-amber-100 text-amber-700', label: '⚠️ Ausente con aviso', icon: AlertCircle },
+                        ausente_sin_aviso: { color: 'bg-rose-100 text-rose-700', label: '✗ Ausente sin aviso', icon: AlertCircle },
+                      };
+                      const config = estadoConfig[asistencia.estado] || estadoConfig.presente;
+
+                      return (
+                        <Card key={asistencia.id} className="shadow-sm">
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Badge className={config.color}>{config.label}</Badge>
+                                  <span className="text-sm text-slate-500">
+                                    {format(parseISO(asistencia.fecha), "d 'de' MMM yyyy", { locale: es })}
+                                  </span>
+                                </div>
+                                {asistencia.notas && (
+                                  <p className="text-sm text-slate-600">{asistencia.notas}</p>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
+          </TabsContent>
 
           <TabsContent value="historial" className="flex-1 overflow-y-auto px-1">
             <div className="space-y-2">
