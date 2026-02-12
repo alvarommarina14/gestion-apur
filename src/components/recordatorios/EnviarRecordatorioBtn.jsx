@@ -90,7 +90,11 @@ export default function EnviarRecordatorioBtn({ alumno, variant = "outline", siz
         variant={variant}
         size={size}
         className={className}
-        onClick={() => setOpen(true)}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setOpen(true);
+        }}
       >
         <MessageCircle className="w-4 h-4 mr-1" />
         Recordar
