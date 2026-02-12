@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/select';
 import { AlertCircle } from 'lucide-react';
 
-const DURACIONES = [60, 90];
+const DURACIONES = [50, 80];
 const CANCHAS = ['1', '2', '3', '4'];
 
 export default function EditarAlquilerModal({ open, onOpenChange, turno }) {
