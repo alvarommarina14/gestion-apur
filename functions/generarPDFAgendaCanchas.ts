@@ -187,17 +187,27 @@ Deno.serve(async (req) => {
          doc.rect(x, y, colWidth, altoCelda);
 
          if (bloqueo) {
-          doc.setFillColor(254, 202, 202);
-          doc.rect(x + 1, y + 1, colWidth - 2, rowHeight - 2, 'F');
-          doc.setTextColor(185, 28, 28);
-          doc.setFont(undefined, 'bold');
-          doc.text('BLOQUEADO', x + 2, y + 5);
-          doc.setFont(undefined, 'normal');
-          doc.setFontSize(6);
-          doc.text(bloqueo.motivo || '', x + 2, y + 9, { maxWidth: colWidth - 4 });
-          doc.setTextColor(0, 0, 0);
-          doc.setFontSize(7);
-        } else if (turno) {
+           doc.setFillColor(254, 202, 202);
+           doc.rect(x + 1, y + 1, colWidth - 2, altoCelda - 2, 'F');
+           doc.setTextColor(185, 28, 28);
+           doc.setFont(undefined, 'bold');
+           doc.text('BLOQUEADO', x + 2, y + 5);
+           doc.setFont(undefined, 'normal');
+           doc.setFontSize(6);
+           doc.text(bloqueo.motivo || '', x + 2, y + 9, { maxWidth: colWidth - 4 });
+           doc.setTextColor(0, 0, 0);
+           doc.setFontSize(7);
+         } else if (esCeldaOcupada) {
+           // Celda ocupada por turno anterior - solo rellenar con color
+           if (turno) {
+             // Esto no debería pasar, pero por seguridad
+           } else {
+             const turnoAnterior = Object.values(turnosPorHora).find(row => 
+               row[cancha] && row[cancha].rowSpan
+             );
+             // Mantener el color sin mostrar texto
+           }
+         } else if (turno) {
           let textY = y + 4;
           
           // Tipo de turno
