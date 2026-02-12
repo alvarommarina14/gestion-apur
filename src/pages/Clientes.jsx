@@ -398,12 +398,7 @@ export default function ClientesPage() {
                             Recurrente
                           </Badge>
                         )}
-                        {estadoPago === 'al_dia' && (
-                           <Badge className="text-xs bg-emerald-100 text-emerald-700">
-                             Al día
-                           </Badge>
-                         )}
-                         {estadoPago === 'moroso' && (
+                        {estadoPago === 'moroso' && (
                            <Badge className="text-xs bg-rose-100 text-rose-700">
                              Moroso
                            </Badge>
