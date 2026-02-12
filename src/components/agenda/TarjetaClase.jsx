@@ -11,25 +11,7 @@ export default function TarjetaClase({ turno, onEdit }) {
   const [mostrarGestionar, setMostrarGestionar] = useState(false);
   const queryClient = useQueryClient();
 
-  const eliminarRecurrenciaMutation = useMutation({
-    mutationFn: async () => {
-      const claseId = turno.clase_id || turno.id;
-      const res = await base44.functions.invoke('eliminarRecurrenciaClase', {
-        claseId,
-        turnoId: turno.id
-      });
-      return res.data;
-    },
-    onSuccess: (data) => {
-      toast.success(data.message || 'Recurrencia eliminada');
-      queryClient.invalidateQueries({ queryKey: ['clases'] });
-      queryClient.invalidateQueries({ queryKey: ['turnos'] });
-      queryClient.invalidateQueries({ queryKey: ['turnoCancha'] });
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    }
-  });
+
 
   return (
     <div className="space-y-2.5">
