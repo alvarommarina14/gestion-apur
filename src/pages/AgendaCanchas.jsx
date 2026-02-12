@@ -197,6 +197,101 @@ export default function AgendaCanchas() {
 
   const turnosFecha = turnos.filter(t => t.fecha === format(selectedDate, 'yyyy-MM-dd'));
 
+  const handleToggleTurno = (turnoId) => {
+    const nuevos = new Set(turnosSeleccionados);
+    if (nuevos.has(turnoId)) {
+      nuevos.delete(turnoId);
+    } else {
+      nuevos.add(turnoId);
+    }
+    setTurnosSeleccionados(nuevos);
+  };
+
+  const calcularTurnosAEliminar = async () => {
+    const hoy = format(new Date(), 'yyyy-MM-dd');
+    let totalAEliminar = 0;
+
+    for (const turnoId of turnosSeleccionados) {
+      const turno = turnos.find(t => t.id === turnoId);
+      if (!turno) continue;
+
+      try {
+        if (turno.tipo_turno === 'clase') {
+          // Buscar clase asociada
+          const clases = await base44.entities.Clase.filter({ turno_cancha_id: turnoId });
+          const clase = clases?.[0];
+          if (clase?.es_recurrente) {
+            const futuras = await base44.entities.Clase.filter({
+              ...(clase.serie_recurrente_id 
+                ? { serie_recurrente_id: clase.serie_recurrente_id }
+                : { profesor_id: clase.profesor_id, hora_inicio: clase.hora_inicio, tipo: clase.tipo }),
+              es_recurrente: true
+            });
+            totalAEliminar += futuras.filter(c => c.fecha >= hoy && c.id !== clase.id).length;
+          }
+        } else if (turno.modalidad_alquiler === 'abono') {
+          // Buscar alquileres recurrentes
+          const futuros = await base44.entities.TurnoCancha.filter({
+            cliente: turno.cliente,
+            cancha: turno.cancha,
+            hora_inicio: turno.hora_inicio,
+            estado: 'activo'
+          });
+          totalAEliminar += futuros.filter(t => t.fecha >= hoy && t.id !== turnoId).length;
+        }
+      } catch (e) {
+        console.error('Error calculando:', e);
+      }
+    }
+    return totalAEliminar;
+  };
+
+  const handleEliminarRecurrencias = async () => {
+    if (turnosSeleccionados.size === 0) {
+      toast.error('Selecciona al menos un turno recurrente');
+      return;
+    }
+    setShowConfirmarEliminacion(true);
+  };
+
+  const confirmarEliminacion = async () => {
+    setShowConfirmarEliminacion(false);
+    const toastId = toast.loading('Eliminando recurrencias...');
+
+    try {
+      let totalEliminados = 0;
+      for (const turnoId of turnosSeleccionados) {
+        const turno = turnos.find(t => t.id === turnoId);
+        if (!turno) continue;
+
+        try {
+          const claseId = turno.clase_id 
+            ? turno.clase_id 
+            : (await base44.entities.Clase.filter({ turno_cancha_id: turnoId }))?.[0]?.id;
+
+          const resultado = await base44.functions.invoke('eliminarRecurrenciaClase', {
+            turnoId,
+            claseId,
+            tipo: turno.tipo_turno === 'clase' ? 'clase' : 'abono'
+          });
+
+          totalEliminados += 1;
+        } catch (e) {
+          console.error('Error eliminando:', e);
+        }
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['turnos'] });
+      queryClient.invalidateQueries({ queryKey: ['clases'] });
+      setTurnosSeleccionados(new Set());
+      toast.dismiss(toastId);
+      toast.success(`${totalEliminados} recurrencia(s) eliminada(s)`);
+    } catch (error) {
+      toast.dismiss(toastId);
+      toast.error('Error: ' + error.message);
+    }
+  };
+
   return (
     <div className="p-4 lg:p-6 space-y-6">
       {/* Header */}
