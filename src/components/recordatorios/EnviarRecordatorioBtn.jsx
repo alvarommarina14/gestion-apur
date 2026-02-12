@@ -74,19 +74,19 @@ export default function EnviarRecordatorioBtn({ alumno, variant = "outline", siz
   
   const handleEnviar = async () => {
     // Crear recordatorio
-    const tipo = alumno.estado === 'moroso' ? 'moroso' : 'pre_cobro';
+    const tipo = alumnoActualizado.estado === 'moroso' ? 'moroso' : 'pre_cobro';
     
     await createMutation.mutateAsync({
-      alumno_id: alumno.id,
-      alumno_nombre: alumno.nombre,
+      alumno_id: alumnoActualizado.id,
+      alumno_nombre: alumnoActualizado.nombre,
       tipo: tipo,
       fecha_programada: format(new Date(), 'yyyy-MM-dd'),
       estado: 'enviado',
       fecha_enviado: new Date().toISOString(),
       mensaje: mensaje,
       canal: 'whatsapp',
-      whatsapp: alumno.whatsapp,
-      monto_recordado: alumno.precio_mensual,
+      whatsapp: alumnoActualizado.whatsapp,
+      monto_recordado: alumnoActualizado.precio_mensual,
       mes_correspondiente: currentMonth,
     });
     
@@ -96,7 +96,7 @@ export default function EnviarRecordatorioBtn({ alumno, variant = "outline", siz
     // Abrir WhatsApp después de un pequeño delay
     setTimeout(() => {
       const mensajeEncoded = encodeURIComponent(mensaje);
-      const numero = alumno.whatsapp?.replace(/\D/g, '');
+      const numero = alumnoActualizado.whatsapp?.replace(/\D/g, '');
       window.open(`https://wa.me/${numero}?text=${mensajeEncoded}`, '_blank');
     }, 300);
   };
