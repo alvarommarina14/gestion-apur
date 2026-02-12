@@ -22,7 +22,10 @@ Deno.serve(async (req) => {
     const pagos = await base44.entities.Pago.list();
     const cobros = await base44.entities.CobroCliente.list();
 
-    const doc = new jsPDF({ orientation: 'landscape' });
+    const doc = new jsPDF({ 
+      orientation: 'landscape',
+      compress: true
+    });
     const pageWidth = doc.internal.pageSize.getWidth();
     let y = 20;
 
@@ -64,7 +67,7 @@ Deno.serve(async (req) => {
     
     const canchas = ['1', '2', '3', '4'];
     const colWidth = 65;
-    const rowHeight = 18;
+    const rowHeight = 28;
     const startX = 10;
     
     // Encabezados
@@ -160,7 +163,8 @@ Deno.serve(async (req) => {
               
               // Mostrar cada alumno
               doc.setFontSize(6);
-              alumnosIds.slice(0, 3).forEach((alumnoId, idx) => {
+              const maxAlumnos = Math.min(alumnosIds.length, 4);
+              alumnosIds.slice(0, maxAlumnos).forEach((alumnoId, idx) => {
                 const alumno = alumnos.find(a => a.id === alumnoId);
                 if (alumno) {
                   const mesActual = fecha.substring(0, 7);
@@ -168,15 +172,16 @@ Deno.serve(async (req) => {
                     p.alumno_id === alumno.id && 
                     (p.mes_correspondiente === mesActual || p.fecha?.startsWith(mesActual))
                   );
-                  const estadoPago = pagosAlumno.length > 0 ? '✓' : alumno.estado === 'moroso' ? '⚠️' : '(P)';
+                  const estadoPago = pagosAlumno.length > 0 ? 'Pagado' : alumno.estado === 'moroso' ? 'Moroso' : 'Pend';
                   const monto = alumno.precio_mensual || 0;
-                  doc.text(`• ${alumno.nombre} - $${monto.toLocaleString('es-AR')} ${estadoPago}`, x + 2, textY);
-                  textY += 3;
+                  const nombreCorto = alumno.nombre.length > 18 ? alumno.nombre.substring(0, 18) + '...' : alumno.nombre;
+                  doc.text(`${nombreCorto} - $${monto.toLocaleString('es-AR')} ${estadoPago}`, x + 2, textY);
+                  textY += 3.5;
                 }
               });
               
-              if (alumnosIds.length > 3) {
-                doc.text(`... +${alumnosIds.length - 3} más`, x + 2, textY);
+              if (alumnosIds.length > maxAlumnos) {
+                doc.text(`+${alumnosIds.length - maxAlumnos} mas`, x + 2, textY);
               }
             } else {
               // Clase individual
@@ -196,7 +201,7 @@ Deno.serve(async (req) => {
                   p.alumno_id === alumno.id && 
                   (p.mes_correspondiente === mesActual || p.fecha?.startsWith(mesActual))
                 );
-                const estadoPago = pagosAlumno.length > 0 ? 'Pagado ✓' : alumno.estado === 'moroso' ? 'Moroso ⚠️' : 'Pendiente (P)';
+                const estadoPago = pagosAlumno.length > 0 ? 'Pagado' : alumno.estado === 'moroso' ? 'Moroso' : 'Pendiente';
                 doc.setFont(undefined, 'bold');
                 doc.text(estadoPago, x + 2, textY);
               }
@@ -218,7 +223,7 @@ Deno.serve(async (req) => {
             
             // Estado de pago
             const cobro = cobros.find(c => c.cliente_id === turno.cliente_id);
-            const estadoPago = turno.pagado ? 'Pagado ✓' : cobro?.estado === 'moroso' ? 'Moroso ⚠️' : 'Pendiente (P)';
+            const estadoPago = turno.pagado ? 'Pagado' : cobro?.estado === 'moroso' ? 'Moroso' : 'Pendiente';
             doc.setFont(undefined, 'bold');
             doc.text(estadoPago, x + 2, textY);
           }
