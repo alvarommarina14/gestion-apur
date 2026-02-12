@@ -86,8 +86,6 @@ export default function RegistrarPagoModal({ open, onOpenChange, alumno, esClien
         fecha: new Date().toISOString(),
       });
       
-      setSuccess(true);
-      
       // Refetch queries para actualizar inmediatamente todos los badges y datos
       await Promise.all([
         queryClient.refetchQueries({ queryKey: ['alumnos'] }),
@@ -99,6 +97,8 @@ export default function RegistrarPagoModal({ open, onOpenChange, alumno, esClien
       
       // Invalidar todas las queries de cobros (incluyendo las con mes específico)
       queryClient.invalidateQueries({ predicate: (query) => query.queryKey[0] === 'cobros' });
+      
+      setSuccess(true);
       
       setTimeout(() => {
         setSuccess(false);
