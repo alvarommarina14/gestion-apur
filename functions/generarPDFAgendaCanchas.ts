@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
     
     const canchas = ['1', '2', '3', '4'];
     const colWidth = 65;
-    const rowHeight = 28;
+    const rowHeight = 22;
     const startX = 10;
     
     // Encabezados
@@ -105,9 +105,9 @@ Deno.serve(async (req) => {
     doc.setFontSize(7);
     
     horarios.forEach((hora, idx) => {
-      if (y > 180) {
+      if (y + rowHeight > 190) {
         doc.addPage();
-        y = 20;
+        y = 15;
       }
 
       // Columna de hora
@@ -163,7 +163,7 @@ Deno.serve(async (req) => {
               
               // Mostrar cada alumno
               doc.setFontSize(6);
-              const maxAlumnos = Math.min(alumnosIds.length, 4);
+              const maxAlumnos = Math.min(alumnosIds.length, 3);
               alumnosIds.slice(0, maxAlumnos).forEach((alumnoId, idx) => {
                 const alumno = alumnos.find(a => a.id === alumnoId);
                 if (alumno) {
@@ -174,9 +174,9 @@ Deno.serve(async (req) => {
                   );
                   const estadoPago = pagosAlumno.length > 0 ? 'Pagado' : alumno.estado === 'moroso' ? 'Moroso' : 'Pend';
                   const monto = alumno.precio_mensual || 0;
-                  const nombreCorto = alumno.nombre.length > 18 ? alumno.nombre.substring(0, 18) + '...' : alumno.nombre;
-                  doc.text(`${nombreCorto} - $${monto.toLocaleString('es-AR')} ${estadoPago}`, x + 2, textY);
-                  textY += 3.5;
+                  const nombreCorto = alumno.nombre.length > 15 ? alumno.nombre.substring(0, 15) + '...' : alumno.nombre;
+                  doc.text(`${nombreCorto} $${monto.toLocaleString('es-AR')} ${estadoPago}`, x + 2, textY);
+                  textY += 3.2;
                 }
               });
               
