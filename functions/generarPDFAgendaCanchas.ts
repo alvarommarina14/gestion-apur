@@ -95,9 +95,30 @@ Deno.serve(async (req) => {
       turnosPorHora[hora] = { '1': null, '2': null, '3': null, '4': null };
     });
 
+    // Marcar turnos en todos los slots que ocupan
     turnos.forEach(turno => {
-      if (turnosPorHora[turno.hora_inicio] && turnosPorHora[turno.hora_inicio][turno.cancha] === null) {
-        turnosPorHora[turno.hora_inicio][turno.cancha] = turno;
+      const inicio = turno.hora_inicio;
+      const fin = turno.hora_fin;
+      
+      // Encontrar todos los slots entre inicio y fin
+      const inicioIdx = horarios.indexOf(inicio);
+      const finIdx = horarios.indexOf(fin);
+      
+      if (inicioIdx !== -1) {
+        // Marcar todos los slots desde inicio hasta fin (sin incluir fin)
+        for (let i = inicioIdx; i < horarios.length; i++) {
+          const horaActual = horarios[i];
+          
+          // Si llegamos al fin o lo pasamos, parar
+          if (finIdx !== -1 && i >= finIdx) break;
+          
+          // Comparar horas manualmente si fin no está en la lista de horarios
+          if (finIdx === -1 && horaActual >= fin) break;
+          
+          if (turnosPorHora[horaActual] && turnosPorHora[horaActual][turno.cancha] === null) {
+            turnosPorHora[horaActual][turno.cancha] = turno;
+          }
+        }
       }
     });
 
