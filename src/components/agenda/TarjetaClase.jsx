@@ -1,39 +1,10 @@
 import React, { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Edit2, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import GestionarClaseModal from './GestionarClaseModal';
 
-const getEstadoPago = (alumnoId, estadosPago) => {
-  // Si existe cobro para este alumno, usar su estado
-  if (estadosPago[alumnoId]) {
-    const estadoObj = estadosPago[alumnoId];
-    // El objeto puede ser { estado: 'pagado', fuera_de_termino: false }
-    const estado = estadoObj.estado || estadoObj;
-    if (estado === 'pagado') return 'pagado';
-    if (estado === 'moroso') return 'moroso';
-    return 'pendiente';
-  }
-
-  // Si no hay cobro, asumir pendiente (mes sin cobro registrado)
-  return 'pendiente';
-};
-
-const getPagoBadge = (estado) => {
-  if (estado === 'pagado') {
-    return <Badge className="bg-emerald-600 text-xs">Pagado</Badge>;
-  }
-  if (estado === 'moroso') {
-    return <Badge className="bg-rose-600 text-xs">Moroso</Badge>;
-  }
-  if (estado === 'pendiente') {
-    return <Badge className="bg-amber-600 text-xs">Pendiente</Badge>;
-  }
-  return null;
-};
-
-export default function TarjetaClase({ turno, estadosPago = {}, onEdit }) {
+export default function TarjetaClase({ turno, onEdit }) {
   const [mostrarGestionar, setMostrarGestionar] = useState(false);
 
   return (
@@ -81,20 +52,13 @@ export default function TarjetaClase({ turno, estadosPago = {}, onEdit }) {
         Alumnos ({turno.alumnos_nombres?.length || 0})
       </div>
 
-      {/* Lista de Alumnos con Estado de Deuda */}
+      {/* Lista de Alumnos */}
       <div className="space-y-1 pl-2 border-l-2 border-blue-200">
-        {turno.alumnos_nombres?.map((alumno, idx) => {
-          const alumnoId = turno.alumnos_ids?.[idx];
-          const estadoPago = getEstadoPago(alumnoId, estadosPago);
-          return (
-            <div key={idx} className="flex items-center justify-between gap-2">
-              <p className="text-xs text-slate-700 truncate flex-1">
-                {alumno}
-              </p>
-              {estadoPago && getPagoBadge(estadoPago)}
-            </div>
-          );
-        })}
+        {turno.alumnos_nombres?.map((alumno, idx) => (
+          <p key={idx} className="text-xs text-slate-700 truncate">
+            {alumno}
+          </p>
+        ))}
       </div>
 
       {/* Notas */}
