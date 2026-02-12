@@ -173,17 +173,20 @@ Deno.serve(async (req) => {
       doc.setFontSize(7);
 
       // Columnas de canchas
-      canchas.forEach((cancha, cIdx) => {
-        const x = startX + 20 + (cIdx * colWidth);
-        const turno = turnosPorHora[hora][cancha];
-        const bloqueo = bloqueos.find(b => 
-          (b.cancha === cancha || b.cancha === 'todas') &&
-          hora >= b.hora_inicio && hora < b.hora_fin
-        );
+       canchas.forEach((cancha, cIdx) => {
+         const x = startX + 20 + (cIdx * colWidth);
+         const turno = turnosPorHora[hora][cancha];
+         const esCeldaOcupada = celdasOcupadas[hora][cancha];
+         const bloqueo = bloqueos.find(b => 
+           (b.cancha === cancha || b.cancha === 'todas') &&
+           hora >= b.hora_inicio && hora < b.hora_fin
+         );
 
-        doc.rect(x, y, colWidth, rowHeight);
+         // Dibujar rectángulo con rowSpan si aplica
+         const altoCelda = turno?.rowSpan ? rowHeight * turno.rowSpan : rowHeight;
+         doc.rect(x, y, colWidth, altoCelda);
 
-        if (bloqueo) {
+         if (bloqueo) {
           doc.setFillColor(254, 202, 202);
           doc.rect(x + 1, y + 1, colWidth - 2, rowHeight - 2, 'F');
           doc.setTextColor(185, 28, 28);
