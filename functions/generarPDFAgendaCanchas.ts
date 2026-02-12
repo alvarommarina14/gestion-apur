@@ -271,7 +271,7 @@ Deno.serve(async (req) => {
           } else {
             // Alquiler
             doc.setFillColor(220, 252, 231);
-            doc.rect(x + 1, y + 1, colWidth - 2, rowHeight - 2, 'F');
+            doc.rect(x + 1, y + 1, colWidth - 2, altoCelda - 2, 'F');
             doc.setTextColor(5, 150, 105);
             doc.setFont(undefined, 'bold');
             doc.text(`ALQUILER - ${(turno.modalidad_alquiler || '').toUpperCase()}`, x + 2, textY);
