@@ -116,22 +116,7 @@ export default function AgendaCanchas() {
     }
   };
 
-  const handleBorrarTodos = async () => {
-    if (!window.confirm('⚠️ ¿Estás seguro de que querés borrar TODOS los turnos? Esta acción no se puede deshacer.')) {
-      return;
-    }
-    if (!window.confirm('🚨 ÚLTIMA CONFIRMACIÓN: Se van a eliminar todos los turnos de la grilla. ¿Continuar?')) {
-      return;
-    }
 
-    try {
-      const response = await base44.functions.invoke('borrarTodosTurnosCancha', {});
-      toast.success(response.data.message);
-      queryClient.invalidateQueries({ queryKey: ['turnos'] });
-    } catch (error) {
-      toast.error('Error: ' + error.message);
-    }
-  };
 
   const handleNuevoTurno = (type) => {
     setTurnoEditando(null);
