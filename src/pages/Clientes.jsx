@@ -245,32 +245,16 @@ export default function ClientesPage() {
           </div>
 
           {/* Filtros de estado de pago */}
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant={filtroEstadoPago === 'todos' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFiltroEstadoPago('todos')}
-              className={filtroEstadoPago === 'todos' ? 'bg-slate-900' : ''}
-            >
-              Todos
-            </Button>
-            <Button
-               variant={filtroEstadoPago === 'al_dia' ? 'default' : 'outline'}
-               size="sm"
-               onClick={() => setFiltroEstadoPago('al_dia')}
-               className={filtroEstadoPago === 'al_dia' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
-             >
-               Al día
-             </Button>
+           <div className="flex flex-wrap gap-2">
              <Button
-               variant={filtroEstadoPago === 'moroso' ? 'default' : 'outline'}
+               variant={filtroEstadoPago === 'todos' ? 'default' : 'outline'}
                size="sm"
-               onClick={() => setFiltroEstadoPago('moroso')}
-               className={filtroEstadoPago === 'moroso' ? 'bg-rose-600 hover:bg-rose-700' : ''}
+               onClick={() => setFiltroEstadoPago('todos')}
+               className={filtroEstadoPago === 'todos' ? 'bg-slate-900' : ''}
              >
-               Morosos
+               Todos
              </Button>
-          </div>
+           </div>
         </CardContent>
       </Card>
 
