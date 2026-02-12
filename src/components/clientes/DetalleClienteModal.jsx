@@ -43,7 +43,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import SeccionCobrosPagosUnificada from './SeccionCobrosPagosUnificada';
-import RegistrarPagoCobroModal from './RegistrarPagoCobroModal';
 import { registrarCambioCliente, registrarEliminacion } from '@/components/utils/auditLog';
 import {
   AlertDialog,
@@ -59,7 +58,6 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
   const queryClient = useQueryClient();
   const [editando, setEditando] = useState(false);
   const [formData, setFormData] = useState({});
-  const [modalRegistrar, setModalRegistrar] = useState({ open: false, cobro: null });
 
   // Fetch pagos y cobros del cliente
   const { data: cobrosClientes = [] } = useQuery({
@@ -370,18 +368,6 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
             <User className="w-5 h-5 text-emerald-600" />
             {cliente.nombre}
             <div className="ml-auto flex gap-2">
-              <Button
-                size="sm"
-                onClick={() => {
-                  const mesActual = format(new Date(), 'yyyy-MM');
-                  const cobroMesActual = cobrosClientes.find(c => c.mes === mesActual);
-                  setModalRegistrar({ open: true, cobro: cobroMesActual });
-                }}
-                className="bg-emerald-600 hover:bg-emerald-700 h-8"
-              >
-                <Plus className="w-4 h-4 mr-1" />
-                Cobrar
-              </Button>
               <Badge className={cn('', config.color)}>
                 <Icon className="w-3 h-3 mr-1" />
                 {config.label}
@@ -682,13 +668,6 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
 
           </Tabs>
 
-      {/* Modal Registrar Pago */}
-      <RegistrarPagoCobroModal
-        open={modalRegistrar.open}
-        onOpenChange={(open) => !open && setModalRegistrar({ open: false, cobro: null })}
-        cobro={modalRegistrar.cobro}
-        cliente={cliente}
-      />
 
           </DialogContent>
           </Dialog>
