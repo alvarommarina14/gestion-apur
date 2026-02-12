@@ -119,7 +119,15 @@ export default function ModalCancelarAlquiler({ open, onOpenChange, turno }) {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
+      // Actualizar cache de turnos removiendo el turno eliminado
+      queryClient.setQueryData(['turnos-cancha'], (oldData) => {
+        if (!oldData) return oldData;
+        return oldData.filter(t => t.id !== turno.id);
+      });
+      queryClient.setQueryData(['turnos-cancha-lista'], (oldData) => {
+        if (!oldData) return oldData;
+        return oldData.filter(t => t.id !== turno.id);
+      });
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha-push'] });
       queryClient.invalidateQueries({ queryKey: ['cancelaciones-cancha'] });
