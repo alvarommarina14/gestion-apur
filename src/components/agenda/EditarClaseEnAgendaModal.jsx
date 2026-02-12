@@ -78,6 +78,48 @@ export default function EditarClaseEnAgendaModal({ open, onOpenChange, turno }) 
     return format(fin, 'HH:mm');
   };
 
+  const eliminarSerieMutation = useMutation({
+    mutationFn: async () => {
+      // Obtener el turno para saber si tiene clase asociada
+      const turnoCompleto = await base44.entities.TurnoCancha.read(turno.id);
+      
+      // Si tiene clase asociada, obtener la serie
+      if (turnoCompleto.turno_cancha_id) {
+        const clases = await base44.entities.Clase.filter({ turno_cancha_id: turno.id });
+        if (clases.length > 0 && clases[0].serie_recurrente_id) {
+          const serie = clases[0].serie_recurrente_id;
+          const todasClases = await base44.entities.Clase.filter({ serie_recurrente_id: serie });
+          
+          const hoy = new Date();
+          hoy.setHours(0, 0, 0, 0);
+          
+          // Eliminar solo las futuras
+          for (const clase of todasClases) {
+            const fechaClase = new Date(clase.fecha);
+            fechaClase.setHours(0, 0, 0, 0);
+            if (fechaClase >= hoy) {
+              // Eliminar turno asociado si existe
+              if (clase.turno_cancha_id) {
+                await base44.entities.TurnoCancha.delete(clase.turno_cancha_id);
+              }
+              // Eliminar clase
+              await base44.entities.Clase.delete(clase.id);
+            }
+          }
+        }
+      }
+    },
+    onSuccess: () => {
+      toast.success('Serie de clases eliminada');
+      queryClient.invalidateQueries({ queryKey: ['turnos'] });
+      queryClient.invalidateQueries({ queryKey: ['clases'] });
+      onOpenChange(false);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    }
+  });
+
   const updateMutation = useMutation({
     mutationFn: async (data) => {
       const updateData = {
