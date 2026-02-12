@@ -38,6 +38,23 @@ export default function TarjetaClase({ turno, onEdit }) {
           {turno.profesor || 'Sin profesor'}
         </p>
         <div className="flex gap-1">
+          {turno.recurrencia_tipo === 'semanal' && (
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (confirm('¿Eliminar la recurrencia semanal?')) {
+                  eliminarRecurrenciaMutation.mutate();
+                }
+              }}
+              disabled={eliminarRecurrenciaMutation.isPending}
+              className="h-6 w-6 hover:bg-amber-100 hover:text-amber-600"
+              title="Eliminar recurrencia semanal"
+            >
+              <Repeat className="w-3 h-3" />
+            </Button>
+          )}
           {onEdit && (
             <Button
               size="icon"
