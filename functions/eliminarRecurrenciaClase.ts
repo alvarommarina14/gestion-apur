@@ -10,6 +10,7 @@ Deno.serve(async (req) => {
     }
 
     const { turnoId, claseId, tipo } = await req.json();
+    const base44SR = base44.asServiceRole;
     
     const hoy = new Date().toISOString().split('T')[0];
     let turnosABorrar = [];
