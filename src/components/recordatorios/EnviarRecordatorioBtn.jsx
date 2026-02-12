@@ -73,33 +73,16 @@ export default function EnviarRecordatorioBtn({ alumno, variant = "outline", siz
       mes_correspondiente: currentMonth,
     });
     
-    // Abrir WhatsApp
-    const mensajeEncoded = encodeURIComponent(mensaje);
-    const numero = alumno.whatsapp?.replace(/\D/g, '');
-    window.open(`https://wa.me/${numero}?text=${mensajeEncoded}`, '_blank');
+    // Cerrar modal primero
+    setOpen(false);
     
-    setSuccess(true);
-    
+    // Abrir WhatsApp después de un pequeño delay
     setTimeout(() => {
-      setSuccess(false);
-      setOpen(false);
-    }, 1500);
+      const mensajeEncoded = encodeURIComponent(mensaje);
+      const numero = alumno.whatsapp?.replace(/\D/g, '');
+      window.open(`https://wa.me/${numero}?text=${mensajeEncoded}`, '_blank');
+    }, 300);
   };
-  
-  if (success) {
-    return (
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-md">
-          <div className="py-12 text-center">
-            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="w-8 h-8 text-emerald-600" />
-            </div>
-            <h3 className="text-lg font-semibold text-slate-900">¡Recordatorio enviado!</h3>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
   
   return (
     <>
