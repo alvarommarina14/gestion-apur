@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
-import { format, differenceInMonths, parseISO } from 'npm:date-fns@3.6.0';
+import { format } from 'npm:date-fns@3.6.0';
 
 Deno.serve(async (req) => {
   try {
@@ -23,32 +23,6 @@ Deno.serve(async (req) => {
     // Determinar estado de pago (pagado si es 5-15, moroso si es después del 15)
     const determinarEstado = (dia) => {
       return dia <= 15 ? 'pagado' : 'moroso';
-    };
-
-    // Calcular meses adeudados desde febrero 2026
-    const calcularMesesAdeudados = async (entidad, mesPagado) => {
-      const inicioApp = new Date(2026, 1, 1); // Febrero 2026
-      const hoy = new Date();
-      
-      // Calcular meses transcurridos desde febrero 2026 hasta hoy
-      const mesesTranscurridos = differenceInMonths(hoy, inicioApp) + 1;
-      
-      // Obtener todos los pagos/cobros de esta entidad
-      let pagosTotales = 0;
-      if (entidad.id) {
-        const pagos = await base44Admin.entities.Pago.filter({ alumno_id: entidad.id });
-        const cobros = await base44Admin.entities.CobroCliente.filter({ 
-          cliente_id: entidad.cliente_id || entidad.id,
-          estado: 'pagado'
-        });
-        pagosTotales = pagos.length + cobros.length;
-      }
-      
-      // Sumar el pago actual
-      pagosTotales += 1;
-      
-      // Deuda = meses transcurridos - pagos realizados
-      return Math.max(0, mesesTranscurridos - pagosTotales);
     };
 
     // ===== SINCRONIZACIÓN DESDE TURNO PAGADO =====
@@ -153,10 +127,8 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Calcular deuda desde febrero 2026
-      const mesesDesdeInicio = calcularMesesAdeudados(alumno, mesPago);
-      const nuevaDeuda = Math.max(0, mesesDesdeInicio * (alumno.precio_mensual || 0));
-      
+      // Actualizar alumno
+      const nuevaDeuda = Math.max(0, (alumno.deuda_total || 0) - (monto || alumno.precio_mensual || 0));
       await base44Admin.entities.Alumno.update(alumnoId, {
         estado_mes_actual: 'pagado',
         estado: nuevaDeuda > 0 ? 'moroso' : 'activo',
@@ -169,8 +141,7 @@ Deno.serve(async (req) => {
     // ===== SINCRONIZACIÓN DESDE PAGO DE CLIENTE =====
     if (tipo_evento === 'cliente_pago' && clienteId) {
       try {
-        const clientes = await base44Admin.entities.Cliente.filter({ id: clienteId });
-        const cliente = clientes[0];
+        const cliente = await base44Admin.entities.Cliente.read(clienteId);
         if (!cliente) return Response.json({ error: 'Cliente no encontrado' }, { status: 404 });
 
         const estado = 'pagado'; // Un pago registrado siempre es pagado
@@ -200,14 +171,6 @@ Deno.serve(async (req) => {
           });
         }
 
-        // Calcular deuda del cliente desde febrero 2026
-        const mesesAdeudadosCliente = await calcularMesesAdeudados(cliente, mesPago);
-        const deudaCliente = Math.max(0, mesesAdeudadosCliente * (cliente.precio || 0));
-        
-        await base44Admin.entities.Cliente.update(clienteId, {
-          deuda_total: deudaCliente
-        });
-
         // Si el cliente es alumno, sincronizar también el alumno
         if (cliente.es_alumno) {
           const alumnoSincronizado = await base44Admin.entities.Alumno.filter({
@@ -215,9 +178,7 @@ Deno.serve(async (req) => {
           });
           if (alumnoSincronizado.length > 0) {
             const alumno = alumnoSincronizado[0];
-            const mesesAdeudadosAlumno = await calcularMesesAdeudados(alumno, mesPago);
-            const nuevaDeuda = Math.max(0, mesesAdeudadosAlumno * (alumno.precio_mensual || 0));
-            
+            const nuevaDeuda = Math.max(0, (alumno.deuda_total || 0) - (monto || alumno.precio_mensual || 0));
             await base44Admin.entities.Alumno.update(alumno.id, {
               estado_mes_actual: 'pagado',
               estado: nuevaDeuda > 0 ? 'moroso' : 'activo',

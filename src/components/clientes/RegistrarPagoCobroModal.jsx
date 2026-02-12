@@ -45,18 +45,18 @@ export default function RegistrarPagoCobroModal({ open, onOpenChange, cobro, cli
       });
       return result;
     },
-    onSuccess: async () => {
-      // Refetch inmediato de todas las queries críticas para actualizar badges
-      await Promise.all([
-        queryClient.refetchQueries({ queryKey: ['clientes'] }),
-        queryClient.refetchQueries({ queryKey: ['alumnos'] }),
-        queryClient.refetchQueries({ queryKey: ['pagos'] }),
-        queryClient.refetchQueries({ queryKey: ['pagos-alumnos'] }),
-        queryClient.refetchQueries({ queryKey: ['cobros-clientes'] }),
-      ]);
-      
-      // Invalidar todas las queries de cobros (incluyendo las con mes específico)
-      queryClient.invalidateQueries({ predicate: (query) => query.queryKey[0] === 'cobros' });
+    onSuccess: () => {
+      // Invalidar queries - el refetch automático actualizará los estados
+      queryClient.invalidateQueries({ queryKey: ['cobros-clientes', cliente?.id] });
+      queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
+      queryClient.invalidateQueries({ queryKey: ['clientes'] });
+      queryClient.invalidateQueries({ queryKey: ['alumnos'] });
+      queryClient.invalidateQueries({ queryKey: ['pagos-alumnos'] });
+      // Invalidar cobros de AgendaCanchas específicamente para el mes del cobro
+      queryClient.invalidateQueries({ queryKey: ['cobros', cobro?.mes] });
+      // Refetch inmediato para Recordatorios Hoy (actualiza estados dinámicamente)
+      queryClient.refetchQueries({ queryKey: ['recordatorios-turnos-hoy'] });
+      queryClient.refetchQueries({ queryKey: ['turnos-cancha'] });
       
       setTimeout(() => {
         onOpenChange(false);
@@ -93,20 +93,9 @@ export default function RegistrarPagoCobroModal({ open, onOpenChange, cobro, cli
             <p className="text-xs text-slate-500">
               {cobro?.tipo_cobro === 'abono_mensual' ? 'Abono' : 'Cancha suelta'} - {cobro?.mes}
             </p>
-            <div className="flex items-center justify-between mt-2">
-              <span className="text-xs text-slate-500">Precio mensual</span>
-              <span className="text-lg font-bold text-emerald-600">
-                ${(cobro?.monto || 0).toLocaleString('es-AR')}
-              </span>
-            </div>
-            {cliente?.deuda_total > 0 && (
-              <div className="flex items-center justify-between mt-1">
-                <span className="text-xs text-rose-600">Deuda acumulada</span>
-                <span className="text-sm font-semibold text-rose-600">
-                  ${(cliente.deuda_total || 0).toLocaleString('es-AR')}
-                </span>
-              </div>
-            )}
+            <p className="text-lg font-bold text-emerald-600 mt-2">
+              ${(cobro?.monto || 0).toLocaleString('es-AR')}
+            </p>
           </div>
 
           <div className="space-y-2">
