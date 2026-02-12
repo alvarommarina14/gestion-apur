@@ -94,9 +94,12 @@ export default function RegistrarPagoModal({ open, onOpenChange, alumno, esClien
         queryClient.refetchQueries({ queryKey: ['pagos'] }),
         queryClient.refetchQueries({ queryKey: ['pagos-alumnos'] }),
         queryClient.refetchQueries({ queryKey: ['cobros-clientes'] }),
-        queryClient.refetchQueries({ queryKey: ['cobros'] }),
+        queryClient.refetchQueries({ queryKey: ['cobros'] }), // Para AgendaCanchas con mes específico
         queryClient.refetchQueries({ queryKey: ['clientes'] }),
       ]);
+      
+      // Invalidar específicamente la query de cobros del mes para la agenda
+      queryClient.invalidateQueries({ predicate: (query) => query.queryKey[0] === 'cobros' });
       
       setTimeout(() => {
         setSuccess(false);
