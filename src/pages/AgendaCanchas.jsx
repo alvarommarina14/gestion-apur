@@ -26,6 +26,8 @@ export default function AgendaCanchas() {
   const [nuevoTurnoType, setNuevoTurnoType] = useState('alquiler');
   const [turnoEditando, setTurnoEditando] = useState(null);
   const [bloqueoEditando, setBloqueoEditando] = useState(null);
+  const [turnosSeleccionados, setTurnosSeleccionados] = useState(new Set());
+  const [showConfirmarEliminacion, setShowConfirmarEliminacion] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: turnos = [], isLoading: turnosLoading } = useQuery({
