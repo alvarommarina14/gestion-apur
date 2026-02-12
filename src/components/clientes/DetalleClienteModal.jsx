@@ -39,8 +39,7 @@ import {
   CheckCircle,
   Clock,
   Trash2,
-  AlertCircle,
-  Plus
+  AlertCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import SeccionCobrosPagosUnificada from './SeccionCobrosPagosUnificada';
