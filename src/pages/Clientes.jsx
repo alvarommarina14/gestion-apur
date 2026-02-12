@@ -486,55 +486,6 @@ export default function ClientesPage() {
                       Ver
                     </Button>
                     
-                    {/* Botón Registrar Cobro para todos los tipos de cliente */}
-                    {(() => {
-                      // Para clientes clase con alumno
-                      if (cliente.es_alumno) {
-                        const alumno = alumnos.find(a => 
-                          a.nombre.toLowerCase() === cliente.nombre.toLowerCase()
-                        );
-                        if (alumno) {
-                          return (
-                            <Button
-                              size="sm"
-                              variant="default"
-                              onClick={() => setPagoModal({ open: true, alumno })}
-                              className="bg-emerald-600 hover:bg-emerald-700"
-                            >
-                              <DollarSign className="w-4 h-4 mr-1" />
-                              Cobrar
-                            </Button>
-                          );
-                        }
-                      }
-                      
-                      // Para clientes de alquiler
-                      if (cliente.tipo_cliente === 'abono' || cliente.tipo_cliente === 'suelto') {
-                        const clienteComoAlumno = {
-                          id: cliente.id,
-                          nombre: cliente.nombre,
-                          whatsapp: cliente.telefono,
-                          precio_mensual: cliente.precio,
-                          estado_mes_actual: estadoPago === 'moroso' ? 'moroso' : estadoPago === 'debe' ? 'pendiente' : 'pagado',
-                          estado: estadoPago === 'moroso' ? 'moroso' : 'activo'
-                        };
-                        
-                        return (
-                          <Button
-                            size="sm"
-                            variant="default"
-                            onClick={() => setPagoModal({ open: true, alumno: clienteComoAlumno, esCliente: true })}
-                            className="bg-emerald-600 hover:bg-emerald-700"
-                          >
-                            <DollarSign className="w-4 h-4 mr-1" />
-                            Cobrar
-                          </Button>
-                        );
-                        }
-                      
-                      return null;
-                    })()}
-                    
                     {/* Menú de opciones */}
                     {(() => {
                       // Para clientes clase con alumno
