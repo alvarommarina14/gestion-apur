@@ -8,7 +8,9 @@ import GestionarClaseModal from './GestionarClaseModal';
 const getEstadoPago = (alumnoId, estadosPago) => {
   // Si existe cobro para este alumno, usar su estado
   if (estadosPago[alumnoId]) {
-    const estado = estadosPago[alumnoId];
+    const estadoObj = estadosPago[alumnoId];
+    // El objeto puede ser { estado: 'pagado', fuera_de_termino: false }
+    const estado = estadoObj.estado || estadoObj;
     if (estado === 'pagado') return 'pagado';
     if (estado === 'moroso') return 'moroso';
     return 'pendiente';
