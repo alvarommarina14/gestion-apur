@@ -54,7 +54,7 @@ export default function TarjetaClase({ turno, onEdit }) {
 
   // Detectar si es clase recurrente o abono recurrente
   const esClaseRecurrente = clase?.es_recurrente === true;
-  const esAbonoRecurrente = turno.tipo_turno === 'alquiler' && turno.modalidad_alquiler === 'abono' && turnosFuturos.length > 0;
+  const esAbonoRecurrente = turno.es_recurrente === true && turno.tipo_turno === 'alquiler' && turno.modalidad_alquiler === 'abono';
 
   const eliminarRecurrenciaMutation = useMutation({
     mutationFn: async () => {
