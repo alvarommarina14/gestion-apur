@@ -26,13 +26,13 @@ Deno.serve(async (req) => {
 
       // Si tiene serie_recurrente_id, buscar todas de esa serie
       if (clase.serie_recurrente_id) {
-        clasesABorrar = await base44.entities.Clase.filter({
+        clasesABorrar = await base44SR.entities.Clase.filter({
           serie_recurrente_id: clase.serie_recurrente_id,
           es_recurrente: true
         }, '-fecha');
       } else {
         // Si no, buscar por profesor + hora + tipo
-        clasesABorrar = await base44.entities.Clase.filter({
+        clasesABorrar = await base44SR.entities.Clase.filter({
           profesor_id: clase.profesor_id,
           hora_inicio: clase.hora_inicio,
           tipo: clase.tipo,
@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
       // Verificar que existan
       for (const tId of turnoIds) {
         try {
-          await base44.entities.TurnoCancha.read(tId);
+          await base44SR.entities.TurnoCancha.read(tId);
           turnosABorrar.push(tId);
         } catch (e) {
           // Turno no existe
@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
       }
 
       // Actualizar la clase actual para quitar recurrencia
-      await base44.entities.Clase.update(claseId, {
+      await base44SR.entities.Clase.update(claseId, {
         es_recurrente: false,
         recurrencia_tipo: null,
         recurrencia_hasta: null,
