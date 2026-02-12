@@ -132,9 +132,15 @@ Deno.serve(async (req) => {
       }
     }
 
+    console.log(`✅ Fin de eliminarRecurrenciaClase - Se eliminaron ${conteoTurnos} turnos y ${clasesABorrar.length} clases`);
+
     return Response.json({ 
       success: true, 
-      message: `Recurrencia eliminada. Se borraron ${conteoTurnos} turnos y ${clasesABorrar.length} clases.`
+      message: `Recurrencia eliminada. Se borraron ${conteoTurnos} turnos y ${clasesABorrar.length} clases.`,
+      detalles: {
+        turnosEliminados: conteoTurnos,
+        clasesEliminadas: clasesABorrar.length
+      }
     });
   } catch (error) {
     console.error('Error en eliminarRecurrenciaClase:', error);
