@@ -208,12 +208,12 @@ Deno.serve(async (req) => {
              // Mantener el color sin mostrar texto
            }
          } else if (turno) {
-          let textY = y + 4;
-          
-          // Tipo de turno
-          if (turno.tipo_turno === 'clase') {
-            doc.setFillColor(219, 234, 254);
-            doc.rect(x + 1, y + 1, colWidth - 2, rowHeight - 2, 'F');
+           let textY = y + 4;
+
+           // Tipo de turno
+           if (turno.tipo_turno === 'clase') {
+             doc.setFillColor(219, 234, 254);
+             doc.rect(x + 1, y + 1, colWidth - 2, altoCelda - 2, 'F');
             doc.setTextColor(37, 99, 235);
             doc.setFont(undefined, 'bold');
             doc.text('CLASE', x + 2, textY);
