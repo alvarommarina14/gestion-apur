@@ -56,20 +56,6 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pago
       toast.error(error.message || 'Error al eliminar recurrencia');
     }
   });
-
-  const eliminarTurnoMutation = useMutation({
-    mutationFn: async (turnoId) => {
-      await base44.entities.TurnoCancha.delete(turnoId);
-      return { success: true };
-    },
-    onSuccess: () => {
-      toast.success('Turno eliminado');
-      queryClient.invalidateQueries({ queryKey: ['turnos'] });
-    },
-    onError: (error) => {
-      toast.error('Error al eliminar: ' + error.message);
-    }
-  });
   // Calcular rowSpan de un turno (cuántas celdas de 30 min ocupa)
   const calcularRowSpan = (horaInicio, horaFin) => {
     const [hInicio, mInicio] = horaInicio.split(':').map(Number);
@@ -264,11 +250,9 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pago
                                     variant="ghost"
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      if (confirm('¿Eliminar este turno para siempre?')) {
-                                        eliminarTurnoMutation.mutate(turno.id);
-                                      }
+                                      setTurnoACancelar(turno);
+                                      setShowModalCancelar(true);
                                     }}
-                                    disabled={eliminarTurnoMutation.isPending}
                                     className="h-6 w-6 hover:bg-rose-100 hover:text-rose-600"
                                   >
                                     <Trash2 className="w-3 h-3" />

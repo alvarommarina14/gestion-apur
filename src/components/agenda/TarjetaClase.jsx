@@ -56,21 +56,6 @@ export default function TarjetaClase({ turno, onEdit }) {
   const esClaseRecurrente = clase?.es_recurrente === true;
   const esAbonoRecurrente = turno.es_recurrente === true && turno.tipo_turno === 'alquiler' && turno.modalidad_alquiler === 'abono';
 
-  const eliminarTurnoMutation = useMutation({
-    mutationFn: async () => {
-      await base44.entities.TurnoCancha.delete(turno.id);
-      return { success: true };
-    },
-    onSuccess: () => {
-      toast.success('Turno eliminado');
-      queryClient.invalidateQueries({ queryKey: ['turnos'] });
-      queryClient.invalidateQueries({ queryKey: ['clases'] });
-    },
-    onError: (error) => {
-      toast.error('Error al eliminar: ' + error.message);
-    }
-  });
-
   const eliminarRecurrenciaMutation = useMutation({
     mutationFn: async () => {
       if (esClaseRecurrente) {
@@ -144,11 +129,8 @@ export default function TarjetaClase({ turno, onEdit }) {
             variant="ghost"
             onClick={(e) => {
               e.stopPropagation();
-              if (confirm('¿Eliminar este turno para siempre?')) {
-                eliminarTurnoMutation.mutate();
-              }
+              setMostrarGestionar(true);
             }}
-            disabled={eliminarTurnoMutation.isPending}
             className="h-6 w-6 hover:bg-rose-100 hover:text-rose-600"
           >
             <Trash2 className="w-3 h-3" />
