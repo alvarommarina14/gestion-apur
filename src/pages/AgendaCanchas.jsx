@@ -253,13 +253,6 @@ export default function AgendaCanchas() {
           <Download className="w-4 h-4" />
           Descargar PDF
         </Button>
-        <Button
-          onClick={handleBorrarTodos}
-          variant="outline"
-          className="gap-2 text-rose-600 hover:bg-rose-50 hover:text-rose-700"
-        >
-          Borrar Todos
-        </Button>
       </div>
 
       {/* Tabs de vistas */}
