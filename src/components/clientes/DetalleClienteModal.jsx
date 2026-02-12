@@ -42,7 +42,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import SeccionCobrosPagosUnificada from './SeccionCobrosPagosUnificada';
+
 import { registrarCambioCliente, registrarEliminacion } from '@/components/utils/auditLog';
 import {
   AlertDialog,
@@ -377,10 +377,9 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
         </DialogHeader>
 
         <Tabs defaultValue="info" className="flex-1 flex flex-col overflow-hidden">
-           <TabsList className="grid w-full grid-cols-4">
+           <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="info">Info</TabsTrigger>
               <TabsTrigger value="asistencia">Asistencia</TabsTrigger>
-              <TabsTrigger value="cobros">Cobros & Pagos</TabsTrigger>
               <TabsTrigger value="historial">Historial</TabsTrigger>
             </TabsList>
 
@@ -628,10 +627,6 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
                 </>
               )}
             </div>
-          </TabsContent>
-
-          <TabsContent value="cobros" className="flex-1 overflow-y-auto px-1">
-            <SeccionCobrosPagosUnificada cliente={cliente} />
           </TabsContent>
 
           <TabsContent value="historial" className="flex-1 overflow-y-auto px-1">
