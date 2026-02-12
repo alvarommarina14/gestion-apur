@@ -561,38 +561,28 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-3 gap-3 mb-6">
-                    <Card className="shadow-sm bg-gradient-to-br from-emerald-50 to-emerald-100">
-                      <CardContent className="p-4">
-                        <div className="text-center">
-                          <p className="text-sm text-emerald-700 font-medium">Presentes</p>
-                          <p className="text-2xl font-bold text-emerald-600">
-                            {asistencias.filter(a => a.estado === 'presente').length}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    <Card className="shadow-sm bg-gradient-to-br from-amber-50 to-amber-100">
-                      <CardContent className="p-4">
-                        <div className="text-center">
-                          <p className="text-sm text-amber-700 font-medium">Con Aviso</p>
-                          <p className="text-2xl font-bold text-amber-600">
-                            {asistencias.filter(a => a.estado === 'ausente_con_aviso').length}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    <Card className="shadow-sm bg-gradient-to-br from-rose-50 to-rose-100">
-                      <CardContent className="p-4">
-                        <div className="text-center">
-                          <p className="text-sm text-rose-700 font-medium">Sin Aviso</p>
-                          <p className="text-2xl font-bold text-rose-600">
-                            {asistencias.filter(a => a.estado === 'ausente_sin_aviso').length}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
+                  <div className="grid grid-cols-2 gap-3 mb-6">
+                     <Card className="shadow-sm bg-gradient-to-br from-emerald-50 to-emerald-100">
+                       <CardContent className="p-4">
+                         <div className="text-center">
+                           <p className="text-sm text-emerald-700 font-medium">Presentes</p>
+                           <p className="text-2xl font-bold text-emerald-600">
+                             {asistencias.filter(a => a.estado === 'presente').length}
+                           </p>
+                         </div>
+                       </CardContent>
+                     </Card>
+                     <Card className="shadow-sm bg-gradient-to-br from-rose-50 to-rose-100">
+                       <CardContent className="p-4">
+                         <div className="text-center">
+                           <p className="text-sm text-rose-700 font-medium">Sin Aviso</p>
+                           <p className="text-2xl font-bold text-rose-600">
+                             {asistencias.filter(a => a.estado === 'ausente_sin_aviso').length}
+                           </p>
+                         </div>
+                       </CardContent>
+                     </Card>
+                   </div>
 
                   <div className="space-y-2">
                     {asistencias.map((asistencia) => {
