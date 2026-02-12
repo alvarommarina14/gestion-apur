@@ -181,11 +181,10 @@ Deno.serve(async (req) => {
               textY += 3.5;
               doc.text(`${turno.hora_inicio}-${turno.hora_fin}`, x + 2, textY);
               textY += 4;
-              
-              // Mostrar cada alumno
+
+              // Mostrar TODOS los alumnos
               doc.setFontSize(6);
-              const maxAlumnos = Math.min(alumnosIds.length, 3);
-              alumnosIds.slice(0, maxAlumnos).forEach((alumnoId, idx) => {
+              alumnosIds.forEach((alumnoId) => {
                 const alumno = alumnos.find(a => a.id === alumnoId);
                 if (alumno) {
                   const mesActual = fecha.substring(0, 7);
@@ -193,17 +192,13 @@ Deno.serve(async (req) => {
                     p.alumno_id === alumno.id && 
                     (p.mes_correspondiente === mesActual || p.fecha?.startsWith(mesActual))
                   );
-                  const estadoPago = pagosAlumno.length > 0 ? 'Pagado' : alumno.estado === 'moroso' ? 'Moroso' : 'Pend';
+                  const estadoPago = pagosAlumno.length > 0 ? 'Pag' : alumno.estado === 'moroso' ? 'Mor' : 'Pend';
                   const monto = alumno.precio_mensual || 0;
-                  const nombreCorto = alumno.nombre.length > 15 ? alumno.nombre.substring(0, 15) + '...' : alumno.nombre;
+                  const nombreCorto = alumno.nombre.length > 13 ? alumno.nombre.substring(0, 13) + '.' : alumno.nombre;
                   doc.text(`${nombreCorto} $${monto.toLocaleString('es-AR')} ${estadoPago}`, x + 2, textY);
-                  textY += 3.2;
+                  textY += 3;
                 }
               });
-              
-              if (alumnosIds.length > maxAlumnos) {
-                doc.text(`+${alumnosIds.length - maxAlumnos} mas`, x + 2, textY);
-              }
             } else {
               // Clase individual
               doc.setFont(undefined, 'normal');
