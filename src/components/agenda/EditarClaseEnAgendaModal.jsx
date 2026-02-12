@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { AlertTriangle, Calendar, X, Plus, Trash2 } from 'lucide-react';
+import { AlertTriangle, Calendar, X, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function EditarClaseEnAgendaModal({ open, onOpenChange, turno }) {
@@ -77,48 +77,6 @@ export default function EditarClaseEnAgendaModal({ open, onOpenChange, turno }) 
     const fin = new Date(inicio.getTime() + duracion * 60000);
     return format(fin, 'HH:mm');
   };
-
-  const eliminarSerieMutation = useMutation({
-    mutationFn: async () => {
-      // Obtener el turno para saber si tiene clase asociada
-      const turnoCompleto = await base44.entities.TurnoCancha.read(turno.id);
-      
-      // Si tiene clase asociada, obtener la serie
-      if (turnoCompleto.turno_cancha_id) {
-        const clases = await base44.entities.Clase.filter({ turno_cancha_id: turno.id });
-        if (clases.length > 0 && clases[0].serie_recurrente_id) {
-          const serie = clases[0].serie_recurrente_id;
-          const todasClases = await base44.entities.Clase.filter({ serie_recurrente_id: serie });
-          
-          const hoy = new Date();
-          hoy.setHours(0, 0, 0, 0);
-          
-          // Eliminar solo las futuras
-          for (const clase of todasClases) {
-            const fechaClase = new Date(clase.fecha);
-            fechaClase.setHours(0, 0, 0, 0);
-            if (fechaClase >= hoy) {
-              // Eliminar turno asociado si existe
-              if (clase.turno_cancha_id) {
-                await base44.entities.TurnoCancha.delete(clase.turno_cancha_id);
-              }
-              // Eliminar clase
-              await base44.entities.Clase.delete(clase.id);
-            }
-          }
-        }
-      }
-    },
-    onSuccess: () => {
-      toast.success('Serie de clases eliminada');
-      queryClient.invalidateQueries({ queryKey: ['turnos'] });
-      queryClient.invalidateQueries({ queryKey: ['clases'] });
-      onOpenChange(false);
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    }
-  });
 
   const updateMutation = useMutation({
     mutationFn: async (data) => {
@@ -369,32 +327,6 @@ export default function EditarClaseEnAgendaModal({ open, onOpenChange, turno }) 
               rows={2}
             />
           </div>
-
-          {/* Botón eliminar serie recurrente - si es recurrente */}
-          {turno?.tipo_turno === 'clase' && (
-            <>
-              {/* Verificar si es recurrente - lo detectamos si la clase tiene serie_recurrente_id */}
-              {turno?.serie_recurrente_id && (
-                <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
-                  <p className="text-sm font-medium text-orange-700 mb-3">⚠️ Eliminar toda la serie recurrente</p>
-                  <p className="text-xs text-orange-600 mb-3">Elimina permanentemente TODAS las clases futuras de esta serie</p>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={() => {
-                      if (confirm('⚠️ Esto eliminará TODAS las clases futuras de esta serie recurrente. ¿Estás seguro?')) {
-                        eliminarSerieMutation.mutate();
-                      }
-                    }}
-                    disabled={eliminarSerieMutation.isPending}
-                    className="w-full bg-orange-600 hover:bg-orange-700"
-                  >
-                    {eliminarSerieMutation.isPending ? 'Eliminando...' : 'Eliminar toda la serie'}
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
 
           <DialogFooter className="flex-col sm:flex-row gap-2 pb-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
