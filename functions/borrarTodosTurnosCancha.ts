@@ -6,41 +6,44 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
 
     if (!user || user.role !== 'admin') {
-      return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Obtener todos los turnos en lotes
-    let allTurnos = [];
+    // Obtener todos los turnos
+    const allTurnos = [];
+    let offset = 0;
     let hasMore = true;
-    let skip = 0;
     
     while (hasMore) {
-      const batch = await base44.asServiceRole.entities.TurnoCancha.list(null, 100, skip);
-      if (batch.length === 0) {
+      const turnos = await base44.asServiceRole.entities.TurnoCancha.list();
+      if (turnos.length === 0) {
         hasMore = false;
       } else {
-        allTurnos = allTurnos.concat(batch);
-        skip += 100;
+        allTurnos.push(...turnos);
+        offset += turnos.length;
       }
     }
-    
-    // Borrar en lotes de 10 para evitar rate limit
-    const batchSize = 10;
-    for (let i = 0; i < allTurnos.length; i += batchSize) {
-      const batch = allTurnos.slice(i, i + batchSize);
-      await Promise.all(
-        batch.map(turno => base44.asServiceRole.entities.TurnoCancha.delete(turno.id))
-      );
-      // Pequeña pausa entre lotes
-      await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Borrar en lotes
+    for (let i = 0; i < allTurnos.length; i += 10) {
+      const batch = allTurnos.slice(i, i + 10);
+      for (const turno of batch) {
+        try {
+          await base44.asServiceRole.entities.TurnoCancha.delete(turno.id);
+        } catch (e) {
+          console.error('Error borrando turno:', turno.id, e);
+        }
+      }
+      // Pequeño delay entre lotes
+      await new Promise(r => setTimeout(r, 100));
     }
 
     return Response.json({ 
       success: true, 
-      message: `Se eliminaron ${allTurnos.length} turnos`,
-      count: allTurnos.length
+      message: `${allTurnos.length} turnos eliminados` 
     });
   } catch (error) {
+    console.error('Error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
