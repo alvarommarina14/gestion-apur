@@ -32,9 +32,16 @@ Deno.serve(async (req) => {
       const mesesAdeudados = Math.max(0, mesesTranscurridos - pagosTotales);
       const deudaTotal = mesesAdeudados * (alumno.precio_mensual || 0);
       
+      // Determinar estado: solo moroso si pasó el día 15 y debe el mes actual
+      const diaActual = hoy.getDate();
+      let nuevoEstado = 'activo';
+      if (deudaTotal > 0 && diaActual > 15) {
+        nuevoEstado = 'moroso';
+      }
+      
       await base44Admin.entities.Alumno.update(alumno.id, {
         deuda_total: deudaTotal,
-        estado: deudaTotal > 0 ? 'moroso' : 'activo'
+        estado: nuevoEstado
       });
       
       alumnosActualizados++;

@@ -341,9 +341,7 @@ export default function ClientesPage() {
                    estadoPago = 'al_dia';
                  } else if (hoy > fechaVencimiento) {
                    estadoPago = 'moroso';
-                 } else if (alumno.estado === 'moroso') {
-                   estadoPago = 'moroso';
-                 } else {
+                 } else if (diaActual >= 5) {
                    estadoPago = 'debe';
                  }
                }
