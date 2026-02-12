@@ -29,7 +29,7 @@ const getStatusBadge = (tipo) => {
   return null;
 };
 
-export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pagosAlumnos = {}, pagosClientes = {}, onEdit, onDelete, onEditBloqueo, onDeleteBloqueo }) {
+export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pagosAlumnos = {}, pagosClientes = {}, onEdit, onDelete, onEditBloqueo, onDeleteBloqueo, turnosSeleccionados = new Set(), onToggleTurno }) {
   const [turnoACancelar, setTurnoACancelar] = useState(null);
   const [showModalCancelar, setShowModalCancelar] = useState(false);
   const [turnoAEditar, setTurnoAEditar] = useState(null);
