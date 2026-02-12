@@ -68,7 +68,27 @@ Deno.serve(async (req) => {
             notas: notas || `Pago registrado desde Clientes`
           });
         }
+        
+        // Invocar sincronización para actualizar deuda_total del alumno
+        await base44.functions.invoke('sincronizarPagosCompleto', {
+          tipo_evento: 'cliente_pago',
+          clienteId: cliente_id,
+          monto: parseFloat(monto),
+          fecha: fecha_pago,
+          mes: mes,
+          medio_pago: medio_pago
+        });
       }
+    } else {
+      // Si es cliente sin alumno, también sincronizar para actualizar deuda_total
+      await base44.functions.invoke('sincronizarPagosCompleto', {
+        tipo_evento: 'cliente_pago',
+        clienteId: cliente_id,
+        monto: parseFloat(monto),
+        fecha: fecha_pago,
+        mes: mes,
+        medio_pago: medio_pago
+      });
     }
 
     return Response.json({ 
