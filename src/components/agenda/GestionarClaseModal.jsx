@@ -263,17 +263,19 @@ export default function GestionarClaseModal({ isOpen, onClose, clase }) {
           {/* Eliminar Serie */}
           {clase.serie_recurrente_id && (
             <div className="p-4 bg-rose-50 border border-rose-200 rounded-lg">
-              <p className="text-sm font-medium text-rose-700 mb-3">⚠️ Esta es una clase recurrente</p>
+              <p className="text-sm font-medium text-rose-700 mb-3">⚠️ Esta es una clase recurrente semanal</p>
+              <p className="text-xs text-rose-600 mb-3">Elimina todas las clases futuras de esta serie</p>
               <Button
                 variant="destructive"
                 onClick={() => {
-                  if (confirm('Eliminar todas las clases futuras de esta serie?')) {
+                  if (confirm('⚠️ Esto eliminará TODAS las clases futuras de esta serie recurrente. ¿Estás seguro?')) {
                     eliminarSerieMutation.mutate();
                   }
                 }}
                 disabled={eliminarSerieMutation.isPending}
+                className="w-full"
               >
-                {eliminarSerieMutation.isPending ? 'Eliminando...' : 'Eliminar toda la serie'}
+                {eliminarSerieMutation.isPending ? 'Eliminando...' : 'Eliminar clase para siempre'}
               </Button>
             </div>
           )}
