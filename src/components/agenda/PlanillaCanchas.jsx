@@ -29,31 +29,6 @@ const getStatusBadge = (tipo) => {
   return null;
 };
 
-const getPagoColor = (pagado) => {
-   return pagado ? 'text-emerald-600 font-semibold' : 'text-orange-600 font-semibold';
-};
-
-const getEstadoPagoCliente = (clienteId, clienteNombre, pagosClientesMap = {}) => {
-  // Primero intentar con cliente_id
-  let estadoPago = pagosClientesMap[clienteId];
-  
-  // Si no existe, intentar con el nombre del cliente
-  if (!estadoPago && clienteNombre) {
-    estadoPago = pagosClientesMap[clienteNombre];
-  }
-  
-  if (!estadoPago) return { estado: 'pendiente', fuera_de_termino: false };
-
-  return estadoPago;
-};
-
-const getPagoBadgeCliente = (estadoObj) => {
-  const estado = estadoObj?.estado || 'pendiente';
-  if (estado === 'pagado') return <Badge className="bg-emerald-600 text-white text-xs">Pagado</Badge>;
-  if (estado === 'moroso') return <Badge className="bg-red-600 text-white text-xs">Moroso</Badge>;
-  return <Badge className="bg-emerald-600 text-white text-xs">Pago</Badge>;
-};
-
 export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pagosAlumnos = {}, pagosClientes = {}, onEdit, onDelete, onEditBloqueo, onDeleteBloqueo }) {
   const [turnoACancelar, setTurnoACancelar] = useState(null);
   const [showModalCancelar, setShowModalCancelar] = useState(false);
@@ -259,20 +234,17 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pago
                                 />
                               ) : (
                                 <div className="space-y-1">
-                                  <div className="flex items-center gap-1 justify-between">
-                                    <p className="text-xs font-semibold text-slate-900 truncate flex-1">
-                                      {turno.cliente}
-                                    </p>
-                                    {getPagoBadgeCliente(getEstadoPagoCliente(turno.cliente_id, turno.cliente, pagosClientes))}
-                                  </div>
-                                  <p className="text-xs text-slate-600">
-                                    {turno.hora_inicio} - {turno.hora_fin}
-                                  </p>
-                                  {turno.notas && (
-                                    <p className="text-xs text-slate-500 italic">{turno.notas}</p>
-                                  )}
-                                </div>
-                              )}
+                                   <p className="text-xs font-semibold text-slate-900 truncate">
+                                     {turno.cliente}
+                                   </p>
+                                   <p className="text-xs text-slate-600">
+                                     {turno.hora_inicio} - {turno.hora_fin}
+                                   </p>
+                                   {turno.notas && (
+                                     <p className="text-xs text-slate-500 italic">{turno.notas}</p>
+                                   )}
+                                 </div>
+                               )}
                             </div>
 
                           {/* Turnos secundarios */}
@@ -326,14 +298,7 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pago
           <Badge className="bg-red-600">Bloqueado</Badge>
           <span className="text-slate-600">Cancha no disponible</span>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-emerald-600 font-semibold">✓</span>
-          <span className="text-slate-600">Pagado</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-orange-600 font-semibold">(P)</span>
-          <span className="text-slate-600">Pendiente</span>
-        </div>
+
       </div>
 
       {/* Modal de cancelación */}
