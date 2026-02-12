@@ -90,37 +90,49 @@ Deno.serve(async (req) => {
     y += 8;
 
     // Organizar turnos por hora y cancha
-    const turnosPorHora = {};
-    horarios.forEach(hora => {
-      turnosPorHora[hora] = { '1': null, '2': null, '3': null, '4': null };
-    });
+     const turnosPorHora = {};
+     const celdasOcupadas = {}; // Rastrear celdas ocupadas por rowSpan
 
-    // Marcar turnos en todos los slots que ocupan
-    turnos.forEach(turno => {
-      const inicio = turno.hora_inicio;
-      const fin = turno.hora_fin;
-      
-      // Encontrar todos los slots entre inicio y fin
-      const inicioIdx = horarios.indexOf(inicio);
-      const finIdx = horarios.indexOf(fin);
-      
-      if (inicioIdx !== -1) {
-        // Marcar todos los slots desde inicio hasta fin (sin incluir fin)
-        for (let i = inicioIdx; i < horarios.length; i++) {
-          const horaActual = horarios[i];
-          
-          // Si llegamos al fin o lo pasamos, parar
-          if (finIdx !== -1 && i >= finIdx) break;
-          
-          // Comparar horas manualmente si fin no está en la lista de horarios
-          if (finIdx === -1 && horaActual >= fin) break;
-          
-          if (turnosPorHora[horaActual] && turnosPorHora[horaActual][turno.cancha] === null) {
-            turnosPorHora[horaActual][turno.cancha] = turno;
-          }
-        }
-      }
-    });
+     horarios.forEach(hora => {
+       turnosPorHora[hora] = { '1': null, '2': null, '3': null, '4': null };
+       celdasOcupadas[hora] = { '1': false, '2': false, '3': false, '4': false };
+     });
+
+     // Marcar turnos solo en la primera celda y calcular rowSpan
+     turnos.forEach(turno => {
+       const inicio = turno.hora_inicio;
+       const fin = turno.hora_fin;
+
+       // Encontrar todos los slots entre inicio y fin
+       const inicioIdx = horarios.indexOf(inicio);
+       const finIdx = horarios.indexOf(fin);
+
+       if (inicioIdx !== -1) {
+         // Mostrar turno solo en la primera celda
+         if (turnosPorHora[horarios[inicioIdx]] && turnosPorHora[horarios[inicioIdx]][turno.cancha] === null) {
+           // Calcular rowSpan
+           let rowSpan = 1;
+           if (finIdx !== -1) {
+             rowSpan = finIdx - inicioIdx;
+           } else {
+             // Si fin no está en lista, contar hasta que sea menor
+             for (let i = inicioIdx + 1; i < horarios.length; i++) {
+               if (horarios[i] >= fin) break;
+               rowSpan++;
+             }
+           }
+
+           turnosPorHora[horarios[inicioIdx]][turno.cancha] = { ...turno, rowSpan };
+
+           // Marcar celdas siguientes como ocupadas
+           for (let i = inicioIdx + 1; i < inicioIdx + rowSpan; i++) {
+             if (horarios[i]) {
+               celdasOcupadas[horarios[i]][turno.cancha] = true;
+             }
+           }
+         }
+       }
+     });
 
     // Renderizar filas
     doc.setFont(undefined, 'normal');
