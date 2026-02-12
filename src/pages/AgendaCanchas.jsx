@@ -478,6 +478,32 @@ export default function AgendaCanchas() {
           initialDate={selectedDate}
         />
       )}
+
+      {/* Dialog de confirmación */}
+      <AlertDialog open={showConfirmarEliminacion} onOpenChange={setShowConfirmarEliminacion}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar recurrencias</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro? Se eliminarán esta fecha y todas las futuras de {turnosSeleccionados.size} turno(s) recurrente(s).
+              Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2 bg-amber-50 p-3 rounded border border-amber-200">
+            <p className="text-sm font-semibold text-amber-900">Resumen:</p>
+            <p className="text-sm text-amber-800">{turnosSeleccionados.size} turno(s) seleccionado(s)</p>
+          </div>
+          <div className="flex gap-3 justify-end">
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmarEliminacion}
+              className="bg-amber-600 hover:bg-amber-700"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
