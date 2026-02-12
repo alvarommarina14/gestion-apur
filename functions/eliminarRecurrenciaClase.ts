@@ -89,7 +89,9 @@ Deno.serve(async (req) => {
       let turno;
       try {
         turno = await base44.asServiceRole.entities.TurnoCancha.read(turnoId);
+        console.log('📍 Turno encontrado:', { id: turnoId, cliente: turno.cliente, cancha: turno.cancha, hora_inicio: turno.hora_inicio });
       } catch (e) {
+        console.error('❌ Turno no encontrado:', turnoId, e.message);
         return Response.json({ error: 'Turno no encontrado' }, { status: 404 });
       }
       
@@ -102,7 +104,10 @@ Deno.serve(async (req) => {
           hora_inicio: turno.hora_inicio,
           estado: 'activo'
         }, '-fecha') || [];
+        console.log('🔍 Turnos encontrados en búsqueda:', allTurnos.length, 'turnos');
+        console.log('📋 Detalles:', allTurnos.map(t => ({ id: t.id, fecha: t.fecha, cliente: t.cliente })));
       } catch (e) {
+        console.error('❌ Error en búsqueda:', e.message);
         allTurnos = [];
       }
 
@@ -110,6 +115,7 @@ Deno.serve(async (req) => {
       turnosABorrar = allTurnos
         .filter(t => t.fecha >= hoy && t.id !== turnoId)
         .map(t => t.id);
+      console.log(`📌 Turnos a borrar después de filtrar (hoy=${hoy}):`, turnosABorrar.length, turnosABorrar);
     }
 
     // Eliminar turnos en lotes
