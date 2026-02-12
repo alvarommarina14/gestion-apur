@@ -169,7 +169,8 @@ Deno.serve(async (req) => {
     // ===== SINCRONIZACIÓN DESDE PAGO DE CLIENTE =====
     if (tipo_evento === 'cliente_pago' && clienteId) {
       try {
-        const cliente = await base44Admin.entities.Cliente.read(clienteId);
+        const clientes = await base44Admin.entities.Cliente.filter({ id: clienteId });
+        const cliente = clientes[0];
         if (!cliente) return Response.json({ error: 'Cliente no encontrado' }, { status: 404 });
 
         const estado = 'pagado'; // Un pago registrado siempre es pagado
