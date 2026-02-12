@@ -125,8 +125,8 @@ export default function EnviarRecordatorioBtn({ alumno, variant = "outline", siz
           
           <div className="space-y-4">
             <div className="bg-slate-50 rounded-lg p-3">
-              <p className="text-sm font-medium text-slate-800">{alumno?.nombre}</p>
-              <p className="text-xs text-slate-500">{alumno?.whatsapp}</p>
+              <p className="text-sm font-medium text-slate-800">{alumnoActualizado?.nombre}</p>
+              <p className="text-xs text-slate-500">{alumnoActualizado?.whatsapp}</p>
             </div>
             
             <div className="space-y-2">
