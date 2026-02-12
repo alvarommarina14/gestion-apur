@@ -9,47 +9,104 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { claseId, turnoId } = await req.json();
-
-    // Obtener la clase
-    const clase = await base44.entities.Clase.read(claseId);
+    const { turnoId, claseId, tipo } = await req.json();
     
-    if (!clase.es_recurrente) {
-      return Response.json({ error: 'La clase no es recurrente' }, { status: 400 });
+    const hoy = new Date().toISOString().split('T')[0];
+    let turnosABorrar = [];
+    let clasesABorrar = [];
+
+    // CASO 1: Clase recurrente
+    if (tipo === 'clase' && claseId) {
+      const clase = await base44.entities.Clase.read(claseId);
+      
+      if (!clase.es_recurrente) {
+        return Response.json({ error: 'La clase no es recurrente' }, { status: 400 });
+      }
+
+      // Si tiene serie_recurrente_id, buscar todas de esa serie
+      if (clase.serie_recurrente_id) {
+        clasesABorrar = await base44.entities.Clase.filter({
+          serie_recurrente_id: clase.serie_recurrente_id,
+          es_recurrente: true
+        }, '-fecha');
+      } else {
+        // Si no, buscar por profesor + hora + tipo
+        clasesABorrar = await base44.entities.Clase.filter({
+          profesor_id: clase.profesor_id,
+          hora_inicio: clase.hora_inicio,
+          tipo: clase.tipo,
+          es_recurrente: true
+        }, '-fecha');
+      }
+
+      // Filtrar solo las futuras a partir de la fecha actual
+      clasesABorrar = clasesABorrar.filter(c => c.fecha >= hoy && c.id !== claseId);
+
+      // Obtener los IDs de turnos asociados
+      const turnoIds = clasesABorrar
+        .map(c => c.turno_cancha_id)
+        .filter(id => id);
+
+      // Verificar que existan
+      for (const tId of turnoIds) {
+        try {
+          await base44.entities.TurnoCancha.read(tId);
+          turnosABorrar.push(tId);
+        } catch (e) {
+          // Turno no existe
+        }
+      }
+
+      // Actualizar la clase actual para quitar recurrencia
+      await base44.entities.Clase.update(claseId, {
+        es_recurrente: false,
+        recurrencia_tipo: null,
+        recurrencia_hasta: null,
+        recurrencia_cantidad: null,
+        serie_recurrente_id: null
+      });
+    } 
+    // CASO 2: Abono/Alquiler recurrente
+    else if (tipo === 'abono' && turnoId) {
+      const turno = await base44.entities.TurnoCancha.read(turnoId);
+      
+      // Buscar todos los turnos con mismo cliente, cancha, hora y estado activo
+      const allTurnos = await base44.entities.TurnoCancha.filter({
+        cliente: turno.cliente,
+        cancha: turno.cancha,
+        hora_inicio: turno.hora_inicio,
+        estado: 'activo'
+      }, '-fecha');
+
+      // Filtrar solo los futuros desde hoy
+      turnosABorrar = allTurnos
+        .filter(t => t.fecha >= hoy && t.id !== turnoId)
+        .map(t => t.id);
     }
 
-    const fechaClase = clase.fecha;
-
-    // Buscar turnos futuro con mismos criterios (profesor, hora, dia semana)
-    const allTurnos = await base44.entities.TurnoCancha.list('', 1000);
-    
-    const turnosABorrar = allTurnos.filter(t => 
-      t.profesor === clase.profesor_id || 
-      (t.fecha > fechaClase && t.hora_inicio === clase.hora_inicio)
-    );
-
     // Eliminar turnos en lotes
-    let conteo = 0;
+    let conteoTurnos = 0;
     for (let i = 0; i < turnosABorrar.length; i += 5) {
       const batch = turnosABorrar.slice(i, i + 5);
-      await Promise.all(batch.map(t => base44.entities.TurnoCancha.delete(t.id)));
-      conteo += batch.length;
+      await Promise.all(batch.map(id => base44.entities.TurnoCancha.delete(id)));
+      conteoTurnos += batch.length;
       if (i + 5 < turnosABorrar.length) {
         await new Promise(resolve => setTimeout(resolve, 100));
       }
     }
 
-    // Actualizar la clase para eliminar recurrencia
-    await base44.entities.Clase.update(claseId, {
-      es_recurrente: false,
-      recurrencia_tipo: null,
-      recurrencia_hasta: null,
-      recurrencia_cantidad: null
-    });
+    // Eliminar clases futuras si aplica
+    for (let i = 0; i < clasesABorrar.length; i += 5) {
+      const batch = clasesABorrar.slice(i, i + 5);
+      await Promise.all(batch.map(c => base44.entities.Clase.delete(c.id)));
+      if (i + 5 < clasesABorrar.length) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
 
     return Response.json({ 
       success: true, 
-      message: `Recurrencia eliminada. Se borraron ${conteo} turnos.`
+      message: `Recurrencia eliminada. Se borraron ${conteoTurnos} turnos y ${clasesABorrar.length} clases.`
     });
   } catch (error) {
     console.error('Error en eliminarRecurrenciaClase:', error);
