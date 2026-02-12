@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
 
     // CASO 1: Clase recurrente
     if (tipo === 'clase' && claseId) {
-      const clase = await base44.entities.Clase.read(claseId);
+      const clase = await base44SR.entities.Clase.read(claseId);
       
       if (!clase.es_recurrente) {
         return Response.json({ error: 'La clase no es recurrente' }, { status: 400 });
