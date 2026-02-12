@@ -237,7 +237,16 @@ Deno.serve(async (req) => {
                   textY += 3;
                 }
               });
-            } else {
+
+              // Notas si existen
+              if (turno.notas) {
+                doc.setFont(undefined, 'italic');
+                doc.setFontSize(5);
+                doc.text(`Notas: ${turno.notas}`, x + 2, textY, { maxWidth: colWidth - 4 });
+                textY += 2;
+                doc.setFontSize(7);
+              }
+              } else {
               // Clase individual
               doc.setFont(undefined, 'normal');
               const alumno = alumnos.find(a => a.id === alumnosIds[0]);
