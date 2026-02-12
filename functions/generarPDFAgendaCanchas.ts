@@ -304,109 +304,69 @@ Deno.serve(async (req) => {
     doc.text('RESUMEN ESTADÍSTICO', 15, y);
     y += 10;
 
-    // Calcular estadísticas por cancha
-    const estadsPorCancha = {};
-    const mesActual = fecha.substring(0, 7);
-    
-    canchas.forEach(cancha => {
-      const turnosCancha = turnos.filter(t => t.cancha === cancha);
-      let totalEsperado = 0;
-      let cobrado = 0;
-      let pendiente = 0;
-      let moroso = 0;
+    // Calcular estadísticas básicas por cancha (sin pagos)
+     const estadsPorCancha = {};
 
-      turnosCancha.forEach(turno => {
-        if (turno.tipo_turno === 'clase') {
-          // Para clases, sumar el precio de cada alumno
-          const alumnosIds = turno.alumnos_ids || [];
-          alumnosIds.forEach(alumnoId => {
-            const alumno = alumnos.find(a => a.id === alumnoId);
-            if (alumno) {
-              const montoAlumno = alumno.precio_mensual || 0;
-              totalEsperado += montoAlumno;
+     canchas.forEach(cancha => {
+       const turnosCancha = turnos.filter(t => t.cancha === cancha);
+       let totalMonto = 0;
 
-              // Verificar estado de pago usando estado_mes_actual
-              if (alumno.estado_mes_actual === 'pagado') {
-                cobrado += montoAlumno;
-              } else if (alumno.estado === 'moroso') {
-                moroso += montoAlumno;
-              } else {
-                pendiente += montoAlumno;
-              }
-            }
-          });
-        } else {
-          // Para alquileres, usar el monto del turno
-          const monto = turno.monto || 0;
-          totalEsperado += monto;
+       turnosCancha.forEach(turno => {
+         if (turno.tipo_turno === 'clase') {
+           // Para clases, sumar el precio de cada alumno
+           const alumnosIds = turno.alumnos_ids || [];
+           alumnosIds.forEach(alumnoId => {
+             const alumno = alumnos.find(a => a.id === alumnoId);
+             if (alumno) {
+               totalMonto += alumno.precio_mensual || 0;
+             }
+           });
+         } else {
+           // Para alquileres, usar el monto del turno
+           totalMonto += turno.monto || 0;
+         }
+       });
 
-          if (turno.pagado) {
-            cobrado += monto;
-          } else {
-            pendiente += monto;
-          }
-        }
-      });
+       estadsPorCancha[cancha] = {
+         turnos: turnosCancha.length,
+         total: totalMonto
+       };
+     });
 
-      estadsPorCancha[cancha] = {
-        turnos: turnosCancha.length,
-        total: totalEsperado,
-        cobrado,
-        pendiente,
-        moroso
-      };
-    });
+     // Mostrar por cancha
+     doc.setFontSize(11);
+     doc.setFont(undefined, 'bold');
+     doc.text('Por Cancha:', 15, y);
+     y += 7;
 
-    // Mostrar por cancha
-    doc.setFontSize(11);
-    doc.setFont(undefined, 'bold');
-    doc.text('Por Cancha:', 15, y);
-    y += 7;
+     doc.setFontSize(9);
+     canchas.forEach(cancha => {
+       const stats = estadsPorCancha[cancha];
+       doc.setFont(undefined, 'bold');
+       doc.text(`Cancha ${cancha}:`, 20, y);
+       doc.setFont(undefined, 'normal');
+       doc.text(`${stats.turnos} turnos | $${stats.total.toLocaleString('es-AR')}`, 45, y);
+       y += 6;
+     });
 
-    doc.setFontSize(9);
-    canchas.forEach(cancha => {
-      const stats = estadsPorCancha[cancha];
-      doc.setFont(undefined, 'bold');
-      doc.text(`Cancha ${cancha}:`, 20, y);
-      doc.setFont(undefined, 'normal');
-      doc.text(`${stats.turnos} turnos | $${stats.total.toLocaleString('es-AR')} total`, 45, y);
-      y += 5;
-      doc.setFontSize(8);
-      doc.text(`  Cobrado: $${stats.cobrado.toLocaleString('es-AR')} | Pendiente: $${stats.pendiente.toLocaleString('es-AR')} | Moroso: $${stats.moroso.toLocaleString('es-AR')}`, 20, y);
-      y += 6;
-      doc.setFontSize(9);
-    });
+     // Resumen general
+     y += 5;
+     const totalTurnos = turnos.length;
+     const totalMonto = Object.values(estadsPorCancha).reduce((sum, s) => sum + s.total, 0);
+     const ocupacion = Math.round((totalTurnos / (horarios.length * 4)) * 100);
 
-    // Resumen general
-    y += 5;
-    const totalTurnos = turnos.length;
-    const totalEsperado = Object.values(estadsPorCancha).reduce((sum, s) => sum + s.total, 0);
-    const totalCobrado = Object.values(estadsPorCancha).reduce((sum, s) => sum + s.cobrado, 0);
-    const totalPendiente = Object.values(estadsPorCancha).reduce((sum, s) => sum + s.pendiente, 0);
-    const totalMoroso = Object.values(estadsPorCancha).reduce((sum, s) => sum + s.moroso, 0);
-    const ocupacion = Math.round((totalTurnos / (horarios.length * 4)) * 100);
+     doc.setFontSize(11);
+     doc.setFont(undefined, 'bold');
+     doc.text('Resumen General:', 15, y);
+     y += 7;
 
-    doc.setFontSize(11);
-    doc.setFont(undefined, 'bold');
-    doc.text('Resumen General:', 15, y);
-    y += 7;
-
-    doc.setFontSize(9);
-    doc.setFont(undefined, 'normal');
-    doc.text(`Total turnos: ${totalTurnos}`, 20, y);
-    y += 5;
-    doc.text(`Ocupacion: ${ocupacion}% (${totalTurnos} de ${horarios.length * 4} slots disponibles)`, 20, y);
-    y += 5;
-    doc.text(`Ingresos esperados: $${totalEsperado.toLocaleString('es-AR')}`, 20, y);
-    y += 5;
-    const porcCobrado = totalEsperado > 0 ? Math.round((totalCobrado / totalEsperado) * 100) : 0;
-    doc.text(`Cobrados: $${totalCobrado.toLocaleString('es-AR')} (${porcCobrado}%)`, 20, y);
-    y += 5;
-    const porcPendiente = totalEsperado > 0 ? Math.round((totalPendiente / totalEsperado) * 100) : 0;
-    doc.text(`Pendientes: $${totalPendiente.toLocaleString('es-AR')} (${porcPendiente}%)`, 20, y);
-    y += 5;
-    const porcMoroso = totalEsperado > 0 ? Math.round((totalMoroso / totalEsperado) * 100) : 0;
-    doc.text(`Morosos: $${totalMoroso.toLocaleString('es-AR')} (${porcMoroso}%)`, 20, y);
+     doc.setFontSize(9);
+     doc.setFont(undefined, 'normal');
+     doc.text(`Total turnos: ${totalTurnos}`, 20, y);
+     y += 5;
+     doc.text(`Ocupacion: ${ocupacion}% (${totalTurnos} de ${horarios.length * 4} slots disponibles)`, 20, y);
+     y += 5;
+     doc.text(`Monto total: $${totalMonto.toLocaleString('es-AR')}`, 20, y);
     y += 10;
 
     // Desglose por tipo
