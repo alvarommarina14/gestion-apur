@@ -131,7 +131,7 @@ Deno.serve(async (req) => {
           doc.rect(x + 1, y + 1, colWidth - 2, rowHeight - 2, 'F');
           doc.setTextColor(185, 28, 28);
           doc.setFont(undefined, 'bold');
-          doc.text('🔴 BLOQUEADO', x + 2, y + 5);
+          doc.text('BLOQUEADO', x + 2, y + 5);
           doc.setFont(undefined, 'normal');
           doc.setFontSize(6);
           doc.text(bloqueo.motivo || '', x + 2, y + 9, { maxWidth: colWidth - 4 });
@@ -146,7 +146,7 @@ Deno.serve(async (req) => {
             doc.rect(x + 1, y + 1, colWidth - 2, rowHeight - 2, 'F');
             doc.setTextColor(37, 99, 235);
             doc.setFont(undefined, 'bold');
-            doc.text('🔵 CLASE', x + 2, textY);
+            doc.text('CLASE', x + 2, textY);
             textY += 3.5;
             
             // Verificar si es clase grupal
@@ -207,7 +207,7 @@ Deno.serve(async (req) => {
             doc.rect(x + 1, y + 1, colWidth - 2, rowHeight - 2, 'F');
             doc.setTextColor(5, 150, 105);
             doc.setFont(undefined, 'bold');
-            doc.text(`🟢 ALQUILER - ${(turno.modalidad_alquiler || '').toUpperCase()}`, x + 2, textY);
+            doc.text(`ALQUILER - ${(turno.modalidad_alquiler || '').toUpperCase()}`, x + 2, textY);
             textY += 3.5;
             
             doc.setFont(undefined, 'normal');
@@ -247,6 +247,8 @@ Deno.serve(async (req) => {
 
     // Calcular estadísticas por cancha
     const estadsPorCancha = {};
+    const mesActual = fecha.substring(0, 7);
+    
     canchas.forEach(cancha => {
       const turnosCancha = turnos.filter(t => t.cancha === cancha);
       let totalEsperado = 0;
@@ -255,17 +257,44 @@ Deno.serve(async (req) => {
       let moroso = 0;
 
       turnosCancha.forEach(turno => {
-        const monto = turno.monto || 0;
-        totalEsperado += monto;
-        
-        if (turno.pagado) {
-          cobrado += monto;
+        if (turno.tipo_turno === 'clase') {
+          // Para clases, sumar el precio de cada alumno
+          const alumnosIds = turno.alumnos_ids || [];
+          alumnosIds.forEach(alumnoId => {
+            const alumno = alumnos.find(a => a.id === alumnoId);
+            if (alumno) {
+              const montoAlumno = alumno.precio_mensual || 0;
+              totalEsperado += montoAlumno;
+              
+              // Verificar estado de pago
+              const pagosAlumno = pagos.filter(p => 
+                p.alumno_id === alumno.id && 
+                (p.mes_correspondiente === mesActual || p.fecha?.startsWith(mesActual))
+              );
+              
+              if (pagosAlumno.length > 0) {
+                cobrado += montoAlumno;
+              } else if (alumno.estado === 'moroso') {
+                moroso += montoAlumno;
+              } else {
+                pendiente += montoAlumno;
+              }
+            }
+          });
         } else {
-          const cobro = cobros.find(c => c.cliente_id === turno.cliente_id);
-          if (cobro?.estado === 'moroso') {
-            moroso += monto;
+          // Para alquileres, usar el monto del turno
+          const monto = turno.monto || 0;
+          totalEsperado += monto;
+          
+          if (turno.pagado) {
+            cobrado += monto;
           } else {
-            pendiente += monto;
+            const cobro = cobros.find(c => c.cliente_id === turno.cliente_id);
+            if (cobro?.estado === 'moroso') {
+              moroso += monto;
+            } else {
+              pendiente += monto;
+            }
           }
         }
       });
@@ -315,17 +344,20 @@ Deno.serve(async (req) => {
 
     doc.setFontSize(9);
     doc.setFont(undefined, 'normal');
-    doc.text(`🎾 Total turnos: ${totalTurnos}`, 20, y);
+    doc.text(`Total turnos: ${totalTurnos}`, 20, y);
     y += 5;
-    doc.text(`📊 Ocupación: ${ocupacion}% (${totalTurnos} de ${horarios.length * 4} slots disponibles)`, 20, y);
+    doc.text(`Ocupacion: ${ocupacion}% (${totalTurnos} de ${horarios.length * 4} slots disponibles)`, 20, y);
     y += 5;
-    doc.text(`💰 Ingresos esperados: $${totalEsperado.toLocaleString('es-AR')}`, 20, y);
+    doc.text(`Ingresos esperados: $${totalEsperado.toLocaleString('es-AR')}`, 20, y);
     y += 5;
-    doc.text(`✅ Cobrados: $${totalCobrado.toLocaleString('es-AR')} (${Math.round((totalCobrado / totalEsperado) * 100)}%)`, 20, y);
+    const porcCobrado = totalEsperado > 0 ? Math.round((totalCobrado / totalEsperado) * 100) : 0;
+    doc.text(`Cobrados: $${totalCobrado.toLocaleString('es-AR')} (${porcCobrado}%)`, 20, y);
     y += 5;
-    doc.text(`⏳ Pendientes: $${totalPendiente.toLocaleString('es-AR')} (${Math.round((totalPendiente / totalEsperado) * 100)}%)`, 20, y);
+    const porcPendiente = totalEsperado > 0 ? Math.round((totalPendiente / totalEsperado) * 100) : 0;
+    doc.text(`Pendientes: $${totalPendiente.toLocaleString('es-AR')} (${porcPendiente}%)`, 20, y);
     y += 5;
-    doc.text(`⚠️ Morosos: $${totalMoroso.toLocaleString('es-AR')} (${Math.round((totalMoroso / totalEsperado) * 100)}%)`, 20, y);
+    const porcMoroso = totalEsperado > 0 ? Math.round((totalMoroso / totalEsperado) * 100) : 0;
+    doc.text(`Morosos: $${totalMoroso.toLocaleString('es-AR')} (${porcMoroso}%)`, 20, y);
     y += 10;
 
     // Desglose por tipo
@@ -333,15 +365,30 @@ Deno.serve(async (req) => {
     const alquileresAbono = turnos.filter(t => t.tipo_turno === 'alquiler' && t.modalidad_alquiler === 'abono');
     const alquileresSueltos = turnos.filter(t => t.tipo_turno === 'alquiler' && t.modalidad_alquiler === 'suelto');
 
+    // Calcular montos correctamente para clases (sumando precio de cada alumno)
+    let montoClases = 0;
+    clases.forEach(clase => {
+      const alumnosIds = clase.alumnos_ids || [];
+      alumnosIds.forEach(alumnoId => {
+        const alumno = alumnos.find(a => a.id === alumnoId);
+        if (alumno) {
+          montoClases += alumno.precio_mensual || 0;
+        }
+      });
+    });
+
+    const montoAbono = alquileresAbono.reduce((sum, t) => sum + (t.monto || 0), 0);
+    const montoSueltos = alquileresSueltos.reduce((sum, t) => sum + (t.monto || 0), 0);
+
     doc.setFont(undefined, 'bold');
     doc.text('Desglose por Tipo:', 15, y);
     y += 7;
     doc.setFont(undefined, 'normal');
-    doc.text(`Clases: ${clases.length} turnos | $${clases.reduce((sum, t) => sum + (t.monto || 0), 0).toLocaleString('es-AR')}`, 20, y);
+    doc.text(`Clases: ${clases.length} turnos | $${montoClases.toLocaleString('es-AR')}`, 20, y);
     y += 5;
-    doc.text(`Alquileres Abono: ${alquileresAbono.length} turnos | $${alquileresAbono.reduce((sum, t) => sum + (t.monto || 0), 0).toLocaleString('es-AR')}`, 20, y);
+    doc.text(`Alquileres Abono: ${alquileresAbono.length} turnos | $${montoAbono.toLocaleString('es-AR')}`, 20, y);
     y += 5;
-    doc.text(`Alquileres Sueltos: ${alquileresSueltos.length} turnos | $${alquileresSueltos.reduce((sum, t) => sum + (t.monto || 0), 0).toLocaleString('es-AR')}`, 20, y);
+    doc.text(`Alquileres Sueltos: ${alquileresSueltos.length} turnos | $${montoSueltos.toLocaleString('es-AR')}`, 20, y);
 
     // Leyenda
     y += 15;
@@ -351,9 +398,9 @@ Deno.serve(async (req) => {
     y += 6;
     doc.setFontSize(8);
     doc.setFont(undefined, 'normal');
-    doc.text('🔵 Clase  |  🟢 Alquiler  |  🔴 Bloqueado', 20, y);
+    doc.text('CLASE  |  ALQUILER  |  BLOQUEADO', 20, y);
     y += 4;
-    doc.text('✓ Pagado  |  (P) Pendiente  |  ⚠️ Moroso', 20, y);
+    doc.text('Pagado  |  Pendiente  |  Moroso', 20, y);
 
     // Generar PDF
     const pdfBytes = doc.output('arraybuffer');
