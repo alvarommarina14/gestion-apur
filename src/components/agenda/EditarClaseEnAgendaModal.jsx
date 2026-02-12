@@ -370,6 +370,32 @@ export default function EditarClaseEnAgendaModal({ open, onOpenChange, turno }) 
             />
           </div>
 
+          {/* Botón eliminar serie recurrente - si es recurrente */}
+          {turno?.tipo_turno === 'clase' && (
+            <>
+              {/* Verificar si es recurrente - lo detectamos si la clase tiene serie_recurrente_id */}
+              {turno?.serie_recurrente_id && (
+                <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                  <p className="text-sm font-medium text-orange-700 mb-3">⚠️ Eliminar toda la serie recurrente</p>
+                  <p className="text-xs text-orange-600 mb-3">Elimina permanentemente TODAS las clases futuras de esta serie</p>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={() => {
+                      if (confirm('⚠️ Esto eliminará TODAS las clases futuras de esta serie recurrente. ¿Estás seguro?')) {
+                        eliminarSerieMutation.mutate();
+                      }
+                    }}
+                    disabled={eliminarSerieMutation.isPending}
+                    className="w-full bg-orange-600 hover:bg-orange-700"
+                  >
+                    {eliminarSerieMutation.isPending ? 'Eliminando...' : 'Eliminar toda la serie'}
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+
           <DialogFooter className="flex-col sm:flex-row gap-2 pb-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
