@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Edit2, Trash2, X } from 'lucide-react';
 import { format } from 'date-fns';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import GestionarClaseModal from './GestionarClaseModal';
@@ -11,8 +11,24 @@ export default function TarjetaClase({ turno, onEdit }) {
   const [mostrarGestionar, setMostrarGestionar] = useState(false);
   const queryClient = useQueryClient();
 
+  // Buscar la clase asociada si el turno tiene clase_id
+  const { data: clase } = useQuery({
+    queryKey: ['clase', turno.clase_id || turno.id],
+    queryFn: async () => {
+      if (turno.clase_id) {
+        try {
+          return await base44.entities.Clase.read(turno.clase_id);
+        } catch (e) {
+          return null;
+        }
+      }
+      return null;
+    },
+    enabled: !!turno.clase_id || !!turno.id,
+  });
+
   // Detectar si es clase recurrente o abono recurrente
-  const esClaseRecurrente = turno.es_recurrente === true;
+  const esClaseRecurrente = clase?.es_recurrente === true;
   const esAbonoRecurrente = turno.modalidad_alquiler === 'abono' && turno.tipo_turno === 'alquiler';
 
   const eliminarRecurrenciaMutation = useMutation({
