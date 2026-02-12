@@ -279,7 +279,7 @@ Deno.serve(async (req) => {
             textY += 3.5;
             
             doc.setFont(undefined, 'normal');
-            doc.text(`${turno.cliente} - $${(turno.monto || 0).toLocaleString('es-AR')}`, x + 2, textY);
+            doc.text(`${turno.cliente}`, x + 2, textY);
             textY += 3.5;
             doc.text(`${turno.hora_inicio}-${turno.hora_fin}`, x + 2, textY);
             textY += 3.5;
