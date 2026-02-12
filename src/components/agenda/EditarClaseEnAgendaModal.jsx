@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { AlertTriangle, Calendar, X, Plus } from 'lucide-react';
+import { AlertTriangle, Calendar, X, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function EditarClaseEnAgendaModal({ open, onOpenChange, turno }) {
