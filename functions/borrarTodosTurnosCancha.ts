@@ -37,8 +37,8 @@ Deno.serve(async (req) => {
 
     return Response.json({ 
       success: true, 
-      message: `Se eliminaron ${turnos.length} turnos`,
-      count: turnos.length
+      message: `Se eliminaron ${allTurnos.length} turnos`,
+      count: allTurnos.length
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
