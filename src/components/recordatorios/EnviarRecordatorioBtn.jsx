@@ -32,20 +32,8 @@ export default function EnviarRecordatorioBtn({ alumno, variant = "outline", siz
   const [mensaje, setMensaje] = useState('');
   
   React.useEffect(() => {
-    if (open) {
-      // Refrescar datos cuando se abre el modal
-      if (alumno?.id) {
-        // Para alumnos
-        if (alumno.profesor_id) {
-          base44.entities.Alumno.read(alumno.id).then(setAlumnoActualizado).catch(() => setAlumnoActualizado(alumno));
-        } 
-        // Para clientes
-        else {
-          base44.entities.Cliente.read(alumno.id).then(setAlumnoActualizado).catch(() => setAlumnoActualizado(alumno));
-        }
-      }
-    }
-  }, [open]);
+    setAlumnoActualizado(alumno);
+  }, [alumno]);
 
   React.useEffect(() => {
     if (open && alumnoActualizado) {
