@@ -136,7 +136,12 @@ export default function AgendaCanchas() {
     if (!confirm('¿Eliminar este turno?')) return;
     try {
       await base44.entities.TurnoCancha.delete(turno.id);
-      queryClient.invalidateQueries({ queryKey: ['turnos'] });
+
+      // Actualizar el cache inmediatamente removiendo el turno
+      queryClient.setQueryData(['turnos'], (prevTurnos) => 
+        prevTurnos.filter(t => t.id !== turno.id)
+      );
+
       toast.success('Turno eliminado');
     } catch (error) {
       toast.error('Error al eliminar: ' + error.message);
@@ -164,7 +169,12 @@ export default function AgendaCanchas() {
     if (!confirm('¿Eliminar este bloqueo?')) return;
     try {
       await base44.entities.DisponibilidadCancha.delete(bloqueo.id);
-      queryClient.invalidateQueries({ queryKey: ['bloqueos'] });
+
+      // Actualizar el cache inmediatamente removiendo el bloqueo
+      queryClient.setQueryData(['bloqueos'], (prevBloqueos) => 
+        prevBloqueos.filter(b => b.id !== bloqueo.id)
+      );
+
       toast.success('Bloqueo eliminado');
     } catch (error) {
       toast.error('Error al eliminar: ' + error.message);
