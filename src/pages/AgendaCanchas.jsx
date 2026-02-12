@@ -69,8 +69,8 @@ export default function AgendaCanchas() {
              // Para meses pasados/futuros, usar solo los datos guardados
              const cobro = cobros.find(c => c.cliente_id === alumno.id);
              const pago = pagos.find(p => p.alumno_id === alumno.id);
-             
-             if (pago) {
+
+             if (pago || (cobro && cobro.estado === 'pagado')) {
                estadosPago[alumno.id] = { estado: 'pagado', fuera_de_termino: false };
              } else if (cobro) {
                estadosPago[alumno.id] = { estado: cobro.estado, fuera_de_termino: cobro.fuera_de_termino };
@@ -80,9 +80,10 @@ export default function AgendaCanchas() {
 
            // Para el mes actual, calcular dinámicamente
            const pago = pagos.find(p => p.alumno_id === alumno.id);
-           
-           if (pago) {
-             // Si tiene pago registrado → Pagado
+           const cobro = cobros.find(c => c.cliente_id === alumno.id);
+
+           if (pago || (cobro && cobro.estado === 'pagado')) {
+             // Si tiene pago registrado o cobro pagado → Pagado
              estadosPago[alumno.id] = { estado: 'pagado', fuera_de_termino: false };
            } else {
              // Sin pago → calcular según la fecha
