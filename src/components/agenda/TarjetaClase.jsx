@@ -99,13 +99,14 @@ export default function TarjetaClase({ turno, onEdit }) {
               variant="ghost"
               onClick={(e) => {
                 e.stopPropagation();
-                if (confirm(`¿Eliminar esta fecha y todas las futuras de la recurrencia?`)) {
+                const msg = esClaseRecurrente ? '¿Eliminar esta fecha y todas las futuras clases de la recurrencia?' : '¿Eliminar todos los turnos de recurrencia semanal?';
+                if (confirm(msg)) {
                   eliminarRecurrenciaMutation.mutate();
                 }
               }}
               disabled={eliminarRecurrenciaMutation.isPending}
               className="h-6 w-6 hover:bg-amber-100 hover:text-amber-600"
-              title="Eliminar recurrencia"
+              title={esClaseRecurrente ? "Eliminar recurrencia de clase" : "Borrar recurrencia semanal"}
             >
               <X className="w-3 h-3" />
             </Button>
