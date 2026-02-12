@@ -58,12 +58,19 @@ export default function TarjetaClase({ turno, onEdit }) {
 
   const eliminarRecurrenciaMutation = useMutation({
     mutationFn: async () => {
-      const res = await base44.functions.invoke('eliminarRecurrenciaClase', {
-        turnoId: turno.id,
-        claseId: clase?.id,
-        tipo: esClaseRecurrente ? 'clase' : 'abono'
-      });
-      return res.data;
+      if (esClaseRecurrente) {
+        const res = await base44.functions.invoke('eliminarRecurrenciaClase', {
+          turnoId: turno.id,
+          claseId: clase?.id,
+          tipo: 'clase'
+        });
+        return res.data;
+      } else if (esAbonoRecurrente) {
+        const res = await base44.functions.invoke('borrarRecurrenciaAlquiler', {
+          turnoId: turno.id
+        });
+        return res.data;
+      }
     },
     onSuccess: (data) => {
       toast.success(data.message || 'Recurrencia eliminada');
