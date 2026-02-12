@@ -49,44 +49,66 @@ export default function AgendaCanchas() {
      queryKey: ['cobros', mesFiltro],
      queryFn: async () => {
        try {
-         const [cobros, pagos] = await Promise.all([
+         const [cobros, pagos, alumnos] = await Promise.all([
            base44.entities.CobroCliente.filter({ mes: mesFiltro }),
-           base44.entities.Pago.filter({ mes_correspondiente: mesFiltro })
+           base44.entities.Pago.filter({ mes_correspondiente: mesFiltro }),
+           base44.entities.Alumno.list()
          ]);
 
-         console.log('🔍 DEBUG - Cobros traídos para mes', mesFiltro, ':', cobros);
-         console.log('🔍 DEBUG - Pagos traídos para mes', mesFiltro, ':', pagos);
-
-         // Mapear cliente_id (alumno_id) directamente a su estado de pago
          const estadosPago = {};
-
-         // Verificar si ya pasó el día 15 del mes actual
          const hoy = new Date();
          const [año, mes] = mesFiltro.split('-');
          const vencimiento = new Date(parseInt(año), parseInt(mes) - 1, 15);
+         const diaActual = hoy.getDate();
          const pasóVencimiento = hoy > vencimiento;
+         const esElMesActual = format(hoy, 'yyyy-MM') === mesFiltro;
 
-         // Primero agregar cobros
-         cobros.forEach(cobro => {
-           console.log('📌 Procesando cobro:', cobro.cliente_id, cobro.cliente_nombre, cobro.estado);
-           let estado = cobro.estado;
-
-           // Si pasó la fecha de vencimiento y sigue pendiente, marcar como moroso
-           if (pasóVencimiento && estado === 'pendiente') {
-             estado = 'moroso';
-             console.log('⚠️ MOROSO: Pasó la fecha de vencimiento para', cobro.cliente_nombre);
+         // Procesar alumnos y calcular su estado dinámicamente
+         alumnos.forEach(alumno => {
+           if (!esElMesActual) {
+             // Para meses pasados/futuros, usar solo los datos guardados
+             const cobro = cobros.find(c => c.cliente_id === alumno.id);
+             const pago = pagos.find(p => p.alumno_id === alumno.id);
+             
+             if (pago) {
+               estadosPago[alumno.id] = { estado: 'pagado', fuera_de_termino: false };
+             } else if (cobro) {
+               estadosPago[alumno.id] = { estado: cobro.estado, fuera_de_termino: cobro.fuera_de_termino };
+             }
+             return;
            }
 
-           estadosPago[cobro.cliente_id] = { estado, fuera_de_termino: cobro.fuera_de_termino };
+           // Para el mes actual, calcular dinámicamente
+           const pago = pagos.find(p => p.alumno_id === alumno.id);
+           
+           if (pago) {
+             // Si tiene pago registrado → Pagado
+             estadosPago[alumno.id] = { estado: 'pagado', fuera_de_termino: false };
+           } else {
+             // Sin pago → calcular según la fecha
+             if (pasóVencimiento) {
+               // Pasó el día 15 sin pago → Moroso
+               estadosPago[alumno.id] = { estado: 'moroso', fuera_de_termino: false };
+             } else if (diaActual >= 5) {
+               // Entre día 5-15 sin pago → Pendiente
+               estadosPago[alumno.id] = { estado: 'pendiente', fuera_de_termino: false };
+             }
+           }
          });
 
-         // Si hay pagos de alumno, marcar como pagado
-         pagos.forEach(pago => {
-           console.log('💰 Procesando pago:', pago.alumno_id, pago.alumno_nombre);
-           estadosPago[pago.alumno_id] = { estado: 'pagado', fuera_de_termino: false };
+         // Procesar clientes que no son alumnos (solo tienen cobros)
+         cobros.forEach(cobro => {
+           if (!estadosPago[cobro.cliente_id]) {
+             let estado = cobro.estado;
+             
+             if (esElMesActual && pasóVencimiento && estado === 'pendiente') {
+               estado = 'moroso';
+             }
+             
+             estadosPago[cobro.cliente_id] = { estado, fuera_de_termino: cobro.fuera_de_termino };
+           }
          });
 
-         console.log('✅ Estados finales:', estadosPago);
          return estadosPago;
        } catch (error) {
          console.error('Error al traer cobros y pagos:', error);
