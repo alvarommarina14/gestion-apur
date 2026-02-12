@@ -143,41 +143,37 @@ export default function ClientesPage() {
     }
 
     // Filtrar por estado de pago
-    if (filtroEstadoPago !== 'todos') {
-      filtrados = filtrados.filter(cliente => {
-        // Para clientes clase con alumno asociado
-        if (cliente.es_alumno) {
-          const alumno = alumnos.find(a => 
-            a.nombre.toLowerCase() === cliente.nombre.toLowerCase()
-          );
-          if (alumno) {
-            if (filtroEstadoPago === 'al_dia') {
-              return alumno.estado_mes_actual === 'pagado' || alumno.estado === 'activo';
-            } else if (filtroEstadoPago === 'moroso') {
-              return alumno.estado === 'moroso' || alumno.estado_mes_actual === 'moroso';
-            } else if (filtroEstadoPago === 'debe') {
-              return alumno.estado_mes_actual === 'debe' || alumno.estado_mes_actual === 'pendiente';
-            }
-          }
-        }
-        
-        // Para clientes de alquiler (abono)
-        if (cliente.tipo_cliente === 'abono') {
-          const cobrosPendientes = cobros.filter(c => 
-            c.cliente_id === cliente.id && c.estado !== 'pagado'
-          );
-          if (filtroEstadoPago === 'al_dia') {
-            return cobrosPendientes.length === 0;
-          } else if (filtroEstadoPago === 'moroso') {
-            return cobros.some(c => c.cliente_id === cliente.id && c.estado === 'moroso');
-          } else if (filtroEstadoPago === 'debe') {
-            return cobros.some(c => c.cliente_id === cliente.id && c.estado === 'pendiente');
-          }
-        }
-        
-        return false;
-      });
-    }
+     if (filtroEstadoPago !== 'todos') {
+       filtrados = filtrados.filter(cliente => {
+         // Para clientes clase con alumno asociado
+         if (cliente.es_alumno) {
+           const alumno = alumnos.find(a => 
+             a.nombre.toLowerCase() === cliente.nombre.toLowerCase()
+           );
+           if (alumno) {
+             if (filtroEstadoPago === 'al_dia') {
+               return alumno.estado_mes_actual === 'pagado' || alumno.estado === 'activo';
+             } else if (filtroEstadoPago === 'moroso') {
+               return alumno.estado === 'moroso' || alumno.estado_mes_actual === 'moroso';
+             }
+           }
+         }
+
+         // Para clientes de alquiler (abono)
+         if (cliente.tipo_cliente === 'abono') {
+           const cobrosPendientes = cobros.filter(c => 
+             c.cliente_id === cliente.id && c.estado !== 'pagado'
+           );
+           if (filtroEstadoPago === 'al_dia') {
+             return cobrosPendientes.length === 0;
+           } else if (filtroEstadoPago === 'moroso') {
+             return cobros.some(c => c.cliente_id === cliente.id && c.estado === 'moroso');
+           }
+         }
+
+         return false;
+       });
+     }
 
     // Filtrar por búsqueda
     if (busqueda.trim()) {
