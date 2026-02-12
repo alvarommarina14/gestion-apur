@@ -237,163 +237,165 @@ export default function GestionarClaseModal({ isOpen, onClose, clase }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
-        <DialogHeader>
+      <DialogContent className="max-w-3xl h-[95vh] p-0 flex flex-col">
+        <DialogHeader className="px-6 pt-6 pb-0 flex-shrink-0">
           <DialogTitle>Gestionar Clase - {format(new Date(clase.fecha), 'dd/MM/yyyy HH:mm')}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 overflow-y-auto flex-1">
-          {/* Liberar Cancha */}
-          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm font-medium text-blue-700 mb-3">💼 Liberar cancha para otro turno</p>
-            <p className="text-xs text-blue-600 mb-3">Cancela la clase, crea recuperos para todos los alumnos y libera el horario</p>
-            <Button
-              onClick={() => {
-                if (confirm('Se cancelará la clase y se crearán recuperos para todos los alumnos. ¿Continuar?')) {
-                  liberarCanchaMutation.mutate();
-                }
-              }}
-              disabled={liberarCanchaMutation.isPending}
-              className="w-full bg-blue-600 hover:bg-blue-700"
-            >
-              {liberarCanchaMutation.isPending ? 'Liberando...' : 'Liberar cancha'}
-            </Button>
-          </div>
+        <div className="overflow-y-auto flex-1 px-6 py-4">
+          <div className="space-y-4">
+            {/* Liberar Cancha */}
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm font-medium text-blue-700 mb-3">💼 Liberar cancha para otro turno</p>
+              <p className="text-xs text-blue-600 mb-3">Cancela la clase, crea recuperos para todos los alumnos y libera el horario</p>
+              <Button
+                onClick={() => {
+                  if (confirm('Se cancelará la clase y se crearán recuperos para todos los alumnos. ¿Continuar?')) {
+                    liberarCanchaMutation.mutate();
+                  }
+                }}
+                disabled={liberarCanchaMutation.isPending}
+                className="w-full bg-blue-600 hover:bg-blue-700"
+              >
+                {liberarCanchaMutation.isPending ? 'Liberando...' : 'Liberar cancha'}
+              </Button>
+            </div>
 
-          {/* Eliminar Serie - Si es recurrente */}
-          {clase.serie_recurrente_id && (
-            <div className="p-4 bg-rose-50 border border-rose-200 rounded-lg">
-              <p className="text-sm font-medium text-rose-700 mb-3">⚠️ Eliminar toda la serie recurrente</p>
-              <p className="text-xs text-rose-600 mb-3">Elimina permanentemente todas las clases futuras de esta serie</p>
+            {/* Eliminar Serie - Si es recurrente */}
+            {clase.serie_recurrente_id && (
+              <div className="p-4 bg-rose-50 border border-rose-200 rounded-lg">
+                <p className="text-sm font-medium text-rose-700 mb-3">⚠️ Eliminar toda la serie recurrente</p>
+                <p className="text-xs text-rose-600 mb-3">Elimina permanentemente todas las clases futuras de esta serie</p>
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    if (confirm('⚠️ Esto eliminará TODAS las clases futuras de esta serie recurrente. ¿Estás seguro?')) {
+                      eliminarSerieMutation.mutate();
+                    }
+                  }}
+                  disabled={eliminarSerieMutation.isPending}
+                  className="w-full"
+                >
+                  {eliminarSerieMutation.isPending ? 'Eliminando...' : 'Eliminar para siempre'}
+                </Button>
+              </div>
+            )}
+
+            {/* Eliminar Clase */}
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm font-medium text-red-700 mb-3">🗑️ Eliminar esta clase</p>
+              <p className="text-xs text-red-600 mb-3">Elimina solo esta clase por error. Se borrarán la clase y su turno asociado.</p>
               <Button
                 variant="destructive"
                 onClick={() => {
-                  if (confirm('⚠️ Esto eliminará TODAS las clases futuras de esta serie recurrente. ¿Estás seguro?')) {
-                    eliminarSerieMutation.mutate();
+                  if (confirm('¿Eliminar esta clase? Esta acción no se puede deshacer.')) {
+                    eliminarClaseMutation.mutate();
                   }
                 }}
-                disabled={eliminarSerieMutation.isPending}
+                disabled={eliminarClaseMutation.isPending}
                 className="w-full"
               >
-                {eliminarSerieMutation.isPending ? 'Eliminando...' : 'Eliminar para siempre'}
+                <Trash2 className="w-4 h-4 mr-2" />
+                {eliminarClaseMutation.isPending ? 'Eliminando...' : 'Eliminar clase'}
               </Button>
             </div>
-          )}
 
-          {/* Eliminar Clase */}
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm font-medium text-red-700 mb-3">🗑️ Eliminar esta clase</p>
-            <p className="text-xs text-red-600 mb-3">Elimina solo esta clase por error. Se borrarán la clase y su turno asociado.</p>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                if (confirm('¿Eliminar esta clase? Esta acción no se puede deshacer.')) {
-                  eliminarClaseMutation.mutate();
-                }
-              }}
-              disabled={eliminarClaseMutation.isPending}
-              className="w-full"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              {eliminarClaseMutation.isPending ? 'Eliminando...' : 'Eliminar clase'}
-            </Button>
-          </div>
+            {/* Gestionar Alumnos */}
+            <div>
+              <h3 className="font-semibold text-slate-700 mb-3">Gestionar Alumnos ({clase.alumnos_nombres?.length || 0})</h3>
+              <div className="space-y-2">
+                {clase.alumnos_nombres?.map((nombre, idx) => {
+                  const alumnoId = clase.alumnos_ids[idx];
+                  const isExpanded = expandedAlumno === alumnoId;
 
-          {/* Gestionar Alumnos */}
-          <div>
-            <h3 className="font-semibold text-slate-700 mb-3">Gestionar Alumnos ({clase.alumnos_nombres?.length || 0})</h3>
-            <div className="space-y-2">
-              {clase.alumnos_nombres?.map((nombre, idx) => {
-                const alumnoId = clase.alumnos_ids[idx];
-                const isExpanded = expandedAlumno === alumnoId;
+                  return (
+                    <div key={alumnoId} className="border border-slate-200 rounded-lg overflow-hidden">
+                      <button
+                        onClick={() => setExpandedAlumno(isExpanded ? null : alumnoId)}
+                        className="w-full p-3 bg-slate-50 hover:bg-slate-100 flex items-center justify-between font-medium text-sm text-slate-700"
+                      >
+                        <span>{nombre}</span>
+                        {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </button>
 
-                return (
-                  <div key={alumnoId} className="border border-slate-200 rounded-lg overflow-hidden">
-                    <button
-                      onClick={() => setExpandedAlumno(isExpanded ? null : alumnoId)}
-                      className="w-full p-3 bg-slate-50 hover:bg-slate-100 flex items-center justify-between font-medium text-sm text-slate-700"
-                    >
-                      <span>{nombre}</span>
-                      {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                    </button>
-
-                    {isExpanded && (
-                      <div className="p-4 bg-white space-y-3 border-t border-slate-200">
-                        {/* Pierde Clase */}
-                        <Button
-                          variant="outline"
-                          className="w-full text-sm justify-start"
-                          onClick={() => pierdeClaseMutation.mutate(alumnoId)}
-                          disabled={pierdeClaseMutation.isPending}
-                        >
-                          {pierdeClaseMutation.isPending ? 'Registrando...' : '❌ Pierde clase (<24hs)'}
-                        </Button>
-
-                        {/* Recupera Clase */}
-                        {mostrarMotivoAlumno === alumnoId ? (
-                          <div className="space-y-2">
-                            <Select value={motivo} onValueChange={setMotivo}>
-                              <SelectTrigger className="text-sm">
-                                <SelectValue placeholder="Selecciona motivo..." />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {motivos.map(m => (
-                                  <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                className="flex-1 bg-blue-600 hover:bg-blue-700"
-                                onClick={() => recuperaClaseMutation.mutate({ alumnoId, motivo })}
-                                disabled={recuperaClaseMutation.isPending || !motivo}
-                              >
-                                {recuperaClaseMutation.isPending ? 'Creando...' : 'Confirmar'}
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="flex-1"
-                                onClick={() => {
-                                  setMostrarMotivoAlumno(null);
-                                  setMotivo('');
-                                }}
-                              >
-                                Cancelar
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
+                      {isExpanded && (
+                        <div className="p-4 bg-white space-y-3 border-t border-slate-200">
+                          {/* Pierde Clase */}
                           <Button
                             variant="outline"
                             className="w-full text-sm justify-start"
-                            onClick={() => setMostrarMotivoAlumno(alumnoId)}
+                            onClick={() => pierdeClaseMutation.mutate(alumnoId)}
+                            disabled={pierdeClaseMutation.isPending}
                           >
-                            🔄 Recupera clase (>24hs)
+                            {pierdeClaseMutation.isPending ? 'Registrando...' : '❌ Pierde clase (<24hs)'}
                           </Button>
-                        )}
 
-                        {/* Registrar Asistencia */}
-                        <Button
-                          variant="outline"
-                          className="w-full text-sm justify-start"
-                          onClick={() => registraAsistenciaMutation.mutate(alumnoId)}
-                          disabled={registraAsistenciaMutation.isPending}
-                        >
-                          {registraAsistenciaMutation.isPending ? 'Registrando...' : '✅ Registrar asistencia'}
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+                          {/* Recupera Clase */}
+                          {mostrarMotivoAlumno === alumnoId ? (
+                            <div className="space-y-2">
+                              <Select value={motivo} onValueChange={setMotivo}>
+                                <SelectTrigger className="text-sm">
+                                  <SelectValue placeholder="Selecciona motivo..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {motivos.map(m => (
+                                    <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                                  onClick={() => recuperaClaseMutation.mutate({ alumnoId, motivo })}
+                                  disabled={recuperaClaseMutation.isPending || !motivo}
+                                >
+                                  {recuperaClaseMutation.isPending ? 'Creando...' : 'Confirmar'}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="flex-1"
+                                  onClick={() => {
+                                    setMostrarMotivoAlumno(null);
+                                    setMotivo('');
+                                  }}
+                                >
+                                  Cancelar
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              className="w-full text-sm justify-start"
+                              onClick={() => setMostrarMotivoAlumno(alumnoId)}
+                            >
+                              🔄 Recupera clase (>24hs)
+                            </Button>
+                          )}
+
+                          {/* Registrar Asistencia */}
+                          <Button
+                            variant="outline"
+                            className="w-full text-sm justify-start"
+                            onClick={() => registraAsistenciaMutation.mutate(alumnoId)}
+                            disabled={registraAsistenciaMutation.isPending}
+                          >
+                            {registraAsistenciaMutation.isPending ? 'Registrando...' : '✅ Registrar asistencia'}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="flex gap-2 pt-4 border-t border-slate-200 mt-4 flex-shrink-0">
-          <Button variant="outline" onClick={onClose} className="flex-1">
+        <div className="border-t border-slate-200 px-6 py-4 flex-shrink-0 bg-white">
+          <Button variant="outline" onClick={onClose} className="w-full">
             Cerrar
           </Button>
         </div>
