@@ -24,7 +24,8 @@ Deno.serve(async (req) => {
 
     const doc = new jsPDF({ 
       orientation: 'landscape',
-      compress: true
+      unit: 'mm',
+      format: 'a4'
     });
     const pageWidth = doc.internal.pageSize.getWidth();
     let y = 20;
@@ -427,16 +428,14 @@ Deno.serve(async (req) => {
     y += 4;
     doc.text('Pagado  |  Pendiente  |  Moroso', 20, y);
 
-    // Generar PDF como blob y convertir a ArrayBuffer
-    const pdfBlob = doc.output('blob');
-    const pdfArrayBuffer = await pdfBlob.arrayBuffer();
+    // Generar PDF
+    const pdfData = doc.output('arraybuffer');
 
-    return new Response(pdfArrayBuffer, {
+    return new Response(pdfData, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="agenda-canchas-${fecha}.pdf"`,
-        'Content-Length': pdfArrayBuffer.byteLength.toString()
+        'Content-Disposition': `attachment; filename="agenda-canchas-${fecha}.pdf"`
       }
     });
   } catch (error) {
