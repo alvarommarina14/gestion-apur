@@ -96,7 +96,7 @@ export default function NuevoAlquilerModal({ isOpen, onClose, initialDate }) {
         notas
       };
 
-      if (recurrenciaSemanal) {
+      if (recurrenciaSemanal && modalidad === 'abono') {
         // Crear 52 alquileres (un año de repeticiones semanales)
         for (let i = 0; i < 52; i++) {
           const fecha = new Date(initialDate);
@@ -292,19 +292,21 @@ export default function NuevoAlquilerModal({ isOpen, onClose, initialDate }) {
             />
           </div>
 
-          {/* Recurrencia semanal */}
-          <div className="flex items-center gap-3 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
-            <input
-              type="checkbox"
-              id="recurrencia-alquiler"
-              checked={recurrenciaSemanal}
-              onChange={(e) => setRecurrenciaSemanal(e.target.checked)}
-              className="w-4 h-4 rounded cursor-pointer"
-            />
-            <label htmlFor="recurrencia-alquiler" className="text-sm font-medium text-emerald-700 cursor-pointer">
-              Repetir semanalmente durante un año
-            </label>
-          </div>
+          {/* Recurrencia semanal - Solo para modalidad abono */}
+          {modalidad === 'abono' && (
+            <div className="flex items-center gap-3 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+              <input
+                type="checkbox"
+                id="recurrencia-alquiler"
+                checked={recurrenciaSemanal}
+                onChange={(e) => setRecurrenciaSemanal(e.target.checked)}
+                className="w-4 h-4 rounded cursor-pointer"
+              />
+              <label htmlFor="recurrencia-alquiler" className="text-sm font-medium text-emerald-700 cursor-pointer">
+                Repetir semanalmente durante un año
+              </label>
+            </div>
+          )}
 
           {/* Botones */}
           <div className="flex gap-3 justify-end">
