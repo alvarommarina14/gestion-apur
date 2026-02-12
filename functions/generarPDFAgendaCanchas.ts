@@ -19,8 +19,6 @@ Deno.serve(async (req) => {
       fecha_fin: fecha
     });
     const alumnos = await base44.entities.Alumno.list();
-    const pagos = await base44.entities.Pago.list();
-    const cobros = await base44.entities.CobroCliente.list();
 
     const doc = new jsPDF({ 
       orientation: 'landscape',
