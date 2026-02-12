@@ -293,14 +293,19 @@ Deno.serve(async (req) => {
           doc.setTextColor(0, 0, 0);
         } else {
           doc.setFillColor(248, 250, 252);
-          doc.rect(x + 1, y + 1, colWidth - 2, rowHeight - 2, 'F');
+          doc.rect(x + 1, y + 1, colWidth - 2, altoCelda - 2, 'F');
           doc.setTextColor(148, 163, 184);
           doc.text('Disponible', x + colWidth / 2, y + 9, { align: 'center' });
           doc.setTextColor(0, 0, 0);
         }
-      });
+        });
 
-      y += rowHeight;
+        // Solo avanzar si no es una celda ocupada (para evitar saltos)
+        if (!Object.values(celdasOcupadas[hora]).some(ocupada => ocupada && turnosPorHora[hora][Object.keys(turnosPorHora[hora]).find(c => celdasOcupadas[hora][c])])) {
+        y += rowHeight;
+        } else {
+        y += rowHeight;
+        }
     });
 
     // RESUMEN ESTADÍSTICO (nueva página)
