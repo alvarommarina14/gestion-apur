@@ -93,9 +93,20 @@ export default function RegistrarPagoCobroModal({ open, onOpenChange, cobro, cli
             <p className="text-xs text-slate-500">
               {cobro?.tipo_cobro === 'abono_mensual' ? 'Abono' : 'Cancha suelta'} - {cobro?.mes}
             </p>
-            <p className="text-lg font-bold text-emerald-600 mt-2">
-              ${(cobro?.monto || 0).toLocaleString('es-AR')}
-            </p>
+            <div className="flex items-center justify-between mt-2">
+              <span className="text-xs text-slate-500">Precio mensual</span>
+              <span className="text-lg font-bold text-emerald-600">
+                ${(cobro?.monto || 0).toLocaleString('es-AR')}
+              </span>
+            </div>
+            {cliente?.deuda_total > 0 && (
+              <div className="flex items-center justify-between mt-1">
+                <span className="text-xs text-rose-600">Deuda acumulada</span>
+                <span className="text-sm font-semibold text-rose-600">
+                  ${(cliente.deuda_total || 0).toLocaleString('es-AR')}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
