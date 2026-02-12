@@ -39,6 +39,23 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pago
   const [showModalEditar, setShowModalEditar] = useState(false);
   const [claseAEditar, setClaseAEditar] = useState(null);
   const [showModalEditarClase, setShowModalEditarClase] = useState(false);
+  const queryClient = useQueryClient();
+
+  const borrarRecurrenciaMutation = useMutation({
+    mutationFn: async (turnoId) => {
+      const res = await base44.functions.invoke('borrarRecurrenciaAlquiler', {
+        turnoId
+      });
+      return res.data;
+    },
+    onSuccess: (data) => {
+      toast.success(data.message || 'Recurrencia eliminada');
+      queryClient.invalidateQueries({ queryKey: ['turnos'] });
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Error al eliminar recurrencia');
+    }
+  });
   // Calcular rowSpan de un turno (cuántas celdas de 30 min ocupa)
   const calcularRowSpan = (horaInicio, horaFin) => {
     const [hInicio, mInicio] = horaInicio.split(':').map(Number);
