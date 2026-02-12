@@ -415,11 +415,7 @@ export default function ClientesPage() {
                             Al día
                           </Badge>
                         )}
-                        {estadoPago === 'debe' && (
-                          <Badge className="text-xs bg-amber-100 text-amber-700">
-                            Debe pagar
-                          </Badge>
-                        )}
+
                         {estadoPago === 'moroso' && (
                           <Badge className="text-xs bg-rose-100 text-rose-700">
                             Moroso
