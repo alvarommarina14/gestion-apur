@@ -411,16 +411,15 @@ export default function ClientesPage() {
                           </Badge>
                         )}
                         {estadoPago === 'al_dia' && (
-                          <Badge className="text-xs bg-emerald-100 text-emerald-700">
-                            Al día
-                          </Badge>
-                        )}
-
-                        {estadoPago === 'moroso' && (
-                          <Badge className="text-xs bg-rose-100 text-rose-700">
-                            Moroso
-                          </Badge>
-                        )}
+                           <Badge className="text-xs bg-emerald-100 text-emerald-700">
+                             Al día
+                           </Badge>
+                         )}
+                         {estadoPago === 'moroso' && (
+                           <Badge className="text-xs bg-rose-100 text-rose-700">
+                             Moroso
+                           </Badge>
+                         )}
                         {!cliente.activo && (
                           <Badge variant="outline" className="text-xs">Inactivo</Badge>
                         )}
