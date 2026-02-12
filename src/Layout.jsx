@@ -49,9 +49,8 @@ const PAGE_TO_PERMISSION = {
 
 
 const navigationAgenda = [
-  { name: 'Agenda de Canchas', href: 'AgendaCanchas', icon: Calendar, permissionKey: 'booking_canchas' },
-  { name: 'Recordatorios Hoy', href: 'RecordatoriosTurnosHoy', icon: Bell, permissionKey: 'booking_canchas' },
-];
+        { name: 'Agenda de Canchas', href: 'AgendaCanchas', icon: Calendar, permissionKey: 'booking_canchas' },
+      ];
 
 const navigationEmpleados = [
   { name: 'Tareas', href: 'Tareas', icon: CheckCircle, permissionKey: 'empleados' },
