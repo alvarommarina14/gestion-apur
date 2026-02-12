@@ -44,7 +44,16 @@ export default function ModalCancelarAlquiler({ open, onOpenChange, turno }) {
 
   const cancelarMutation = useMutation({
     mutationFn: async ({ tipo, motivo }) => {
-      if (tipo === 'menos_24h') {
+      if (tipo === 'error') {
+        // Eliminar turno por error - Sin log ni confirmaciones adicionales
+        const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: turno.id });
+        if (recordatorios.length > 0) {
+          await base44.entities.RecordatorioCancha.delete(recordatorios[0].id);
+        }
+
+        await base44.entities.TurnoCancha.delete(turno.id);
+
+      } else if (tipo === 'menos_24h') {
         // Eliminar turno sin descuento
         // Log de auditoría antes de eliminar
         await base44.entities.LogAuditoria.create({
@@ -125,7 +134,11 @@ export default function ModalCancelarAlquiler({ open, onOpenChange, turno }) {
   });
 
   const handleCancelar = () => {
-    if (opcionSeleccionada === 'menos_24h') {
+    if (opcionSeleccionada === 'error') {
+      if (confirm('¿Eliminar este turno?')) {
+        cancelarMutation.mutate({ tipo: 'error' });
+      }
+    } else if (opcionSeleccionada === 'menos_24h') {
       if (confirm('¿Cancelar este turno sin descuento?')) {
         cancelarMutation.mutate({ tipo: 'menos_24h' });
       }
@@ -166,9 +179,35 @@ export default function ModalCancelarAlquiler({ open, onOpenChange, turno }) {
           </div>
 
           <div className="space-y-3">
-            <p className="text-sm font-medium text-slate-700">Selecciona una opción:</p>
+             <p className="text-sm font-medium text-slate-700">Selecciona una opción:</p>
 
-            {/* Opción 1: Menos de 24h */}
+             {/* Opción 0: Eliminado por error */}
+             <button
+               onClick={() => setOpcionSeleccionada('error')}
+               className={`w-full text-left p-4 rounded-lg border-2 transition-colors ${
+                 opcionSeleccionada === 'error'
+                   ? 'border-red-500 bg-red-50'
+                   : 'border-slate-200 hover:border-slate-300'
+               }`}
+             >
+               <div className="flex items-start gap-3">
+                 <div className={`w-4 h-4 rounded-full border-2 mt-0.5 flex items-center justify-center ${
+                   opcionSeleccionada === 'error'
+                     ? 'border-red-500 bg-red-500'
+                     : 'border-slate-300'
+                 }`}>
+                   {opcionSeleccionada === 'error' && (
+                     <div className="w-2 h-2 bg-white rounded-full" />
+                   )}
+                 </div>
+                 <div className="flex-1">
+                   <p className="font-medium text-slate-900">Eliminar turno por error</p>
+                   <p className="text-xs text-slate-600 mt-1">Se elimina directamente, sin registros de cancelación</p>
+                 </div>
+               </div>
+             </button>
+
+             {/* Opción 1: Menos de 24h */}
             <button
               onClick={() => setOpcionSeleccionada('menos_24h')}
               className={`w-full text-left p-4 rounded-lg border-2 transition-colors ${
@@ -283,7 +322,7 @@ export default function ModalCancelarAlquiler({ open, onOpenChange, turno }) {
               onClick={handleCancelar}
               disabled={!opcionSeleccionada || cancelarMutation.isPending}
               className={
-                opcionSeleccionada === 'eliminar_serie'
+                opcionSeleccionada === 'error' || opcionSeleccionada === 'eliminar_serie'
                   ? 'bg-rose-600 hover:bg-rose-700 flex-1'
                   : 'bg-emerald-600 hover:bg-emerald-700 flex-1'
               }
