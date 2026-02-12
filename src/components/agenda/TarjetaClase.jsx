@@ -14,15 +14,14 @@ export default function TarjetaClase({ turno, onEdit }) {
   const eliminarRecurrenciaMutation = useMutation({
     mutationFn: async () => {
       const claseId = turno.clase_id || turno.id;
-      await base44.entities.Clase.update(claseId, {
-        es_recurrente: false,
-        recurrencia_tipo: null,
-        recurrencia_hasta: null,
-        recurrencia_cantidad: null
+      const res = await base44.functions.invoke('eliminarRecurrenciaClase', {
+        claseId,
+        turnoId: turno.id
       });
+      return res.data;
     },
-    onSuccess: () => {
-      toast.success('Recurrencia eliminada');
+    onSuccess: (data) => {
+      toast.success(data.message || 'Recurrencia eliminada');
       queryClient.invalidateQueries({ queryKey: ['clases'] });
       queryClient.invalidateQueries({ queryKey: ['turnos'] });
       queryClient.invalidateQueries({ queryKey: ['turnoCancha'] });
