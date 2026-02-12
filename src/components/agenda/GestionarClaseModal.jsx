@@ -237,12 +237,12 @@ export default function GestionarClaseModal({ isOpen, onClose, clase }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Gestionar Clase - {format(new Date(clase.fecha), 'dd/MM/yyyy HH:mm')}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 overflow-y-auto flex-1">
           {/* Liberar Cancha */}
           <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm font-medium text-blue-700 mb-3">💼 Liberar cancha para otro turno</p>
