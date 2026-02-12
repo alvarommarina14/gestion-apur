@@ -555,15 +555,13 @@ export default function ClientesPage() {
                                   <FileText className="w-4 h-4 mr-2" />
                                   Reporte detallado
                                 </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                  <div className="w-full">
-                                    <EnviarRecordatorioBtn 
-                                      alumno={alumno} 
-                                      variant="ghost" 
-                                      size="sm" 
-                                      className="w-full justify-start p-0 h-auto font-normal hover:bg-transparent" 
-                                    />
-                                  </div>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                  <EnviarRecordatorioBtn 
+                                    alumno={alumno} 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="w-full justify-start p-0 h-auto font-normal hover:bg-transparent" 
+                                  />
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
                                   onClick={() => setEliminandoCliente(cliente)}
@@ -597,15 +595,13 @@ export default function ClientesPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem asChild>
-                                <div className="w-full">
-                                  <EnviarRecordatorioBtn 
-                                    alumno={clienteComoAlumno} 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="w-full justify-start p-0 h-auto font-normal hover:bg-transparent" 
-                                  />
-                                </div>
+                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                <EnviarRecordatorioBtn 
+                                  alumno={clienteComoAlumno} 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="w-full justify-start p-0 h-auto font-normal hover:bg-transparent" 
+                                />
                               </DropdownMenuItem>
                               <DropdownMenuItem 
                                 onClick={() => setEliminandoCliente(cliente)}
