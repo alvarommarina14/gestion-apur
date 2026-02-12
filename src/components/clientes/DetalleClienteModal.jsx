@@ -43,7 +43,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import SeccionCobrosPagosUnificada from './SeccionCobrosPagosUnificada';
-import RegistrarPagoModal from '@/components/modals/RegistrarPagoModal';
 import { registrarCambioCliente, registrarEliminacion } from '@/components/utils/auditLog';
 import {
   AlertDialog,
@@ -59,7 +58,6 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
   const queryClient = useQueryClient();
   const [editando, setEditando] = useState(false);
   const [formData, setFormData] = useState({});
-  const [pagoModal, setPagoModal] = useState({ open: false, alumno: null });
 
   // Fetch pagos y cobros del cliente
   const { data: cobrosClientes = [] } = useQuery({
@@ -633,32 +631,6 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
           </TabsContent>
 
           <TabsContent value="cobros" className="flex-1 overflow-y-auto px-1">
-            <div className="mb-4 flex justify-end">
-              <Button
-                size="sm"
-                onClick={() => {
-                  // Para clientes clase con alumno
-                  if (cliente.es_alumno && alumnoCliente) {
-                    setPagoModal({ open: true, alumno: alumnoCliente });
-                  } else if (cliente.tipo_cliente === 'abono' || cliente.tipo_cliente === 'suelto') {
-                    // Para clientes de alquiler
-                    const clienteComoAlumno = {
-                      id: cliente.id,
-                      nombre: cliente.nombre,
-                      whatsapp: cliente.telefono,
-                      precio_mensual: cliente.precio,
-                      estado_mes_actual: estadisticas.estadoGeneral === 'moroso' ? 'moroso' : estadisticas.estadoGeneral === 'pendiente' ? 'pendiente' : 'pagado',
-                      estado: estadisticas.estadoGeneral === 'moroso' ? 'moroso' : 'activo'
-                    };
-                    setPagoModal({ open: true, alumno: clienteComoAlumno, esCliente: true });
-                  }
-                }}
-                className="bg-emerald-600 hover:bg-emerald-700"
-              >
-                <DollarSign className="w-4 h-4 mr-1" />
-                Cobrar
-              </Button>
-            </div>
             <SeccionCobrosPagosUnificada cliente={cliente} />
           </TabsContent>
 
@@ -695,14 +667,9 @@ export default function DetalleClienteModal({ open, onOpenChange, cliente }) {
           </TabsContent>
 
           </Tabs>
-        </DialogContent>
 
-        <RegistrarPagoModal 
-          open={pagoModal.open}
-          onOpenChange={(open) => setPagoModal({ ...pagoModal, open })}
-          alumno={pagoModal.alumno}
-          esCliente={pagoModal.esCliente}
-        />
-      </Dialog>
-    );
-  }
+
+          </DialogContent>
+          </Dialog>
+          );
+          }

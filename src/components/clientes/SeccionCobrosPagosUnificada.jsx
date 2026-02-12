@@ -209,6 +209,18 @@ export default function SeccionCobrosPagosUnificada({ cliente }) {
           <div className="space-y-2">
             <div className="flex items-center justify-between mb-2">
               <h4 className="font-semibold text-slate-900 text-sm">Movimientos ({movimientosFiltrados.length})</h4>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setModalRegistrar({ 
+                  open: true, 
+                  cobro: cobrosConVirtual.find(c => c.mes === format(new Date(), 'yyyy-MM')) 
+                })}
+                className="h-7"
+              >
+                <Plus className="w-3 h-3 mr-1" />
+                Cobrar
+              </Button>
             </div>
 
             {movimientosFiltrados.length === 0 ? (
