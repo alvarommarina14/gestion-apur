@@ -52,12 +52,23 @@ Deno.serve(async (req) => {
       }
     }
 
-    if (turnosAEliminar.length > 0) {
-      for (let i = 0; i < turnosAEliminar.length; i += 10) {
-        const batch = turnosAEliminar.slice(i, i + 10);
-        await Promise.all(batch.map(id => base44.entities.TurnoCancha.delete(id)));
-        if (i + 10 < turnosAEliminar.length) {
-          await new Promise(resolve => setTimeout(resolve, 200));
+    // Eliminar turnos en lotes
+    for (let i = 0; i < turnosAEliminar.length; i += 5) {
+      const batch = turnosAEliminar.slice(i, i + 5);
+      await Promise.all(batch.map(id => base44.entities.TurnoCancha.delete(id)));
+      if (i + 5 < turnosAEliminar.length) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
+    
+    // Eliminar también las clases futuras de la serie
+    for (let i = 0; i < clasesDelaSerie.length; i++) {
+      const c = clasesDelaSerie[i];
+      if (c.fecha >= hoy && c.id !== claseId) {
+        try {
+          await base44.entities.Clase.delete(c.id);
+        } catch (e) {
+          // Ignorar errores al eliminar clases
         }
       }
     }
