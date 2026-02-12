@@ -27,9 +27,34 @@ export default function TarjetaClase({ turno, onEdit }) {
     enabled: !!turno.clase_id || !!turno.id,
   });
 
+  // Buscar turnos futuros con mismo patrón (para detectar abonos recurrentes)
+  const { data: turnosFuturos = [] } = useQuery({
+    queryKey: ['turnosFuturos', turno.id, turno.cliente, turno.cancha, turno.hora_inicio],
+    queryFn: async () => {
+      if (turno.tipo_turno === 'alquiler' && turno.modalidad_alquiler === 'abono') {
+        try {
+          const todos = await base44.entities.TurnoCancha.list();
+          return todos.filter(t => 
+            t.id !== turno.id &&
+            t.cliente === turno.cliente &&
+            t.cancha === turno.cancha &&
+            t.hora_inicio === turno.hora_inicio &&
+            t.tipo_turno === 'alquiler' &&
+            t.modalidad_alquiler === 'abono' &&
+            t.fecha > turno.fecha
+          );
+        } catch (e) {
+          return [];
+        }
+      }
+      return [];
+    },
+    enabled: turno.tipo_turno === 'alquiler' && turno.modalidad_alquiler === 'abono',
+  });
+
   // Detectar si es clase recurrente o abono recurrente
   const esClaseRecurrente = clase?.es_recurrente === true;
-  const esAbonoRecurrente = turno.modalidad_alquiler === 'abono' && turno.tipo_turno === 'alquiler';
+  const esAbonoRecurrente = turno.tipo_turno === 'alquiler' && turno.modalidad_alquiler === 'abono' && turnosFuturos.length > 0;
 
   const eliminarRecurrenciaMutation = useMutation({
     mutationFn: async () => {
