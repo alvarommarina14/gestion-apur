@@ -483,6 +483,46 @@ export default function ClientesPage() {
                       <Eye className="w-4 h-4 mr-1" />
                       Ver
                     </Button>
+
+                    {/* Botón Cobrar */}
+                    {(() => {
+                      // Para clientes clase con alumno
+                      if (cliente.es_alumno) {
+                        const alumno = alumnos.find(a => 
+                          a.nombre.toLowerCase() === cliente.nombre.toLowerCase()
+                        );
+                        if (alumno) {
+                          return (
+                            <Button
+                              size="sm"
+                              variant="default"
+                              onClick={() => setPagoModal({ open: true, alumno })}
+                              className="bg-emerald-600 hover:bg-emerald-700"
+                            >
+                              <DollarSign className="w-4 h-4 mr-1" />
+                              Cobrar
+                            </Button>
+                          );
+                        }
+                      }
+                      
+                      // Para clientes de alquiler (abono o suelto)
+                      if (cliente.tipo_cliente === 'abono' || cliente.tipo_cliente === 'suelto') {
+                        return (
+                          <Button
+                            size="sm"
+                            variant="default"
+                            onClick={() => setPagoModal({ open: true, alumno: cliente, esCliente: true })}
+                            className="bg-emerald-600 hover:bg-emerald-700"
+                          >
+                            <DollarSign className="w-4 h-4 mr-1" />
+                            Cobrar
+                          </Button>
+                        );
+                      }
+                      
+                      return null;
+                    })()}
                     
                     {/* Menú de opciones */}
                     {(() => {
