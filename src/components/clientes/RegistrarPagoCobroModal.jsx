@@ -45,18 +45,18 @@ export default function RegistrarPagoCobroModal({ open, onOpenChange, cobro, cli
       });
       return result;
     },
-    onSuccess: () => {
-      // Invalidar queries - el refetch automático actualizará los estados
-      queryClient.invalidateQueries({ queryKey: ['cobros-clientes', cliente?.id] });
-      queryClient.invalidateQueries({ queryKey: ['cobros-clientes'] });
-      queryClient.invalidateQueries({ queryKey: ['clientes'] });
-      queryClient.invalidateQueries({ queryKey: ['alumnos'] });
-      queryClient.invalidateQueries({ queryKey: ['pagos-alumnos'] });
-      // Invalidar cobros de AgendaCanchas específicamente para el mes del cobro
-      queryClient.invalidateQueries({ queryKey: ['cobros', cobro?.mes] });
-      // Refetch inmediato para Recordatorios Hoy (actualiza estados dinámicamente)
-      queryClient.refetchQueries({ queryKey: ['recordatorios-turnos-hoy'] });
-      queryClient.refetchQueries({ queryKey: ['turnos-cancha'] });
+    onSuccess: async () => {
+      // Refetch inmediato de todas las queries críticas para actualizar badges
+      await Promise.all([
+        queryClient.refetchQueries({ queryKey: ['clientes'] }),
+        queryClient.refetchQueries({ queryKey: ['alumnos'] }),
+        queryClient.refetchQueries({ queryKey: ['pagos'] }),
+        queryClient.refetchQueries({ queryKey: ['pagos-alumnos'] }),
+        queryClient.refetchQueries({ queryKey: ['cobros-clientes'] }),
+      ]);
+      
+      // Invalidar todas las queries de cobros (incluyendo las con mes específico)
+      queryClient.invalidateQueries({ predicate: (query) => query.queryKey[0] === 'cobros' });
       
       setTimeout(() => {
         onOpenChange(false);
