@@ -231,12 +231,7 @@ Deno.serve(async (req) => {
               alumnosIds.forEach((alumnoId) => {
                 const alumno = alumnos.find(a => a.id === alumnoId);
                 if (alumno) {
-                  const mesActual = fecha.substring(0, 7);
-                  const pagosAlumno = pagos.filter(p => 
-                    p.alumno_id === alumno.id && 
-                    (p.mes_correspondiente === mesActual || p.fecha?.startsWith(mesActual))
-                  );
-                  const estadoPago = pagosAlumno.length > 0 ? 'Pag' : alumno.estado === 'moroso' ? 'Mor' : 'Pend';
+                  const estadoPago = alumno.estado_mes_actual === 'pagado' ? 'Pag' : alumno.estado === 'moroso' ? 'Mor' : 'Pend';
                   const monto = alumno.precio_mensual || 0;
                   const nombreCorto = alumno.nombre.length > 13 ? alumno.nombre.substring(0, 13) + '.' : alumno.nombre;
                   doc.text(`${nombreCorto} $${monto.toLocaleString('es-AR')} ${estadoPago}`, x + 2, textY);
