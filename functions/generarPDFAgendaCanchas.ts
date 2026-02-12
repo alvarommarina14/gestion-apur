@@ -335,14 +335,9 @@ Deno.serve(async (req) => {
             if (alumno) {
               const montoAlumno = alumno.precio_mensual || 0;
               totalEsperado += montoAlumno;
-              
-              // Verificar estado de pago
-              const pagosAlumno = pagos.filter(p => 
-                p.alumno_id === alumno.id && 
-                (p.mes_correspondiente === mesActual || p.fecha?.startsWith(mesActual))
-              );
-              
-              if (pagosAlumno.length > 0) {
+
+              // Verificar estado de pago usando estado_mes_actual
+              if (alumno.estado_mes_actual === 'pagado') {
                 cobrado += montoAlumno;
               } else if (alumno.estado === 'moroso') {
                 moroso += montoAlumno;
@@ -355,16 +350,11 @@ Deno.serve(async (req) => {
           // Para alquileres, usar el monto del turno
           const monto = turno.monto || 0;
           totalEsperado += monto;
-          
+
           if (turno.pagado) {
             cobrado += monto;
           } else {
-            const cobro = cobros.find(c => c.cliente_id === turno.cliente_id);
-            if (cobro?.estado === 'moroso') {
-              moroso += monto;
-            } else {
-              pendiente += monto;
-            }
+            pendiente += monto;
           }
         }
       });
