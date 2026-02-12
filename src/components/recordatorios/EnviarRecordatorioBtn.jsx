@@ -19,6 +19,7 @@ export default function EnviarRecordatorioBtn({ alumno, variant = "outline", siz
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [alumnoActualizado, setAlumnoActualizado] = useState(alumno);
   const currentMonth = format(new Date(), 'yyyy-MM');
   
   const { data: configuraciones = [] } = useQuery({
