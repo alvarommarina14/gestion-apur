@@ -11,65 +11,31 @@ Deno.serve(async (req) => {
 
     const { claseId, turnoId } = await req.json();
 
-    // Obtener la clase para saber la fecha y serie recurrente
+    // Obtener la clase
     const clase = await base44.entities.Clase.read(claseId);
     
     if (!clase.es_recurrente) {
       return Response.json({ error: 'La clase no es recurrente' }, { status: 400 });
     }
 
-    // Buscar todas las clases de la misma serie recurrente
-    const hoy = new Date().toISOString().split('T')[0];
-    let clasesDelaSerie = [];
+    const fechaClase = clase.fecha;
+
+    // Buscar turnos futuro con mismos criterios (profesor, hora, dia semana)
+    const allTurnos = await base44.entities.TurnoCancha.list('', 1000);
     
-    if (clase.serie_recurrente_id) {
-      clasesDelaSerie = await base44.entities.Clase.filter({
-        serie_recurrente_id: clase.serie_recurrente_id
-      }, '-fecha');
-    } else {
-      // Si no tiene serie_recurrente_id, incluir solo clases con mismos alumnos/profesor/horario
-      clasesDelaSerie = await base44.entities.Clase.filter({
-        profesor_id: clase.profesor_id,
-        hora_inicio: clase.hora_inicio,
-        tipo: clase.tipo
-      }, '-fecha');
-    }
-
-    // Obtener los turnos asociados a esas clases que sean futuros
-    const clasesIds = clasesDelaSerie
-      .filter(c => c.fecha >= hoy)
-      .map(c => c.turno_cancha_id)
-      .filter(id => id); // Solo los que tienen turno_cancha_id
-
-    // Buscar los turnos por ID
-    const turnosAEliminar = [];
-    for (const turnoId of clasesIds) {
-      try {
-        await base44.entities.TurnoCancha.read(turnoId);
-        turnosAEliminar.push(turnoId);
-      } catch (e) {
-        // Turno no existe, ignorar
-      }
-    }
+    const turnosABorrar = allTurnos.filter(t => 
+      t.profesor === clase.profesor_id || 
+      (t.fecha > fechaClase && t.hora_inicio === clase.hora_inicio)
+    );
 
     // Eliminar turnos en lotes
-    for (let i = 0; i < turnosAEliminar.length; i += 5) {
-      const batch = turnosAEliminar.slice(i, i + 5);
-      await Promise.all(batch.map(id => base44.entities.TurnoCancha.delete(id)));
-      if (i + 5 < turnosAEliminar.length) {
+    let conteo = 0;
+    for (let i = 0; i < turnosABorrar.length; i += 5) {
+      const batch = turnosABorrar.slice(i, i + 5);
+      await Promise.all(batch.map(t => base44.entities.TurnoCancha.delete(t.id)));
+      conteo += batch.length;
+      if (i + 5 < turnosABorrar.length) {
         await new Promise(resolve => setTimeout(resolve, 100));
-      }
-    }
-    
-    // Eliminar también las clases futuras de la serie
-    for (let i = 0; i < clasesDelaSerie.length; i++) {
-      const c = clasesDelaSerie[i];
-      if (c.fecha >= hoy && c.id !== claseId) {
-        try {
-          await base44.entities.Clase.delete(c.id);
-        } catch (e) {
-          // Ignorar errores al eliminar clases
-        }
       }
     }
 
@@ -83,9 +49,10 @@ Deno.serve(async (req) => {
 
     return Response.json({ 
       success: true, 
-      message: `Recurrencia eliminada. Se borraron ${turnosAEliminar.length} turnos futuros.`
+      message: `Recurrencia eliminada. Se borraron ${conteo} turnos.`
     });
   } catch (error) {
+    console.error('Error en eliminarRecurrenciaClase:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
