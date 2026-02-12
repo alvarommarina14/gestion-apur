@@ -63,13 +63,19 @@ export default function AgendaCanchas() {
          const pasóVencimiento = hoy > vencimiento;
          const esElMesActual = format(hoy, 'yyyy-MM') === mesFiltro;
 
+         console.log('DEBUG:', { pagos, cobros, mesFiltro, alumnos: alumnos.map(a => ({ id: a.id, nombre: a.nombre })) });
+
          // Procesar alumnos y calcular su estado dinámicamente
          alumnos.forEach(alumno => {
+           const pago = pagos.find(p => p.alumno_id === alumno.id);
+           const cobro = cobros.find(c => c.cliente_id === alumno.id);
+
+           if (alumno.nombre === 'Celina Montefiore') {
+             console.log('Celina DEBUG:', { alumnoId: alumno.id, pago, cobro, esElMesActual });
+           }
+
            if (!esElMesActual) {
              // Para meses pasados/futuros, usar solo los datos guardados
-             const cobro = cobros.find(c => c.cliente_id === alumno.id);
-             const pago = pagos.find(p => p.alumno_id === alumno.id);
-
              if (pago || (cobro && cobro.estado === 'pagado')) {
                estadosPago[alumno.id] = { estado: 'pagado', fuera_de_termino: false };
              } else if (cobro) {
@@ -79,9 +85,6 @@ export default function AgendaCanchas() {
            }
 
            // Para el mes actual, calcular dinámicamente
-           const pago = pagos.find(p => p.alumno_id === alumno.id);
-           const cobro = cobros.find(c => c.cliente_id === alumno.id);
-
            if (pago || (cobro && cobro.estado === 'pagado')) {
              // Si tiene pago registrado o cobro pagado → Pagado
              estadosPago[alumno.id] = { estado: 'pagado', fuera_de_termino: false };
