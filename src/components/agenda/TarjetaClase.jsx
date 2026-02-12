@@ -1,11 +1,34 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Edit2, Trash2 } from 'lucide-react';
+import { Edit2, Trash2, Repeat } from 'lucide-react';
 import { format } from 'date-fns';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
+import { toast } from 'sonner';
 import GestionarClaseModal from './GestionarClaseModal';
 
 export default function TarjetaClase({ turno, onEdit }) {
   const [mostrarGestionar, setMostrarGestionar] = useState(false);
+  const queryClient = useQueryClient();
+
+  const eliminarRecurrenciaMutation = useMutation({
+    mutationFn: async () => {
+      await base44.entities.Clase.update(turno.id, {
+        es_recurrente: false,
+        recurrencia_tipo: null,
+        recurrencia_hasta: null,
+        recurrencia_cantidad: null
+      });
+    },
+    onSuccess: () => {
+      toast.success('Recurrencia eliminada');
+      queryClient.invalidateQueries({ queryKey: ['clases'] });
+      queryClient.invalidateQueries({ queryKey: ['turnos'] });
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    }
+  });
 
   return (
     <div className="space-y-2.5">
