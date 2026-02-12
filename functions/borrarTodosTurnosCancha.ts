@@ -9,12 +9,30 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
-    // Obtener todos los turnos
-    const turnos = await base44.asServiceRole.entities.TurnoCancha.list();
+    // Obtener todos los turnos en lotes
+    let allTurnos = [];
+    let hasMore = true;
+    let skip = 0;
     
-    // Borrar todos
-    for (const turno of turnos) {
-      await base44.asServiceRole.entities.TurnoCancha.delete(turno.id);
+    while (hasMore) {
+      const batch = await base44.asServiceRole.entities.TurnoCancha.list(null, 100, skip);
+      if (batch.length === 0) {
+        hasMore = false;
+      } else {
+        allTurnos = allTurnos.concat(batch);
+        skip += 100;
+      }
+    }
+    
+    // Borrar en lotes de 10 para evitar rate limit
+    const batchSize = 10;
+    for (let i = 0; i < allTurnos.length; i += batchSize) {
+      const batch = allTurnos.slice(i, i + batchSize);
+      await Promise.all(
+        batch.map(turno => base44.asServiceRole.entities.TurnoCancha.delete(turno.id))
+      );
+      // Pequeña pausa entre lotes
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
 
     return Response.json({ 
