@@ -90,6 +90,7 @@ export default function NuevoAlquilerModal({ isOpen, onClose, initialDate }) {
         cliente_id: clienteObj.id,
         tipo_turno: 'alquiler',
         modalidad_alquiler: modalidad,
+        es_recurrente: recurrenciaSemanal && modalidad === 'abono',
         pagado: false,
         estado: 'activo',
         empleados_asignados_ids: [],
