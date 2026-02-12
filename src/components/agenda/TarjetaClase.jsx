@@ -35,7 +35,7 @@ export default function TarjetaClase({ turno, onEdit }) {
     mutationFn: async () => {
       const res = await base44.functions.invoke('eliminarRecurrenciaClase', {
         turnoId: turno.id,
-        claseId: turno.clase_id || turno.id,
+        claseId: clase?.id,
         tipo: esClaseRecurrente ? 'clase' : 'abono'
       });
       return res.data;
