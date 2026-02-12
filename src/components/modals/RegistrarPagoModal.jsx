@@ -88,17 +88,16 @@ export default function RegistrarPagoModal({ open, onOpenChange, alumno, esClien
       
       setSuccess(true);
       
-      // Refetch queries para actualizar inmediatamente
+      // Refetch queries para actualizar inmediatamente todos los badges y datos
       await Promise.all([
         queryClient.refetchQueries({ queryKey: ['alumnos'] }),
         queryClient.refetchQueries({ queryKey: ['pagos'] }),
         queryClient.refetchQueries({ queryKey: ['pagos-alumnos'] }),
         queryClient.refetchQueries({ queryKey: ['cobros-clientes'] }),
-        queryClient.refetchQueries({ queryKey: ['cobros'] }), // Para AgendaCanchas con mes específico
         queryClient.refetchQueries({ queryKey: ['clientes'] }),
       ]);
       
-      // Invalidar específicamente la query de cobros del mes para la agenda
+      // Invalidar todas las queries de cobros (incluyendo las con mes específico)
       queryClient.invalidateQueries({ predicate: (query) => query.queryKey[0] === 'cobros' });
       
       setTimeout(() => {
