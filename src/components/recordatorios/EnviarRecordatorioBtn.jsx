@@ -33,21 +33,37 @@ export default function EnviarRecordatorioBtn({ alumno, variant = "outline", siz
   
   React.useEffect(() => {
     if (open) {
-      const nombre = alumno?.nombre?.split(' ')[0] || 'Alumno';
+      // Refrescar datos cuando se abre el modal
+      if (alumno?.id) {
+        // Para alumnos
+        if (alumno.profesor_id) {
+          base44.entities.Alumno.read(alumno.id).then(setAlumnoActualizado).catch(() => setAlumnoActualizado(alumno));
+        } 
+        // Para clientes
+        else {
+          base44.entities.Cliente.read(alumno.id).then(setAlumnoActualizado).catch(() => setAlumnoActualizado(alumno));
+        }
+      }
+    }
+  }, [open]);
+
+  React.useEffect(() => {
+    if (open && alumnoActualizado) {
+      const nombre = alumnoActualizado?.nombre?.split(' ')[0] || 'Alumno';
       const monto = new Intl.NumberFormat('es-AR', {
         style: 'currency',
         currency: 'ARS',
         minimumFractionDigits: 0,
-      }).format(alumno?.precio_mensual || 0);
+      }).format(alumnoActualizado?.precio_mensual || 0);
       
       // Mensaje dinámico según estado
-      if (alumno.estado === 'moroso') {
+      if (alumnoActualizado.estado === 'moroso') {
         setMensaje(`¡Hola ${nombre}! 👋\n\nVemos que tienes una deuda pendiente de ${monto}. Te pedimos que regularices tu situación lo antes posible.\n\n¡Gracias!`);
       } else {
         setMensaje(`¡Hola ${nombre}! 👋\n\nTe recordamos que la cuota de ${monto} vence pronto. Por favor, realiza el pago.\n\n¡Gracias!`);
       }
     }
-  }, [open, alumno]);
+  }, [open, alumnoActualizado]);
   
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Recordatorio.create(data),
