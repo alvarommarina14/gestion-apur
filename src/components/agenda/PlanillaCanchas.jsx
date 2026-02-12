@@ -216,23 +216,6 @@ export default function PlanillaCanchas({ date, turnos = [], bloqueos = [], pago
                               </div>
                               {turno.tipo_turno === 'alquiler' && (
                                 <div className="flex gap-1">
-                                  {turno.es_recurrente && (
-                                    <Button
-                                      size="icon"
-                                      variant="ghost"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (confirm('¿Eliminar todos los turnos de recurrencia semanal?')) {
-                                          borrarRecurrenciaMutation.mutate(turno.id);
-                                        }
-                                      }}
-                                      disabled={borrarRecurrenciaMutation.isPending}
-                                      className="h-6 w-6 hover:bg-amber-100 hover:text-amber-600"
-                                      title="Borrar recurrencia semanal"
-                                    >
-                                      <X className="w-3 h-3" />
-                                    </Button>
-                                  )}
                                   <Button
                                     size="icon"
                                     variant="ghost"
