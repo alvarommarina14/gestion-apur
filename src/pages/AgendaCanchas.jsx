@@ -348,6 +348,14 @@ export default function AgendaCanchas() {
           <Download className="w-4 h-4" />
           Descargar PDF
         </Button>
+        {turnosSeleccionados.size > 0 && (
+          <Button
+            onClick={handleEliminarRecurrencias}
+            className="gap-2 bg-amber-600 hover:bg-amber-700 ml-auto"
+          >
+            Eliminar Recurrencia ({turnosSeleccionados.size})
+          </Button>
+        )}
       </div>
 
       {/* Tabs de vistas */}
