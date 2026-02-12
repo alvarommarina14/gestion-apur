@@ -13,7 +13,8 @@ export default function TarjetaClase({ turno, onEdit }) {
 
   const eliminarRecurrenciaMutation = useMutation({
     mutationFn: async () => {
-      await base44.entities.Clase.update(turno.id, {
+      const claseId = turno.clase_id || turno.id;
+      await base44.entities.Clase.update(claseId, {
         es_recurrente: false,
         recurrencia_tipo: null,
         recurrencia_hasta: null,
@@ -24,6 +25,7 @@ export default function TarjetaClase({ turno, onEdit }) {
       toast.success('Recurrencia eliminada');
       queryClient.invalidateQueries({ queryKey: ['clases'] });
       queryClient.invalidateQueries({ queryKey: ['turnos'] });
+      queryClient.invalidateQueries({ queryKey: ['turnoCancha'] });
     },
     onError: (error) => {
       toast.error(error.message);
