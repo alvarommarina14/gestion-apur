@@ -258,8 +258,16 @@ Deno.serve(async (req) => {
                   doc.text(`Prof. ${turno.profesor || ''}`, x + 2, textY);
                   textY += 3.5;
 
+                  // Notas si existen
+                  if (turno.notas) {
+                    doc.setFont(undefined, 'italic');
+                    doc.setFontSize(6);
+                    doc.text(`Notas: ${turno.notas}`, x + 2, textY, { maxWidth: colWidth - 4 });
+                    textY += 2.5;
+                    doc.setFontSize(7);
+                  }
 
-              }
+                  }
             }
           } else {
             // Alquiler
