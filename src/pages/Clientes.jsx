@@ -259,29 +259,21 @@ export default function ClientesPage() {
               Todos
             </Button>
             <Button
-              variant={filtroEstadoPago === 'al_dia' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFiltroEstadoPago('al_dia')}
-              className={filtroEstadoPago === 'al_dia' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
-            >
-              Al día
-            </Button>
-            <Button
-              variant={filtroEstadoPago === 'debe' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFiltroEstadoPago('debe')}
-              className={filtroEstadoPago === 'debe' ? 'bg-amber-600 hover:bg-amber-700' : ''}
-            >
-              Debe pagar
-            </Button>
-            <Button
-              variant={filtroEstadoPago === 'moroso' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFiltroEstadoPago('moroso')}
-              className={filtroEstadoPago === 'moroso' ? 'bg-rose-600 hover:bg-rose-700' : ''}
-            >
-              Morosos
-            </Button>
+               variant={filtroEstadoPago === 'al_dia' ? 'default' : 'outline'}
+               size="sm"
+               onClick={() => setFiltroEstadoPago('al_dia')}
+               className={filtroEstadoPago === 'al_dia' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
+             >
+               Al día
+             </Button>
+             <Button
+               variant={filtroEstadoPago === 'moroso' ? 'default' : 'outline'}
+               size="sm"
+               onClick={() => setFiltroEstadoPago('moroso')}
+               className={filtroEstadoPago === 'moroso' ? 'bg-rose-600 hover:bg-rose-700' : ''}
+             >
+               Morosos
+             </Button>
           </div>
         </CardContent>
       </Card>
