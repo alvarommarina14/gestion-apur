@@ -234,7 +234,7 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null, c
           notas: formData.notas,
           es_recupero: formData.es_recupero,
           clase_original_id: formData.clase_original_id,
-          sincronizar_calendar: user?.rol === 'admin',
+          sincronizar_calendar: false,
         });
       } else {
         // Crear profesor si es necesario
@@ -300,13 +300,6 @@ export default function NuevaClaseModal({ open, onOpenChange, recupero = null, c
           } catch (err) {
             console.error('Error creando TurnoCancha:', err);
           }
-        }
-
-        // Sincronizar con Google Calendar
-        try {
-          await base44.functions.invoke('sincronizarClaseGoogleCalendar', { clase_id: claseCreada.id });
-        } catch (err) {
-          console.error('Error sincronizando con Google Calendar:', err);
         }
       }
       

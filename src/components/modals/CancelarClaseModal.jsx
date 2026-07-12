@@ -87,21 +87,11 @@ export default function CancelarClaseModal({ open, onOpenChange, clase }) {
 
   const handleDeleteSingle = async () => {
     if (!clase) return;
-    if (!confirm('¿Eliminar solo esta clase? Se eliminará de Google Calendar.')) return;
+    if (!confirm('¿Eliminar solo esta clase?')) return;
     
     setLoading(true);
     try {
       await base44.entities.Clase.delete(clase.id);
-      
-      // Eliminar de Google Calendar
-      try {
-        await base44.functions.invoke('sincronizarClaseGoogleCalendar', { 
-          clase_id: clase.id, 
-          action: 'delete' 
-        });
-      } catch (err) {
-        console.error('Error eliminando de Google Calendar:', err);
-      }
       
       queryClient.invalidateQueries({ queryKey: ['clases'] });
       setSuccess(true);
@@ -119,7 +109,7 @@ export default function CancelarClaseModal({ open, onOpenChange, clase }) {
 
   const handleDeleteSeries = async () => {
     if (!clase || !clase.serie_recurrente_id) return;
-    if (!confirm('¿Eliminar TODA la serie de clases recurrentes? Se eliminarán todas de Google Calendar.')) return;
+    if (!confirm('¿Eliminar TODA la serie de clases recurrentes?')) return;
     
     setLoading(true);
     try {
@@ -131,16 +121,6 @@ export default function CancelarClaseModal({ open, onOpenChange, clase }) {
       // Eliminar cada clase
       for (const c of clasesSerieData) {
         await base44.entities.Clase.delete(c.id);
-        
-        // Eliminar de Google Calendar
-        try {
-          await base44.functions.invoke('sincronizarClaseGoogleCalendar', { 
-            clase_id: c.id, 
-            action: 'delete' 
-          });
-        } catch (err) {
-          console.error('Error eliminando de Google Calendar:', err);
-        }
       }
       
       queryClient.invalidateQueries({ queryKey: ['clases'] });
@@ -226,16 +206,6 @@ export default function CancelarClaseModal({ open, onOpenChange, clase }) {
           motivo_cancelacion: notas || selectedOption?.label,
           cancelado_por: motivo.includes('alumno') ? 'alumno' : motivo === 'clima' ? 'clima' : 'profesor',
         });
-
-        // Si la clase está cancelada, también eliminarla de Google Calendar
-        try {
-          await base44.functions.invoke('sincronizarClaseGoogleCalendar', { 
-            clase_id: clase.id, 
-            action: 'delete' 
-          });
-        } catch (err) {
-          console.error('Error eliminando de Google Calendar:', err);
-        }
       }
       
       // Si genera recupero y no es reprogramación, crear recuperos para cada alumno
@@ -359,12 +329,12 @@ export default function CancelarClaseModal({ open, onOpenChange, clase }) {
           <div className="py-4 space-y-4">
             {deleteMode === 'single' && (
               <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg">
-                <p className="text-sm text-rose-700">Se eliminará solo esta clase individual de Google Calendar.</p>
+                <p className="text-sm text-rose-700">Se eliminará solo esta clase individual.</p>
               </div>
             )}
             {deleteMode === 'series' && clase?.serie_recurrente_id && (
               <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg">
-                <p className="text-sm text-rose-700">Se eliminarán TODAS las clases de esta serie recurrente de Google Calendar.</p>
+                <p className="text-sm text-rose-700">Se eliminarán TODAS las clases de esta serie recurrente.</p>
               </div>
             )}
           </div>

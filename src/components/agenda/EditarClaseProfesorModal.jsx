@@ -37,17 +37,6 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
 
     try {
       if (isClase) {
-        // Eliminar de Google Calendar primero
-        try {
-          await base44.functions.invoke('sincronizarClaseGoogleCalendar', { 
-            clase_id: turno.id, 
-            action: 'delete' 
-          });
-        } catch (err) {
-          console.error('Error eliminando de Google Calendar:', err);
-          // Continuar aunque falle
-        }
-
         // Eliminar TurnoCancha asociado
         const turnosAsociados = await base44.entities.TurnoCancha.filter({
           fecha: turno.fecha,
@@ -56,14 +45,6 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
         });
         
         for (const t of turnosAsociados) {
-          try {
-            await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
-              turno_id: t.id, 
-              action: 'delete' 
-            });
-          } catch (err) {
-            console.error('Error eliminando turno de Google Calendar:', err);
-          }
           await base44.entities.TurnoCancha.delete(t.id);
         }
 
@@ -71,14 +52,6 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
         await base44.entities.Clase.delete(turno.id);
       } else {
         // Eliminar solo este turno
-        try {
-          await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
-            turno_id: turno.id, 
-            action: 'delete' 
-          });
-        } catch (err) {
-          console.error('Error eliminando turno de Google Calendar:', err);
-        }
         await base44.entities.TurnoCancha.delete(turno.id);
       }
 
@@ -127,18 +100,6 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
 
         console.log(`🗑️ Eliminando ${clasesAActualizar.length} clases recurrentes...`);
 
-        // Eliminar de Google Calendar - eliminar toda la serie recurrente
-        const primeraClaseConSerie = clasesAActualizar.find(c => c.serie_recurrente_id);
-        if (primeraClaseConSerie?.serie_recurrente_id) {
-          try {
-            await base44.functions.invoke('sincronizarSerieRecurrenteGoogleCalendar', {
-              recurringEventId: primeraClaseConSerie.serie_recurrente_id
-            });
-          } catch (err) {
-            console.error('Error eliminando serie recurrente de Google Calendar:', err);
-          }
-        }
-
         // Obtener TODOS los turnos para buscar asociados
         const todosTurnos = await base44.entities.TurnoCancha.list('-fecha', 1000);
 
@@ -151,17 +112,8 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
             t.tipo_turno === 'clase'
           );
 
-          // Eliminar cada turno de Google Calendar y BD
+          // Eliminar cada turno de BD
           for (const t of turnosDeClase) {
-            if (t.gcal_event_id) {
-              try {
-                await base44.functions.invoke('borrarEventosGoogleCalendar', { 
-                  event_id: t.gcal_event_id 
-                });
-              } catch (err) {
-                console.error('Error eliminando turno de GCal:', err);
-              }
-            }
             try {
               await base44.entities.TurnoCancha.delete(t.id);
               console.log(`✅ Turno ${t.id} eliminado`);
@@ -195,18 +147,6 @@ export default function EditarClaseProfesorModal({ open, onOpenChange, turno }) 
         });
 
         console.log(`🗑️ Eliminando ${turnosAActualizar.length} turnos recurrentes...`);
-
-        // Eliminar de Google Calendar - eliminar toda la serie recurrente
-        const primerTurnoConGcal = turnosAActualizar.find(t => t.gcal_event_id);
-        if (primerTurnoConGcal?.gcal_event_id) {
-          try {
-            await base44.functions.invoke('sincronizarSerieRecurrenteGoogleCalendar', {
-              recurringEventId: primerTurnoConGcal.gcal_event_id
-            });
-          } catch (err) {
-            console.error('Error eliminando serie recurrente de Google Calendar:', err);
-          }
-        }
 
         for (const t of turnosAActualizar) {
           try {

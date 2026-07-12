@@ -72,17 +72,6 @@ export default function ModalCancelarTurno({ open, onOpenChange, turno }) {
         });
       }
 
-      // Eliminar de Google Calendar si existe
-      if (turno.gcal_event_id) {
-        try {
-          await base44.functions.invoke('eliminarEventoGoogleCalendar', {
-            eventId: turno.gcal_event_id
-          });
-        } catch (err) {
-          console.error('Error eliminando de Google Calendar:', err);
-        }
-      }
-
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['recordatorios-cancha'] });
       queryClient.invalidateQueries({ queryKey: ['cancelaciones-cancha'] });
@@ -158,17 +147,6 @@ export default function ModalCancelarTurno({ open, onOpenChange, turno }) {
 
         // NO crear registros de recupero ni afectar cobros si el turno ya está pagado
         // Los turnos pagados no generan recuperos ni afectan KPIs al cancelarse
-
-        // Eliminar de Google Calendar si existe
-        if (t.gcal_event_id) {
-          try {
-            await base44.functions.invoke('eliminarEventoGoogleCalendar', {
-              eventId: t.gcal_event_id
-            });
-          } catch (err) {
-            console.error('Error eliminando de Google Calendar:', err);
-          }
-        }
       }
 
       queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });
