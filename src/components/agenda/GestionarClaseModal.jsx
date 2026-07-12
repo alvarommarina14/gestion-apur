@@ -351,7 +351,7 @@ export default function GestionarClaseModal({ isOpen, onClose, clase }) {
                               className="w-full text-sm justify-start"
                               onClick={() => setMostrarMotivoAlumno(alumnoId)}
                             >
-                              🔄 Recupera clase (>24hs)
+                              🔄 Recupera clase (más 24hs)
                             </Button>
                           )}
 

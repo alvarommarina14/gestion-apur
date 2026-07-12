@@ -1,0 +1,54 @@
+{
+  "name": "LogAuditoria",
+  "type": "object",
+  "properties": {
+    "entidad": {
+      "type": "string",
+      "description": "Tipo de entidad modificada"
+    },
+    "entidad_id": {
+      "type": "string",
+      "description": "ID del registro modificado"
+    },
+    "entidad_nombre": {
+      "type": "string",
+      "description": "Nombre descriptivo del registro"
+    },
+    "accion": {
+      "type": "string",
+      "enum": [
+        "crear",
+        "editar",
+        "eliminar",
+        "cambio_estado"
+      ],
+      "description": "Tipo de acci\u00f3n realizada"
+    },
+    "campo_modificado": {
+      "type": "string",
+      "description": "Campo que fue modificado"
+    },
+    "valor_anterior": {
+      "type": "string",
+      "description": "Valor antes del cambio"
+    },
+    "valor_nuevo": {
+      "type": "string",
+      "description": "Valor despu\u00e9s del cambio"
+    },
+    "motivo": {
+      "type": "string",
+      "description": "Motivo obligatorio del cambio"
+    },
+    "fecha": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Fecha y hora del cambio"
+    }
+  },
+  "required": [
+    "entidad",
+    "accion",
+    "motivo"
+  ]
+}

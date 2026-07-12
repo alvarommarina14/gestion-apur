@@ -1,0 +1,88 @@
+{
+  "name": "CancelacionCancha",
+  "type": "object",
+  "properties": {
+    "turno_cancha_id": {
+      "type": "string",
+      "description": "ID del turno de cancha cancelado"
+    },
+    "cliente": {
+      "type": "string",
+      "description": "Nombre del cliente"
+    },
+    "cancha": {
+      "type": "string",
+      "description": "N\u00famero de cancha"
+    },
+    "fecha": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha del turno cancelado"
+    },
+    "hora_inicio": {
+      "type": "string",
+      "description": "Hora de inicio del turno"
+    },
+    "monto": {
+      "type": "number",
+      "description": "Monto del turno"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "cancha",
+        "clase"
+      ],
+      "default": "cancha",
+      "description": "Tipo de recupero: cancha o clase"
+    },
+    "motivo_cancelacion": {
+      "type": "string",
+      "enum": [
+        "cliente_solicita",
+        "clima",
+        "mantenimiento",
+        "falta_clientes",
+        "otro"
+      ],
+      "description": "Motivo de la cancelaci\u00f3n"
+    },
+    "detalles": {
+      "type": "string",
+      "description": "Detalles adicionales del motivo"
+    },
+    "estado_recupero": {
+      "type": "string",
+      "enum": [
+        "pendiente",
+        "recuperado",
+        "descontado",
+        "rechazado"
+      ],
+      "default": "pendiente",
+      "description": "Estado del recupero"
+    },
+    "fecha_recupero": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha en que se recuper\u00f3"
+    },
+    "turno_recupero_id": {
+      "type": "string",
+      "description": "ID del turno de recupero si se program\u00f3"
+    },
+    "notas_recupero": {
+      "type": "string",
+      "description": "Notas sobre el recupero"
+    }
+  },
+  "required": [
+    "turno_cancha_id",
+    "cliente",
+    "cancha",
+    "fecha",
+    "hora_inicio",
+    "motivo_cancelacion",
+    "tipo"
+  ]
+}

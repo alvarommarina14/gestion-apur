@@ -1,0 +1,42 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "rol": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "empleado",
+        "profesor"
+      ],
+      "description": "Rol del usuario en el sistema"
+    },
+    "estado_aprobacion": {
+      "type": "string",
+      "enum": [
+        "pendiente",
+        "aprobado",
+        "rechazado"
+      ],
+      "default": "pendiente",
+      "description": "Estado de aprobaci\u00f3n del usuario (solo para admins)"
+    },
+    "tel": {
+      "type": "string",
+      "description": "Tel\u00e9fono en formato internacional (+549341XXXXXXXX)"
+    },
+    "activo": {
+      "type": "boolean",
+      "default": true,
+      "description": "Si el empleado est\u00e1 activo para recibir notificaciones"
+    },
+    "recibir_notificaciones_cancha": {
+      "type": "boolean",
+      "default": true,
+      "description": "Si recibe notificaciones push de canchas"
+    }
+  },
+  "required": [
+    "tel"
+  ]
+}

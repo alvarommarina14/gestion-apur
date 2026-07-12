@@ -1,0 +1,63 @@
+{
+  "name": "CobroCliente",
+  "type": "object",
+  "properties": {
+    "cliente_id": {
+      "type": "string",
+      "description": "ID del cliente"
+    },
+    "cliente_nombre": {
+      "type": "string",
+      "description": "Nombre del cliente"
+    },
+    "tipo_cobro": {
+      "type": "string",
+      "enum": [
+        "abono_mensual",
+        "cancha_suelta"
+      ],
+      "description": "Tipo de cobro: abono mensual o cancha suelta"
+    },
+    "mes": {
+      "type": "string",
+      "description": "Mes del cobro (YYYY-MM)"
+    },
+    "monto": {
+      "type": "number",
+      "description": "Monto a cobrar"
+    },
+    "estado": {
+      "type": "string",
+      "enum": [
+        "pendiente",
+        "pagado",
+        "moroso"
+      ],
+      "default": "pendiente",
+      "description": "Estado del cobro"
+    },
+    "fecha_vencimiento": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de vencimiento (d\u00eda 15 del mes)"
+    },
+    "fecha_pago": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha en que se pag\u00f3"
+    },
+    "medio_pago": {
+      "type": "string",
+      "description": "Forma de pago (Efectivo, Transferencia, etc.)"
+    },
+    "notas": {
+      "type": "string",
+      "description": "Notas del cobro"
+    }
+  },
+  "required": [
+    "cliente_id",
+    "tipo_cobro",
+    "monto"
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "name": "DisponibilidadCancha",
+  "type": "object",
+  "properties": {
+    "cancha": {
+      "type": "string",
+      "enum": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "todas"
+      ],
+      "description": "Cancha afectada o 'todas' para bloquear todas"
+    },
+    "fecha_inicio": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de inicio del bloqueo"
+    },
+    "fecha_fin": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de fin del bloqueo"
+    },
+    "hora_inicio": {
+      "type": "string",
+      "description": "Hora de inicio (HH:MM) - opcional para bloqueo de todo el d\u00eda"
+    },
+    "hora_fin": {
+      "type": "string",
+      "description": "Hora de fin (HH:MM) - opcional para bloqueo de todo el d\u00eda"
+    },
+    "todo_el_dia": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si el bloqueo es de todo el d\u00eda"
+    },
+    "motivo": {
+      "type": "string",
+      "enum": [
+        "mantenimiento",
+        "evento_privado",
+        "clima",
+        "reparacion",
+        "otro"
+      ],
+      "description": "Motivo del bloqueo"
+    },
+    "descripcion": {
+      "type": "string",
+      "description": "Descripci\u00f3n detallada del bloqueo"
+    },
+    "estado": {
+      "type": "string",
+      "enum": [
+        "activo",
+        "cancelado"
+      ],
+      "default": "activo",
+      "description": "Estado del bloqueo"
+    },
+    "notificacion_enviada": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si ya se envi\u00f3 notificaci\u00f3n a empleados"
+    },
+    "creado_por": {
+      "type": "string",
+      "description": "Usuario que cre\u00f3 el bloqueo"
+    }
+  },
+  "required": [
+    "cancha",
+    "fecha_inicio",
+    "fecha_fin",
+    "motivo"
+  ]
+}

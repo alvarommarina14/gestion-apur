@@ -1,0 +1,66 @@
+{
+  "name": "Recupero",
+  "type": "object",
+  "properties": {
+    "alumno_id": {
+      "type": "string",
+      "description": "ID del alumno"
+    },
+    "alumno_nombre": {
+      "type": "string",
+      "description": "Nombre del alumno"
+    },
+    "clase_original_id": {
+      "type": "string",
+      "description": "ID de la clase que gener\u00f3 el recupero"
+    },
+    "fecha_original": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de la clase original"
+    },
+    "motivo": {
+      "type": "string",
+      "enum": [
+        "cancelacion_alumno",
+        "cancelacion_profesor",
+        "clima",
+        "otro"
+      ],
+      "description": "Motivo del recupero"
+    },
+    "estado": {
+      "type": "string",
+      "enum": [
+        "pendiente",
+        "programado",
+        "realizado",
+        "perdido"
+      ],
+      "default": "pendiente",
+      "description": "Estado del recupero"
+    },
+    "fecha_programada": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha asignada para el recupero"
+    },
+    "clase_recupero_id": {
+      "type": "string",
+      "description": "ID de la clase de recupero si ya se program\u00f3"
+    },
+    "notas": {
+      "type": "string",
+      "description": "Notas sobre el recupero"
+    },
+    "vencimiento": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha l\u00edmite para recuperar"
+    }
+  },
+  "required": [
+    "alumno_id",
+    "motivo"
+  ]
+}

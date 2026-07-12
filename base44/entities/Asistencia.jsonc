@@ -1,0 +1,47 @@
+{
+  "name": "Asistencia",
+  "type": "object",
+  "properties": {
+    "clase_id": {
+      "type": "string",
+      "description": "ID de la clase"
+    },
+    "alumno_id": {
+      "type": "string",
+      "description": "ID del alumno"
+    },
+    "alumno_nombre": {
+      "type": "string",
+      "description": "Nombre del alumno"
+    },
+    "fecha": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de la clase"
+    },
+    "estado": {
+      "type": "string",
+      "enum": [
+        "presente",
+        "ausente_con_aviso",
+        "ausente_sin_aviso"
+      ],
+      "description": "Estado de asistencia"
+    },
+    "genera_recupero": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si esta ausencia genera recupero"
+    },
+    "notas": {
+      "type": "string",
+      "description": "Notas sobre la asistencia"
+    }
+  },
+  "required": [
+    "clase_id",
+    "alumno_id",
+    "fecha",
+    "estado"
+  ]
+}

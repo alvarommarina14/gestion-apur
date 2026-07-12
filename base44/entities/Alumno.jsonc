@@ -1,0 +1,119 @@
+{
+  "name": "Alumno",
+  "type": "object",
+  "properties": {
+    "profesor_id": {
+      "type": "string",
+      "description": "ID del profesor asignado"
+    },
+    "profesor_nombre": {
+      "type": "string",
+      "description": "Nombre del profesor asignado"
+    },
+    "nombre": {
+      "type": "string",
+      "description": "Nombre completo del alumno"
+    },
+    "whatsapp": {
+      "type": "string",
+      "description": "N\u00famero de WhatsApp con c\u00f3digo de pa\u00eds"
+    },
+    "observaciones": {
+      "type": "string",
+      "description": "Notas generales sobre el alumno"
+    },
+    "estado": {
+      "type": "string",
+      "enum": [
+        "activo",
+        "moroso",
+        "pausado"
+      ],
+      "default": "activo",
+      "description": "Estado actual del alumno"
+    },
+    "precio_mensual": {
+      "type": "number",
+      "description": "Precio mensual acordado"
+    },
+    "clases_por_mes": {
+      "type": "number",
+      "description": "Cantidad de clases incluidas en el mes"
+    },
+    "clases_a_recuperar": {
+      "type": "number",
+      "default": 0,
+      "description": "Clases pendientes de recuperar"
+    },
+    "deuda_total": {
+      "type": "number",
+      "default": 0,
+      "description": "Deuda acumulada en pesos"
+    },
+    "ultimo_pago_fecha": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha del \u00faltimo pago"
+    },
+    "ultimo_pago_nota": {
+      "type": "string",
+      "description": "Nota del \u00faltimo pago"
+    },
+    "estado_mes_actual": {
+      "type": "string",
+      "enum": [
+        "pendiente",
+        "pagado",
+        "debe",
+        "moroso"
+      ],
+      "default": "pendiente",
+      "description": "Estado de pago del mes actual"
+    },
+    "total_clases_asistidas": {
+      "type": "number",
+      "default": 0,
+      "description": "Total hist\u00f3rico de clases asistidas"
+    },
+    "fecha_inicio": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de inicio como alumno"
+    },
+    "sede_preferida": {
+      "type": "string",
+      "description": "Sede habitual del alumno"
+    },
+    "horario_preferido": {
+      "type": "string",
+      "description": "Horario habitual de clases"
+    },
+    "dia_preferido": {
+      "type": "string",
+      "description": "D\u00eda habitual de clases (heredado para compatibilidad)"
+    },
+    "tipo_asistencia": {
+      "type": "string",
+      "enum": [
+        "un_dia",
+        "varios_dias"
+      ],
+      "default": "un_dia",
+      "description": "Si el alumno asiste un d\u00eda o varios d\u00edas a la semana"
+    },
+    "dias_semana": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "D\u00edas de la semana que asiste (lunes, martes, etc.)"
+    }
+  },
+  "required": [
+    "profesor_id",
+    "nombre",
+    "whatsapp",
+    "precio_mensual",
+    "clases_por_mes"
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "name": "Profesor",
+  "type": "object",
+  "properties": {
+    "nombre": {
+      "type": "string",
+      "description": "Nombre completo del profesor"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "Email del profesor"
+    },
+    "telefono": {
+      "type": "string",
+      "description": "Tel\u00e9fono de contacto"
+    },
+    "especialidad": {
+      "type": "string",
+      "description": "Especialidad o nivel de ense\u00f1anza"
+    },
+    "activo": {
+      "type": "boolean",
+      "default": true,
+      "description": "Si el profesor est\u00e1 activo"
+    },
+    "total_alumnos": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de alumnos activos"
+    },
+    "total_clases": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de clases impartidas"
+    },
+    "notas": {
+      "type": "string",
+      "description": "Notas sobre el profesor"
+    }
+  },
+  "required": [
+    "nombre"
+  ]
+}

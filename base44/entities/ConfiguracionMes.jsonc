@@ -1,0 +1,54 @@
+{
+  "name": "ConfiguracionMes",
+  "type": "object",
+  "properties": {
+    "mes": {
+      "type": "string",
+      "description": "Mes en formato YYYY-MM"
+    },
+    "ciclo_cobro_abierto": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si el ciclo de cobro est\u00e1 abierto"
+    },
+    "fecha_apertura_cobro": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha en que se abri\u00f3 el cobro"
+    },
+    "morosos_procesados": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si ya se procesaron los morosos del d\u00eda 16"
+    },
+    "ingreso_esperado": {
+      "type": "number",
+      "default": 0,
+      "description": "Suma de precios mensuales de alumnos activos"
+    },
+    "ingreso_real": {
+      "type": "number",
+      "default": 0,
+      "description": "Suma de pagos recibidos"
+    },
+    "total_clases_programadas": {
+      "type": "number",
+      "default": 0
+    },
+    "total_clases_realizadas": {
+      "type": "number",
+      "default": 0
+    },
+    "total_clases_canceladas": {
+      "type": "number",
+      "default": 0
+    },
+    "total_clases_recuperadas": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "mes"
+  ]
+}

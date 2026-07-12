@@ -1,0 +1,79 @@
+{
+  "name": "Recordatorio",
+  "type": "object",
+  "properties": {
+    "alumno_id": {
+      "type": "string",
+      "description": "ID del alumno"
+    },
+    "alumno_nombre": {
+      "type": "string",
+      "description": "Nombre del alumno"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "pre_cobro",
+        "moroso",
+        "manual"
+      ],
+      "description": "Tipo de recordatorio"
+    },
+    "fecha_programada": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha en que debe enviarse"
+    },
+    "fecha_enviado": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Fecha y hora de env\u00edo"
+    },
+    "estado": {
+      "type": "string",
+      "enum": [
+        "pendiente",
+        "enviado",
+        "cancelado",
+        "fallido"
+      ],
+      "default": "pendiente",
+      "description": "Estado del recordatorio"
+    },
+    "mensaje": {
+      "type": "string",
+      "description": "Mensaje enviado"
+    },
+    "canal": {
+      "type": "string",
+      "enum": [
+        "whatsapp",
+        "sms",
+        "email"
+      ],
+      "default": "whatsapp",
+      "description": "Canal de env\u00edo"
+    },
+    "whatsapp": {
+      "type": "string",
+      "description": "N\u00famero de WhatsApp del destinatario"
+    },
+    "monto_recordado": {
+      "type": "number",
+      "description": "Monto del recordatorio"
+    },
+    "mes_correspondiente": {
+      "type": "string",
+      "description": "Mes al que corresponde (YYYY-MM)"
+    },
+    "notas": {
+      "type": "string",
+      "description": "Notas adicionales"
+    }
+  },
+  "required": [
+    "alumno_id",
+    "tipo",
+    "mensaje"
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "name": "RolPermiso",
+  "type": "object",
+  "properties": {
+    "rol": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "empleado",
+        "profesor"
+      ],
+      "description": "Rol del usuario"
+    },
+    "seccion": {
+      "type": "string",
+      "enum": [
+        "gestion_clases",
+        "gestion_profesores",
+        "gestion_alumnos",
+        "gestion_pagos",
+        "booking_canchas",
+        "agenda_empleados",
+        "dashboard_ocupacion",
+        "gestion_clientes",
+        "recordatorios_cancha_admin",
+        "recordatorios_cancha_empleado",
+        "reportes",
+        "configuracion",
+        "empleados"
+      ],
+      "description": "Secci\u00f3n de la aplicaci\u00f3n"
+    },
+    "permisos": {
+      "type": "object",
+      "properties": {
+        "ver": {
+          "type": "boolean",
+          "default": false,
+          "description": "Permiso para ver la secci\u00f3n"
+        },
+        "crear": {
+          "type": "boolean",
+          "default": false,
+          "description": "Permiso para crear registros"
+        },
+        "editar": {
+          "type": "boolean",
+          "default": false,
+          "description": "Permiso para editar registros"
+        },
+        "eliminar": {
+          "type": "boolean",
+          "default": false,
+          "description": "Permiso para eliminar registros"
+        }
+      }
+    },
+    "activo": {
+      "type": "boolean",
+      "default": true,
+      "description": "Si el permiso est\u00e1 activo"
+    },
+    "descripcion": {
+      "type": "string",
+      "description": "Descripci\u00f3n del permiso"
+    }
+  },
+  "required": [
+    "rol",
+    "seccion",
+    "permisos"
+  ]
+}

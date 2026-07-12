@@ -1,0 +1,46 @@
+{
+  "name": "ConfiguracionRecordatorios",
+  "type": "object",
+  "properties": {
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "pre_cobro",
+        "moroso",
+        "manual"
+      ],
+      "description": "Tipo de recordatorio"
+    },
+    "activo": {
+      "type": "boolean",
+      "default": true,
+      "description": "Si el recordatorio est\u00e1 activo"
+    },
+    "dias_anticipacion": {
+      "type": "number",
+      "description": "D\u00edas antes del cobro (para pre_cobro)"
+    },
+    "dias_despues": {
+      "type": "number",
+      "description": "D\u00edas despu\u00e9s del d\u00eda 15 (para moroso)"
+    },
+    "mensaje_template": {
+      "type": "string",
+      "description": "Template del mensaje con variables {nombre}, {monto}, {mes}"
+    },
+    "canal": {
+      "type": "string",
+      "enum": [
+        "whatsapp",
+        "sms",
+        "email"
+      ],
+      "default": "whatsapp",
+      "description": "Canal de env\u00edo"
+    }
+  },
+  "required": [
+    "tipo",
+    "mensaje_template"
+  ]
+}

@@ -310,19 +310,6 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
         await base44.entities.TurnoCancha.update(turnoCreado.id, {
           alumnos_nombres: alumnosNombres
         });
-        
-        // Sincronizar clase con Google Calendar (sin bloquear)
-        base44.functions.invoke('sincronizarClaseGoogleCalendar', { 
-          clase_id: claseCreada.id,
-        })
-          .catch(err => console.error('Error sincronizando clase con Google Calendar:', err));
-      } else {
-        // Sincronizar turno de alquiler con Google Calendar
-          try {
-            await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { turno_id: turnoCreado.id });
-          } catch (err) {
-            console.error('Error sincronizando turno con Google Calendar:', err);
-          }
       }
       
       const diaSemana = format(parseISO(data.fecha), 'EEEE', { locale: es });
@@ -391,10 +378,6 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
         base44_agenda_link: `${window.location.origin}/AgendaEmpleados`,
       };
       await base44.entities.TurnoCancha.update(id, turnoData);
-      
-      // Sincronizar con Google Calendar (sin bloquear)
-      base44.functions.invoke('sincronizarTurnoGoogleCalendar', { turno_id: id })
-        .catch(err => console.error('Error sincronizando con Google Calendar:', err));
       
       const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: id });
       if (recordatorios.length > 0) {
@@ -479,16 +462,6 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
         }
 
         await base44.entities.TurnoCancha.delete(id);
-
-        // Intentar eliminar de Google Calendar (sin bloquear si falla)
-        try {
-          await base44.functions.invoke('sincronizarTurnoGoogleCalendar', { 
-            turno_id: id, 
-            action: 'delete' 
-          });
-        } catch (err) {
-          console.log('Turno ya eliminado de Calendar o no existía');
-        }
       }
     },
     onSuccess: () => {
@@ -652,13 +625,6 @@ export default function NuevoTurnoModal({ open, onOpenChange, turno, fecha, isPr
 
              await base44.entities.RecordatorioCancha.bulkCreate(recordatorios);
              console.log(`✅ ${recordatorios.length} recordatorios creados`);
-
-             // Sincronizar primer turno con recurrencia en Google Calendar (sin esperar)
-             if (turnosCreados.length > 0) {
-               base44.functions.invoke('sincronizarTurnoRecurrenteGoogleCalendar', { 
-                 turno_id: turnosCreados[0].id
-               }).catch(err => console.error('Error sincronizando con Google Calendar:', err));
-             }
 
              // Invalidar queries y cerrar inmediatamente
              await queryClient.invalidateQueries({ queryKey: ['turnos-cancha'] });

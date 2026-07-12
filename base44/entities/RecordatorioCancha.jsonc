@@ -1,0 +1,165 @@
+{
+  "name": "RecordatorioCancha",
+  "type": "object",
+  "properties": {
+    "turno_cancha_id": {
+      "type": "string",
+      "description": "ID del turno de cancha vinculado (sincronizaci\u00f3n con Agenda)"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "sacar_cancha"
+      ],
+      "default": "sacar_cancha",
+      "description": "Tipo de recordatorio"
+    },
+    "fecha": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha del recordatorio"
+    },
+    "hora": {
+      "type": "string",
+      "description": "Hora del recordatorio (HH:MM)"
+    },
+    "cancha": {
+      "type": "string",
+      "enum": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "description": "N\u00famero de cancha"
+    },
+    "cliente": {
+      "type": "string",
+      "description": "Nombre del cliente que alquil\u00f3"
+    },
+    "tipo_turno": {
+      "type": "string",
+      "enum": [
+        "clase",
+        "alquiler"
+      ],
+      "description": "Tipo de turno: clase o alquiler"
+    },
+    "modalidad_alquiler": {
+      "type": "string",
+      "enum": [
+        "abono",
+        "suelto"
+      ],
+      "description": "Modalidad del alquiler (solo para alquileres)"
+    },
+    "profesor": {
+      "type": "string",
+      "description": "Nombre del profesor"
+    },
+    "monto": {
+      "type": "number",
+      "description": "Monto a pagar"
+    },
+    "pagado": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si el turno est\u00e1 pagado"
+    },
+    "asignado_a": {
+      "type": "string",
+      "default": "Empleado",
+      "description": "Usuario o rol asignado"
+    },
+    "notificar": {
+      "type": "boolean",
+      "default": true,
+      "description": "Si debe enviar notificaci\u00f3n push"
+    },
+    "minutos_antes": {
+      "type": "number",
+      "enum": [
+        5,
+        10,
+        15,
+        30
+      ],
+      "default": 10,
+      "description": "Minutos antes de la hora para notificar"
+    },
+    "estado": {
+      "type": "string",
+      "enum": [
+        "pendiente",
+        "hecho"
+      ],
+      "default": "pendiente",
+      "description": "Estado del recordatorio"
+    },
+    "hecho_por": {
+      "type": "string",
+      "description": "Email del usuario que marc\u00f3 como hecho"
+    },
+    "hecho_por_nombre": {
+      "type": "string",
+      "description": "Nombre del usuario que marc\u00f3 como hecho"
+    },
+    "hora_confirmacion": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Fecha y hora exacta de confirmaci\u00f3n"
+    },
+    "minutos_tolerancia": {
+      "type": "number",
+      "default": 10,
+      "description": "Minutos de tolerancia despu\u00e9s de la hora para reintento"
+    },
+    "minutos_escalado": {
+      "type": "number",
+      "default": 25,
+      "description": "Minutos despu\u00e9s de la hora para escalar a admin"
+    },
+    "notificado_previo": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si ya se envi\u00f3 la notificaci\u00f3n previa (X minutos antes)"
+    },
+    "notificado_hora": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si ya se envi\u00f3 la notificaci\u00f3n a la hora exacta"
+    },
+    "reintento_enviado": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si ya se envi\u00f3 el reintento despu\u00e9s de tolerancia"
+    },
+    "escalado_admin": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si ya se escal\u00f3 al admin"
+    },
+    "repeticion_semanal": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si se repite semanalmente"
+    },
+    "dia_semana": {
+      "type": "string",
+      "description": "D\u00eda de la semana (calculado autom\u00e1tico)"
+    },
+    "recordatorio_base_id": {
+      "type": "string",
+      "description": "ID del recordatorio original si es repetici\u00f3n"
+    },
+    "notas": {
+      "type": "string",
+      "description": "Notas adicionales"
+    }
+  },
+  "required": [
+    "fecha",
+    "hora",
+    "cancha"
+  ]
+}

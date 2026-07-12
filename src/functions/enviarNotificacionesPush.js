@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { base44 } from "@base44/sdk";
 import webpush from "web-push";
 import { format, parseISO, differenceInMinutes, addMinutes } from "date-fns";

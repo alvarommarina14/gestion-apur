@@ -1,0 +1,71 @@
+{
+  "name": "ListaEspera",
+  "type": "object",
+  "properties": {
+    "nombre": {
+      "type": "string",
+      "description": "Nombre del solicitante"
+    },
+    "telefono": {
+      "type": "string",
+      "description": "Tel\u00e9fono de contacto"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "Email del solicitante"
+    },
+    "nivel": {
+      "type": "string",
+      "enum": [
+        "principiante",
+        "intermedio",
+        "avanzado"
+      ],
+      "description": "Nivel de experiencia"
+    },
+    "tipo_clase": {
+      "type": "string",
+      "enum": [
+        "individual",
+        "grupal"
+      ],
+      "description": "Tipo de clase preferida"
+    },
+    "dias_disponibles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "D\u00edas disponibles (lunes, martes, etc.)"
+    },
+    "hora_inicio": {
+      "type": "string",
+      "description": "Hora inicio disponible (HH:MM)"
+    },
+    "hora_fin": {
+      "type": "string",
+      "description": "Hora fin disponible (HH:MM)"
+    },
+    "notas": {
+      "type": "string",
+      "description": "Notas adicionales"
+    },
+    "estado": {
+      "type": "string",
+      "enum": [
+        "espera",
+        "asignado",
+        "rechazado"
+      ],
+      "default": "espera",
+      "description": "Estado de la solicitud"
+    }
+  },
+  "required": [
+    "nombre",
+    "telefono",
+    "nivel",
+    "tipo_clase"
+  ]
+}

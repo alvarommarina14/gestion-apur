@@ -1,0 +1,74 @@
+{
+  "name": "Tarea",
+  "type": "object",
+  "properties": {
+    "titulo": {
+      "type": "string",
+      "description": "T\u00edtulo de la tarea"
+    },
+    "descripcion": {
+      "type": "string",
+      "description": "Descripci\u00f3n detallada de la tarea"
+    },
+    "asignado_a_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs de empleados asignados"
+    },
+    "asignado_a_nombres": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Nombres de empleados asignados"
+    },
+    "prioridad": {
+      "type": "string",
+      "enum": [
+        "baja",
+        "media",
+        "alta"
+      ],
+      "default": "media",
+      "description": "Nivel de prioridad"
+    },
+    "estado": {
+      "type": "string",
+      "enum": [
+        "pendiente",
+        "en_progreso",
+        "completada"
+      ],
+      "default": "pendiente",
+      "description": "Estado de la tarea"
+    },
+    "fecha_vencimiento": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de vencimiento"
+    },
+    "completada_por_id": {
+      "type": "string",
+      "description": "ID del empleado que complet\u00f3"
+    },
+    "completada_por_nombre": {
+      "type": "string",
+      "description": "Nombre del empleado que complet\u00f3"
+    },
+    "completada_en": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Fecha y hora de completaci\u00f3n"
+    },
+    "notas": {
+      "type": "string",
+      "description": "Notas sobre la tarea"
+    }
+  },
+  "required": [
+    "titulo",
+    "asignado_a_ids"
+  ]
+}

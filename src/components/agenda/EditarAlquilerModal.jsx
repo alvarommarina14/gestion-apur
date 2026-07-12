@@ -102,18 +102,6 @@ export default function EditarAlquilerModal({ open, onOpenChange, turno }) {
         notas: formData.notas,
       });
 
-      // Actualizar evento en Google Calendar si existe
-      if (turno.gcal_event_id && turno.gcal_event_id.trim()) {
-        try {
-          await base44.functions.invoke('sincronizarTurnoGoogleCalendar', {
-            turno_id: turno.id,
-            isUpdate: true,
-          });
-        } catch (error) {
-          console.error('Error sincronizando con Google Calendar:', error);
-        }
-      }
-
       // Actualizar recordatorios asociados
       try {
         const recordatorios = await base44.entities.RecordatorioCancha.filter({ turno_cancha_id: turno.id });

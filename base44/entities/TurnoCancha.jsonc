@@ -1,0 +1,182 @@
+{
+  "name": "TurnoCancha",
+  "type": "object",
+  "properties": {
+    "fecha": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha del turno"
+    },
+    "hora_inicio": {
+      "type": "string",
+      "description": "Hora de inicio (HH:00 o HH:30)"
+    },
+    "duracion": {
+      "type": "number",
+      "enum": [
+        60,
+        90
+      ],
+      "default": 60,
+      "description": "Duraci\u00f3n en minutos"
+    },
+    "hora_fin": {
+      "type": "string",
+      "description": "Hora de fin (calculada autom\u00e1ticamente)"
+    },
+    "cancha": {
+      "type": "string",
+      "enum": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "description": "N\u00famero de cancha"
+    },
+    "cliente": {
+      "type": "string",
+      "description": "Nombre del cliente"
+    },
+    "tipo_turno": {
+      "type": "string",
+      "enum": [
+        "clase",
+        "alquiler"
+      ],
+      "default": "clase",
+      "description": "Tipo de turno: clase con profesor o alquiler"
+    },
+    "profesor": {
+      "type": "string",
+      "description": "Nombre del profesor (solo para clases)"
+    },
+    "modalidad_alquiler": {
+      "type": "string",
+      "enum": [
+        "abono",
+        "suelto"
+      ],
+      "description": "Modalidad del alquiler (solo para alquileres)"
+    },
+    "es_recurrente": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si este turno es parte de una serie recurrente"
+    },
+    "monto": {
+      "type": "number",
+      "description": "Monto a pagar"
+    },
+    "pagado": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si el turno est\u00e1 pagado"
+    },
+    "notas_pago": {
+      "type": "string",
+      "description": "Notas sobre el pago (medio, comprobante, etc.)"
+    },
+    "cobrado_por": {
+      "type": "string",
+      "description": "Nombre del empleado que cobr\u00f3"
+    },
+    "hora_cobro": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Fecha y hora del cobro"
+    },
+    "notificado_10m": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si ya se envi\u00f3 la notificaci\u00f3n de 10 minutos antes del fin"
+    },
+    "notificado_10m_fecha": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Fecha y hora en que se envi\u00f3 la notificaci\u00f3n"
+    },
+    "empleados_asignados_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs de los empleados asignados al turno"
+    },
+    "empleados_asignados_emails": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Emails de los empleados asignados"
+    },
+    "empleados_asignados_nombres": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Nombres de los empleados asignados"
+    },
+    "alumnos_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs de los alumnos en esta clase (para clases grupal)"
+    },
+    "alumnos_nombres": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Nombres de los alumnos (para visualizaci\u00f3n)"
+    },
+    "estado": {
+      "type": "string",
+      "enum": [
+        "activo",
+        "cancelado"
+      ],
+      "default": "activo",
+      "description": "Estado del turno"
+    },
+    "gcal_event_id": {
+      "type": "string",
+      "description": "ID del evento en Google Calendar"
+    },
+    "make_sync_status": {
+      "type": "string",
+      "enum": [
+        "pendiente",
+        "sincronizado",
+        "error"
+      ],
+      "default": "pendiente",
+      "description": "Estado de sincronizaci\u00f3n con Make/Google Calendar"
+    },
+    "make_last_sync_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u00daltima vez que se sincroniz\u00f3 con Make"
+    },
+    "make_error_msg": {
+      "type": "string",
+      "description": "Mensaje de error si fall\u00f3 la sincronizaci\u00f3n"
+    },
+    "base44_agenda_link": {
+      "type": "string",
+      "description": "Link para abrir la agenda del empleado desde notificaci\u00f3n"
+    },
+    "notas": {
+      "type": "string",
+      "description": "Notas adicionales"
+    }
+  },
+  "required": [
+    "fecha",
+    "hora_inicio",
+    "cancha",
+    "cliente",
+    "empleados_asignados_ids"
+  ]
+}

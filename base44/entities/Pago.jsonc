@@ -1,0 +1,46 @@
+{
+  "name": "Pago",
+  "type": "object",
+  "properties": {
+    "alumno_id": {
+      "type": "string",
+      "description": "ID del alumno"
+    },
+    "alumno_nombre": {
+      "type": "string",
+      "description": "Nombre del alumno"
+    },
+    "fecha": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha del pago"
+    },
+    "monto": {
+      "type": "number",
+      "description": "Monto pagado"
+    },
+    "medio_pago": {
+      "type": "string",
+      "description": "Efectivo, transferencia, etc."
+    },
+    "mes_correspondiente": {
+      "type": "string",
+      "description": "Mes al que corresponde (YYYY-MM)"
+    },
+    "fuera_de_termino": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si se pag\u00f3 despu\u00e9s del d\u00eda 15"
+    },
+    "notas": {
+      "type": "string",
+      "description": "Notas del pago"
+    }
+  },
+  "required": [
+    "alumno_id",
+    "fecha",
+    "monto",
+    "mes_correspondiente"
+  ]
+}

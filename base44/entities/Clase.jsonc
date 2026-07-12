@@ -1,0 +1,193 @@
+{
+  "name": "Clase",
+  "type": "object",
+  "properties": {
+    "fecha": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha de la clase"
+    },
+    "hora_inicio": {
+      "type": "string",
+      "description": "Hora de inicio (HH:MM)"
+    },
+    "duracion": {
+      "type": "number",
+      "default": 50,
+      "description": "Duraci\u00f3n en minutos"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "individual",
+        "grupal"
+      ],
+      "default": "individual",
+      "description": "Tipo de clase"
+    },
+    "sede": {
+      "type": "string",
+      "description": "Sede donde se realiza"
+    },
+    "cancha": {
+      "type": "string",
+      "description": "N\u00famero o nombre de cancha"
+    },
+    "alumnos_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs de los alumnos en esta clase"
+    },
+    "alumnos_nombres": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Nombres de los alumnos (para visualizaci\u00f3n)"
+    },
+    "precio": {
+      "type": "number",
+      "description": "Precio de esta clase espec\u00edfica"
+    },
+    "notas_pago": {
+      "type": "string",
+      "description": "Notas sobre el pago (medio, comprobante, etc.)"
+    },
+    "cobrado_por": {
+      "type": "string",
+      "description": "Nombre del empleado que cobr\u00f3"
+    },
+    "hora_cobro": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Fecha y hora del cobro"
+    },
+    "estado": {
+      "type": "string",
+      "enum": [
+        "programada",
+        "realizada",
+        "cancelada_anticipada",
+        "cancelada_tarde",
+        "no_show",
+        "suspendida",
+        "reprogramada",
+        "pendiente_decision",
+        "recuperada"
+      ],
+      "default": "programada",
+      "description": "Estado de la clase"
+    },
+    "motivo_cancelacion": {
+      "type": "string",
+      "description": "Motivo si fue cancelada/suspendida"
+    },
+    "cancelado_por": {
+      "type": "string",
+      "enum": [
+        "alumno",
+        "profesor",
+        "clima",
+        "otro"
+      ],
+      "description": "Qui\u00e9n cancel\u00f3 la clase"
+    },
+    "clase_original_id": {
+      "type": "string",
+      "description": "ID de la clase original si es recupero o reprogramaci\u00f3n"
+    },
+    "clase_reprogramada_id": {
+      "type": "string",
+      "description": "ID de la nueva clase si fue reprogramada"
+    },
+    "es_recupero": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si esta clase es un recupero"
+    },
+    "es_reprogramacion": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si esta clase es una reprogramaci\u00f3n de otra"
+    },
+    "asistencia_registrada": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si ya se registr\u00f3 la asistencia"
+    },
+    "es_recurrente": {
+      "type": "boolean",
+      "default": false,
+      "description": "Si esta clase es parte de una serie recurrente"
+    },
+    "recurrencia_tipo": {
+      "type": "string",
+      "enum": [
+        "semanal",
+        "quincenal"
+      ],
+      "description": "Tipo de recurrencia"
+    },
+    "recurrencia_hasta": {
+      "type": "string",
+      "format": "date",
+      "description": "Fecha l\u00edmite de recurrencia"
+    },
+    "recurrencia_cantidad": {
+      "type": "number",
+      "description": "Cantidad de repeticiones"
+    },
+    "serie_recurrente_id": {
+      "type": "string",
+      "description": "ID que agrupa clases de la misma serie recurrente"
+    },
+    "notas": {
+      "type": "string",
+      "description": "Notas adicionales de la clase"
+    },
+    "estado_aprobacion": {
+      "type": "string",
+      "enum": [
+        "pendiente",
+        "aprobada",
+        "rechazada"
+      ],
+      "default": "pendiente",
+      "description": "Estado de aprobaci\u00f3n de la clase (solo para clases de profesores)"
+    },
+    "profesor_id": {
+      "type": "string",
+      "description": "ID del profesor que cre\u00f3 la clase"
+    },
+    "turno_cancha_id": {
+      "type": "string",
+      "description": "ID del turno de cancha sincronizado"
+    },
+    "gcal_event_id": {
+      "type": "string",
+      "description": "ID del evento en Google Calendar"
+    },
+    "gcal_sync_status": {
+      "type": "string",
+      "enum": [
+        "pendiente",
+        "sincronizado",
+        "error"
+      ],
+      "default": "pendiente",
+      "description": "Estado de sincronizaci\u00f3n con Google Calendar"
+    },
+    "gcal_error_msg": {
+      "type": "string",
+      "description": "Mensaje de error si fall\u00f3 la sincronizaci\u00f3n"
+    }
+  },
+  "required": [
+    "fecha",
+    "hora_inicio",
+    "tipo",
+    "sede"
+  ]
+}

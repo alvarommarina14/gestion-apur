@@ -1,0 +1,65 @@
+{
+  "name": "PermisoUsuario",
+  "type": "object",
+  "properties": {
+    "usuario_id": {
+      "type": "string",
+      "description": "ID del usuario (profesor o empleado)"
+    },
+    "usuario_email": {
+      "type": "string",
+      "description": "Email del usuario"
+    },
+    "usuario_nombre": {
+      "type": "string",
+      "description": "Nombre del usuario"
+    },
+    "usuario_rol": {
+      "type": "string",
+      "enum": [
+        "profesor",
+        "empleado"
+      ],
+      "description": "Rol del usuario"
+    },
+    "secciones_acceso": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "seccion": {
+            "type": "string",
+            "description": "Nombre de la secci\u00f3n (dashboard, alumnos, pagos, etc)"
+          },
+          "ver": {
+            "type": "boolean",
+            "default": false
+          },
+          "crear": {
+            "type": "boolean",
+            "default": false
+          },
+          "editar": {
+            "type": "boolean",
+            "default": false
+          },
+          "eliminar": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "description": "Lista de permisos por secci\u00f3n"
+    },
+    "activo": {
+      "type": "boolean",
+      "default": true,
+      "description": "Si el usuario tiene estos permisos activos"
+    }
+  },
+  "required": [
+    "usuario_id",
+    "usuario_email",
+    "usuario_rol"
+  ]
+}
